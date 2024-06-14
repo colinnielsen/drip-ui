@@ -4,6 +4,7 @@ export type ItemOption = {
   price: number;
   currency: "eth" | "usd";
   category: string;
+  isOptional: boolean
 };
 
 export type Item = {

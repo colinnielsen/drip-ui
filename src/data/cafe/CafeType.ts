@@ -1,6 +1,10 @@
 import { BaseEntity, Entity } from "@/data/__global/entities";
-import { UUID, randomUUID } from "crypto";
+import { UUID } from "crypto";
+import { v4 } from "uuid";
 import { FarmerAllocation } from "../types-TODO/farmer";
+import { Item, ItemCategory, ItemOption } from "../types-TODO/item";
+
+export type Coords = [number, number];
 
 ///
 //// TYPES
@@ -12,11 +16,14 @@ export type BaseShop = BaseEntity & {
   logo: string;
   url?: string;
   farmerAllocations: FarmerAllocation[];
+  menu: Map<ItemCategory, Item[]>;
+  options: Map<ItemCategory, ItemOption[]>;
+  bestSellers?: string[];
 };
 
 export type Storefront = BaseShop & {
   __type: "storefront";
-  location: Location | null;
+  location: Coords | null;
 };
 
 export type OnlineShop = BaseShop & {
@@ -31,28 +38,36 @@ export type Cafe = Storefront | OnlineShop;
 ///
 export const createStorefront = (data: {
   label: string;
-  location?: Location;
+  id?: UUID;
+  location?: Coords;
   url?: string;
-  farmerAllocation?: FarmerAllocation[];
+  backgroundImage: string;
+  logo: string;
+  menu: Map<ItemCategory, Item[]>;
+  options: Map<ItemCategory, ItemOption[]>;
+  farmerAllocations?: FarmerAllocation[];
 }): Storefront => ({
-  id: randomUUID(),
+  id: data.id || (v4() as UUID),
   __entity: Entity.cafe,
   __type: "storefront",
-  url: data.url,
-  label: data.label,
   location: data.location || null,
-  farmerAllocations: data.farmerAllocation || [],
+  farmerAllocations: data.farmerAllocations || [],
+  ...data,
 });
 
 export const createOnlineShop = (data: {
   label: string;
   url: string;
-  farmerAllocation?: FarmerAllocation[];
+  backgroundImage: string;
+  logo: string;
+  id?: UUID;
+  options: Map<ItemCategory, ItemOption[]>;
+  menu: Map<ItemCategory, Item[]>;
+  farmerAllocations?: FarmerAllocation[];
 }): OnlineShop => ({
-  id: randomUUID(),
+  id: data.id || (v4() as UUID),
   __entity: Entity.cafe,
   __type: "online",
-  label: data.label,
-  url: data.url,
-  farmerAllocations: data.farmerAllocation || [],
+  farmerAllocations: data.farmerAllocations || [],
+  ...data,
 });

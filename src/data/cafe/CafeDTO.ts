@@ -4,35 +4,36 @@ import {
   Cafe,
   OnlineShop,
   Storefront,
-  createOnlineShop,
   createStorefront,
+  createOnlineShop,
+  Coords,
 } from "./CafeType";
-import { FarmerAllocation } from "../types-TODO/farmer";
+import { FarmerAllocation, getTotalAllocationBPS } from "../types-TODO/farmer";
 
 export const addStorefront =
   (repo: CafeRepository) =>
-  async (
-    label: string,
-    location: Location,
-    farmerAllocation?: FarmerAllocation[]
-  ): Promise<Storefront> => {
-    const storefront = createStorefront({ label, location, farmerAllocation });
+  async (data: {
+    label: string;
+    backgroundImage: string;
+    logo: string;
+    location?: Coords;
+    farmerAllocations?: FarmerAllocation[];
+  }): Promise<Storefront> => {
+    const storefront = createStorefront(data);
     await repo.save(storefront);
     return storefront;
   };
 
 export const addOnlineShop =
   (repo: CafeRepository) =>
-  async (
-    label: string,
-    url: string,
-    farmerAllocation?: FarmerAllocation[]
-  ): Promise<OnlineShop> => {
-    const onlineShop = createOnlineShop({
-      label,
-      url,
-      farmerAllocation,
-    });
+  async (data: {
+    label: string;
+    backgroundImage: string;
+    logo: string;
+    url: string;
+    farmerAllocations?: FarmerAllocation[];
+  }): Promise<OnlineShop> => {
+    const onlineShop = createOnlineShop(data);
     await repo.save(onlineShop);
     return onlineShop;
   };
@@ -48,5 +49,20 @@ export const getAllCafes =
     return repo.findAll();
   };
 
-// TODO
-// get get total allocations
+export const getAllocationsById =
+  (repo: CafeRepository) =>
+  async (id: UUID): Promise<FarmerAllocation[] | null> => {
+    let cafe = await repo.findById(id);
+    if (!cafe) return null;
+
+    return cafe.farmerAllocations;
+  };
+
+export const getTotalAllocationsById =
+  (repo: CafeRepository) =>
+  async (id: UUID): Promise<number | null> => {
+    let allocations = await getAllocationsById(repo)(id);
+    if (!allocations) return null;
+
+    return getTotalAllocationBPS(allocations);
+  };

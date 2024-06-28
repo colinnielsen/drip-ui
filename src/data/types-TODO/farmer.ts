@@ -1,8 +1,16 @@
 import { UUID } from "crypto";
+import { v4 } from "uuid";
 
 export type FarmerAllocation = {
   id: UUID;
   allocationBPS: number;
+};
+
+export type FarmerRepository = {
+  findById: (id: UUID) => Promise<Farmer | null>;
+  findAll: () => Promise<Farmer[]>;
+  save: (item: Farmer) => Promise<void>;
+  delete: (id: UUID) => Promise<void>;
 };
 
 /**
@@ -25,4 +33,23 @@ export type Farmer = {
   shortDescription: string;
   infoUrl: string;
   ethAddress: `0x${string}`;
+};
+
+export const getTotalAllocationBPS = (
+  allocations: FarmerAllocation[],
+): number => {
+  return allocations.reduce((acc, curr) => curr.allocationBPS + acc, 0);
+};
+
+export const createFarmer = (data: {
+  name: string;
+  image: string;
+  shortDescription: string;
+  infoUrl: string;
+  ethAddress: `0x${string}`;
+}): Farmer => {
+  return {
+    id: v4() as UUID,
+    ...data,
+  };
 };

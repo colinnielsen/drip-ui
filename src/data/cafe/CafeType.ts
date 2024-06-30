@@ -57,7 +57,7 @@ export const createStorefront = (data: {
   options: Map<ItemCategory, ItemOption[]>;
   farmerAllocations?: FarmerAllocation[];
 }): Storefront => ({
-  id: data.id || (v4() as UUID),
+  id: data.id ?? (v4() as UUID),
   __entity: Entity.cafe,
   __type: "storefront",
   location: data.location || null,
@@ -76,7 +76,7 @@ export const createOnlineShop = (data: {
   menu: Map<ItemCategory, Item[]>;
   farmerAllocations?: FarmerAllocation[];
 }): OnlineShop => ({
-  id: data.id || (v4() as UUID),
+  id: data.id ?? (v4() as UUID),
   __entity: Entity.cafe,
   __type: "online",
   farmerAllocations: data.farmerAllocations || [],

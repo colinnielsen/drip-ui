@@ -133,6 +133,7 @@ export const DefaultOptions: Map<ItemCategory, ItemOption[]> = new Map([
     ["espresso", EspressoMods],
     ["coffee", EspressoMods],
     ["syrup", SyrupMods],
+    ["extras", []],
 ]);
 
 export const DefaultCategoryOptions: Map<ItemCategory, ItemCategory[]> =

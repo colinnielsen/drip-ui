@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,10 +20,10 @@ export type DrawerProps = {
 };
 
 export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
-  const [quantity, setQuantity] = React.useState(1);
+  const [quantity, setQuantity] = useState(1);
 
-  const { data } = useCategoryOptions(cafeId, category);
-  const options = Array.from(data ?? []);
+  const query = useCategoryOptions(cafeId, category);
+  const options = Array.from(query.data ?? []);
 
   return (
     <Drawer>
@@ -31,12 +31,8 @@ export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
       <DrawerContent className="border-none rounded-t-xl">
         <div className="max-h-[75vh] overflow-y-scroll">
           <DrawerHeader className="p-0 rounded-t-xl">
-            <div className="h-32 relative rounded-t-xl overflow-hidden">
-              <img
-                src={item.image}
-                alt={item.name}
-                className="absolute bottom-0"
-              />
+            <div className="min-h-64 relative rounded-t-xl">
+              <img src={item.image} alt={item.name} />
             </div>
             <DrawerTitle className="text-left pl-4 pt-4  font-sans font-medium text-[24px]">
               {item.name}
@@ -57,13 +53,15 @@ export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
             </div>
             <RadioGroupDemo />
           </DrawerHeader>
-          {options.map(([category, options]) => (
-            <DrinkOptions
-              key={`${category}-${options}`}
-              category={category}
-              options={options}
-            />
-          ))}
+          {options
+            .filter(([category, options]) => options.length > 0)
+            .map(([category, options]) => (
+              <DrinkOptions
+                key={`${category}-${options}`}
+                category={category}
+                options={options}
+              />
+            ))}
           <DrawerFooter>
             <DrawerClose asChild>
               <Button className="bg-black text-white rounded-3xl py-6">
@@ -83,10 +81,12 @@ type DrinkMods = {
 };
 
 export function DrinkOptions({ category, options }: DrinkMods) {
+  // Upper case the first letter of the category
+  const prettyCategory = category.charAt(0).toUpperCase() + category.slice(1);
   return (
     <div className="p-4 flex flex-col gap-5">
       <div key={category} className="flex flex-col">
-        <h3 className="font-semibold font-sans text-lg">{category}</h3>
+        <h3 className="font-semibold font-sans text-lg">{prettyCategory}</h3>
         {options.map((option) => (
           <div
             className="flex justify-between items-center pt-4"
@@ -136,7 +136,11 @@ export function CoffeeCard({ name, image, price }: Item) {
     <div className="flex flex-col gap-2 bg-white w-full ">
       <DrawerTrigger asChild className="overflow-hidden">
         <div className="relative overflow-hidden h-24 rounded-xl">
-          <img src={image} alt={name} className="rounded-xl" />
+          <img
+            src={image}
+            alt={name}
+            className="rounded-xl min-h-24 min-w-24 overflow-hidden"
+          />
           <button className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:scale-95">
             <PlusSvg />
           </button>

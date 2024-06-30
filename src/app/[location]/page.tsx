@@ -1,5 +1,4 @@
 "use client";
-
 import { LocationHeader, LocationDetails } from "@/components/LocationHeader";
 import { ItemList } from "@/components/LocationItems";
 import { Footer } from "@/components/Footer";
@@ -17,7 +16,9 @@ export default function LocationPage() {
   }
 
   const { data: cafe } = useCafe(id as UUID);
-  if (!cafe) return null;
+  if (!cafe) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <main className="flex flex-col min-h-screen mb-32">
@@ -28,7 +29,6 @@ export default function LocationPage() {
         <div className="py-12 w-full flex justify-center items-center bg-neutral-500 rounded-3xl">
           Leaving out the growers panel here?
         </div>
-        {/* Cafe should have a best sellers list */}
         <ItemList
           title="Espresso"
           category="espresso"

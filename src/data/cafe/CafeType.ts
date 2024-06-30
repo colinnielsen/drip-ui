@@ -17,8 +17,17 @@ export type BaseShop = BaseEntity & {
   url?: string;
   farmerAllocations: FarmerAllocation[];
   menu: Map<ItemCategory, Item[]>;
+  // NOTE This is a mapping from itemCategory -> ItemCategory[]
+  // It conveys the list of options we should have for a given category
+  // IE espresso should support espresso options + syrup options
+  // So this would be: "espress" -> ["espresso", "syrup"]
+  categoryOptions: Map<ItemCategory, ItemCategory[]>;
+  // NOTE This is a mapping from category to options
+  // This lets each cafe configure what options each item category supports
   options: Map<ItemCategory, ItemOption[]>;
-  bestSellers?: string[];
+  // TODO This might make more sense as [ItemCategory, ItemId] in case there are potential collisions on names?
+  // bestsellers is a list of tuples, where the first element is the category and the second is the item name
+  bestSellers?: Array<[ItemCategory, string]>;
 };
 
 export type Storefront = BaseShop & {
@@ -44,6 +53,7 @@ export const createStorefront = (data: {
   backgroundImage: string;
   logo: string;
   menu: Map<ItemCategory, Item[]>;
+  categoryOptions: Map<ItemCategory, ItemCategory[]>;
   options: Map<ItemCategory, ItemOption[]>;
   farmerAllocations?: FarmerAllocation[];
 }): Storefront => ({
@@ -61,6 +71,7 @@ export const createOnlineShop = (data: {
   backgroundImage: string;
   logo: string;
   id?: UUID;
+  categoryOptions: Map<ItemCategory, ItemCategory[]>;
   options: Map<ItemCategory, ItemOption[]>;
   menu: Map<ItemCategory, Item[]>;
   farmerAllocations?: FarmerAllocation[];

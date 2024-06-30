@@ -131,5 +131,12 @@ export const DefaultMenu: Map<ItemCategory, Item[]> = new Map([
 
 export const DefaultOptions: Map<ItemCategory, ItemOption[]> = new Map([
     ["espresso", EspressoMods],
+    ["coffee", EspressoMods],
     ["syrup", SyrupMods],
 ]);
+
+export const DefaultCategoryOptions: Map<ItemCategory, ItemCategory[]> =
+    new Map([
+        ["espresso", ["espresso", "syrup", "extras"]],
+        ["coffee", ["espresso", "syrup", "extras"]],
+    ]);

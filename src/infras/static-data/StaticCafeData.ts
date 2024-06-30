@@ -1,5 +1,10 @@
 import { Cafe, createOnlineShop, createStorefront } from "@/data/cafe/CafeType";
-import { DefaultMenu, DefaultOptions, Mocha } from "./StaticMenuData";
+
+import {
+    DefaultCategoryOptions,
+    DefaultMenu,
+    DefaultOptions,
+} from "./StaticMenuData";
 
 export const cafeData: Cafe[] = [
     createStorefront({
@@ -10,6 +15,7 @@ export const cafeData: Cafe[] = [
         logo: "/logo.jpg",
         menu: DefaultMenu,
         options: DefaultOptions,
+        categoryOptions: DefaultCategoryOptions,
     }),
     createStorefront({
         label: "Expresso Yourself",
@@ -19,6 +25,7 @@ export const cafeData: Cafe[] = [
         logo: "/logo.jpg",
         menu: DefaultMenu,
         options: DefaultOptions,
+        categoryOptions: DefaultCategoryOptions,
     }),
     createStorefront({
         label: "WHT R THOZ Roasting Company",
@@ -28,6 +35,7 @@ export const cafeData: Cafe[] = [
         logo: "/logo.jpg",
         menu: DefaultMenu,
         options: DefaultOptions,
+        categoryOptions: DefaultCategoryOptions,
     }),
     createOnlineShop({
         label: "Sip Happens",
@@ -37,5 +45,6 @@ export const cafeData: Cafe[] = [
         logo: "/logo.jpg",
         menu: DefaultMenu,
         options: DefaultOptions,
+        categoryOptions: DefaultCategoryOptions,
     }),
 ];

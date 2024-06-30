@@ -8,19 +8,23 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerTrigger,
 } from "@/components/ui/drawer";
-import { CoffeeCard } from "./LocationItems";
-import { Price } from "./Helpers";
+import { PlusSvg, Price } from "./Helpers";
 import { Checkbox } from "./ui/checkbox";
 
 export type DrawerProps = {
   item: Item;
-  itemOptions: ItemOption[];
   category: ItemCategory;
+  cafeId: UUID;
 };
 
-export function DrinkDrawer({ item, itemOptions, category }: DrawerProps) {
+export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
   const [quantity, setQuantity] = React.useState(1);
+
+  const { data } = useCategoryOptions(cafeId, category);
+  const options = Array.from(data ?? []);
+
   return (
     <Drawer>
       <CoffeeCard {...item} />
@@ -53,11 +57,17 @@ export function DrinkDrawer({ item, itemOptions, category }: DrawerProps) {
             </div>
             <RadioGroupDemo />
           </DrawerHeader>
-          <DrinkOptions category={category} options={itemOptions} />
+          {options.map(([category, options]) => (
+            <DrinkOptions
+              key={`${category}-${options}`}
+              category={category}
+              options={options}
+            />
+          ))}
           <DrawerFooter>
             <DrawerClose asChild>
               <Button className="bg-black text-white rounded-3xl py-6">
-                Add to Basket
+                Add to Cart
               </Button>
             </DrawerClose>
           </DrawerFooter>
@@ -68,7 +78,7 @@ export function DrinkDrawer({ item, itemOptions, category }: DrawerProps) {
 }
 
 type DrinkMods = {
-  category: string;
+  category: ItemCategory;
   options: ItemOption[];
 };
 
@@ -99,6 +109,8 @@ export function DrinkOptions({ category, options }: DrinkMods) {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Item, ItemCategory, ItemOption } from "@/data/types-TODO/item";
+import { UUID } from "crypto";
+import { useCategoryOptions } from "@/infras/database";
 
 export function RadioGroupDemo() {
   return (
@@ -116,5 +128,24 @@ export function RadioGroupDemo() {
         </Label>
       </div>
     </RadioGroup>
+  );
+}
+
+export function CoffeeCard({ name, image, price }: Item) {
+  return (
+    <div className="flex flex-col gap-2 bg-white w-full ">
+      <DrawerTrigger asChild className="overflow-hidden">
+        <div className="relative overflow-hidden h-24 rounded-xl">
+          <img src={image} alt={name} className="rounded-xl" />
+          <button className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:scale-95">
+            <PlusSvg />
+          </button>
+        </div>
+      </DrawerTrigger>
+      <div className="flex flex-col gap-1">
+        <h3 className="font-medium">{name}</h3>
+        <Price price={price} />
+      </div>
+    </div>
   );
 }

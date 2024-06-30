@@ -1,13 +1,8 @@
-import type { DrawerProps } from "./Drawer";
-import type { DrinkMod } from "./Drawer";
-
 export function Price({ price }: { price: number }) {
   return (
     <div className="flex items-center gap-1">
       <UsdcSVG />
-      <span className="font-normal text-sm text-neutral-400">
-        {price}
-      </span>
+      <span className="font-normal text-sm text-neutral-400">{price}</span>
     </div>
   );
 }
@@ -20,7 +15,8 @@ export function HomeSvg() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="size-6">
+      className="size-6"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -38,7 +34,8 @@ export function MapSvg() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="size-6">
+      className="size-6"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -56,7 +53,8 @@ export function ProfileSvg() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="size-6">
+      className="size-6"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -74,7 +72,8 @@ export function BackSvg() {
       viewBox="0 0 24 24"
       strokeWidth={2.5}
       stroke="currentColor"
-      className="size-6 absolute top-4 left-4 text-white">
+      className="size-6 absolute top-4 left-4 text-white"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -92,7 +91,8 @@ export function CartSvg() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="size-6">
+      className="size-6"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -109,7 +109,8 @@ export function CarIcon() {
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
-      stroke="currentColor">
+      stroke="currentColor"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -126,7 +127,8 @@ export function UsdcSVG() {
       className="w-4 h-4"
       data-name="86977684-12db-4850-8f30-233a7c267d11"
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 2000 2000">
+      viewBox="0 0 2000 2000"
+    >
       <path
         d="M1000 2000c554.17 0 1000-445.83 1000-1000S1554.17 0 1000 0 0 445.83 0 1000s445.83 1000 1000 1000z"
         fill="#2775ca"
@@ -151,7 +153,8 @@ export function PlusSvg() {
       viewBox="0 0 24 24"
       strokeWidth="2"
       stroke="currentColor"
-      className="size-4">
+      className="size-4"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -160,78 +163,3 @@ export function PlusSvg() {
     </svg>
   );
 }
-
-const drinkMods: DrinkMod[] = [
-  {
-    category: "Espresso",
-    label: "Extra Shot",
-    price: 1.0,
-    optional: true,
-  },
-  {
-    category: "Syrup",
-    label: "Caramel",
-    price: 0.5,
-    optional: true,
-  },
-  {
-    category: "Milk",
-    label: "Whole Milk",
-    price: 0.5,
-    optional: false,
-  },
-  {
-    category: "Syrup",
-    label: "Vanilla",
-    price: 0.5,
-    optional: true,
-  },
-];
-
-export const items: DrawerProps[] = [
-  {
-    name: "Cappuccino",
-    image:
-      "https://cdn.pixabay.com/photo/2016/11/29/12/54/cafe-1869656_1280.jpg",
-    price: 3.5,
-    drinkOptions: {
-      drinkMods,
-    },
-  },
-  {
-    name: "Cappuccino",
-    image:
-      "https://cdn.pixabay.com/photo/2016/11/29/12/54/cafe-1869656_1280.jpg",
-    price: 3.5,
-    drinkOptions: {
-      drinkMods,
-    },
-  },
-  {
-    name: "Cappuccino",
-    image:
-      "https://cdn.pixabay.com/photo/2016/11/29/12/54/cafe-1869656_1280.jpg",
-    price: 3.5,
-    drinkOptions: {
-      drinkMods,
-    },
-  },
-  {
-    name: "Cappuccino",
-    image:
-      "https://cdn.pixabay.com/photo/2016/11/29/12/54/cafe-1869656_1280.jpg",
-    price: 3.5,
-    drinkOptions: {
-      drinkMods,
-    },
-  },
-  {
-    name: "Cappuccino",
-    image:
-      "https://cdn.pixabay.com/photo/2016/11/29/12/54/cafe-1869656_1280.jpg",
-    price: 3.5,
-    drinkOptions: {
-      drinkMods,
-    },
-  },
-];

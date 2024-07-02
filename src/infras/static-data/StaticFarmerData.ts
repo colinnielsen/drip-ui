@@ -1,5 +1,11 @@
-import { createFarmer, Farmer } from "@/data/types-TODO/farmer";
+import {
+    createFarmer,
+    Farmer,
+    FarmerAllocation,
+} from "@/data/types-TODO/farmer";
 import { VitalikAddress } from "./StaticPlaceholderData";
+import { v4 } from "uuid";
+import { UUID } from "crypto";
 
 export const farmerData: Farmer[] = [
     createFarmer({
@@ -24,4 +30,25 @@ export const farmerData: Farmer[] = [
         infoUrl: "https://fsf.org",
         ethAddress: VitalikAddress,
     }),
+];
+
+const createDefaultAllocation = (
+    farmerIndex: number,
+    allocation: number,
+): FarmerAllocation => {
+    const farmer = farmerData[farmerIndex];
+    if (!farmer) {
+        throw new Error(`Farmer not found at index: ${farmerIndex}`);
+    }
+    return {
+        id: v4() as UUID,
+        farmer: farmer.id,
+        allocationBPS: allocation,
+    };
+};
+
+export const farmerAllocations: FarmerAllocation[] = [
+    createDefaultAllocation(0, 100),
+    createDefaultAllocation(1, 50),
+    createDefaultAllocation(2, 25),
 ];

@@ -3,6 +3,7 @@ import { v4 } from "uuid";
 
 export type FarmerAllocation = {
   id: UUID;
+  farmer: UUID;
   allocationBPS: number;
 };
 

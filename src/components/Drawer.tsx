@@ -12,12 +12,35 @@ import {
 } from "@/components/ui/drawer";
 import { PlusSvg, Price } from "./Helpers";
 import { Checkbox } from "./ui/checkbox";
+import { NumericOption, BooleanOption } from "@/data/types-TODO/item";
 
 export type DrawerProps = {
   item: Item;
   category: ItemCategory;
   cafeId: UUID;
 };
+
+export function NumberInput({
+  onPlus,
+  onMinus,
+  value,
+}: {
+  onPlus: () => void;
+  onMinus: () => void;
+  value: number;
+}) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-2 font-normal text-sm bg-neutral-100 w-fit rounded-2xl">
+      <button onClick={onMinus}>
+        <Minus />
+      </button>
+      <p>{value}</p>
+      <button onClick={onPlus}>
+        <Plus />
+      </button>
+    </div>
+  );
+}
 
 export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
   const [quantity, setQuantity] = useState(1);
@@ -40,21 +63,15 @@ export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
             <div className="pl-4">
               <Price price={item.price} />
             </div>
-            <div className="pl-4">
-              <div className="flex items-center gap-2 px-4 py-2 font-normal text-sm bg-neutral-100 w-fit rounded-2xl">
-                <button onClick={() => setQuantity(quantity - 1)}>
-                  <Minus />
-                </button>
-                <p>{quantity}</p>
-                <button onClick={() => setQuantity(quantity + 1)}>
-                  <Plus />
-                </button>
-              </div>
-            </div>
+            <NumberInput
+              onPlus={() => setQuantity(quantity + 1)}
+              onMinus={() => setQuantity(quantity - 1)}
+              value={quantity}
+            />
             <RadioGroupDemo />
           </DrawerHeader>
           {options
-            .filter(([category, options]) => options.length > 0)
+            .filter(([, options]) => options.length > 0)
             .map(([category, options]) => (
               <DrinkOptions
                 key={`${category}-${options}`}
@@ -83,25 +100,41 @@ type DrinkMods = {
 export function DrinkOptions({ category, options }: DrinkMods) {
   // Upper case the first letter of the category
   const prettyCategory = category.charAt(0).toUpperCase() + category.slice(1);
+
   return (
     <div className="p-4 flex flex-col gap-5">
       <div key={category} className="flex flex-col">
         <h3 className="font-semibold font-sans text-lg">{prettyCategory}</h3>
         {options.map((option) => (
-          <div
-            className="flex justify-between items-center pt-4"
-            key={`${category}:${option.name}`}
-          >
-            <div className="flex gap-2 items-center w-full">
-              <Checkbox id={`${category}:${option.name}`} className="w-5 h-5" />
-              <label className="w-full" htmlFor={`${category}:${option.name}`}>
-                {option.name}
-              </label>
-            </div>
-            <Price price={option.price} />
-          </div>
+          <OptionInput key={option.name} option={option} />
         ))}
       </div>
+    </div>
+  );
+}
+
+export function OptionInput({ option }: { option: ItemOption }) {
+  return (
+    <div className="flex justify-between items-center pt-4">
+      <div className="flex gap-2 items-center w-full">
+        <label className="w-full" htmlFor={option.name}>
+          {option.name}
+        </label>
+        {option.type === "number" ? (
+          <input
+            type="number"
+            id={option.name}
+            name={option.name}
+            min={0}
+            max={10}
+            step={1}
+            className="w-12 h-8 border border-black rounded-md justify-self-start"
+          />
+        ) : (
+          <Checkbox id={option.name} className="w-5 h-5" />
+        )}
+      </div>
+      <Price price={option.price} />
     </div>
   );
 }

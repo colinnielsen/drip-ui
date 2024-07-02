@@ -3,19 +3,18 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { DrinkDrawer, DrawerProps } from "./Drawer";
+import { ReactNode } from "react";
 
-export function ItemCarousel({
-  title,
-  drawerProps,
+export function ItemCarousel<T>({
+  data,
+  renderFn,
 }: {
-  title: string;
-  drawerProps: DrawerProps[];
+  data: Array<T>;
+  renderFn: (data: T, index: number) => ReactNode;
 }) {
   return (
     <div className="w-full py-2">
       <div className="flex flex-col gap-2">
-        <h2 className="text-2xl text-medium font-normal">{title}</h2>
         <Carousel
           opts={{
             align: "start",
@@ -23,13 +22,9 @@ export function ItemCarousel({
           className="w-full max-w-sm"
         >
           <CarouselContent>
-            {drawerProps.map((drawer, index) => (
+            {data.map((item, index) => (
               <CarouselItem key={index} className=" basis-5/12">
-                <DrinkDrawer
-                  item={drawer.item}
-                  category={drawer.category}
-                  itemOptions={drawer.itemOptions}
-                />
+                {renderFn(item, index)}
               </CarouselItem>
             ))}
           </CarouselContent>

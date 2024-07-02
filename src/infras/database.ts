@@ -3,22 +3,24 @@ import { InMemoryCafeRepository } from "./repositories/CafeRepository";
 import { useQuery } from "@tanstack/react-query";
 import { UUID } from "crypto";
 import { ItemCategory } from "@/data/types-TODO/item";
+import { InMemoryOrderRepository } from "./repositories/OrderRepository";
 
 export const database = {
     farmers: new InMemoryFarmerRepository(),
     cafes: new InMemoryCafeRepository(),
+    order: new InMemoryOrderRepository(),
 };
 
 export const useFarmers = () =>
     useQuery({
         queryKey: ["farmers"],
-        queryFn: () => database.farmers.findAll(),
+        queryFn: async () => await database.farmers.findAll(),
     });
 
 export const useFarmer = (id: UUID) =>
     useQuery({
         queryKey: ["farmer", id],
-        queryFn: () => database.farmers.findById(id),
+        queryFn: async () => await database.farmers.findById(id),
     });
 
 export const useCafes = () =>

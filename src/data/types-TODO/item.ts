@@ -12,10 +12,12 @@ type BaseOption = {
 
 export type NumericOption = BaseOption & {
   value: number | null;
+  type: "number";
 };
 
 export type BooleanOption = BaseOption & {
   value: boolean | null;
+  type: "boolean";
 };
 
 export type ItemOption = NumericOption | BooleanOption;
@@ -49,6 +51,7 @@ export const createBooleanOption = (data: {
   isOptional: boolean;
 }): BooleanOption => ({
   value: null,
+  type: "boolean",
   ...data,
 });
 
@@ -61,5 +64,6 @@ export const createNumericOption = (data: {
   isOptional: boolean;
 }): NumericOption => ({
   value: null,
+  type: "number",
   ...data,
 });

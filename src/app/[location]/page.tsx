@@ -5,7 +5,8 @@ import { Footer } from "@/components/Footer";
 import { useSearchParams } from "next/navigation";
 import { useBestSellers, useCafe } from "@/infras/database";
 import { UUID } from "crypto";
-import { Cafe } from "@/data/cafe/CafeType";
+import { FarmerLink } from "@/components/FarmerCard";
+import { ItemCarousel } from "@/components/ItemCarousel";
 
 export default function LocationPage() {
   const searchParams = useSearchParams();
@@ -20,6 +21,8 @@ export default function LocationPage() {
     return <div>Loading...</div>;
   }
 
+  const allocations = cafe.farmerAllocations;
+
   return (
     <main className="flex flex-col min-h-screen mb-32">
       <LocationHeader {...cafe} />
@@ -27,7 +30,10 @@ export default function LocationPage() {
         <LocationDetails {...cafe} />
 
         <div className="py-12 w-full flex justify-center items-center bg-neutral-500 rounded-3xl">
-          Leaving out the growers panel here?
+          <ItemCarousel
+            data={allocations}
+            renderFn={(f, i) => <FarmerLink allocation={f} />}
+          />
         </div>
         <ItemList
           title="Espresso"
@@ -43,23 +49,8 @@ export default function LocationPage() {
           items={cafe.menu.get("coffee") || []}
           horizontal
         />
-
-        {/* <ItemCarousel title="Popular Items" drawerProps={items} /> */}
       </div>
       <Footer />
     </main>
-  );
-}
-
-function BestSellers(cafe: Cafe) {
-  let id = cafe.id;
-  const { data: bestSellers } = useBestSellers(id);
-  if (!bestSellers) return null;
-
-  return (
-    <div className="flex flex-col gap-5">
-      <h2 className="text-2xl font-bold">Best Sellers</h2>
-      <div className="flex flex-col gap-5"></div>
-    </div>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/shadcn/input";
 import { useState } from "react";
 
 export function Header() {

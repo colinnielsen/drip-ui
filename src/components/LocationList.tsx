@@ -1,7 +1,9 @@
+import { Coffee } from "@phosphor-icons/react/dist/ssr";
 import { CafeModule } from "@/data/cafe/CafeModule";
 import { Cafe } from "@/data/cafe/CafeType";
 import { getTotalAllocationBPS } from "@/data/types-TODO/farmer";
 import { UUID } from "crypto";
+import Image from "next/image";
 import Link from "next/link";
 
 type LocationListProps = {
@@ -25,22 +27,21 @@ export function LocationList({ title, cafes }: LocationListProps) {
 export function Location({
   label,
   backgroundImage,
-  logo,
-  url,
-  farmerAllocations: allocations,
+  farmerAllocations,
   id,
 }: Cafe) {
-  // TODO Represent this as a percentage
-  const allocationTotal = getTotalAllocationBPS(allocations);
+  const allocationTotal = getTotalAllocationBPS(farmerAllocations);
 
   return (
     <Link href={`/location?id=${id}`}>
       <div className="flex flex-col gap-1">
-        <div className="overflow-hidden h-40 relative">
-          <img
-            src={logo}
+        <div className="overflow-hidden h-40 relative w-full">
+          <Image
+            src={backgroundImage}
             alt={label}
-            className="rounded-xl absolute inset-0 w-full h-full object-cover"
+            quality={20}
+            fill={true}
+            className="rounded-3xl object-cover"
           />
         </div>
         <h3 className="font-semibold text-lg">{label}</h3>
@@ -52,30 +53,12 @@ export function Location({
         {/* need actual coffee icon
         should align fine with good icon/svg but may take some tweak */}
         <div className="flex items-center gap-1">
-          <Icon />
-          <p className="text-xs font-bold">{allocationTotal}% FOR THE GROWER</p>
+          <Coffee />
+          <p className="text-xs font-bold">
+            {allocationTotal / 100}% FOR THE GROWER
+          </p>
         </div>
       </div>
     </Link>
-  );
-}
-
-//need actual coffee icon
-export function Icon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={2}
-      stroke="currentColor"
-      className="size-4"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z"
-      />
-    </svg>
   );
 }

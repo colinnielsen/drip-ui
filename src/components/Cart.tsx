@@ -4,7 +4,7 @@ import {
   DrawerTrigger,
   Drawer,
   DrawerContent,
-} from "./ui/drawer";
+} from "./shadcn/drawer";
 import coffee from "@/assets/coffee.jpg";
 
 export function CartBanner() {

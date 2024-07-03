@@ -1,22 +1,17 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
   DialogOverlay,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { useState } from "react";
-
-import Coffee from "@/assets/coffee.jpg";
-import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  DialogTitle,
+} from "@/components/shadcn/dialog";
 import type { StaticImageData } from "next/image";
+import Image from "next/image";
 
 type DialogProps = {
   title: string;
@@ -35,19 +30,22 @@ export function WelcomeDialog({
   imageAlt,
   defaultOpen = true,
 }: DialogProps) {
+  
   return (
     <Dialog defaultOpen={defaultOpen}>
       <DialogOverlay className="opacity-30">
-        <DialogContent className="w-4/5 h-3/4 rounded-xl flex flex-col gap-5">
+        <DialogContent className="w-4/5 rounded-xl flex flex-col gap-5">
           <DialogClose className="absolute top-6 right-3 font-semibold text-xl">
             <Close />
           </DialogClose>
           <DialogTitle className="text-left font-semibold text-xl">
             {title}
           </DialogTitle>
-          <div className="h-2/3 overflow-hidden">
-            <Image src={image} alt={imageAlt} className="rounded-xl" />
-          </div>
+          <Image
+            src={image}
+            alt={imageAlt}
+            className="rounded-xl object-cover"
+          />
           <DialogDescription className="text-center font-sans text-[14px]">
             {description}
           </DialogDescription>

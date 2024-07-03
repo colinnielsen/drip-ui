@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/button";
 import {
   Drawer,
   DrawerClose,
@@ -9,9 +9,9 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from "@/components/shadcn/drawer";
 import { PlusSvg, Price } from "./Helpers";
-import { Checkbox } from "./ui/checkbox";
+import { Checkbox } from "./shadcn/checkbox";
 import { NumericOption, BooleanOption } from "@/data/types-TODO/item";
 
 export type DrawerProps = {
@@ -139,11 +139,12 @@ export function OptionInput({ option }: { option: ItemOption }) {
   );
 }
 
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/shadcn/label";
+import { RadioGroup, RadioGroupItem } from "@/components/shadcn/radio-group";
 import { Item, ItemCategory, ItemOption } from "@/data/types-TODO/item";
 import { UUID } from "crypto";
 import { useCategoryOptions } from "@/infras/database";
+import Image from "next/image";
 
 export function RadioGroupDemo() {
   return (
@@ -166,14 +167,10 @@ export function RadioGroupDemo() {
 
 export function CoffeeCard({ name, image, price }: Item) {
   return (
-    <div className="flex flex-col gap-2 bg-white w-full ">
+    <div className="flex flex-col gap-2 bg-white">
       <DrawerTrigger asChild className="overflow-hidden">
-        <div className="relative overflow-hidden h-24 rounded-xl">
-          <img
-            src={image}
-            alt={name}
-            className="rounded-xl min-h-24 min-w-24 overflow-hidden"
-          />
+        <div className="relative overflow-hidden rounded-xl h-36 w-36">
+          <Image src={image} alt={name} fill className="overflow-hidden" />
           <button className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:scale-95">
             <PlusSvg />
           </button>

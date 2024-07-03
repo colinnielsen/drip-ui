@@ -51,11 +51,11 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border border-neutral-200 bg-white",
         className
       )}
       {...props}>
-      <div className="mx-auto  h-[6px] w-[75px] rounded-full  dark:bg-neutral-800 absolute -top-4  bg-white -translate-x-1/2 left-1/2 z-[51]" />
+      <div className="mx-auto  h-[6px] w-[75px] rounded-full  absolute -top-4  bg-white -translate-x-1/2 left-1/2 z-[51]" />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
@@ -116,7 +116,7 @@ const DrawerDescription = React.forwardRef<
   <DrawerPrimitive.Description
     ref={ref}
     className={cn(
-      "text-sm text-neutral-500 dark:text-neutral-400",
+      "text-sm text-neutral-500",
       className
     )}
     {...props}

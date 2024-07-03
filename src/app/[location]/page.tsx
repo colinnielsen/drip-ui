@@ -5,36 +5,32 @@ import { Footer } from "@/components/Footer";
 import { useSearchParams } from "next/navigation";
 import { useBestSellers, useCafe } from "@/infras/database";
 import { UUID } from "crypto";
-import { FarmerLink } from "@/components/FarmerCard";
-import { ItemCarousel } from "@/components/ItemCarousel";
+import { FarmerCard } from "@/components/FarmerCard";
 
 export default function LocationPage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  if (!id) {
-    throw new Error("No id provided");
-  }
+  if (!id) throw new Error("No id provided");
 
-  const { data: cafe } = useCafe(id as UUID);
-  if (!cafe) {
-    return <div>Loading...</div>;
-  }
+  const { data: cafe, isLoading, isError } = useCafe(id as UUID);
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error...</div>;
+  if (!cafe) return <div>Cafe not found</div>;
 
   const allocations = cafe.farmerAllocations;
 
   return (
-    <main className="flex flex-col min-h-screen mb-32">
+    <main className="flex flex-col mb-32">
       <LocationHeader {...cafe} />
       <div className="p-5 px-6 flex flex-col gap-5">
         <LocationDetails {...cafe} />
-
-        <div className="py-12 w-full flex justify-center items-center bg-neutral-500 rounded-3xl">
-          <ItemCarousel
+        <FarmerCard allocation={allocations[0]} />
+        {/* <ItemCarousel
             data={allocations}
-            renderFn={(f, i) => <FarmerLink allocation={f} />}
-          />
-        </div>
+            renderFn={(f, i) => }
+          /> */}
+
         <ItemList
           title="Espresso"
           category="espresso"

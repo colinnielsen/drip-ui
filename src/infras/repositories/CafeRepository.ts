@@ -24,7 +24,7 @@ export class InMemoryCafeRepository implements CafeRepository {
   async findItem(
     id: UUID,
     category: ItemCategory,
-    name: string,
+    name: string
   ): Promise<Item | null> {
     let cafe = await this.findById(id);
     if (!cafe) return null;
@@ -34,7 +34,7 @@ export class InMemoryCafeRepository implements CafeRepository {
 
   async findCategoryOptions(
     id: UUID,
-    category: ItemCategory,
+    category: ItemCategory
   ): Promise<Map<ItemCategory, ItemOption[]> | null> {
     let cafe = await this.findById(id);
     if (!cafe) return null;

@@ -66,3 +66,11 @@ export const getTotalAllocationsById =
 
     return getTotalAllocationBPS(allocations);
   };
+
+export const isStorefront = (cafe: Cafe): cafe is Storefront => {
+  return cafe.__type === "storefront";
+};
+
+export const isOnlineShop = (cafe: Cafe): cafe is OnlineShop => {
+  return cafe.__type === "online";
+};

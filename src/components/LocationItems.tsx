@@ -1,5 +1,5 @@
 import { DrawerProps, DrinkDrawer } from "./Drawer";
-import { DrawerTrigger } from "./ui/drawer";
+import { DrawerTrigger } from "./shadcn/drawer";
 import { Price, PlusSvg } from "./Helpers";
 import { Item, ItemCategory } from "@/data/types-TODO/item";
 import { UUID } from "crypto";

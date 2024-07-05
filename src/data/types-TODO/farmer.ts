@@ -37,12 +37,13 @@ export type Farmer = {
 };
 
 export const getTotalAllocationBPS = (
-  allocations: FarmerAllocation[],
+  allocations: FarmerAllocation[]
 ): number => {
   return allocations.reduce((acc, curr) => curr.allocationBPS + acc, 0);
 };
 
 export const createFarmer = (data: {
+  id?: UUID;
   name: string;
   image: string;
   shortDescription: string;
@@ -50,7 +51,7 @@ export const createFarmer = (data: {
   ethAddress: `0x${string}`;
 }): Farmer => {
   return {
-    id: v4() as UUID,
+    id: data.id ?? (v4() as UUID),
     ...data,
   };
 };

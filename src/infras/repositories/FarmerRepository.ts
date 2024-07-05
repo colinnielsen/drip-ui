@@ -1,6 +1,6 @@
 // src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
+import { Farmer, FarmerRepository } from "@/data/types-TODO/farmer";
 import { UUID } from "crypto";
-import { FarmerRepository, Farmer } from "@/data/types-TODO/farmer";
 import { farmerData } from "../static-data/StaticFarmerData";
 
 export class InMemoryFarmerRepository implements FarmerRepository {

@@ -1,18 +1,14 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { Footer } from "@/components/Footer";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-  dehydrate,
-} from "@tanstack/react-query";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
+import { Inter } from "next/font/google";
+import localFont from "next/font/local";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+// Font files can be colocated inside of `app`
+const myFont = localFont({
+  src: "../assets/diary-notes.ttf",
+  variable: "--font-diary-notes",
+});
 
 /* export const metadata: Metadata = {
  *   title: "Drip Coffee",
@@ -26,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <ReactQueryClientProvider>
-      <html lang="en" className="">
+      <html lang="en" className={myFont.variable}>
         <body className={inter.className}>{children}</body>
       </html>
     </ReactQueryClientProvider>

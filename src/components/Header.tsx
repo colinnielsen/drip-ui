@@ -5,7 +5,7 @@ import { useState } from "react";
 export function Header() {
   return (
     <header className="flex flex-col p-6 gap-6">
-      <h1 className="text-4xl font-semibold">Drip</h1>
+      <h1 className="text-4xl font-semibold font-drip">Drip</h1>
       <Search />
     </header>
   );

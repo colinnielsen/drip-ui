@@ -85,9 +85,9 @@ export const useCategoryOptions = (id: UUID, category: ItemCategory) =>
     queryKey: ["menuOptions", id, category],
     queryFn: async () => {
       const options = await database.cafes.findCategoryOptions(id, category);
-      if (!options) {
+      if (!options)
         throw new Error(`No options found for category ${category}`);
-      }
+
       return options;
     },
   });

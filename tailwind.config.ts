@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'drip': ['var(--font-diary-notes)']
+      },
       colors: {
         "secondary-background": "#EFE8DB",
       },

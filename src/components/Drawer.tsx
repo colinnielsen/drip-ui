@@ -46,6 +46,7 @@ export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
   const [quantity, setQuantity] = useState(1);
 
   const query = useCategoryOptions(cafeId, category);
+  console.log(query);
   const options = Array.from(query.data ?? []);
 
   return (
@@ -55,7 +56,13 @@ export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
         <div className="max-h-[75vh] overflow-y-scroll">
           <DrawerHeader className="p-0 rounded-t-xl">
             <div className="min-h-64 relative rounded-t-xl">
-              <img src={item.image} alt={item.name} />
+              <Image
+                src={item.image}
+                alt={item.name}
+                fill
+                className="object-cover"
+                quality={30}
+              />
             </div>
             <DrawerTitle className="text-left pl-4 pt-4  font-sans font-medium text-[24px]">
               {item.name}
@@ -68,7 +75,7 @@ export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
               onMinus={() => setQuantity(quantity - 1)}
               value={quantity}
             />
-            <RadioGroupDemo />
+            {/* <RadioGroupDemo /> */}
           </DrawerHeader>
           {options
             .filter(([, options]) => options.length > 0)
@@ -134,7 +141,7 @@ export function OptionInput({ option }: { option: ItemOption }) {
           <Checkbox id={option.name} className="w-5 h-5" />
         )}
       </div>
-      <Price price={option.price} />
+      {option.price ? <Price price={option.price} /> : null}
     </div>
   );
 }

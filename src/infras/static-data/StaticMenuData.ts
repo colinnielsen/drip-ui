@@ -29,7 +29,7 @@ export const SyrupMods: ItemOption[] = [
   createNumericOption({
     id: "1-1-1-1-1-3",
     name: "Vanilla",
-    price: .75,
+    price: 0.75,
     currency: "usd",
     category: "syrup",
     isOptional: true,
@@ -37,7 +37,7 @@ export const SyrupMods: ItemOption[] = [
   createNumericOption({
     id: "1-1-1-1-1-4",
     name: "Chocolate",
-    price: .75,
+    price: 0.75,
     currency: "usd",
     category: "syrup",
     isOptional: true,
@@ -45,7 +45,7 @@ export const SyrupMods: ItemOption[] = [
   createNumericOption({
     id: "1-1-1-1-1-5",
     name: "Caramel",
-    price: .75,
+    price: 0.75,
     currency: "usd",
     category: "syrup",
     isOptional: true,
@@ -124,20 +124,23 @@ export const Cortado = createBeverage({
   image: "/cortado.jpg",
 });
 
-export const DefaultMenu: Map<ItemCategory, Item[]> = new Map([
-  ["espresso", [Espresso, Latte, Mocha, Cappuccino, Americano, Cortado]],
-  ["coffee", [ColdBrew]],
-]);
+export const DefaultMenu: Record<ItemCategory, Item[]> = {
+  espresso: [Espresso, Latte, Mocha, Cappuccino, Americano, Cortado],
+  coffee: [ColdBrew],
+  extras: [],
+  syrup: [],
+};
 
-export const DefaultOptions: Map<ItemCategory, ItemOption[]> = new Map([
-  ["espresso", EspressoMods],
-  ["coffee", EspressoMods],
-  ["syrup", SyrupMods],
-  ["extras", []],
-]);
+export const DefaultOptions: Record<ItemCategory, ItemOption[]> = {
+  espresso: EspressoMods,
+  coffee: EspressoMods,
+  syrup: SyrupMods,
+  extras: [],
+};
 
-export const DefaultCategoryOptions: Map<ItemCategory, ItemCategory[]> =
-  new Map([
-    ["espresso", ["espresso", "syrup", "extras"]],
-    ["coffee", ["espresso", "syrup", "extras"]],
-  ]);
+export const DefaultCategoryOptions: Record<ItemCategory, ItemCategory[]> = {
+  espresso: ["espresso", "syrup", "extras"],
+  coffee: ["espresso", "syrup", "extras"],
+  syrup: [],
+  extras: [],
+};

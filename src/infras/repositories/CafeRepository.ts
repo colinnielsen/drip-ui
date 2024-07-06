@@ -29,7 +29,7 @@ export class InMemoryCafeRepository implements CafeRepository {
     let cafe = await this.findById(id);
     if (!cafe) return null;
 
-    return cafe.menu.get(category)?.find((item) => item.name === name) || null;
+    return cafe.menu[category]?.find((item) => item.name === name) || null;
   }
 
   async findCategoryOptions(
@@ -39,14 +39,14 @@ export class InMemoryCafeRepository implements CafeRepository {
     let cafe = await this.findById(id);
     if (!cafe) return null;
 
-    let categoryOptions = cafe.categoryOptions.get(category);
+    let categoryOptions = cafe.categoryOptions[category];
     if (!categoryOptions) {
       throw new Error(`No category options found for category ${category}`);
     }
     let optionMap = new Map<ItemCategory, ItemOption[]>();
 
     for (let cat of categoryOptions) {
-      let options = cafe.options.get(cat);
+      let options = cafe.options[cat];
       if (!options) {
         throw new Error(`No options found for category ${cat}`);
       }

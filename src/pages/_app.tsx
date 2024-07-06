@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { cn } from "@/lib/utils";
 import { AppProps } from "next/app";
 import { Inter } from "next/font/google";
@@ -22,6 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <main className={cn("antialiased", diaryNotes.variable, inter.className)}>
         <Component {...pageProps} />
       </main>
+      <ReactQueryDevtools initialIsOpen={false} />
     </ReactQueryClientProvider>
   );
 }

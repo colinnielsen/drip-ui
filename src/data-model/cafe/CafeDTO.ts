@@ -12,13 +12,7 @@ import { FarmerAllocation, getTotalAllocationBPS } from "../types-TODO/farmer";
 
 export const addStorefront =
   (repo: CafeRepository) =>
-  async (data: {
-    label: string;
-    backgroundImage: string;
-    logo: string;
-    location?: Coords;
-    farmerAllocations?: FarmerAllocation[];
-  }): Promise<Storefront> => {
+  async (data: Parameters<typeof createStorefront>[0]): Promise<Storefront> => {
     const storefront = createStorefront(data);
     await repo.save(storefront);
     return storefront;
@@ -26,13 +20,7 @@ export const addStorefront =
 
 export const addOnlineShop =
   (repo: CafeRepository) =>
-  async (data: {
-    label: string;
-    backgroundImage: string;
-    logo: string;
-    url: string;
-    farmerAllocations?: FarmerAllocation[];
-  }): Promise<OnlineShop> => {
+  async (data: Parameters<typeof createOnlineShop>[0]): Promise<OnlineShop> => {
     const onlineShop = createOnlineShop(data);
     await repo.save(onlineShop);
     return onlineShop;

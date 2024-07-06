@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerClose,
@@ -9,9 +9,9 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/shadcn/drawer";
+} from "@/components/ui/drawer";
 import { PlusSvg, Price } from "./Helpers";
-import { Checkbox } from "./shadcn/checkbox";
+import { Checkbox } from "./ui/checkbox";
 import { NumericOption, BooleanOption } from "@/data-model/types-TODO/item";
 
 export type DrawerProps = {
@@ -46,7 +46,7 @@ export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
   const [quantity, setQuantity] = useState(1);
 
   const query = useCategoryOptions(cafeId, category);
-  console.log(query);
+
   const options = Array.from(query.data ?? []);
 
   return (
@@ -146,8 +146,8 @@ export function OptionInput({ option }: { option: ItemOption }) {
   );
 }
 
-import { Label } from "@/components/shadcn/label";
-import { RadioGroup, RadioGroupItem } from "@/components/shadcn/radio-group";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Item, ItemCategory, ItemOption } from "@/data-model/types-TODO/item";
 import { UUID } from "crypto";
 import { useCategoryOptions } from "@/infras/database";

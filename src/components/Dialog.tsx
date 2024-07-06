@@ -1,6 +1,6 @@
 ;
 
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -9,7 +9,7 @@ import {
   DialogFooter,
   DialogOverlay,
   DialogTitle,
-} from "@/components/shadcn/dialog";
+} from "@/components/ui/dialog";
 import type { StaticImageData } from "next/image";
 import Image from "next/image";
 

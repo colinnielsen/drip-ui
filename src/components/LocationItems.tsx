@@ -1,8 +1,6 @@
-import { DrawerProps, DrinkDrawer } from "./Drawer";
-import { DrawerTrigger } from "./shadcn/drawer";
-import { Price, PlusSvg } from "./Helpers";
 import { Item, ItemCategory } from "@/data-model/types-TODO/item";
 import { UUID } from "crypto";
+import { DrinkDrawer } from "./Drawer";
 
 export function ItemList({
   title,

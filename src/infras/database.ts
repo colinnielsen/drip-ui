@@ -17,11 +17,13 @@ export const useFarmers = () =>
     queryFn: async () => await database.farmers.findAll(),
   });
 
-export const useFarmer = (id: UUID) =>
-  useQuery({
-    queryKey: ["farmer", id],
-    queryFn: async () => await database.farmers.findById(id),
-  });
+export const farmerQuery = (id: UUID) => ({
+  queryKey: ["farmer", id],
+  queryFn: async () => await database.farmers.findById(id),
+  enabled: !!id,
+});
+
+export const useFarmer = (id: UUID) => useQuery(farmerQuery(id));
 
 export const useCafes = () =>
   useQuery({
@@ -29,15 +31,16 @@ export const useCafes = () =>
     queryFn: async () => await database.cafes.findAll(),
   });
 
-export const useCafe = (id: UUID) =>
-  useQuery({
-    queryKey: ["cafe", id],
-    queryFn: async () => {
-      let cafe = await database.cafes.findById(id);
-      if (!cafe) throw new Error(`Cafe with id ${id} not found`);
-      return cafe;
-    },
-  });
+export const cafeQuery = (id: UUID) => ({
+  queryKey: ["cafe", id],
+  queryFn: async () => {
+    let cafe = await database.cafes.findById(id);
+    if (!cafe) throw new Error(`Cafe with id ${id} not found`);
+    return cafe;
+  },
+});
+
+export const useCafe = (id: UUID) => useQuery(cafeQuery(id));
 
 export const useBestSellers = (id: UUID) =>
   useQuery({

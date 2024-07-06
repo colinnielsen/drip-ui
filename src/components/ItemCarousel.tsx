@@ -2,7 +2,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/shadcn/carousel";
+} from "@/components/ui/carousel";
 import { ReactNode } from "react";
 
 export function ItemCarousel<T>({

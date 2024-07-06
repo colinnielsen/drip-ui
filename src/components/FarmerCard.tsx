@@ -17,7 +17,7 @@ export function FarmerCard({ allocation }: { allocation: FarmerAllocation }) {
   return (
     <div className="grid grid-cols-3 w-full justify-center items-center rounded-3xl bg-secondary-background overflow-clip">
       <div className="relative bg-red col-span-1 w-full h-full">
-        <Link href={`/farmer?id=${allocation.farmer}`}>
+        <Link href={`/farmer/${allocation.farmer}`}>
           <Image
             src={farmer.image}
             alt={farmer.name}

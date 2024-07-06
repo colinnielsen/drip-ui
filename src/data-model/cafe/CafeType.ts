@@ -6,9 +6,14 @@ import { Item, ItemCategory, ItemOption } from "../types-TODO/item";
 
 export type Coords = [number, number];
 
+export type Menu = Record<ItemCategory, Item[]>;
+export type CategoryOptions = Record<ItemCategory, ItemCategory[]>;
+export type Options = Record<ItemCategory, ItemOption[]>;
+
 ///
 //// TYPES
 ///
+
 export type BaseShop = BaseEntity & {
   __entity: Entity.cafe;
   label: string;
@@ -16,18 +21,18 @@ export type BaseShop = BaseEntity & {
   logo: string;
   url?: string;
   farmerAllocations: FarmerAllocation[];
-  menu: Map<ItemCategory, Item[]>;
+  menu: Menu;
   // NOTE This is a mapping from itemCategory -> ItemCategory[]
   // It conveys the list of options we should have for a given category
   // IE espresso should support espresso options + syrup options
   // So this would be: "espress" -> ["espresso", "syrup"]
-  categoryOptions: Map<ItemCategory, ItemCategory[]>;
+  categoryOptions: CategoryOptions;
   // NOTE This is a mapping from category to options
   // This lets each cafe configure what options each item category supports
-  options: Map<ItemCategory, ItemOption[]>;
+  options: Options;
   // TODO This might make more sense as [ItemCategory, ItemId] in case there are potential collisions on names?
   // bestsellers is a list of tuples, where the first element is the category and the second is the item name
-  bestSellers?: Array<[ItemCategory, string]>;
+  bestSellers?: [ItemCategory, string][];
 };
 
 export type Storefront = BaseShop & {
@@ -52,9 +57,9 @@ export const createStorefront = (data: {
   url?: string;
   backgroundImage: string;
   logo: string;
-  menu: Map<ItemCategory, Item[]>;
-  categoryOptions: Map<ItemCategory, ItemCategory[]>;
-  options: Map<ItemCategory, ItemOption[]>;
+  menu: Menu;
+  categoryOptions: CategoryOptions;
+  options: Options;
   farmerAllocations?: FarmerAllocation[];
 }): Storefront => ({
   id: data.id ?? (v4() as UUID),
@@ -71,9 +76,9 @@ export const createOnlineShop = (data: {
   backgroundImage: string;
   logo: string;
   id?: UUID;
-  categoryOptions: Map<ItemCategory, ItemCategory[]>;
-  options: Map<ItemCategory, ItemOption[]>;
-  menu: Map<ItemCategory, Item[]>;
+  categoryOptions: CategoryOptions;
+  options: Options;
+  menu: Menu;
   farmerAllocations?: FarmerAllocation[];
 }): OnlineShop => ({
   id: data.id ?? (v4() as UUID),

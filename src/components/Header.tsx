@@ -1,5 +1,4 @@
-;
-import { Input } from "@/components/shadcn/input";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 export function Header() {
@@ -27,18 +26,15 @@ export function Search() {
   );
 }
 
-export function SearchIcon({
-  className,
-}: {
-  className?: string;
-}) {
+export function SearchIcon({ className }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       fill="none"
       viewBox="0 0 24 24"
-      stroke="currentColor">
+      stroke="currentColor"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

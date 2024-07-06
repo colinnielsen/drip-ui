@@ -43,7 +43,7 @@ export const getTotalAllocationBPS = (
 };
 
 export const createFarmer = (data: {
-  id?: UUID;
+  id: UUID;
   name: string;
   image: string;
   shortDescription: string;
@@ -51,7 +51,6 @@ export const createFarmer = (data: {
   ethAddress: `0x${string}`;
 }): Farmer => {
   return {
-    id: data.id ?? (v4() as UUID),
     ...data,
   };
 };

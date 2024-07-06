@@ -1,4 +1,4 @@
-import { Cafe } from "@/data/cafe/CafeType";
+import { Cafe } from "@/data-model/cafe/CafeType";
 import { UUID } from "crypto";
 
 export type CafeRepository = {

@@ -1,4 +1,4 @@
-"use client";
+;
 import { Input } from "@/components/shadcn/input";
 import { useState } from "react";
 

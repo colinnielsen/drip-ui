@@ -1,12 +1,13 @@
+import "../styles/globals.css";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
+import { cn } from "@/lib/utils";
+import { AppProps } from "next/app";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
-import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
-// Font files can be colocated inside of `app`
-const myFont = localFont({
-  src: "../assets/diary-notes.ttf",
+const diaryNotes = localFont({
+  src: "../assets/fonts/diary-notes.ttf",
   variable: "--font-diary-notes",
 });
 
@@ -15,16 +16,12 @@ const myFont = localFont({
  *   description: "Onchain coffee breh",
  * }; */
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function App({ Component, pageProps }: AppProps) {
   return (
     <ReactQueryClientProvider>
-      <html lang="en" className={myFont.variable}>
-        <body className={inter.className}>{children}</body>
-      </html>
+      <main className={cn("antialiased", diaryNotes.variable, inter.className)}>
+        <Component {...pageProps} />
+      </main>
     </ReactQueryClientProvider>
   );
 }

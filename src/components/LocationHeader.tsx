@@ -1,5 +1,5 @@
-import { isStorefront } from "@/data/cafe/CafeDTO";
-import { Cafe } from "@/data/cafe/CafeType";
+import { isStorefront } from "@/data-model/cafe/CafeDTO";
+import { Cafe } from "@/data-model/cafe/CafeType";
 import { CarSimple } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
 import { useRouter } from "next/navigation";

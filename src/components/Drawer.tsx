@@ -12,7 +12,7 @@ import {
 } from "@/components/shadcn/drawer";
 import { PlusSvg, Price } from "./Helpers";
 import { Checkbox } from "./shadcn/checkbox";
-import { NumericOption, BooleanOption } from "@/data/types-TODO/item";
+import { NumericOption, BooleanOption } from "@/data-model/types-TODO/item";
 
 export type DrawerProps = {
   item: Item;
@@ -148,7 +148,7 @@ export function OptionInput({ option }: { option: ItemOption }) {
 
 import { Label } from "@/components/shadcn/label";
 import { RadioGroup, RadioGroupItem } from "@/components/shadcn/radio-group";
-import { Item, ItemCategory, ItemOption } from "@/data/types-TODO/item";
+import { Item, ItemCategory, ItemOption } from "@/data-model/types-TODO/item";
 import { UUID } from "crypto";
 import { useCategoryOptions } from "@/infras/database";
 import Image from "next/image";

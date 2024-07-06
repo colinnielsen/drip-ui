@@ -1,4 +1,4 @@
-import { FarmerAllocation } from "@/data/types-TODO/farmer";
+import { FarmerAllocation } from "@/data-model/types-TODO/farmer";
 import { useFarmer } from "@/infras/database";
 import { MapPin } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";

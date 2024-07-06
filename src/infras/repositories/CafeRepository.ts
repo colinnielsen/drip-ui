@@ -1,9 +1,9 @@
 // src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
-import { CafeRepository } from "@/data/cafe/CafeRepository";
-import { Cafe } from "@/data/cafe/CafeType";
+import { CafeRepository } from "@/data-model/cafe/CafeRepository";
+import { Cafe } from "@/data-model/cafe/CafeType";
 import { UUID } from "crypto";
 import { cafeData } from "../static-data/StaticCafeData";
-import { Item, ItemCategory, ItemOption } from "@/data/types-TODO/item";
+import { Item, ItemCategory, ItemOption } from "@/data-model/types-TODO/item";
 
 export class InMemoryCafeRepository implements CafeRepository {
   private cafes: Map<UUID, Cafe> = new Map();

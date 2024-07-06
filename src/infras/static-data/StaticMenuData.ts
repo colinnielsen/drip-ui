@@ -5,7 +5,7 @@ import {
   Item,
   ItemCategory,
   ItemOption,
-} from "@/data/types-TODO/item";
+} from "@/data-model/types-TODO/item";
 
 export const EspressoMods: ItemOption[] = [
   createNumericOption({

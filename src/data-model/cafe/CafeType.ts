@@ -1,4 +1,4 @@
-import { BaseEntity, Entity } from "@/data/__global/entities";
+import { BaseEntity, Entity } from "@/data-model/__global/entities";
 import { UUID } from "crypto";
 import { v4 } from "uuid";
 import { FarmerAllocation } from "../types-TODO/farmer";

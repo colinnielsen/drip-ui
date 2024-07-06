@@ -1,4 +1,4 @@
-import { Cafe, createOnlineShop, createStorefront } from "@/data/cafe/CafeType";
+import { Cafe, createOnlineShop, createStorefront } from "@/data-model/cafe/CafeType";
 import {
     DefaultCategoryOptions,
     DefaultMenu,

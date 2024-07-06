@@ -1,7 +1,7 @@
 import { Coffee } from "@phosphor-icons/react/dist/ssr";
-import { CafeModule } from "@/data/cafe/CafeModule";
-import { Cafe } from "@/data/cafe/CafeType";
-import { getTotalAllocationBPS } from "@/data/types-TODO/farmer";
+import { CafeModule } from "@/data-model/cafe/CafeModule";
+import { Cafe } from "@/data-model/cafe/CafeType";
+import { getTotalAllocationBPS } from "@/data-model/types-TODO/farmer";
 import { UUID } from "crypto";
 import Image from "next/image";
 import Link from "next/link";

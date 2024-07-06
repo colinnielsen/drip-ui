@@ -1,4 +1,4 @@
-"use client";
+;
 import { LocationHeader, LocationDetails } from "@/components/LocationHeader";
 import { ItemList } from "@/components/LocationItems";
 import { Footer } from "@/components/Footer";

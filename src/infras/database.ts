@@ -2,7 +2,7 @@ import { InMemoryFarmerRepository } from "./repositories/FarmerRepository";
 import { InMemoryCafeRepository } from "./repositories/CafeRepository";
 import { useQuery } from "@tanstack/react-query";
 import { UUID } from "crypto";
-import { ItemCategory } from "@/data/types-TODO/item";
+import { ItemCategory } from "@/data-model/types-TODO/item";
 import { InMemoryOrderRepository } from "./repositories/OrderRepository";
 
 export const database = {

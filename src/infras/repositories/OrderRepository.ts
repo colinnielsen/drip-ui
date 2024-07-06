@@ -1,10 +1,10 @@
 // src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
-import { Item, ItemOption } from "@/data/types-TODO/item";
+import { Item, ItemOption } from "@/data-model/types-TODO/item";
 import {
   OrderItem,
   OrderRepository,
   UniqueItem,
-} from "@/data/types-TODO/order";
+} from "@/data-model/types-TODO/order";
 import { UUID } from "crypto";
 import { v4 } from "uuid";
 

@@ -1,11 +1,11 @@
-"use client";
+;
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import * as React from "react";
 import { BackSvg, CarIcon } from "./Helpers";
-import { Cafe } from "@/data/cafe/CafeType";
-import { Farmer } from "@/data/types-TODO/farmer";
+import { Cafe } from "@/data-model/cafe/CafeType";
+import { Farmer } from "@/data-model/types-TODO/farmer";
 
 export function FarmerHeader({ image, name }: Farmer) {
   const router = useRouter();

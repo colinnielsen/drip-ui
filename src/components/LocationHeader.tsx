@@ -3,7 +3,7 @@ import { Cafe } from "@/data-model/cafe/CafeType";
 import { CarSimple } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
 import { BackSvg } from "./Helpers";
-import { StaticLocationData } from "@/pages/location/[id]";
+import { StaticLocationData } from "@/pages/location/[locationId]";
 import { useRouter } from "next/dist/client/router";
 
 export function LocationHeader({

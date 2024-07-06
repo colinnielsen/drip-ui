@@ -1,6 +1,6 @@
 import { Item, ItemCategory } from "@/data-model/types-TODO/item";
 import { UUID } from "crypto";
-import { DrinkDrawer } from "./Drawer";
+import { DrinkWithSelector } from "./Drawer";
 
 export function ItemList({
   title,
@@ -27,7 +27,7 @@ export function ItemList({
       </div>
       <div className={className}>
         {items.map((item, index) => (
-          <DrinkDrawer
+          <DrinkWithSelector
             key={index}
             item={item}
             category={category}

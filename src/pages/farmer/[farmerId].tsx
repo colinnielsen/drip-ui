@@ -13,10 +13,10 @@ import { farmerData } from "@/infras/static-data/StaticFarmerData";
 // TODO Add messages (probably worth using an external service for this)
 // TODO Add activity log data
 
-export default function FarmerPage({ id }: { id: string }) {
-  const query = useFarmer(id as UUID);
+export default function FarmerPage({ farmerId }: { farmerId: string }) {
+  const query = useFarmer(farmerId as UUID);
 
-  if (!id) return null;
+  if (!farmerId) return null;
   if (query.status === "pending") {
     return <div>Loading...</div>;
   }
@@ -46,21 +46,25 @@ export default function FarmerPage({ id }: { id: string }) {
 export async function getStaticPaths() {
   return {
     paths: farmerData.map((farmer) => ({
-      params: { id: farmer.id },
+      params: { farmerId: farmer.id },
     })),
     fallback: true,
   };
 }
 
-export async function getStaticProps({ params }: { params: { id: string } }) {
-  if (!params.id)
+export async function getStaticProps({
+  params,
+}: {
+  params: { farmerId: string };
+}) {
+  if (!params.farmerId)
     return {
       notFound: true,
     };
   else
     return {
       props: {
-        id: params.id,
+        farmerId: params.farmerId,
       },
     };
 }

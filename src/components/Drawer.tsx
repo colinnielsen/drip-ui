@@ -42,7 +42,7 @@ export function NumberInput({
   );
 }
 
-export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
+export function DrinkWithSelector({ item, category, cafeId }: DrawerProps) {
   const [quantity, setQuantity] = useState(1);
 
   const query = useCategoryOptions(cafeId, category);
@@ -53,7 +53,7 @@ export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
     <Drawer>
       <CoffeeCard {...item} />
       <DrawerContent className="border-none rounded-t-xl">
-        <div className="max-h-[75vh] overflow-y-scroll">
+        <div className="h-[75vh] overflow-y-scroll">
           <DrawerHeader className="p-0 rounded-t-xl">
             <div className="min-h-64 relative rounded-t-xl">
               <Image
@@ -89,7 +89,7 @@ export function DrinkDrawer({ item, category, cafeId }: DrawerProps) {
           <DrawerFooter>
             <DrawerClose asChild>
               <Button className="bg-black text-white rounded-3xl py-6">
-                Add to Cart
+                Add to Basket
               </Button>
             </DrawerClose>
           </DrawerFooter>
@@ -110,7 +110,7 @@ export function DrinkOptions({ category, options }: DrinkMods) {
 
   return (
     <div className="p-4 flex flex-col gap-5">
-      <div key={category} className="flex flex-col">
+      <div className="flex flex-col">
         <h3 className="font-semibold font-sans text-lg">{prettyCategory}</h3>
         {options.map((option) => (
           <OptionInput key={option.name} option={option} />
@@ -122,12 +122,15 @@ export function DrinkOptions({ category, options }: DrinkMods) {
 
 export function OptionInput({ option }: { option: ItemOption }) {
   return (
-    <div className="flex justify-between items-center pt-4">
+    <div className="flex justify-between items-center py-4 border-b border-b-gray-50">
       <div className="flex gap-2 items-center w-full">
+        {option.type === "boolean" && (
+          <Checkbox id={option.name} className="w-5 h-5" />
+        )}
         <label className="w-full" htmlFor={option.name}>
           {option.name}
         </label>
-        {option.type === "number" ? (
+        {option.type === "number" && (
           <input
             type="number"
             id={option.name}
@@ -137,8 +140,6 @@ export function OptionInput({ option }: { option: ItemOption }) {
             step={1}
             className="w-12 h-8 border border-black rounded-md justify-self-start"
           />
-        ) : (
-          <Checkbox id={option.name} className="w-5 h-5" />
         )}
       </div>
       {option.price ? <Price price={option.price} /> : null}

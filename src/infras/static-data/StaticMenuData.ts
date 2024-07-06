@@ -8,7 +8,7 @@ import {
 } from "@/data-model/types-TODO/item";
 
 export const EspressoMods: ItemOption[] = [
-  createNumericOption({
+  createBooleanOption({
     id: "1-1-1-1-1-1",
     name: "Add Shot",
     price: 1,
@@ -26,7 +26,7 @@ export const EspressoMods: ItemOption[] = [
   }),
 ];
 export const SyrupMods: ItemOption[] = [
-  createNumericOption({
+  createBooleanOption({
     id: "1-1-1-1-1-3",
     name: "Vanilla",
     price: 0.75,
@@ -34,7 +34,7 @@ export const SyrupMods: ItemOption[] = [
     category: "syrup",
     isOptional: true,
   }),
-  createNumericOption({
+  createBooleanOption({
     id: "1-1-1-1-1-4",
     name: "Chocolate",
     price: 0.75,
@@ -42,7 +42,7 @@ export const SyrupMods: ItemOption[] = [
     category: "syrup",
     isOptional: true,
   }),
-  createNumericOption({
+  createBooleanOption({
     id: "1-1-1-1-1-5",
     name: "Caramel",
     price: 0.75,

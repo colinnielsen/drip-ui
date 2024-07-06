@@ -77,8 +77,8 @@ export default function StaticLocationPage(
         <div className="p-5 px-6 flex flex-col gap-5">
           <LocationDetails {...staticLocation} />
           <DynamicLocation {...staticLocation} />
-          <Footer />
         </div>
+        <Footer />
       </HydrationBoundary>
     </main>
   );
@@ -88,23 +88,27 @@ export default function StaticLocationPage(
 ///// STATIC GENERATION
 ///
 
-export const getStaticPaths: GetStaticPaths<{ id: UUID }> = () => {
-  const paths = STATIC_LOCATION_DATA.map((d) => ({ params: { id: d.id } }));
+export const getStaticPaths: GetStaticPaths<{ locationId: UUID }> = () => {
+  const paths = STATIC_LOCATION_DATA.map((d) => ({
+    params: { locationId: d.id },
+  }));
   return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps<{
   dehydratedState: DehydratedState;
 }> = async ({ params }) => {
-  if (!params?.id) throw Error("cannot find params");
+  if (!params?.locationId) throw Error("cannot find params");
 
-  const location = STATIC_LOCATION_DATA.find((l) => l.id === params.id)!;
+  const location = STATIC_LOCATION_DATA.find(
+    (l) => l.id === params.locationId
+  )!;
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(cafeQuery(params.id as UUID));
+  await queryClient.prefetchQuery(cafeQuery(params.locationId as UUID));
   const data: Cafe | undefined = queryClient.getQueryData([
     "cafe",
-    params.id as UUID,
+    params.locationId as UUID,
   ]);
 
   const [selectedFarmer] = data?.farmerAllocations || [null];

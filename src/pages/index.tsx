@@ -18,7 +18,7 @@ export default function Home() {
         imageAlt="coffee"
         description="Drip is a coffee app designed to reward growers and local farms. For every coffee you buy with USDC, the more growers earn."
         buttonText="NEXT"
-        defaultOpen={false}
+        defaultOpen={true}
       />
       <Header />
       <div className="w-screen max-h-64 overflow-hidden">

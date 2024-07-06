@@ -33,7 +33,7 @@ export function Location({
   const allocationTotal = getTotalAllocationBPS(farmerAllocations);
 
   return (
-    <Link href={`/location?id=${id}`}>
+    <Link href={`/location/${id}`}>
       <div className="flex flex-col gap-1">
         <div className="overflow-hidden h-40 relative w-full">
           <Image

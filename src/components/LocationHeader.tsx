@@ -2,10 +2,17 @@ import { isStorefront } from "@/data-model/cafe/CafeDTO";
 import { Cafe } from "@/data-model/cafe/CafeType";
 import { CarSimple } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { BackSvg } from "./Helpers";
+import { StaticLocationData } from "@/pages/[location]/[id]";
+import { useRouter } from "next/dist/client/router";
 
-export function LocationHeader({ backgroundImage, logo }: Cafe) {
+export function LocationHeader({
+  backgroundImage,
+  logo,
+}: {
+  backgroundImage: string;
+  logo: string;
+}) {
   const router = useRouter();
   return (
     <header className="relative h-[25vh]">
@@ -25,20 +32,20 @@ export function LocationHeader({ backgroundImage, logo }: Cafe) {
   );
 }
 
-export function LocationDetails(cafe: Cafe) {
-  const newLocal = (
-    <div className="flex items-center gap-1">
-      <CarSimple weight="bold" />
-      <p className="text-sm font-normal text-neutral-400">
-        {isStorefront(cafe) ? cafe.location?.join(", ") : "Online only"}
-      </p>
-    </div>
-  );
-
+export function LocationDetails(staticLocation: StaticLocationData) {
   return (
     <div className="flex flex-col  pt-3 font-sans text-[16px] font-semibold">
-      <h1 className="text-[32px] font-sans font-medium ">{cafe.label}</h1>
-      {newLocal}
+      <h1 className="text-[32px] font-sans font-medium ">
+        {staticLocation.label}
+      </h1>
+      <div className="flex items-center gap-1">
+        <CarSimple weight="bold" />
+        <p className="text-sm font-normal text-neutral-400">
+          {staticLocation.location
+            ? staticLocation.location?.join(", ")
+            : "Online only"}
+        </p>
+      </div>
     </div>
   );
 }

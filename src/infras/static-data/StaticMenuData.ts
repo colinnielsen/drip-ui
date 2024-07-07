@@ -1,13 +1,7 @@
-import {
-  createBooleanOption,
-  createItem,
-  createNumericOption,
-  Item,
-  ItemCategory,
-  ItemOption,
-} from "@/data-model/types-TODO/item";
+import { Item, ItemCategory, ItemMod } from "@/data-model/item/ItemType";
+import { createBooleanOption, createItem } from "@/data-model/item/ItemDTO";
 
-export const EspressoMods: ItemOption[] = [
+export const EspressoMods: ItemMod[] = [
   createBooleanOption({
     id: "1-1-1-1-1-1",
     name: "Add Shot",
@@ -25,7 +19,7 @@ export const EspressoMods: ItemOption[] = [
     isOptional: true,
   }),
 ];
-export const SyrupMods: ItemOption[] = [
+export const SyrupMods: ItemMod[] = [
   createBooleanOption({
     id: "1-1-1-1-1-3",
     name: "Vanilla",
@@ -131,7 +125,7 @@ export const DefaultMenu: Record<ItemCategory, Item[]> = {
   syrup: [],
 };
 
-export const DefaultOptions: Record<ItemCategory, ItemOption[]> = {
+export const DefaultOptions: Record<ItemCategory, ItemMod[]> = {
   espresso: EspressoMods,
   coffee: EspressoMods,
   syrup: SyrupMods,

@@ -1,7 +1,7 @@
 import { InMemoryCafeRepository } from "@/infras/repositories/CafeRepository";
 import {
-  addOnlineShop,
-  addStorefront,
+  saveOnlineShop,
+  saveStorefront,
   getAllCafes,
   getCafeById,
 } from "./CafeDTO";
@@ -9,8 +9,8 @@ import {
 const cafeRepository = new InMemoryCafeRepository();
 
 export const CafeModule = {
-  addStorefront: addStorefront(cafeRepository),
-  addOnlineShop: addOnlineShop(cafeRepository),
+  saveStorefront: saveStorefront(cafeRepository),
+  saveOnlineShop: saveOnlineShop(cafeRepository),
   getCafeById: getCafeById(cafeRepository),
   getAllCafes: getAllCafes(cafeRepository),
 };

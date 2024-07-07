@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -10,9 +8,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { Minus, Plus } from "lucide-react";
+import { useState } from "react";
 import { PlusSvg, Price } from "./Helpers";
 import { Checkbox } from "./ui/checkbox";
-import { NumericOption, BooleanOption } from "@/data-model/types-TODO/item";
 
 export type DrawerProps = {
   item: Item;
@@ -79,7 +78,7 @@ export function DrinkWithSelector({ item, category, cafeId }: DrawerProps) {
           </DrawerHeader>
           {options
             .filter(([, options]) => options.length > 0)
-            .map(([category, options]) => (
+            .map<JSX.Element>(([category, options]) => (
               <DrinkOptions
                 key={`${category}-${options}`}
                 category={category}
@@ -101,7 +100,7 @@ export function DrinkWithSelector({ item, category, cafeId }: DrawerProps) {
 
 type DrinkMods = {
   category: ItemCategory;
-  options: ItemOption[];
+  options: ItemMod[];
 };
 
 export function DrinkOptions({ category, options }: DrinkMods) {
@@ -120,7 +119,7 @@ export function DrinkOptions({ category, options }: DrinkMods) {
   );
 }
 
-export function OptionInput({ option }: { option: ItemOption }) {
+export function OptionInput({ option }: { option: ItemMod }) {
   return (
     <div className="flex justify-between items-center py-4 border-b border-b-gray-50">
       <div className="flex gap-2 items-center w-full">
@@ -149,10 +148,10 @@ export function OptionInput({ option }: { option: ItemOption }) {
 
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Item, ItemCategory, ItemOption } from "@/data-model/types-TODO/item";
+import { Item, ItemCategory, ItemMod } from "@/data-model/item/ItemType";
 import { UUID } from "crypto";
-import { useCategoryOptions } from "@/infras/database";
 import Image from "next/image";
+import { useCategoryOptions } from "@/queries/CafeQuery";
 
 export function RadioGroupDemo() {
   return (

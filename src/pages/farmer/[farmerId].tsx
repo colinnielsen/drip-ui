@@ -1,12 +1,9 @@
-import { LocationHeader, LocationDetails } from "@/components/LocationHeader";
-import { ItemList } from "@/components/LocationItems";
-import { Footer } from "@/components/Footer";
-import { useBestSellers, useCafe, useFarmer } from "@/infras/database";
-import { UUID } from "crypto";
-import { ItemCarousel } from "@/components/ItemCarousel";
 import { FarmerDetails, FarmerHeader } from "@/components/FarmerHeader";
-import { notFound } from "next/navigation";
-import { farmerData } from "@/infras/static-data/StaticFarmerData";
+import { Footer } from "@/components/Footer";
+import { database } from "@/infras/database";
+import { useFarmer } from "@/queries/FarmerQuery";
+import { UUID } from "crypto";
+import { GetStaticPaths } from "next";
 
 // Things left to do here:
 // TODO Add tip panel
@@ -43,14 +40,14 @@ export default function FarmerPage({ farmerId }: { farmerId: string }) {
   );
 }
 
-export async function getStaticPaths() {
+export const getStaticPaths = (async () => {
   return {
-    paths: farmerData.map((farmer) => ({
+    paths: (await database.farmers.findAll()).map((farmer) => ({
       params: { farmerId: farmer.id },
     })),
     fallback: true,
   };
-}
+}) satisfies GetStaticPaths;
 
 export async function getStaticProps({
   params,

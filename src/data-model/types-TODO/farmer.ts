@@ -1,5 +1,4 @@
 import { UUID } from "crypto";
-import { v4 } from "uuid";
 
 export type FarmerAllocation = {
   id: UUID;

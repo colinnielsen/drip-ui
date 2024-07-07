@@ -1,16 +1,15 @@
 import { UUID } from "crypto";
+import { FarmerAllocation, getTotalAllocationBPS } from "../types-TODO/farmer";
 import { CafeRepository } from "./CafeRepository";
 import {
   Cafe,
   OnlineShop,
   Storefront,
-  createStorefront,
   createOnlineShop,
-  Coords,
+  createStorefront
 } from "./CafeType";
-import { FarmerAllocation, getTotalAllocationBPS } from "../types-TODO/farmer";
 
-export const addStorefront =
+export const saveStorefront =
   (repo: CafeRepository) =>
   async (data: Parameters<typeof createStorefront>[0]): Promise<Storefront> => {
     const storefront = createStorefront(data);
@@ -18,7 +17,7 @@ export const addStorefront =
     return storefront;
   };
 
-export const addOnlineShop =
+export const saveOnlineShop =
   (repo: CafeRepository) =>
   async (data: Parameters<typeof createOnlineShop>[0]): Promise<OnlineShop> => {
     const onlineShop = createOnlineShop(data);

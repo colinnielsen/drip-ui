@@ -10,7 +10,7 @@ import {
 } from "./StaticMenuData";
 import { farmerAllocations } from "./StaticFarmerData";
 
-export const cafeData: Cafe[] = [
+export const STATIC_CAFE_DATA: Cafe[] = [
   createStorefront({
     id: "1-3-3-4-5",
     label: "La Cabra",

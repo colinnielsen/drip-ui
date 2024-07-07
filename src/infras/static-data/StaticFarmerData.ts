@@ -7,7 +7,7 @@ import { VitalikAddress } from "./StaticPlaceholderData";
 import { v4 } from "uuid";
 import { UUID } from "crypto";
 
-export const farmerData: Farmer[] = [
+export const STATIC_FARMER_DATA: Farmer[] = [
   createFarmer({
     id: "2-2-3-4-5",
     name: "Gilgamesh",
@@ -39,10 +39,9 @@ const createDefaultAllocation = (
   farmerIndex: number,
   allocation: number
 ): FarmerAllocation => {
-  const farmer = farmerData[farmerIndex];
-  if (!farmer) {
-    throw new Error(`Farmer not found at index: ${farmerIndex}`);
-  }
+  const farmer = STATIC_FARMER_DATA[farmerIndex];
+  if (!farmer) throw new Error(`Farmer not found at index: ${farmerIndex}`);
+
   return {
     id: v4() as UUID,
     farmer: farmer.id,

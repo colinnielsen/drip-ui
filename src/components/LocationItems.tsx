@@ -1,4 +1,4 @@
-import { Item, ItemCategory } from "@/data-model/types-TODO/item";
+import { Item, ItemCategory } from "@/data-model/item/ItemType";
 import { UUID } from "crypto";
 import { DrinkWithSelector } from "./Drawer";
 

@@ -4,7 +4,7 @@ import { WelcomeDialog } from "@/components/Dialog";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { LocationList } from "@/components/LocationList";
-import { useCafes } from "@/infras/database";
+import { useCafes } from "@/queries/CafeQuery";
 import Image from "next/image";
 
 export default function Home() {

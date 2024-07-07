@@ -3,8 +3,9 @@ import { Footer } from "@/components/Footer";
 import { LocationDetails, LocationHeader } from "@/components/LocationHeader";
 import { ItemList } from "@/components/LocationItems";
 import { Cafe } from "@/data-model/cafe/CafeType";
-import { cafeQuery, farmerQuery, useCafe } from "@/infras/database";
-import { cafeData } from "@/infras/static-data/StaticCafeData";
+import { STATIC_CAFE_DATA } from "@/infras/static-data/StaticCafeData";
+import { cafeQuery, useCafe } from "@/queries/CafeQuery";
+import { farmerQuery } from "@/queries/FarmerQuery";
 import {
   DehydratedState,
   HydrationBoundary,
@@ -14,7 +15,7 @@ import {
 import { UUID } from "crypto";
 import { GetStaticPaths, GetStaticProps } from "next/types";
 
-const STATIC_LOCATION_DATA = cafeData.map((c) => ({
+const STATIC_LOCATION_DATA = STATIC_CAFE_DATA.map((c) => ({
   __type: c.__type,
   id: c.id,
   label: c.label,

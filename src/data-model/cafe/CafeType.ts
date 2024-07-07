@@ -2,13 +2,15 @@ import { BaseEntity, Entity } from "@/data-model/__global/entities";
 import { UUID } from "crypto";
 import { v4 } from "uuid";
 import { FarmerAllocation } from "../types-TODO/farmer";
-import { Item, ItemCategory, ItemOption } from "../types-TODO/item";
+import { Item, ItemCategory, ItemMod } from "../item/ItemType";
 
 export type Coords = [number, number];
 
-export type Menu = Record<ItemCategory, Item[]>;
+export type Menu = {
+  [category in ItemCategory]: Item[];
+};
 export type CategoryOptions = Record<ItemCategory, ItemCategory[]>;
-export type Options = Record<ItemCategory, ItemOption[]>;
+export type Options = Record<ItemCategory, ItemMod[]>;
 
 ///
 //// TYPES
@@ -58,6 +60,7 @@ export const createStorefront = (data: {
   backgroundImage: string;
   logo: string;
   menu: Menu;
+  // itemMods: ItemMod[];
   categoryOptions: CategoryOptions;
   options: Options;
   farmerAllocations?: FarmerAllocation[];

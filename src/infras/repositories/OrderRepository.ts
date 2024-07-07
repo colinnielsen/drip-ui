@@ -1,57 +1,104 @@
 // src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
-import { Item, ItemOption } from "@/data-model/types-TODO/item";
+import { Item, ItemMod } from "@/data-model/item/ItemType";
+import { Order, OrderItem } from "@/data-model/order/OrderType";
 import {
-  OrderItem,
   OrderRepository,
-  UniqueItem,
-} from "@/data-model/types-TODO/order";
+  UpdateOrderOperation,
+} from "@/data-model/order/OrderRepository";
 import { UUID } from "crypto";
 import { v4 } from "uuid";
+import { sleep } from "@/lib/utils";
+
+const SLEEP_MS = 600;
 
 export class InMemoryOrderRepository implements OrderRepository {
-  private items: Map<UUID, OrderItem> = new Map();
+  private items: Map<UUID, Order> = new Map();
 
   constructor() {
     this.items = new Map();
-    // TODO Maybe add static data?
-    //cafeData.forEach((cafe) => this.cafes.set(cafe.id as UUID, cafe));
   }
 
-  async findById(id: UUID): Promise<OrderItem | null> {
+  async findById(id: UUID): Promise<Order | null> {
+    await sleep(SLEEP_MS);
     return this.items.get(id) || null;
   }
 
-  async findAll(): Promise<OrderItem[]> {
-    return Array.from(this.items.values());
-  }
-
-  async findUnique(): Promise<UniqueItem[]> {
-    throw new Error("Method not implemented.");
-  }
-
-  async save(item: Item, options: ItemOption[]): Promise<void> {
+  async save(cafeId: UUID, userId: UUID, items: OrderItem[]): Promise<Order> {
     let id = v4() as UUID;
-    let orderItem = {
+    let orderItem: Order = {
       id,
-      item,
-      options,
+      cafe: cafeId,
+      user: userId,
+      status: "pending",
+      timestamp: Date().toString(),
+      orderItems: items,
     };
+
+    await sleep(SLEEP_MS);
     this.items.set(id, orderItem);
+
+    return orderItem;
   }
 
-  async update(id: UUID, options: ItemOption[]): Promise<void> {
-    let orderItem = this.items.get(id);
-    if (!orderItem) {
-      throw new Error(`Order item with id ${id} not found`);
+  async update(
+    orderId: UUID,
+    operations: UpdateOrderOperation[]
+  ): Promise<Order> {
+    await sleep(SLEEP_MS);
+    const order = this.items.get(orderId);
+    if (!order) throw Error("Order not found");
+
+    for (const op of operations) {
+      let orderId: number;
+
+      switch (op.__type) {
+        case "add":
+          order.orderItems.push(op.item);
+          break;
+        case "delete":
+          orderId = order.orderItems.findIndex((o) => o.id === op.itemId);
+          if (orderId == -1) throw Error("bad order id");
+          order.orderItems.splice(orderId);
+          break;
+        case "update":
+          orderId = order.orderItems.findIndex((o) => o.id === op.itemId);
+          if (orderId == -1) throw Error("bad order id");
+          order.orderItems[orderId] = op.item;
+          break;
+        default:
+          let err: never;
+          throw Error("bad impl");
+      }
     }
-    orderItem.options = options;
+
+    return order;
   }
 
   async delete(id: UUID): Promise<void> {
-    this.items.delete(id);
+    if (!this.items.delete(id)) throw Error("could not delete");
   }
 
-  async clear(): Promise<void> {
-    this.items.clear();
+  async clear(orderId: UUID): Promise<Order> {
+    await sleep(SLEEP_MS);
+    const order = this.items.get(orderId);
+    if (!order) throw Error("Order not found");
+
+    order.orderItems = [];
+
+    return order;
+  }
+
+  async getOrdersByUserId(userId: UUID): Promise<Order[]> {
+    return Array.from(this.items.values()).filter((o) => o.user === userId);
+  }
+
+  async getActiveUserOrders(userId: UUID): Promise<Order[]> {
+    return this.getOrdersByUserId(userId).then((orders) =>
+      orders
+        .filter((o) => o.status !== "complete")
+        .sort((a, b) =>
+          new Date(a.timestamp) < new Date(b.timestamp) ? -1 : 1
+        )
+    );
   }
 }

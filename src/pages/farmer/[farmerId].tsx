@@ -35,7 +35,6 @@ export default function FarmerPage({ farmerId }: { farmerId: string }) {
         <FarmerDetails {...farmer} />
         <div className="py-12 w-full flex justify-center items-center bg-neutral-500 rounded-3xl"></div>
       </div>
-      <Footer />
     </main>
   );
 }

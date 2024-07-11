@@ -27,7 +27,6 @@ export default function Home() {
 
       <LocationList title="Near You" cafes={cafes?.slice(0, 2) ?? []} />
       <LocationList title="Popular" cafes={cafes?.slice(2) ?? []} />
-      <Footer />
     </div>
   );
 }

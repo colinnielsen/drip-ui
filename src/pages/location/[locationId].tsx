@@ -79,7 +79,6 @@ export default function StaticLocationPage(
           <LocationDetails {...staticLocation} />
           <DynamicLocation {...staticLocation} />
         </div>
-        <Footer />
       </HydrationBoundary>
     </main>
   );

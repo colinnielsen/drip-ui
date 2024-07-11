@@ -1,15 +1,17 @@
+import { Unsaved } from "@/data-model/_common/type/CommonType";
 import { OrderItem } from "@/data-model/order/OrderType";
 import { database } from "@/infras/database";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UUID } from "crypto";
 
 //
 //// QUERIES
 //
-export const useActiveOrders = (userId: UUID) =>
+const CART_QUERY_KEY = "cart";
+export const useCart = (userId: UUID) =>
   useQuery({
-    queryKey: ["activeOrder"],
-    queryFn: async () => await database.order.getActiveUserOrders(userId),
+    queryKey: [CART_QUERY_KEY],
+    queryFn: async () => await database.order.getActiveUserOrder(userId),
   });
 
 //
@@ -25,11 +27,37 @@ export const useSaveOrder = (
       await database.order.save(cafeId, userId, orderItems),
   });
 
-export const useAddOrderItem = (orderId: UUID, item: OrderItem) =>
-  useMutation({
-    mutationFn: async () =>
-      await database.order.update(orderId, [{ __type: "add", item }]),
+export const useAddToCart = ({
+  cafeId,
+  userId,
+  orderId,
+  orderItem,
+}: {
+  cafeId: UUID;
+  userId: UUID;
+  orderId?: UUID;
+  orderItem: Unsaved<OrderItem>;
+}) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      // if there's no order, create one
+      if (!orderId)
+        return await database.order.save(cafeId, userId, [orderItem]);
+      // otherwise add it to an existing order
+      else
+        return await database.order.update(orderId, [
+          { __type: "add", item: orderItem },
+        ]);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [CART_QUERY_KEY],
+      });
+    },
   });
+};
 
 export const useDeleteOrderItem = (orderId: UUID, itemId: UUID) =>
   useMutation({

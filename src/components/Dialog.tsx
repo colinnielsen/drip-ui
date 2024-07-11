@@ -1,5 +1,3 @@
-;
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,14 +28,11 @@ export function WelcomeDialog({
   imageAlt,
   defaultOpen = true,
 }: DialogProps) {
-  
   return (
     <Dialog defaultOpen={defaultOpen}>
       <DialogOverlay className="opacity-30">
         <DialogContent className="w-4/5 rounded-xl flex flex-col gap-5">
-          <DialogClose className="absolute top-6 right-3 font-semibold text-xl">
-            <Close />
-          </DialogClose>
+          <CloseIcon />
           <DialogTitle className="text-left font-semibold text-xl">
             {title}
           </DialogTitle>
@@ -65,21 +60,26 @@ export function WelcomeDialog({
   );
 }
 
-function Close() {
+export function CloseIcon() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={2.5}
-      stroke="currentColor"
-      className="size-6"
+    <DialogClose
+      className="absolute top-6 right-3 font-semibold text-xl"
+      asChild
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M6 18 18 6M6 6l12 12"
-      />
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={2.5}
+        stroke="currentColor"
+        className="size-6"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M6 18 18 6M6 6l12 12"
+        />
+      </svg>
+    </DialogClose>
   );
 }

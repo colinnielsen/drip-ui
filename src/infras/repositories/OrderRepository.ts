@@ -1,15 +1,14 @@
 // src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
-import { Item, ItemMod } from "@/data-model/item/ItemType";
-import { Order, OrderItem } from "@/data-model/order/OrderType";
+import { FAKE_DB_SLEEP_MS } from "@/data-model/__global/constants";
+import { Unsaved } from "@/data-model/_common/type/CommonType";
 import {
   OrderRepository,
   UpdateOrderOperation,
 } from "@/data-model/order/OrderRepository";
+import { Order, OrderItem, isPending } from "@/data-model/order/OrderType";
+import { sleep } from "@/lib/utils";
 import { UUID } from "crypto";
 import { v4 } from "uuid";
-import { sleep } from "@/lib/utils";
-
-const SLEEP_MS = 600;
 
 export class InMemoryOrderRepository implements OrderRepository {
   private items: Map<UUID, Order> = new Map();
@@ -19,11 +18,15 @@ export class InMemoryOrderRepository implements OrderRepository {
   }
 
   async findById(id: UUID): Promise<Order | null> {
-    await sleep(SLEEP_MS);
+    await sleep(FAKE_DB_SLEEP_MS);
     return this.items.get(id) || null;
   }
 
-  async save(cafeId: UUID, userId: UUID, items: OrderItem[]): Promise<Order> {
+  async save(
+    cafeId: UUID,
+    userId: UUID,
+    items: Unsaved<OrderItem>[]
+  ): Promise<Order> {
     let id = v4() as UUID;
     let orderItem: Order = {
       id,
@@ -31,10 +34,13 @@ export class InMemoryOrderRepository implements OrderRepository {
       user: userId,
       status: "pending",
       timestamp: Date().toString(),
-      orderItems: items,
+      orderItems: items.map((i) => ({
+        id: v4() as UUID,
+        ...i,
+      })),
     };
 
-    await sleep(SLEEP_MS);
+    await sleep(FAKE_DB_SLEEP_MS);
     this.items.set(id, orderItem);
 
     return orderItem;
@@ -44,16 +50,17 @@ export class InMemoryOrderRepository implements OrderRepository {
     orderId: UUID,
     operations: UpdateOrderOperation[]
   ): Promise<Order> {
-    await sleep(SLEEP_MS);
+    await sleep(FAKE_DB_SLEEP_MS);
     const order = this.items.get(orderId);
     if (!order) throw Error("Order not found");
+    if (!isPending) throw Error("Order is not pending");
 
     for (const op of operations) {
       let orderId: number;
 
       switch (op.__type) {
         case "add":
-          order.orderItems.push(op.item);
+          order.orderItems.push({ id: v4() as UUID, ...op.item });
           break;
         case "delete":
           orderId = order.orderItems.findIndex((o) => o.id === op.itemId);
@@ -79,7 +86,7 @@ export class InMemoryOrderRepository implements OrderRepository {
   }
 
   async clear(orderId: UUID): Promise<Order> {
-    await sleep(SLEEP_MS);
+    await sleep(FAKE_DB_SLEEP_MS);
     const order = this.items.get(orderId);
     if (!order) throw Error("Order not found");
 
@@ -92,13 +99,14 @@ export class InMemoryOrderRepository implements OrderRepository {
     return Array.from(this.items.values()).filter((o) => o.user === userId);
   }
 
-  async getActiveUserOrders(userId: UUID): Promise<Order[]> {
-    return this.getOrdersByUserId(userId).then((orders) =>
-      orders
-        .filter((o) => o.status !== "complete")
-        .sort((a, b) =>
-          new Date(a.timestamp) < new Date(b.timestamp) ? -1 : 1
-        )
+  async getActiveUserOrder(userId: UUID): Promise<Order | null> {
+    return this.getOrdersByUserId(userId).then(
+      (orders) =>
+        orders
+          .sort((a, b) =>
+            new Date(a.timestamp) < new Date(b.timestamp) ? -1 : 1
+          )
+          .find((o) => o.status === "pending") ?? null
     );
   }
 }

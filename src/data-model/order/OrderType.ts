@@ -20,3 +20,13 @@ export type OrderItem = {
   item: Item;
   mods: ItemMod[];
 };
+
+//
+//// DTO
+//
+
+export const isPending = (o: Order) => o.status === "complete";
+
+export const isInProgress = (o: Order) => o.status === "in-progress";
+
+export const isComplete = (o: Order) => o.status === "complete";

@@ -1,8 +1,9 @@
 import { UUID } from "crypto";
 import { Order, OrderItem } from "./OrderType";
+import { Unsaved } from "../_common/type/CommonType";
 
 export type UpdateOrderOperation =
-  | { __type: "add"; item: OrderItem }
+  | { __type: "add"; item: Unsaved<OrderItem> }
   | { __type: "delete"; itemId: UUID }
   | { __type: "update"; itemId: UUID; item: OrderItem };
 
@@ -31,7 +32,7 @@ export type OrderRepository = {
    */
   getOrdersByUserId: (userId: UUID) => Promise<Order[]>;
   /**
-   * @dev finds users orders
+   * @dev find a users order
    */
-  getActiveUserOrders: (userId: UUID) => Promise<Order[]>;
+  getActiveUserOrder: (userId: UUID) => Promise<Order | null>;
 };

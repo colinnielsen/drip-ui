@@ -1,6 +1,6 @@
 import { Item, ItemCategory } from "@/data-model/item/ItemType";
 import { UUID } from "crypto";
-import { DrinkWithSelector } from "./Drawer";
+import { ItemWithSelector } from "./ItemSelector";
 
 export function ItemList({
   title,
@@ -23,11 +23,11 @@ export function ItemList({
     <div className="flex flex-col">
       <div className="py-3">
         <h2 className="text-lg font-normal">{title}</h2>
-        <p className="text-sm text-neutral-500 font-normal"></p>
+        {/* <p className="text-sm text-neutral-500 font-normal"></p> */}
       </div>
       <div className={className}>
         {items.map((item, index) => (
-          <DrinkWithSelector
+          <ItemWithSelector
             key={index}
             item={item}
             category={category}

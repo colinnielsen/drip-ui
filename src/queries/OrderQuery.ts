@@ -36,19 +36,19 @@ export const useAddToCart = ({
   cafeId: UUID;
   userId: UUID;
   orderId?: UUID;
-  orderItem: Unsaved<OrderItem>;
+  orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[];
 }) => {
   const queryClient = useQueryClient();
+  const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
 
   return useMutation({
     mutationFn: async () => {
       // if there's no order, create one
-      if (!orderId)
-        return await database.order.save(cafeId, userId, [orderItem]);
+      if (!orderId) return await database.order.save(cafeId, userId, itemArray);
       // otherwise add it to an existing order
       else
         return await database.order.update(orderId, [
-          { __type: "add", item: orderItem },
+          { __type: "add", item: itemArray },
         ]);
     },
     onSuccess: () => {

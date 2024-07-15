@@ -1,6 +1,9 @@
 {
   "extends": [
     "next/core-web-vitals",
-    "@tanstack/query"
+    "@tanstack/query",
+    "@typescript-eslint",
+    "prettier",
+    "plugin:prettier/recommended"
   ]
 }

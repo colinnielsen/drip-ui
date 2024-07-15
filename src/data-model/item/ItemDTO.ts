@@ -34,6 +34,7 @@ export const createNumericOption = (data: {
   name: string;
   price: number;
   currency: "eth" | "usd";
+  category: string;
   isOptional: boolean;
 }): NumericMod => ({
   id: data.id,

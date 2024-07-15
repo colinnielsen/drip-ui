@@ -1,5 +1,9 @@
 import { Item, ItemCategory, ItemMod } from "@/data-model/item/ItemType";
-import { createBooleanOption, createItem } from "@/data-model/item/ItemDTO";
+import {
+  createBooleanOption,
+  createItem,
+  createNumericOption,
+} from "@/data-model/item/ItemDTO";
 
 export const EspressoMods: ItemMod[] = [
   createBooleanOption({
@@ -14,6 +18,14 @@ export const EspressoMods: ItemMod[] = [
     id: "1-1-1-1-1-2",
     name: "Iced",
     price: 0,
+    currency: "usd",
+    category: "espresso",
+    isOptional: true,
+  }),
+  createNumericOption({
+    id: "1-1-1-1-1-3",
+    name: "Shot count",
+    price: 1,
     currency: "usd",
     category: "espresso",
     isOptional: true,

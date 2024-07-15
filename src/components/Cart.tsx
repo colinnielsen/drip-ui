@@ -2,7 +2,7 @@ import { Order, OrderItem } from "@/data-model/order/OrderType";
 import { TESTING_USER_UUID } from "@/data-model/user/UserType";
 import { useCafe } from "@/queries/CafeQuery";
 import { useCart } from "@/queries/OrderQuery";
-import { Close } from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
 import Image from "next/image";
 import { CartSvg, Price } from "./Helpers";
 import {
@@ -12,7 +12,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "./ui/drawer";
-import { X } from "lucide-react";
 
 export function CheckoutItem(o: OrderItem) {
   return (
@@ -23,7 +22,9 @@ export function CheckoutItem(o: OrderItem) {
       <div>
         <p>{o.item.name}</p>
         {o.mods.map((m) => (
-          <p key={m.id}>{m.name}</p>
+          <p key={m.id}>
+            {m.name} x{Number(m.value)}
+          </p>
         ))}
         <Price price={o.item.price} />
       </div>

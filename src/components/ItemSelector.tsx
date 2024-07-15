@@ -15,9 +15,9 @@ import { useCategoryOptions } from "@/queries/CafeQuery";
 import { useAddToCart, useCart } from "@/queries/OrderQuery";
 import { useActiveUser } from "@/queries/UserQuery";
 import { UUID } from "crypto";
-import { Minus, Plus } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
+import { NumberInput } from "./base/NumberInput";
 import { PlusSvg, Price } from "./Helpers";
 import { Checkbox } from "./ui/checkbox";
 
@@ -26,76 +26,6 @@ export type DrawerProps = {
   category: ItemCategory;
   cafeId: UUID;
 };
-
-export function NumberInput({
-  onPlus,
-  onMinus,
-  value,
-}: {
-  onPlus: () => void;
-  onMinus: () => void;
-  value: number;
-}) {
-  return (
-    <div className="flex items-center gap-2 px-4 py-2 font-normal text-sm bg-neutral-100 w-fit rounded-2xl">
-      <button onClick={onMinus}>
-        <Minus />
-      </button>
-      <p>{value}</p>
-      <button onClick={onPlus}>
-        <Plus />
-      </button>
-    </div>
-  );
-}
-
-type DrinkMods = {
-  category: ItemCategory;
-  options: ItemMod[];
-};
-
-export function OptionInput({ option }: { option: ItemMod }) {
-  return (
-    <div className="flex justify-between items-center py-4 border-b border-b-gray-50">
-      <div className="flex gap-2 items-center w-full">
-        {option.type === "boolean" && (
-          <Checkbox id={option.name} className="w-5 h-5" />
-        )}
-        <label className="w-full" htmlFor={option.name}>
-          {option.name}
-        </label>
-        {option.type === "number" && (
-          <input
-            type="number"
-            id={option.name}
-            name={option.name}
-            min={0}
-            max={10}
-            step={1}
-            className="w-12 h-8 border border-black rounded-md justify-self-start"
-          />
-        )}
-      </div>
-      {option.price ? <Price price={option.price} /> : null}
-    </div>
-  );
-}
-
-export function DrinkOptions({ category, options }: DrinkMods) {
-  // Upper case the first letter of the category
-  const prettyCategory = category.charAt(0).toUpperCase() + category.slice(1);
-
-  return (
-    <div className="p-4 flex flex-col gap-5">
-      <div className="flex flex-col">
-        <h3 className="font-semibold font-sans text-lg">{prettyCategory}</h3>
-        {options.map((option) => (
-          <OptionInput key={option.name} option={option} />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function AddToBasketButton({
   userId,
@@ -147,17 +77,98 @@ export function ItemPreviewTrigger({ name, image, price }: Item) {
   );
 }
 
+export const ItemOption = ({
+  option,
+  setSelectedOptions,
+}: {
+  option: ItemMod;
+  setSelectedOptions: Dispatch<
+    SetStateAction<
+      Record<`${string}-${string}-${string}-${string}-${string}`, ItemMod>
+    >
+  >;
+}) => {
+  const [quantity, setQuantity] = useState(0);
+  function selectBooleanMod(checked: boolean) {
+    setSelectedOptions((prev) => {
+      if (!checked) {
+        const { [option.id]: _, ...next } = prev;
+        return next;
+      }
+      return {
+        ...prev,
+        [option.id]: {
+          ...option,
+          value: !!checked,
+        },
+      };
+    });
+  }
+
+  function selectNumericOption(value: number) {
+    setQuantity(value);
+    setSelectedOptions((prev) => {
+      if (value === 0) {
+        const { [option.id]: _, ...next } = prev;
+        return next;
+      }
+      return {
+        ...prev,
+        [option.id]: {
+          ...option,
+          value,
+        },
+      };
+    });
+  }
+
+  if (option.type === "boolean") option.value;
+  else option.value;
+
+  return (
+    <>
+      <div className="flex justify-between items-center py-4 border-b border-b-gray-50">
+        <div className="flex gap-2 items-center w-full">
+          {option.type === "boolean" && (
+            <Checkbox
+              id={option.name}
+              className="w-5 h-5"
+              onCheckedChange={selectBooleanMod}
+            />
+          )}
+          <div className="w-full flex gap-x-2 items-center">
+            <label htmlFor={option.name}>{option.name}</label>
+            {option.type === "number" && (
+              <NumberInput
+                id={option.name}
+                value={quantity}
+                onPlus={() => quantity < 4 && selectNumericOption(quantity + 1)}
+                onMinus={() => quantity && selectNumericOption(quantity - 1)}
+              />
+            )}
+          </div>
+        </div>
+        {option.price ? <Price price={option.price} /> : null}
+      </div>
+    </>
+  );
+};
+
 export function ItemWithSelector({ item, category, cafeId }: DrawerProps) {
   const [quantity, setQuantity] = useState(1);
 
-  const { data: user } = useActiveUser();
-  const query = useCategoryOptions(cafeId, category);
+  const [selectionOptions, setSelectedOptions] = useState<
+    Record<UUID, ItemMod>
+  >({});
 
-  const options = Array.from(query.data ?? []);
+  const { data: user } = useActiveUser();
+  const { data: itemMods } = useCategoryOptions(cafeId, category);
+
+  const options = Array.from(itemMods ?? []);
 
   const orderItem: Unsaved<OrderItem> = {
     item,
-    mods: [],
+    mods: Object.values(selectionOptions),
   };
 
   return (
@@ -165,6 +176,9 @@ export function ItemWithSelector({ item, category, cafeId }: DrawerProps) {
       <ItemPreviewTrigger {...item} />
       <DrawerContent className="border-none rounded-t-xl overflow-hidden">
         <div className="h-[75vh] overflow-y-scroll">
+          {/* <pre className="text-xs">
+            {JSON.stringify(orderItem.mods, null, 2)}
+          </pre> */}
           <DrawerHeader className="p-0 rounded-t-xl">
             <div className="min-h-64 relative rounded-t-xl">
               <Image
@@ -189,14 +203,28 @@ export function ItemWithSelector({ item, category, cafeId }: DrawerProps) {
             {/* <RadioGroupDemo /> */}
           </DrawerHeader>
           {options
-            .filter(([, options]) => options.length > 0)
-            .map(([category, options]) => (
-              <DrinkOptions
-                key={`${category}-${options}`}
-                category={category}
-                options={options}
-              />
-            ))}
+            .filter(([, o]) => o.length > 0)
+            .map(([category, options]) => {
+              // Upper case the first letter of the category
+              const prettyCategory =
+                category.charAt(0).toUpperCase() + category.slice(1);
+
+              return (
+                <div
+                  key={`${category}-${options}`}
+                  className="p-4 flex flex-col gap-5"
+                >
+                  <div className="flex flex-col">
+                    <h3 className="font-semibold font-sans text-lg">
+                      {prettyCategory}
+                    </h3>
+                    {options.map((option, i) => (
+                      <ItemOption key={i} {...{ option, setSelectedOptions }} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           {user?.id && (
             <AddToBasketButton {...{ userId: user.id, cafeId, orderItem }} />
           )}

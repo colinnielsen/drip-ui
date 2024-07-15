@@ -3,7 +3,7 @@ import { Order, OrderItem } from "./OrderType";
 import { Unsaved } from "../_common/type/CommonType";
 
 export type UpdateOrderOperation =
-  | { __type: "add"; item: Unsaved<OrderItem> }
+  | { __type: "add"; item: Unsaved<OrderItem> | Unsaved<OrderItem>[] }
   | { __type: "delete"; itemId: UUID }
   | { __type: "update"; itemId: UUID; item: OrderItem };
 

@@ -60,7 +60,12 @@ export class InMemoryOrderRepository implements OrderRepository {
 
       switch (op.__type) {
         case "add":
-          order.orderItems.push({ id: v4() as UUID, ...op.item });
+          if (Array.isArray(op.item))
+            order.orderItems = [
+              ...order.orderItems,
+              ...op.item.map<OrderItem>((o) => ({ id: v4() as UUID, ...o })),
+            ];
+          else order.orderItems.push({ id: v4() as UUID, ...op.item });
           break;
         case "delete":
           orderId = order.orderItems.findIndex((o) => o.id === op.itemId);

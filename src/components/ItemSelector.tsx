@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Drawer,
   DrawerClose,
@@ -7,19 +7,19 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Unsaved } from "@/data-model/_common/type/CommonType";
-import { Item, ItemCategory, ItemMod } from "@/data-model/item/ItemType";
-import { OrderItem } from "@/data-model/order/OrderType";
-import { useCategoryOptions } from "@/queries/CafeQuery";
-import { useAddToCart, useCart } from "@/queries/OrderQuery";
-import { useActiveUser } from "@/queries/UserQuery";
-import { UUID } from "crypto";
-import Image from "next/image";
-import { Dispatch, SetStateAction, useState } from "react";
-import { NumberInput } from "./base/NumberInput";
-import { PlusSvg, Price } from "./Helpers";
-import { Checkbox } from "./ui/checkbox";
+} from '@/components/ui/drawer';
+import { Unsaved } from '@/data-model/_common/type/CommonType';
+import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
+import { OrderItem } from '@/data-model/order/OrderType';
+import { useCategoryOptions } from '@/queries/CafeQuery';
+import { useAddToCart, useCart } from '@/queries/OrderQuery';
+import { useActiveUser } from '@/queries/UserQuery';
+import { UUID } from 'crypto';
+import Image from 'next/image';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { NumberInput } from './base/NumberInput';
+import { PlusSvg, Price } from './Helpers';
+import { Checkbox } from './ui/checkbox';
 
 export type DrawerProps = {
   item: Item;
@@ -90,7 +90,7 @@ export const ItemOption = ({
 }) => {
   const [quantity, setQuantity] = useState(0);
   function selectBooleanMod(checked: boolean) {
-    setSelectedOptions((prev) => {
+    setSelectedOptions(prev => {
       if (!checked) {
         const { [option.id]: _, ...next } = prev;
         return next;
@@ -107,7 +107,7 @@ export const ItemOption = ({
 
   function selectNumericOption(value: number) {
     setQuantity(value);
-    setSelectedOptions((prev) => {
+    setSelectedOptions(prev => {
       if (value === 0) {
         const { [option.id]: _, ...next } = prev;
         return next;
@@ -122,14 +122,14 @@ export const ItemOption = ({
     });
   }
 
-  if (option.type === "boolean") option.value;
+  if (option.type === 'boolean') option.value;
   else option.value;
 
   return (
     <>
       <div className="flex justify-between items-center py-4 border-b border-b-gray-50">
         <div className="flex gap-2 items-center w-full">
-          {option.type === "boolean" && (
+          {option.type === 'boolean' && (
             <Checkbox
               id={option.name}
               className="w-5 h-5"
@@ -138,7 +138,7 @@ export const ItemOption = ({
           )}
           <div className="w-full flex gap-x-2 items-center">
             <label htmlFor={option.name}>{option.name}</label>
-            {option.type === "number" && (
+            {option.type === 'number' && (
               <NumberInput
                 id={option.name}
                 value={quantity}

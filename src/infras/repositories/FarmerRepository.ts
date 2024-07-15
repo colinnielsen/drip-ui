@@ -1,14 +1,14 @@
 // src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
-import { Farmer, FarmerRepository } from "@/data-model/types-TODO/farmer";
-import { UUID } from "crypto";
-import { STATIC_FARMER_DATA } from "../static-data/StaticFarmerData";
+import { Farmer, FarmerRepository } from '@/data-model/types-TODO/farmer';
+import { UUID } from 'crypto';
+import { STATIC_FARMER_DATA } from '../static-data/StaticFarmerData';
 
 export class InMemoryFarmerRepository implements FarmerRepository {
   private farmers: Map<UUID, Farmer> = new Map();
 
   constructor() {
     this.farmers = new Map();
-    STATIC_FARMER_DATA.forEach((farmer) => this.farmers.set(farmer.id, farmer));
+    STATIC_FARMER_DATA.forEach(farmer => this.farmers.set(farmer.id, farmer));
   }
 
   async findById(id: UUID): Promise<Farmer | null> {

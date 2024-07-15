@@ -1,5 +1,5 @@
-import { Minus, Plus, Trash, Trash2 } from "lucide-react";
-import { HTMLAttributes } from "react";
+import { Minus, Plus, Trash, Trash2 } from 'lucide-react';
+import { HTMLAttributes } from 'react';
 
 export function NumberInput({
   onPlus,
@@ -12,7 +12,7 @@ export function NumberInput({
   value: number;
   useTrashForDelete?: boolean;
 } & Partial<HTMLAttributes<HTMLInputElement>>) {
-  const strokeWidth = "2px";
+  const strokeWidth = '2px';
   return (
     <div className="flex items-center gap-2 px-4 py-2 font-normal text-sm bg-neutral-100 w-fit rounded-2xl">
       <button onClick={onMinus}>

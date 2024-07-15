@@ -1,16 +1,16 @@
-import { database } from "@/infras/database";
-import { NextApiRequest, NextApiResponse } from "next";
-import { isUUID } from "@/lib/utils";
+import { database } from '@/infras/database';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { isUUID } from '@/lib/utils';
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const { id } = req.query;
 
-  if (req.method === "GET") {
-    if (typeof id !== "string" || !isUUID(id)) {
-      res.status(400).json({ error: "Invalid cafeId" });
+  if (req.method === 'GET') {
+    if (typeof id !== 'string' || !isUUID(id)) {
+      res.status(400).json({ error: 'Invalid cafeId' });
       return;
     }
     try {
@@ -21,9 +21,9 @@ export default async function handler(
         res.status(200).json(cafe);
       }
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch cafe" });
+      res.status(500).json({ error: 'Failed to fetch cafe' });
     }
   } else {
-    res.status(405).json({ error: "Method not allowed" });
+    res.status(405).json({ error: 'Method not allowed' });
   }
 }

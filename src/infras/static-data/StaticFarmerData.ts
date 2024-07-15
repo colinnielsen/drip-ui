@@ -2,42 +2,42 @@ import {
   createFarmer,
   Farmer,
   FarmerAllocation,
-} from "@/data-model/types-TODO/farmer";
-import { VitalikAddress } from "./StaticPlaceholderData";
-import { v4 } from "uuid";
-import { UUID } from "crypto";
+} from '@/data-model/types-TODO/farmer';
+import { VitalikAddress } from './StaticPlaceholderData';
+import { v4 } from 'uuid';
+import { UUID } from 'crypto';
 
 export const STATIC_FARMER_DATA: Farmer[] = [
   createFarmer({
-    id: "2-2-3-4-5",
-    name: "Gilgamesh",
-    image: "/farmer1.jpg",
-    shortDescription: "The oldest farmer in the world",
-    infoUrl: "https://gilgamesh.com",
+    id: '2-2-3-4-5',
+    name: 'Gilgamesh',
+    image: '/farmer1.jpg',
+    shortDescription: 'The oldest farmer in the world',
+    infoUrl: 'https://gilgamesh.com',
     ethAddress: VitalikAddress,
   }),
   createFarmer({
-    id: "3-2-3-4-5",
-    name: "Richard Stallman",
-    image: "/farmer2.jpg",
-    shortDescription: "The most free and open source farmer in the world",
-    infoUrl: "https://fsf.org",
+    id: '3-2-3-4-5',
+    name: 'Richard Stallman',
+    image: '/farmer2.jpg',
+    shortDescription: 'The most free and open source farmer in the world',
+    infoUrl: 'https://fsf.org',
     ethAddress: VitalikAddress,
   }),
   createFarmer({
-    id: "4-2-3-4-5",
-    name: "Stichard Rallman",
-    image: "/farmer3.jpg",
+    id: '4-2-3-4-5',
+    name: 'Stichard Rallman',
+    image: '/farmer3.jpg',
     shortDescription:
-      "The least free and open source farmer in the world. Hates freedom.",
-    infoUrl: "https://fsf.org",
+      'The least free and open source farmer in the world. Hates freedom.',
+    infoUrl: 'https://fsf.org',
     ethAddress: VitalikAddress,
   }),
 ];
 
 const createDefaultAllocation = (
   farmerIndex: number,
-  allocation: number
+  allocation: number,
 ): FarmerAllocation => {
   const farmer = STATIC_FARMER_DATA[farmerIndex];
   if (!farmer) throw new Error(`Farmer not found at index: ${farmerIndex}`);

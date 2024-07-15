@@ -1,6 +1,6 @@
-import { UUID } from "crypto";
-import { User } from "./UserType";
-import { Unsaved } from "../_common/type/CommonType";
+import { UUID } from 'crypto';
+import { User } from './UserType';
+import { Unsaved } from '../_common/type/CommonType';
 
 export type UserRepository = {
   findById: (userId: UUID) => Promise<User | null>;

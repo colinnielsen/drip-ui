@@ -1,8 +1,8 @@
-import { FarmerAllocation } from "@/data-model/types-TODO/farmer";
-import { useFarmer } from "@/queries/FarmerQuery";
-import { MapPin } from "@phosphor-icons/react/dist/ssr";
-import Image from "next/image";
-import Link from "next/link";
+import { FarmerAllocation } from '@/data-model/types-TODO/farmer';
+import { useFarmer } from '@/queries/FarmerQuery';
+import { MapPin } from '@phosphor-icons/react/dist/ssr';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export function FarmerCard({ allocation }: { allocation: FarmerAllocation }) {
   let { farmer: farmerId, allocationBPS } = allocation;
@@ -34,7 +34,7 @@ export function FarmerCard({ allocation }: { allocation: FarmerAllocation }) {
         </p>
         <div className="flex gap-x-1 items-center">
           <MapPin />
-          {"Costa Rica"}
+          {'Costa Rica'}
         </div>
       </div>
     </div>

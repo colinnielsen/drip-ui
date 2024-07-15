@@ -1,1 +1,1 @@
-export type Unsaved<T> = Omit<T, "id">;
+export type Unsaved<T> = Omit<T, 'id'>;

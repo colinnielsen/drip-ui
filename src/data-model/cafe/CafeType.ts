@@ -1,8 +1,8 @@
-import { BaseEntity, Entity } from "@/data-model/__global/entities";
-import { UUID } from "crypto";
-import { v4 } from "uuid";
-import { FarmerAllocation } from "../types-TODO/farmer";
-import { Item, ItemCategory, ItemMod } from "../item/ItemType";
+import { BaseEntity, Entity } from '@/data-model/__global/entities';
+import { UUID } from 'crypto';
+import { v4 } from 'uuid';
+import { FarmerAllocation } from '../types-TODO/farmer';
+import { Item, ItemCategory, ItemMod } from '../item/ItemType';
 
 export type Coords = [number, number];
 
@@ -38,12 +38,12 @@ export type BaseShop = BaseEntity & {
 };
 
 export type Storefront = BaseShop & {
-  __type: "storefront";
+  __type: 'storefront';
   location: Coords | null;
 };
 
 export type OnlineShop = BaseShop & {
-  __type: "online";
+  __type: 'online';
   url: string;
 };
 
@@ -67,7 +67,7 @@ export const createStorefront = (data: {
 }): Storefront => ({
   id: data.id ?? (v4() as UUID),
   __entity: Entity.cafe,
-  __type: "storefront",
+  __type: 'storefront',
   location: data.location || null,
   farmerAllocations: data.farmerAllocations || [],
   ...data,
@@ -86,7 +86,7 @@ export const createOnlineShop = (data: {
 }): OnlineShop => ({
   id: data.id ?? (v4() as UUID),
   __entity: Entity.cafe,
-  __type: "online",
+  __type: 'online',
   farmerAllocations: data.farmerAllocations || [],
   ...data,
 });

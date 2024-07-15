@@ -1,6 +1,6 @@
-import { Item, ItemCategory } from "@/data-model/item/ItemType";
-import { UUID } from "crypto";
-import { ItemWithSelector } from "./ItemSelector";
+import { Item, ItemCategory } from '@/data-model/item/ItemType';
+import { UUID } from 'crypto';
+import { ItemWithSelector } from './ItemSelector';
 
 export function ItemList({
   title,
@@ -16,8 +16,8 @@ export function ItemList({
   horizontal?: boolean;
 }) {
   let className = horizontal
-    ? "flex flex-row gap-5 w-full overflow-auto"
-    : "flex flex-col gap-5 w-full";
+    ? 'flex flex-row gap-5 w-full overflow-auto'
+    : 'flex flex-col gap-5 w-full';
 
   return (
     <div className="flex flex-col">

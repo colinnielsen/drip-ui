@@ -1,4 +1,4 @@
-import { UUID } from "crypto";
+import { UUID } from 'crypto';
 
 export type FarmerAllocation = {
   id: UUID;
@@ -36,7 +36,7 @@ export type Farmer = {
 };
 
 export const getTotalAllocationBPS = (
-  allocations: FarmerAllocation[]
+  allocations: FarmerAllocation[],
 ): number => {
   return allocations.reduce((acc, curr) => curr.allocationBPS + acc, 0);
 };

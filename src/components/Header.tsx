@@ -1,5 +1,5 @@
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
 
 export function Header() {
   return (
@@ -11,7 +11,7 @@ export function Header() {
 }
 
 export function Search() {
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState<string>('');
   return (
     <div className="relative w-full h-8 items-center flex">
       <SearchIcon className="absolute left-3 h-4 w-4 pointer-events-none text-muted" />
@@ -20,7 +20,7 @@ export function Search() {
         placeholder="Search for coffee shops"
         className="pl-10 rounded-3xl w-full bg-neutral-100"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={e => setSearch(e.target.value)}
       />
     </div>
   );

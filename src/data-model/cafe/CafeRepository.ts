@@ -1,6 +1,6 @@
-import { Cafe } from "@/data-model/cafe/CafeType";
-import { UUID } from "crypto";
-import { Item, ItemCategory, ItemMod } from "../item/ItemType";
+import { Cafe } from '@/data-model/cafe/CafeType';
+import { UUID } from 'crypto';
+import { Item, ItemCategory, ItemMod } from '../item/ItemType';
 
 export type CafeRepository = {
   findById: (id: UUID) => Promise<Cafe | null>;
@@ -8,7 +8,7 @@ export type CafeRepository = {
   findItem: (
     id: UUID,
     name: string,
-    category?: ItemCategory
+    category?: ItemCategory,
   ) => Promise<Item | null>;
   getItemMods: (cafeId: UUID, itemId: UUID) => Promise<ItemMod[]>;
   save: (item: Cafe) => Promise<void>;

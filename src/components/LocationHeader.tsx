@@ -1,10 +1,10 @@
-import { isStorefront } from "@/data-model/cafe/CafeDTO";
-import { Cafe } from "@/data-model/cafe/CafeType";
-import { CarSimple } from "@phosphor-icons/react/dist/ssr";
-import Image from "next/image";
-import { BackSvg } from "./Helpers";
-import { StaticLocationData } from "@/pages/location/[locationId]";
-import { useRouter } from "next/dist/client/router";
+import { isStorefront } from '@/data-model/cafe/CafeDTO';
+import { Cafe } from '@/data-model/cafe/CafeType';
+import { CarSimple } from '@phosphor-icons/react/dist/ssr';
+import Image from 'next/image';
+import { BackSvg } from './Helpers';
+import { StaticLocationData } from '@/pages/location/[locationId]';
+import { useRouter } from 'next/dist/client/router';
 
 export function LocationHeader({
   backgroundImage,
@@ -42,8 +42,8 @@ export function LocationDetails(staticLocation: StaticLocationData) {
         <CarSimple weight="bold" />
         <p className="text-sm font-normal text-neutral-400">
           {staticLocation.location
-            ? staticLocation.location?.join(", ")
-            : "Online only"}
+            ? staticLocation.location?.join(', ')
+            : 'Online only'}
         </p>
       </div>
     </div>

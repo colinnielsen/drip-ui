@@ -1,11 +1,11 @@
 // src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
-import { FAKE_DB_SLEEP_MS } from "@/data-model/__global/constants";
-import { Unsaved } from "@/data-model/_common/type/CommonType";
-import { UserRepository } from "@/data-model/user/UserRepository";
-import { TESTING_USER_UUID, User } from "@/data-model/user/UserType";
-import { sleep } from "@/lib/utils";
-import { UUID } from "crypto";
-import { v4 } from "uuid";
+import { FAKE_DB_SLEEP_MS } from '@/data-model/__global/constants';
+import { Unsaved } from '@/data-model/_common/type/CommonType';
+import { UserRepository } from '@/data-model/user/UserRepository';
+import { TESTING_USER_UUID, User } from '@/data-model/user/UserType';
+import { sleep } from '@/lib/utils';
+import { UUID } from 'crypto';
+import { v4 } from 'uuid';
 
 export class InMemoryUserRepository implements UserRepository {
   private items: Map<UUID, User> = new Map();
@@ -14,9 +14,9 @@ export class InMemoryUserRepository implements UserRepository {
     this.items = new Map();
     this.items.set(TESTING_USER_UUID, {
       id: TESTING_USER_UUID,
-      email: "yo@yo.yo",
-      name: "colin nielsen",
-      role: "admin",
+      email: 'yo@yo.yo',
+      name: 'colin nielsen',
+      role: 'admin',
     });
   }
 
@@ -40,7 +40,7 @@ export class InMemoryUserRepository implements UserRepository {
 
   async update(id: UUID, newUser: Partial<Unsaved<User>>): Promise<User> {
     const existingUser = this.items.get(id);
-    if (!existingUser) throw Error("not found");
+    if (!existingUser) throw Error('not found');
 
     const nextUser = { ...existingUser, d: newUser };
     this.items.set(id, nextUser);
@@ -52,6 +52,6 @@ export class InMemoryUserRepository implements UserRepository {
 
   async delete(id: UUID): Promise<void> {
     await sleep(FAKE_DB_SLEEP_MS);
-    if (!this.items.delete(id)) throw Error("could not delete");
+    if (!this.items.delete(id)) throw Error('could not delete');
   }
 }

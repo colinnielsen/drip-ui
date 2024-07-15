@@ -1,6 +1,6 @@
-import { UUID } from "crypto";
+import { UUID } from 'crypto';
 
-export type ItemCategory = "espresso" | "coffee" | "syrup" | "extras";
+export type ItemCategory = 'espresso' | 'coffee' | 'syrup' | 'extras';
 
 //
 //// OPTIONS
@@ -9,18 +9,18 @@ type BaseMod = {
   id: UUID;
   name: string;
   price: number;
-  currency: "eth" | "usd";
+  currency: 'eth' | 'usd';
   isOptional: boolean;
 };
 
 export type NumericMod = BaseMod & {
   value: number | null;
-  type: "number";
+  type: 'number';
 };
 
 export type BooleanMod = BaseMod & {
   value: boolean | null;
-  type: "boolean";
+  type: 'boolean';
 };
 
 export type ItemMod = NumericMod | BooleanMod;
@@ -32,7 +32,7 @@ export type Item = {
   id: UUID;
   name: string;
   price: number;
-  currency: "eth" | "usd";
+  currency: 'eth' | 'usd';
   description: string;
   image: string;
   // mods: UUID[];

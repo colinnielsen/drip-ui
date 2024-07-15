@@ -1,11 +1,11 @@
-import { UUID } from "crypto";
-import { Item, BooleanMod, NumericMod, ItemCategory } from "./ItemType";
+import { UUID } from 'crypto';
+import { Item, BooleanMod, NumericMod, ItemCategory } from './ItemType';
 
 export const createItem = (data: {
   id: UUID;
   name: string;
   price: number;
-  currency: "eth" | "usd";
+  currency: 'eth' | 'usd';
   description: string;
   image: string;
 }): Item => ({
@@ -16,7 +16,7 @@ export const createBooleanOption = (data: {
   id: UUID;
   name: string;
   price: number;
-  currency: "eth" | "usd";
+  currency: 'eth' | 'usd';
   category: string;
   isOptional: boolean;
 }): BooleanMod => ({
@@ -26,14 +26,14 @@ export const createBooleanOption = (data: {
   currency: data.currency,
   isOptional: data.isOptional,
   value: null,
-  type: "boolean",
+  type: 'boolean',
 });
 
 export const createNumericOption = (data: {
   id: UUID;
   name: string;
   price: number;
-  currency: "eth" | "usd";
+  currency: 'eth' | 'usd';
   category: string;
   isOptional: boolean;
 }): NumericMod => ({
@@ -43,5 +43,5 @@ export const createNumericOption = (data: {
   currency: data.currency,
   isOptional: data.isOptional,
   value: null,
-  type: "number",
+  type: 'number',
 });

@@ -1,9 +1,9 @@
-import { FarmerDetails, FarmerHeader } from "@/components/FarmerHeader";
-import { Footer } from "@/components/Footer";
-import { database } from "@/infras/database";
-import { useFarmer } from "@/queries/FarmerQuery";
-import { UUID } from "crypto";
-import { GetStaticPaths } from "next";
+import { FarmerDetails, FarmerHeader } from '@/components/FarmerHeader';
+import { Footer } from '@/components/Footer';
+import { database } from '@/infras/database';
+import { useFarmer } from '@/queries/FarmerQuery';
+import { UUID } from 'crypto';
+import { GetStaticPaths } from 'next';
 
 // Things left to do here:
 // TODO Add tip panel
@@ -14,18 +14,18 @@ export default function FarmerPage({ farmerId }: { farmerId: string }) {
   const query = useFarmer(farmerId as UUID);
 
   if (!farmerId) return null;
-  if (query.status === "pending") {
+  if (query.status === 'pending') {
     return <div>Loading...</div>;
   }
 
-  if (query.status === "error") {
+  if (query.status === 'error') {
     return <div>Error: {query.error.message}</div>;
   }
 
   const farmer = query.data;
 
   if (!farmer) {
-    throw new Error("Farmer not found");
+    throw new Error('Farmer not found');
   }
 
   return (
@@ -41,7 +41,7 @@ export default function FarmerPage({ farmerId }: { farmerId: string }) {
 
 export const getStaticPaths = (async () => {
   return {
-    paths: (await database.farmers.findAll()).map((farmer) => ({
+    paths: (await database.farmers.findAll()).map(farmer => ({
       params: { farmerId: farmer.id },
     })),
     fallback: true,

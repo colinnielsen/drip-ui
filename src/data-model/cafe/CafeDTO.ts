@@ -1,13 +1,13 @@
-import { UUID } from "crypto";
-import { FarmerAllocation, getTotalAllocationBPS } from "../types-TODO/farmer";
-import { CafeRepository } from "./CafeRepository";
+import { UUID } from 'crypto';
+import { FarmerAllocation, getTotalAllocationBPS } from '../types-TODO/farmer';
+import { CafeRepository } from './CafeRepository';
 import {
   Cafe,
   OnlineShop,
   Storefront,
   createOnlineShop,
-  createStorefront
-} from "./CafeType";
+  createStorefront,
+} from './CafeType';
 
 export const saveStorefront =
   (repo: CafeRepository) =>
@@ -55,9 +55,9 @@ export const getTotalAllocationsById =
   };
 
 export const isStorefront = (cafe: Cafe): cafe is Storefront => {
-  return cafe.__type === "storefront";
+  return cafe.__type === 'storefront';
 };
 
 export const isOnlineShop = (cafe: Cafe): cafe is OnlineShop => {
-  return cafe.__type === "online";
+  return cafe.__type === 'online';
 };

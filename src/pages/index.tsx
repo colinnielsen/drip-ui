@@ -1,11 +1,11 @@
-import drip from "@/assets/drip.jpeg";
-import map from "@/assets/map.png";
-import { WelcomeDialog } from "@/components/Dialog";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { LocationList } from "@/components/LocationList";
-import { useCafes } from "@/queries/CafeQuery";
-import Image from "next/image";
+import drip from '@/assets/drip.jpeg';
+import map from '@/assets/map.png';
+import { WelcomeDialog } from '@/components/Dialog';
+import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
+import { LocationList } from '@/components/LocationList';
+import { useCafes } from '@/queries/CafeQuery';
+import Image from 'next/image';
 
 export default function Home() {
   const { data: cafes } = useCafes();

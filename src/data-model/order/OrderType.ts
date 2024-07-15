@@ -1,7 +1,7 @@
-import { UUID } from "crypto";
-import { Item, ItemMod } from "../item/ItemType";
+import { UUID } from 'crypto';
+import { Item, ItemMod } from '../item/ItemType';
 
-export type OrderStatus = "pending" | "in-progress" | "complete";
+export type OrderStatus = 'pending' | 'in-progress' | 'complete';
 
 export type Order = {
   id: UUID;
@@ -25,8 +25,8 @@ export type OrderItem = {
 //// DTO
 //
 
-export const isPending = (o: Order) => o.status === "complete";
+export const isPending = (o: Order) => o.status === 'complete';
 
-export const isInProgress = (o: Order) => o.status === "in-progress";
+export const isInProgress = (o: Order) => o.status === 'in-progress';
 
-export const isComplete = (o: Order) => o.status === "complete";
+export const isComplete = (o: Order) => o.status === 'complete';

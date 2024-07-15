@@ -1,11 +1,11 @@
-import { UUID } from "crypto";
+import { UUID } from 'crypto';
 
 export enum Entity {
-  cafe = "cafe",
-  user = "user",
-  farmer = "farmer",
-  item = "item",
-  order = "order",
+  cafe = 'cafe',
+  user = 'user',
+  farmer = 'farmer',
+  item = 'item',
+  order = 'order',
 }
 
 export type BaseEntity = {

@@ -2,8 +2,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/ui/carousel";
-import { ReactNode } from "react";
+} from '@/components/ui/carousel';
+import { ReactNode } from 'react';
 
 export function ItemCarousel<T>({
   data,
@@ -17,7 +17,7 @@ export function ItemCarousel<T>({
       <div className="flex flex-col gap-2">
         <Carousel
           opts={{
-            align: "start",
+            align: 'start',
           }}
           className="w-full max-w-sm"
         >

@@ -1,13 +1,13 @@
-import { Unsaved } from "@/data-model/_common/type/CommonType";
-import { OrderItem } from "@/data-model/order/OrderType";
-import { database } from "@/infras/database";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UUID } from "crypto";
+import { Unsaved } from '@/data-model/_common/type/CommonType';
+import { OrderItem } from '@/data-model/order/OrderType';
+import { database } from '@/infras/database';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { UUID } from 'crypto';
 
 //
 //// QUERIES
 //
-const CART_QUERY_KEY = "cart";
+const CART_QUERY_KEY = 'cart';
 export const useCart = (userId: UUID) =>
   useQuery({
     queryKey: [CART_QUERY_KEY],
@@ -20,7 +20,7 @@ export const useCart = (userId: UUID) =>
 export const useSaveOrder = (
   cafeId: UUID,
   userId: UUID,
-  orderItems: OrderItem[]
+  orderItems: OrderItem[],
 ) =>
   useMutation({
     mutationFn: async () =>
@@ -48,7 +48,7 @@ export const useAddToCart = ({
       // otherwise add it to an existing order
       else
         return await database.order.update(orderId, [
-          { __type: "add", item: itemArray },
+          { __type: 'add', item: itemArray },
         ]);
     },
     onSuccess: () => {
@@ -62,5 +62,5 @@ export const useAddToCart = ({
 export const useDeleteOrderItem = (orderId: UUID, itemId: UUID) =>
   useMutation({
     mutationFn: async () =>
-      await database.order.update(orderId, [{ __type: "delete", itemId }]),
+      await database.order.update(orderId, [{ __type: 'delete', itemId }]),
   });

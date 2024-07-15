@@ -1,17 +1,17 @@
-import { Order, OrderItem } from "@/data-model/order/OrderType";
-import { TESTING_USER_UUID } from "@/data-model/user/UserType";
-import { useCafe } from "@/queries/CafeQuery";
-import { useCart } from "@/queries/OrderQuery";
-import { X } from "lucide-react";
-import Image from "next/image";
-import { CartSvg, Price } from "./Helpers";
+import { Order, OrderItem } from '@/data-model/order/OrderType';
+import { TESTING_USER_UUID } from '@/data-model/user/UserType';
+import { useCafe } from '@/queries/CafeQuery';
+import { useCart } from '@/queries/OrderQuery';
+import { X } from 'lucide-react';
+import Image from 'next/image';
+import { CartSvg, Price } from './Helpers';
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
   DrawerTitle,
   DrawerTrigger,
-} from "./ui/drawer";
+} from './ui/drawer';
 
 export function CheckoutItem(o: OrderItem) {
   return (
@@ -21,7 +21,7 @@ export function CheckoutItem(o: OrderItem) {
       </div>
       <div>
         <p>{o.item.name}</p>
-        {o.mods.map((m) => (
+        {o.mods.map(m => (
           <p key={m.id}>
             {m.name} x{Number(m.value)}
           </p>
@@ -69,7 +69,7 @@ export function CartFooter() {
 
   if (!cart) return null;
   return (
-    <Drawer key={"drawer"}>
+    <Drawer key={'drawer'}>
       <Cart {...cart} />
     </Drawer>
   );

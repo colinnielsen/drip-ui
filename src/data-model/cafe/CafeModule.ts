@@ -1,10 +1,10 @@
-import { InMemoryCafeRepository } from "@/infras/repositories/CafeRepository";
+import { InMemoryCafeRepository } from '@/infras/repositories/CafeRepository';
 import {
   saveOnlineShop,
   saveStorefront,
   getAllCafes,
   getCafeById,
-} from "./CafeDTO";
+} from './CafeDTO';
 
 const cafeRepository = new InMemoryCafeRepository();
 

@@ -1,7 +1,7 @@
-import { TESTING_USER_UUID } from "@/data-model/user/UserType";
-import { useCart } from "@/queries/OrderQuery";
-import { CartFooter } from "./Cart";
-import { HomeSvg, MapSvg, ProfileSvg } from "./Helpers";
+import { TESTING_USER_UUID } from '@/data-model/user/UserType';
+import { useCart } from '@/queries/OrderQuery';
+import { CartFooter } from './Cart';
+import { HomeSvg, MapSvg, ProfileSvg } from './Helpers';
 
 export function Footer() {
   const { data: cart } = useCart(TESTING_USER_UUID);

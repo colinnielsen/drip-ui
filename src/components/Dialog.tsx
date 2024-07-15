@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -7,9 +7,9 @@ import {
   DialogFooter,
   DialogOverlay,
   DialogTitle,
-} from "@/components/ui/dialog";
-import type { StaticImageData } from "next/image";
-import Image from "next/image";
+} from '@/components/ui/dialog';
+import type { StaticImageData } from 'next/image';
+import Image from 'next/image';
 
 type DialogProps = {
   title: string;

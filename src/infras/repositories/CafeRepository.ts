@@ -1,17 +1,17 @@
 // src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
-import { CafeRepository } from "@/data-model/cafe/CafeRepository";
-import { Cafe } from "@/data-model/cafe/CafeType";
-import { UUID } from "crypto";
-import { STATIC_CAFE_DATA } from "../static-data/StaticCafeData";
-import { Item, ItemCategory, ItemMod } from "@/data-model/item/ItemType";
-import { validate } from "uuid";
+import { CafeRepository } from '@/data-model/cafe/CafeRepository';
+import { Cafe } from '@/data-model/cafe/CafeType';
+import { UUID } from 'crypto';
+import { STATIC_CAFE_DATA } from '../static-data/StaticCafeData';
+import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
+import { validate } from 'uuid';
 
 export class InMemoryCafeRepository implements CafeRepository {
   private cafes: Map<UUID, Cafe> = new Map();
 
   constructor() {
     this.cafes = new Map();
-    STATIC_CAFE_DATA.forEach((cafe) => this.cafes.set(cafe.id, cafe));
+    STATIC_CAFE_DATA.forEach(cafe => this.cafes.set(cafe.id, cafe));
   }
 
   async findById(id: UUID): Promise<Cafe | null> {
@@ -30,15 +30,15 @@ export class InMemoryCafeRepository implements CafeRepository {
     const items = Object.values(cafe.menu).flat();
 
     return (
-      items.find((item) =>
-        isFindByName ? item.name === nameOrID : item.id === nameOrID
+      items.find(item =>
+        isFindByName ? item.name === nameOrID : item.id === nameOrID,
       ) || null
     );
   }
 
   async findCategoryOptions(
     id: UUID,
-    category: ItemCategory
+    category: ItemCategory,
   ): Promise<Map<ItemCategory, ItemMod[]> | null> {
     let cafe = await this.findById(id);
     if (!cafe) return null;
@@ -61,10 +61,10 @@ export class InMemoryCafeRepository implements CafeRepository {
   }
 
   async getItemMods(cafeId: UUID, itemId: UUID): Promise<ItemMod[]> {
-    throw Error("unimplemented");
+    throw Error('unimplemented');
 
     const item = await this.findItem(cafeId, itemId);
-    if (!item) throw Error("findItemMods() > item not found");
+    if (!item) throw Error('findItemMods() > item not found');
   }
 
   async save(cafe: Cafe): Promise<void> {

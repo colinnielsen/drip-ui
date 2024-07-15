@@ -1,7 +1,7 @@
-import { InMemoryCafeRepository } from "./repositories/CafeRepository";
-import { InMemoryFarmerRepository } from "./repositories/FarmerRepository";
-import { InMemoryOrderRepository } from "./repositories/OrderRepository";
-import { InMemoryUserRepository } from "./repositories/UserRepository";
+import { InMemoryCafeRepository } from './repositories/CafeRepository';
+import { InMemoryFarmerRepository } from './repositories/FarmerRepository';
+import { InMemoryOrderRepository } from './repositories/OrderRepository';
+import { InMemoryUserRepository } from './repositories/UserRepository';
 
 export const database = {
   farmers: new InMemoryFarmerRepository(),

@@ -5,6 +5,7 @@ import { UUID } from 'crypto';
 import { STATIC_CAFE_DATA } from '../static-data/StaticCafeData';
 import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { validate } from 'uuid';
+import { sleep } from '@/lib/utils';
 
 export class InMemoryCafeRepository implements CafeRepository {
   private cafes: Map<UUID, Cafe> = new Map();
@@ -15,15 +16,17 @@ export class InMemoryCafeRepository implements CafeRepository {
   }
 
   async findById(id: UUID): Promise<Cafe | null> {
+    await sleep(1000);
     return this.cafes.get(id) || null;
   }
 
   async findAll(): Promise<Cafe[]> {
+    await sleep(1000);
     return Array.from(this.cafes.values());
   }
 
   async findItem(cafeId: UUID, nameOrID: UUID | string): Promise<Item | null> {
-    let cafe = await this.findById(cafeId);
+    const cafe = await this.findById(cafeId);
     if (!cafe) return null;
 
     const isFindByName = !validate(nameOrID);
@@ -40,17 +43,17 @@ export class InMemoryCafeRepository implements CafeRepository {
     id: UUID,
     category: ItemCategory,
   ): Promise<Map<ItemCategory, ItemMod[]> | null> {
-    let cafe = await this.findById(id);
+    const cafe = await this.findById(id);
     if (!cafe) return null;
 
-    let categoryOptions = cafe.categoryOptions[category];
+    const categoryOptions = cafe.categoryOptions[category];
     if (!categoryOptions) {
       throw new Error(`No category options found for category ${category}`);
     }
-    let optionMap = new Map<ItemCategory, ItemMod[]>();
+    const optionMap = new Map<ItemCategory, ItemMod[]>();
 
-    for (let cat of categoryOptions) {
-      let options = cafe.options[cat];
+    for (const cat of categoryOptions) {
+      const options = cafe.options[cat];
       if (!options) {
         throw new Error(`No options found for category ${cat}`);
       }

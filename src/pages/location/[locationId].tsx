@@ -1,5 +1,5 @@
-import { FarmerCard } from '@/components/FarmerCard';
-import { Footer } from '@/components/Footer';
+import { FarmerCard, FarmerLoadingCard } from '@/components/FarmerCard';
+import { ItemListSkeleton } from '@/components/ItemSelector';
 import { LocationDetails, LocationHeader } from '@/components/LocationHeader';
 import { ItemList } from '@/components/LocationItems';
 import { Cafe } from '@/data-model/cafe/CafeType';
@@ -30,36 +30,46 @@ export type StaticLocationData = (typeof STATIC_LOCATION_DATA)[number];
 /// DYNAMIC PAGE
 //
 function DynamicLocation(staticLocation: StaticLocationData) {
-  const { data: cafe, isLoading, isError } = useCafe(staticLocation.id);
+  const { data: cafe, error, isLoading } = useCafe(staticLocation.id);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error...</div>;
-  if (!cafe) return <div>Cafe not found</div>;
-
-  const [featuredFarmer] = cafe.farmerAllocations;
+  // return <FarmerLoadingCard />
+  if (error) return <div className="text-red-500">{error.message}</div>;
 
   return (
     <>
-      {featuredFarmer && <FarmerCard allocation={featuredFarmer} />}
+      {isLoading || !cafe ? (
+        <FarmerLoadingCard />
+      ) : (
+        <FarmerCard allocation={cafe.farmerAllocations[0]} />
+      )}
       {/* <ItemCarousel
             data={allocations}
             renderFn={(f, i) => }
           /> */}
 
-      <ItemList
-        title="Espresso"
-        category="espresso"
-        items={cafe.menu['espresso'] || []}
-        cafeId={cafe.id}
-        horizontal
-      />
-      <ItemList
-        title="Coffee"
-        category="coffee"
-        cafeId={cafe.id}
-        items={cafe.menu['coffee'] || []}
-        horizontal
-      />
+      {cafe ? (
+        <>
+          <ItemList
+            title="Espresso"
+            category="espresso"
+            items={cafe.menu['espresso'] || []}
+            cafeId={cafe.id}
+            horizontal
+          />
+          <ItemList
+            title="Coffee"
+            category="coffee"
+            cafeId={cafe.id}
+            items={cafe.menu['coffee'] || []}
+            horizontal
+          />
+        </>
+      ) : (
+        <>
+          <ItemListSkeleton title={'Espresso'} />
+          <ItemListSkeleton title={'Espresso'} />
+        </>
+      )}
     </>
   );
 }

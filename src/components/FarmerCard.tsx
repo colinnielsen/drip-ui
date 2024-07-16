@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import { FarmerAllocation } from '@/data-model/types-TODO/farmer';
 import { useFarmer } from '@/queries/FarmerQuery';
 import { MapPin } from '@phosphor-icons/react/dist/ssr';
@@ -5,12 +6,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export function FarmerCard({ allocation }: { allocation: FarmerAllocation }) {
-  let { farmer: farmerId, allocationBPS } = allocation;
+  const { farmer: farmerId, allocationBPS } = allocation;
 
-  let query = useFarmer(farmerId);
-  let farmer = query.data;
+  const query = useFarmer(farmerId);
+  const farmer = query.data;
 
-  if (query.isLoading) return <div>Loading...</div>;
+  if (query.isLoading) return <FarmerLoadingCard />;
   if (query.isError) return <div>Error: {query.error.message}</div>;
   if (!farmer) return <div>Farmer not found</div>;
 
@@ -38,5 +39,11 @@ export function FarmerCard({ allocation }: { allocation: FarmerAllocation }) {
         </div>
       </div>
     </div>
+  );
+}
+
+export function FarmerLoadingCard() {
+  return (
+    <Skeleton className="w-full justify-center rounded-3xl overflow-clip min-h-[134px]" />
   );
 }

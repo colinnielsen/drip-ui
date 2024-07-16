@@ -1,6 +1,7 @@
 import { Item, ItemCategory } from '@/data-model/item/ItemType';
 import { UUID } from 'crypto';
 import { ItemWithSelector } from './ItemSelector';
+import { cn } from '@/lib/utils';
 
 export function ItemList({
   title,
@@ -15,17 +16,17 @@ export function ItemList({
   items: Item[];
   horizontal?: boolean;
 }) {
-  let className = horizontal
-    ? 'flex flex-row gap-5 w-full overflow-auto'
-    : 'flex flex-col gap-5 w-full';
-
   return (
     <div className="flex flex-col">
       <div className="py-3">
         <h2 className="text-lg font-normal">{title}</h2>
-        {/* <p className="text-sm text-neutral-500 font-normal"></p> */}
       </div>
-      <div className={className}>
+      <div
+        className={cn(
+          'flex flex-row gap-5 w-full overflow-auto',
+          horizontal ? 'flex-row' : 'flex-col',
+        )}
+      >
         {items.map((item, index) => (
           <ItemWithSelector
             key={index}

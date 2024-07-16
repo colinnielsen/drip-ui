@@ -20,6 +20,7 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import { NumberInput } from './base/NumberInput';
 import { PlusSvg, Price } from './Helpers';
 import { Checkbox } from './ui/checkbox';
+import { Skeleton } from './ui/skeleton';
 
 export type DrawerProps = {
   item: Item;
@@ -231,5 +232,31 @@ export function ItemWithSelector({ item, category, cafeId }: DrawerProps) {
         </div>
       </DrawerContent>
     </Drawer>
+  );
+}
+
+export function ItemListSkeleton({
+  title,
+  horizontal,
+}: {
+  title: string;
+  horizontal?: boolean;
+}) {
+  return (
+    <div className="flex flex-col">
+      <div className="py-3">
+        <h2 className="text-lg font-normal">{title}</h2>
+      </div>
+      <div
+        className={cn(
+          'flex flex-row gap-5 w-full overflow-auto',
+          horizontal ? 'flex-row' : 'flex-col',
+        )}
+      >
+        {[...Array(5)].map((_, index) => (
+          <Skeleton key={index} className="w-32 h-32" />
+        ))}
+      </div>
+    </div>
   );
 }

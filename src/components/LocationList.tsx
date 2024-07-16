@@ -1,24 +1,30 @@
-import { Coffee } from '@phosphor-icons/react/dist/ssr';
-import { CafeModule } from '@/data-model/cafe/CafeModule';
 import { Cafe } from '@/data-model/cafe/CafeType';
 import { getTotalAllocationBPS } from '@/data-model/types-TODO/farmer';
-import { UUID } from 'crypto';
+import { Coffee } from '@phosphor-icons/react/dist/ssr';
 import Image from 'next/image';
 import Link from 'next/link';
 
 type LocationListProps = {
   title: string;
   cafes: Cafe[];
+  isLoading?: boolean;
 };
 
-export function LocationList({ title, cafes }: LocationListProps) {
+export function LocationList({ title, cafes, isLoading }: LocationListProps) {
   return (
     <div className="w-full px-4">
       <h2 className="text-2xl font-semibold">{title}</h2>
       <div className="grid grid-cols-1 gap-8 mt-5">
-        {cafes.map((cafe, index) => (
-          <Location key={index} {...cafe} />
-        ))}
+        {isLoading
+          ? Array.from({ length: 2 }).map((_, index) => (
+              <div key={index} className="animate-pulse flex flex-col gap-y-2">
+                <div className="h-40 bg-gray-300 rounded-3xl"></div>
+                <div className="h-6 bg-gray-300 rounded w-1/4"></div>
+                <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+              </div>
+            ))
+          : cafes.map((cafe, index) => <Location key={index} {...cafe} />)}
       </div>
     </div>
   );
@@ -50,8 +56,6 @@ export function Location({
           <div className="rounded-full h-1 w-1 bg-neutral-400"></div>
           <p>tbd district</p>
         </div>
-        {/* need actual coffee icon
-        should align fine with good icon/svg but may take some tweak */}
         <div className="flex items-center gap-1">
           <Coffee />
           <p className="text-xs font-bold">

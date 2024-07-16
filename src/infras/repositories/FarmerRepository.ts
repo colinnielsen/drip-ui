@@ -2,6 +2,7 @@
 import { Farmer, FarmerRepository } from '@/data-model/types-TODO/farmer';
 import { UUID } from 'crypto';
 import { STATIC_FARMER_DATA } from '../static-data/StaticFarmerData';
+import { sleep } from '@/lib/utils';
 
 export class InMemoryFarmerRepository implements FarmerRepository {
   private farmers: Map<UUID, Farmer> = new Map();
@@ -12,6 +13,7 @@ export class InMemoryFarmerRepository implements FarmerRepository {
   }
 
   async findById(id: UUID): Promise<Farmer | null> {
+    await sleep(1000);
     return this.farmers.get(id) || null;
   }
 

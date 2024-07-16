@@ -1,6 +1,6 @@
-import { database } from '@/infras/database';
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { UUID } from 'crypto';
+import { axiosFetcher } from '@/lib/utils';
 
 //
 //// QUERIES
@@ -8,14 +8,14 @@ import { UUID } from 'crypto';
 export const useFarmers = () =>
   useQuery({
     queryKey: ['farmers'],
-    queryFn: async () => await database.farmers.findAll(),
+    queryFn: () => axiosFetcher('/api/farmers'),
   });
 
 export const farmerQuery = (id: UUID) =>
-  queryOptions({
+  ({
     queryKey: ['farmer', id],
-    queryFn: async () => await database.farmers.findById(id),
-  });
+    queryFn: () => axiosFetcher(`/api/farmers/${id}`),
+  }) as const;
 
 export const useFarmer = (id: UUID) => useQuery(farmerQuery(id));
 

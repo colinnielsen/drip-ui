@@ -17,6 +17,7 @@ const config: Config = {
         garamond: ['var(--font-garamond)'],
         libreFranklin: ['var(--font-libre-franklin)'],
         sans: ['var(--font-libre-franklin)'],
+        mono: ['var(--font-roboto-mono)'],
       },
       colors: {
         'primary-gray': '#747474',

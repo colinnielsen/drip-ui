@@ -1,10 +1,12 @@
+import { Label2 } from './base/typography';
+
 export function Price({ price }: { price: number }) {
   return (
     <div className="flex items-center gap-1">
       <UsdcSVG />
-      <span className="font-normal text-sm text-neutral-400">
+      <Label2 as="span" className="font-normal text-sm text-primary-gray">
         {price.toFixed(2)}
-      </span>
+      </Label2>
     </div>
   );
 }

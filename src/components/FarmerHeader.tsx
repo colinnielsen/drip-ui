@@ -1,7 +1,7 @@
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import * as React from 'react';
-import { BackSvg, CarIcon } from './Helpers';
+import { BackSvg, CarIcon } from './icons';
 import { Shop } from '@/data-model/shop/ShopType';
 import { Farmer } from '@/data-model/farmer/FarmerType';
 

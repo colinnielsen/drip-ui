@@ -16,7 +16,7 @@ import { useActiveUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
-import { PlusSvg, Price } from '../Helpers';
+import { PlusSvg, Price } from '../icons';
 import { NumberInput } from '../base/NumberInput';
 import { Checkbox } from '../ui/checkbox';
 import { useItemMods } from '@/queries/ShopQuery';

@@ -1,134 +1,143 @@
 import { cn } from '@/lib/utils';
 
-export const Title1 = ({
-  children,
-  className,
-}: {
+interface TypographyProps {
   children: React.ReactNode;
   className?: string;
-}) => {
-  return (
-    <h2
-      className={cn(
-        'text-[32px] font-garamond leading-[36.9px] align-middle',
-        className,
-      )}
-    >
-      {children}
-    </h2>
-  );
-};
+  as?: keyof JSX.IntrinsicElements;
+}
+
+export const Title1 = ({
+  as: Component = 'h1',
+  className,
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn(
+      'text-[32px] font-garamond leading-[36.9px] align-middle font-normal',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </Component>
+);
 
 export const Title2 = ({
-  children,
+  as: Component = 'h2',
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <h2
-      className={cn(
-        'text-[24px] font-garamond leading-[27.6px] align-middle',
-        className,
-      )}
-    >
-      {children}
-    </h2>
-  );
-};
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn(
+      'text-[24px] font-garamond leading-[27.6px] align-middle',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </Component>
+);
 
 export const Label1 = ({
-  children,
+  as: Component = 'div',
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <p
-      className={cn(
-        'text-[14px] leading-[17px] font-libreFranklin align-middle',
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
-};
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn(
+      'text-[14px] leading-[17px] font-libreFranklin align-middle',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </Component>
+);
 
 export const Label2 = ({
-  children,
+  as: Component = 'div',
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <p
-      className={cn(
-        'text-[12px] leading-[17px] font-libreFranklin font-medium align-middle',
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
-};
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn(
+      'text-[14px] leading-[17px] font-libreFranklin font-medium align-middle',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </Component>
+);
 
 export const Label3 = ({
-  children,
+  as: Component = 'div',
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <p
-      className={cn(
-        'text-[14px] leading-[17px] font-libreFranklin font-semibold align-middle',
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
-};
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn(
+      'text-[14px] leading-[17px] font-libreFranklin font-semibold align-middle',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </Component>
+);
 
 export const Headline = ({
-  children,
+  as: Component = 'div',
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <p
-      className={cn(
-        'text-[16px] leading-[19.4px] font-libreFranklin font-semibold align-middle',
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
-};
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn(
+      'text-[16px] leading-[19.4px] font-libreFranklin font-semibold align-middle',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </Component>
+);
 
 export const Body = ({
-  children,
+  as: Component = 'div',
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <p
-      className={cn(
-        'text-[16px] leading-[19.4px] font-libreFranklin align-middle',
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
-};
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn(
+      'text-[16px] leading-[19.4px] font-libreFranklin align-middle',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </Component>
+);
+
+export const Mono = ({
+  as: Component = 'div',
+  className,
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn(
+      'text-[16px] leading-[21.1px] font-mono align-middle',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </Component>
+);

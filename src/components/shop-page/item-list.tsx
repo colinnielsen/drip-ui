@@ -20,8 +20,8 @@ export function ItemList({
   const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
     <div className="flex gap-5 w-full overflow-x-auto">
       {Array.from({ length: count }).map((_, index) => (
-        <div className="flex flex-col gap-2 bg-white">
-          <Skeleton key={index} className="h-36 w-36 flex-shrink-0" />
+        <div className="flex flex-col gap-2 bg-white" key={index}>
+          <Skeleton className="h-36 w-36 flex-shrink-0" />
           <div className="flex flex-col gap-1">
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-4 w-1/2" />

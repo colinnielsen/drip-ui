@@ -1,7 +1,7 @@
 import { InMemoryShopRepository } from '@/infras/repositories/ShopRepository';
 import {
   saveOnlineShop,
-  saveShopfront,
+  saveStorefront,
   getAllShops,
   getShopById,
 } from './ShopDTO';
@@ -9,7 +9,7 @@ import {
 const shopRepository = new InMemoryShopRepository();
 
 export const ShopModule = {
-  saveShopfront: saveShopfront(shopRepository),
+  saveStorefront: saveStorefront(shopRepository),
   saveOnlineShop: saveOnlineShop(shopRepository),
   getShopById: getShopById(shopRepository),
   getAllShops: getAllShops(shopRepository),

@@ -13,13 +13,13 @@ import {
 export const saveStorefront =
   (repo: ShopRepository) =>
   async (data: Parameters<typeof createStorefront>[0]): Promise<Storefront> => {
-    const shopfront = createStorefront(data);
-    await repo.save(shopfront);
-    return shopfront;
+    const storefront = createStorefront(data);
+    await repo.save(storefront);
+    return storefront;
   };
 
 export const saveOnlineShop =
-  (repo: Shopepository) =>
+  (repo: ShopRepository) =>
   async (data: Parameters<typeof createOnlineShop>[0]): Promise<OnlineShop> => {
     const onlineShop = createOnlineShop(data);
     await repo.save(onlineShop);
@@ -27,18 +27,18 @@ export const saveOnlineShop =
   };
 
 export const getShopById =
-  (repo: Shopepository) =>
+  (repo: ShopRepository) =>
   async (id: UUID): Promise<Shop | null> => {
     return repo.findById(id);
   };
 
 export const getAllShops =
-  (repo: Shopepository) => async (): Promise<Shop[]> => {
+  (repo: ShopRepository) => async (): Promise<Shop[]> => {
     return repo.findAll();
   };
 
 export const getAllocationsById =
-  (repo: Shopepository) =>
+  (repo: ShopRepository) =>
   async (id: UUID): Promise<FarmerAllocation[] | null> => {
     const shop = await repo.findById(id);
     if (!shop) return null;
@@ -47,7 +47,7 @@ export const getAllocationsById =
   };
 
 export const getTotalAllocationsById =
-  (repo: Shopepository) =>
+  (repo: ShopRepository) =>
   async (id: UUID): Promise<number | null> => {
     const allocations = await getAllocationsById(repo)(id);
     if (!allocations) return null;
@@ -55,8 +55,8 @@ export const getTotalAllocationsById =
     return getTotalAllocationBPS(allocations);
   };
 
-export const isShopfront = (shop: Shop): shop is Shopfront => {
-  return shop.__type === 'shopfront';
+export const isStorefront = (shop: Shop): shop is Storefront => {
+  return shop.__type === 'storefront';
 };
 
 export const isOnlineShop = (shop: Shop): shop is OnlineShop => {

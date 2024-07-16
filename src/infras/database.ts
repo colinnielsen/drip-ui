@@ -6,6 +6,6 @@ import { InMemoryUserRepository } from './repositories/UserRepository';
 export const database = {
   farmers: new InMemoryFarmerRepository(),
   shops: new InMemoryShopRepository(),
-  order: new InMemoryOrderRepository(),
-  user: new InMemoryUserRepository(),
+  orders: new InMemoryOrderRepository(),
+  users: new InMemoryUserRepository(),
 };

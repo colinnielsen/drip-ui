@@ -8,7 +8,7 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
-      const user = await database.user.findById(TESTING_USER_UUID);
+      const user = await database.users.findById(TESTING_USER_UUID);
       res.status(200).json(user);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch active user' });

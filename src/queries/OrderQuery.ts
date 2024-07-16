@@ -13,7 +13,7 @@ export const useCart = (userId: UUID) =>
   useQuery({
     queryKey: [CART_QUERY_KEY],
     queryFn: async () =>
-      (await database.order.getActiveUserOrder(userId)) ?? undefined,
+      (await database.orders.getActiveUserOrder(userId)) ?? undefined,
   });
 
 //
@@ -26,7 +26,7 @@ export const useSaveOrder = (
 ) =>
   useMutation({
     mutationFn: async () =>
-      await database.order.save(shopId, userId, orderItems),
+      await database.orders.save(shopId, userId, orderItems),
   });
 
 export const useAddToCart = ({
@@ -46,10 +46,11 @@ export const useAddToCart = ({
     mutationFn: async () => {
       debugger;
       // if there's no order, create one
-      if (!orderId) return await database.order.save(shopId, userId, itemArray);
+      if (!orderId)
+        return await database.orders.save(shopId, userId, itemArray);
       // otherwise add it to an existing order
       else
-        return await database.order.update(orderId, [
+        return await database.orders.update(orderId, [
           { __type: 'add', item: itemArray },
         ]);
     },
@@ -64,5 +65,5 @@ export const useAddToCart = ({
 export const useDeleteOrderItem = (orderId: UUID, itemId: UUID) =>
   useMutation({
     mutationFn: async () =>
-      await database.order.update(orderId, [{ __type: 'delete', itemId }]),
+      await database.orders.update(orderId, [{ __type: 'delete', itemId }]),
   });

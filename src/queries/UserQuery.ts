@@ -7,5 +7,5 @@ export const ACTIVE_USER_QUERY_KEY = 'active-user';
 export const useActiveUser = () =>
   useQuery({
     queryKey: [ACTIVE_USER_QUERY_KEY],
-    queryFn: async () => await database.user.findById(TESTING_USER_UUID),
+    queryFn: async () => await database.users.findById(TESTING_USER_UUID),
   });

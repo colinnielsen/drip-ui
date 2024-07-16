@@ -38,7 +38,7 @@ export type BaseShop = BaseEntity & {
 };
 
 export type Storefront = BaseShop & {
-  __type: 'shopfront';
+  __type: 'storefront';
   location: Coords | null;
 };
 
@@ -67,7 +67,7 @@ export const createStorefront = (data: {
 }): Storefront => ({
   id: data.id ?? (v4() as UUID),
   __entity: Entity.shop,
-  __type: 'shopfront',
+  __type: 'storefront',
   location: data.location || null,
   farmerAllocations: data.farmerAllocations || [],
   ...data,

@@ -15,7 +15,7 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const cart = await database.order.getActiveUserOrder(userId as UUID);
+      const cart = await database.orders.getActiveUserOrder(userId as UUID);
       res.status(200).json(cart);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch cart' });

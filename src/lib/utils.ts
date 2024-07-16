@@ -7,9 +7,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const axiosFetcher = async (url: string) => {
+export const axiosFetcher = async <T>(url: string): Promise<T> => {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get<T>(url);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {

@@ -1,5 +1,5 @@
 import { UUID } from 'crypto';
-import { Item, BooleanMod, NumericMod, ItemCategory } from './ItemType';
+import { Item, BooleanMod, NumericMod } from './ItemType';
 
 export const createItem = (data: {
   id: UUID;

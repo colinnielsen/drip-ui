@@ -1,4 +1,4 @@
-// src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
+// src/infrastructure/repositories/implementations/InMemoryShopRepository.ts
 import { FAKE_DB_SLEEP_MS } from '@/data-model/__global/constants';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import {
@@ -23,14 +23,14 @@ export class InMemoryOrderRepository implements OrderRepository {
   }
 
   async save(
-    cafeId: UUID,
+    shopId: UUID,
     userId: UUID,
     items: Unsaved<OrderItem>[],
   ): Promise<Order> {
-    let id = v4() as UUID;
-    let orderItem: Order = {
+    const id = v4() as UUID;
+    const orderItem: Order = {
       id,
-      cafe: cafeId,
+      shop: shopId,
       user: userId,
       status: 'pending',
       timestamp: Date().toString(),
@@ -78,7 +78,7 @@ export class InMemoryOrderRepository implements OrderRepository {
           order.orderItems[orderId] = op.item;
           break;
         default:
-          let err: never;
+          let _err: never;
           throw Error('bad impl');
       }
     }

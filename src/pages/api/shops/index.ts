@@ -10,9 +10,9 @@ export default async function handler(
   }
 
   try {
-    const cafes = await database.cafes.findAll();
-    return res.status(200).json(cafes);
+    const shops = await database.shops.findAll();
+    return res.status(200).json(shops);
   } catch (error) {
-    return res.status(500).json({ error: 'Failed to fetch cafes' });
+    return res.status(500).json({ error: 'Failed to fetch shops' });
   }
 }

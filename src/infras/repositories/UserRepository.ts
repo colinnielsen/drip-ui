@@ -1,4 +1,4 @@
-// src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
+// src/infrastructure/repositories/implementations/InMemoryStoreRepository.ts
 import { FAKE_DB_SLEEP_MS } from '@/data-model/__global/constants';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { UserRepository } from '@/data-model/user/UserRepository';
@@ -26,8 +26,8 @@ export class InMemoryUserRepository implements UserRepository {
   }
 
   async save(data: Unsaved<User>): Promise<User> {
-    let id = v4() as UUID;
-    let user: User = {
+    const id = v4() as UUID;
+    const user: User = {
       id,
       ...data,
     };

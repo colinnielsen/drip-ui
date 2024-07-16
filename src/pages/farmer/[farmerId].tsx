@@ -1,5 +1,4 @@
 import { FarmerDetails, FarmerHeader } from '@/components/FarmerHeader';
-import { Footer } from '@/components/Footer';
 import { database } from '@/infras/database';
 import { useFarmer } from '@/queries/FarmerQuery';
 import { UUID } from 'crypto';
@@ -10,34 +9,9 @@ import { GetStaticPaths } from 'next';
 // TODO Add messages (probably worth using an external service for this)
 // TODO Add activity log data
 
-export default function FarmerPage({ farmerId }: { farmerId: string }) {
-  const query = useFarmer(farmerId as UUID);
-
-  if (!farmerId) return null;
-  if (query.status === 'pending') {
-    return <div>Loading...</div>;
-  }
-
-  if (query.status === 'error') {
-    return <div>Error: {query.error.message}</div>;
-  }
-
-  const farmer = query.data;
-
-  if (!farmer) {
-    throw new Error('Farmer not found');
-  }
-
-  return (
-    <main className="flex flex-col min-h-screen mb-32">
-      <FarmerHeader {...farmer} />
-      <div className="p-5 px-6 flex flex-col gap-5">
-        <FarmerDetails {...farmer} />
-        <div className="py-12 w-full flex justify-center items-center bg-neutral-500 rounded-3xl"></div>
-      </div>
-    </main>
-  );
-}
+//
+//// STATIC SITE GENERATION
+//
 
 export const getStaticPaths = (async () => {
   return {
@@ -63,4 +37,25 @@ export async function getStaticProps({
         farmerId: params.farmerId,
       },
     };
+}
+
+//
+//// DYNAMIC RENDERING
+//
+export default function FarmerPage({ farmerId }: { farmerId: string }) {
+  const { isLoading, data: farmer, error } = useFarmer(farmerId as UUID);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  if (!farmer) return <div>Farmer not found</div>;
+
+  return (
+    <main className="flex flex-col min-h-screen mb-32">
+      <FarmerHeader {...farmer} />
+      <div className="p-5 px-6 flex flex-col gap-5">
+        <FarmerDetails {...farmer} />
+        <div className="py-12 w-full flex justify-center items-center bg-neutral-500 rounded-3xl"></div>
+      </div>
+    </main>
+  );
 }

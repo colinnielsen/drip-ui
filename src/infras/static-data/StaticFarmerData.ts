@@ -1,8 +1,5 @@
-import {
-  createFarmer,
-  Farmer,
-  FarmerAllocation,
-} from '@/data-model/types-TODO/farmer';
+import { Farmer, FarmerAllocation } from '@/data-model/farmer/FarmerType';
+import { createFarmer } from '@/data-model/farmer/FarmerDTO';
 import { VitalikAddress } from './StaticPlaceholderData';
 import { v4 } from 'uuid';
 import { UUID } from 'crypto';

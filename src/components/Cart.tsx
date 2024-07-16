@@ -1,6 +1,6 @@
 import { Order, OrderItem } from '@/data-model/order/OrderType';
 import { TESTING_USER_UUID } from '@/data-model/user/UserType';
-import { useCafe } from '@/queries/CafeQuery';
+import { useShop } from '@/queries/ShopQuery';
 import { useCart } from '@/queries/OrderQuery';
 import { X } from 'lucide-react';
 import Image from 'next/image';
@@ -33,8 +33,8 @@ export function CheckoutItem(o: OrderItem) {
 }
 
 export const Cart = (cart: Order) => {
-  const { data: cafe } = useCafe(cart.cafe);
-  if (!cafe) return null;
+  const { data: shop } = useShop(cart.shop);
+  if (!shop) return null;
 
   return (
     <>
@@ -43,7 +43,7 @@ export const Cart = (cart: Order) => {
           <div>
             <p>Pickup Store</p>
             <div className="flex items-center gap-2">
-              <p>{cafe.label}</p>
+              <p>{shop.label}</p>
               <div className="rounded-full h-1 w-1 bg-white"></div>
               <p> 0.7mi</p>
             </div>
@@ -55,7 +55,7 @@ export const Cart = (cart: Order) => {
         <DrawerClose asChild>
           <X />
         </DrawerClose>
-        <DrawerTitle className="text-3xl">{cafe.label}</DrawerTitle>
+        <DrawerTitle className="text-3xl">{shop.label}</DrawerTitle>
         {cart.orderItems.map((o, index) => (
           <CheckoutItem {...o} key={index} />
         ))}

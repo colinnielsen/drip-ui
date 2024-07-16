@@ -1,7 +1,7 @@
 import { BaseEntity, Entity } from '@/data-model/__global/entities';
 import { UUID } from 'crypto';
 import { v4 } from 'uuid';
-import { FarmerAllocation } from '../types-TODO/farmer';
+import { FarmerAllocation } from '../farmer/FarmerType';
 import { Item, ItemCategory, ItemMod } from '../item/ItemType';
 
 export type Coords = [number, number];
@@ -17,7 +17,7 @@ export type Options = Record<ItemCategory, ItemMod[]>;
 ///
 
 export type BaseShop = BaseEntity & {
-  __entity: Entity.cafe;
+  __entity: Entity.shop;
   label: string;
   backgroundImage: string;
   logo: string;
@@ -30,7 +30,7 @@ export type BaseShop = BaseEntity & {
   // So this would be: "espress" -> ["espresso", "syrup"]
   categoryOptions: CategoryOptions;
   // NOTE This is a mapping from category to options
-  // This lets each cafe configure what options each item category supports
+  // This lets each shop configure what options each item category supports
   options: Options;
   // TODO This might make more sense as [ItemCategory, ItemId] in case there are potential collisions on names?
   // bestsellers is a list of tuples, where the first element is the category and the second is the item name
@@ -38,7 +38,7 @@ export type BaseShop = BaseEntity & {
 };
 
 export type Storefront = BaseShop & {
-  __type: 'storefront';
+  __type: 'shopfront';
   location: Coords | null;
 };
 
@@ -47,7 +47,7 @@ export type OnlineShop = BaseShop & {
   url: string;
 };
 
-export type Cafe = Storefront | OnlineShop;
+export type Shop = Storefront | OnlineShop;
 
 ///
 //// FACTORIES
@@ -66,8 +66,8 @@ export const createStorefront = (data: {
   farmerAllocations?: FarmerAllocation[];
 }): Storefront => ({
   id: data.id ?? (v4() as UUID),
-  __entity: Entity.cafe,
-  __type: 'storefront',
+  __entity: Entity.shop,
+  __type: 'shopfront',
   location: data.location || null,
   farmerAllocations: data.farmerAllocations || [],
   ...data,
@@ -85,7 +85,7 @@ export const createOnlineShop = (data: {
   farmerAllocations?: FarmerAllocation[];
 }): OnlineShop => ({
   id: data.id ?? (v4() as UUID),
-  __entity: Entity.cafe,
+  __entity: Entity.shop,
   __type: 'online',
   farmerAllocations: data.farmerAllocations || [],
   ...data,

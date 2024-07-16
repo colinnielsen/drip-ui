@@ -13,16 +13,16 @@ export default async function handler(
   }
 
   if (typeof id !== 'string' || !isUUID(id)) {
-    return res.status(400).json({ error: 'Invalid cafeId' });
+    return res.status(400).json({ error: 'Invalid shopId' });
   }
 
   try {
-    const cafe = await database.cafes.findById(id);
-    if (!cafe) {
-      return res.status(404).json({ error: `Cafe with id ${id} not found` });
+    const shop = await database.shops.findById(id);
+    if (!shop) {
+      return res.status(404).json({ error: `Shop with id ${id} not found` });
     }
-    return res.status(200).json(cafe);
+    return res.status(200).json(shop);
   } catch (error) {
-    return res.status(500).json({ error: 'Failed to fetch cafe' });
+    return res.status(500).json({ error: 'Failed to fetch shop' });
   }
 }

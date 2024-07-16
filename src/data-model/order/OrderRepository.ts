@@ -12,7 +12,7 @@ export type OrderRepository = {
   /**
    * @dev creates a new order
    */
-  save: (cafeId: UUID, userId: UUID, items: OrderItem[]) => Promise<Order>;
+  save: (shopId: UUID, userId: UUID, items: OrderItem[]) => Promise<Order>;
   /**
    * @dev updates an order with the operations
    * @throws if order is

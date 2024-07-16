@@ -1,8 +1,8 @@
 import {
-  Cafe,
+  Shop,
   createOnlineShop,
   createStorefront,
-} from '@/data-model/cafe/CafeType';
+} from '@/data-model/shop/ShopType';
 import {
   DefaultCategoryOptions,
   DefaultMenu,
@@ -10,7 +10,7 @@ import {
 } from './StaticMenuData';
 import { farmerAllocations } from './StaticFarmerData';
 
-export const STATIC_CAFE_DATA: Cafe[] = [
+export const STATIC_SHOP_DATA: Shop[] = [
   createStorefront({
     id: '1-3-3-4-5',
     label: 'La Cabra',
@@ -36,7 +36,7 @@ export const STATIC_CAFE_DATA: Cafe[] = [
   createStorefront({
     id: '1-5-3-4-5',
     label: 'WHT R THOZ Roasting Company',
-    url: 'https//cafe3.com',
+    url: 'https//shop3.com',
     farmerAllocations,
     backgroundImage: '/background.jpg',
     logo: '/logo.jpg',
@@ -47,7 +47,7 @@ export const STATIC_CAFE_DATA: Cafe[] = [
   createOnlineShop({
     id: '1-5-3-4-9',
     label: 'Sip Happens',
-    url: 'https://cafe4.com',
+    url: 'https://shop4.com',
     farmerAllocations,
     backgroundImage: '/background.jpg',
     logo: '/logo.jpg',

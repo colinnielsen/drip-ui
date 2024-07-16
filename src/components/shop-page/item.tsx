@@ -11,35 +11,34 @@ import {
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { OrderItem } from '@/data-model/order/OrderType';
-import { useCategoryOptions } from '@/queries/CafeQuery';
 import { useAddToCart, useCart } from '@/queries/OrderQuery';
 import { useActiveUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
-import { NumberInput } from './base/NumberInput';
-import { PlusSvg, Price } from './Helpers';
-import { Checkbox } from './ui/checkbox';
-import { Skeleton } from './ui/skeleton';
+import { PlusSvg, Price } from '../Helpers';
+import { NumberInput } from '../base/NumberInput';
+import { Checkbox } from '../ui/checkbox';
+import { useItemMods } from '@/queries/ShopQuery';
 
 export type DrawerProps = {
   item: Item;
   category: ItemCategory;
-  cafeId: UUID;
+  shopId: UUID;
 };
 
 function AddToBasketButton({
   userId,
-  cafeId,
+  shopId,
   orderItem,
 }: {
   userId: UUID;
-  cafeId: UUID;
+  shopId: UUID;
   orderItem: Unsaved<OrderItem>;
 }) {
   const { data: maybeCart } = useCart(userId);
   const { mutate } = useAddToCart({
-    cafeId,
+    shopId,
     userId,
     orderItem,
     orderId: maybeCart?.id,
@@ -155,7 +154,7 @@ export const ItemOption = ({
   );
 };
 
-export function ItemWithSelector({ item, category, cafeId }: DrawerProps) {
+export function ItemWithSelector({ item, category, shopId }: DrawerProps) {
   const [quantity, setQuantity] = useState(1);
 
   const [selectionOptions, setSelectedOptions] = useState<
@@ -163,7 +162,7 @@ export function ItemWithSelector({ item, category, cafeId }: DrawerProps) {
   >({});
 
   const { data: user } = useActiveUser();
-  const { data: itemMods } = useCategoryOptions(cafeId, category);
+  const { data: itemMods } = useItemMods(shopId, category);
 
   const options = Array.from(itemMods ?? []);
 
@@ -203,7 +202,7 @@ export function ItemWithSelector({ item, category, cafeId }: DrawerProps) {
             />
             {/* <RadioGroupDemo /> */}
           </DrawerHeader>
-          {options
+          {/* {options
             .filter(([, o]) => o.length > 0)
             .map(([category, options]) => {
               // Upper case the first letter of the category
@@ -225,38 +224,12 @@ export function ItemWithSelector({ item, category, cafeId }: DrawerProps) {
                   </div>
                 </div>
               );
-            })}
+            })} */}
           {user?.id && (
-            <AddToBasketButton {...{ userId: user.id, cafeId, orderItem }} />
+            <AddToBasketButton {...{ userId: user.id, shopId, orderItem }} />
           )}
         </div>
       </DrawerContent>
     </Drawer>
-  );
-}
-
-export function ItemListSkeleton({
-  title,
-  horizontal,
-}: {
-  title: string;
-  horizontal?: boolean;
-}) {
-  return (
-    <div className="flex flex-col">
-      <div className="py-3">
-        <h2 className="text-lg font-normal">{title}</h2>
-      </div>
-      <div
-        className={cn(
-          'flex flex-row gap-5 w-full overflow-auto',
-          horizontal ? 'flex-row' : 'flex-col',
-        )}
-      >
-        {[...Array(5)].map((_, index) => (
-          <Skeleton key={index} className="w-32 h-32" />
-        ))}
-      </div>
-    </div>
   );
 }

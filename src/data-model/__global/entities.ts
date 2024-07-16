@@ -1,7 +1,7 @@
 import { UUID } from 'crypto';
 
 export enum Entity {
-  cafe = 'cafe',
+  shop = 'shop',
   user = 'user',
   farmer = 'farmer',
   item = 'item',

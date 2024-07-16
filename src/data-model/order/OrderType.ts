@@ -7,8 +7,8 @@ export type Order = {
   id: UUID;
   status: OrderStatus;
   timestamp: string;
-  /** The id of the cafe */
-  cafe: UUID;
+  /** The id of the shop */
+  shop: UUID;
   /** Id of the user who placed the order */
   user: UUID;
   /** The items the user ordered */

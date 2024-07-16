@@ -1,8 +1,10 @@
-// src/infrastructure/repositories/implementations/InMemoryCafeRepository.ts
-import { Farmer, FarmerRepository } from '@/data-model/types-TODO/farmer';
+// src/infrastructure/repositories/implementations/InMemoryShopRepository.ts
+import { Farmer } from '@/data-model/farmer/FarmerType';
+import { FarmerRepository } from '@/data-model/farmer/FarmerRepository';
 import { UUID } from 'crypto';
 import { STATIC_FARMER_DATA } from '../static-data/StaticFarmerData';
 import { sleep } from '@/lib/utils';
+import { FAKE_DB_SLEEP_MS } from '@/data-model/__global/constants';
 
 export class InMemoryFarmerRepository implements FarmerRepository {
   private farmers: Map<UUID, Farmer> = new Map();
@@ -13,7 +15,7 @@ export class InMemoryFarmerRepository implements FarmerRepository {
   }
 
   async findById(id: UUID): Promise<Farmer | null> {
-    await sleep(1000);
+    await sleep(FAKE_DB_SLEEP_MS);
     return this.farmers.get(id) || null;
   }
 

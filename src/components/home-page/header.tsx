@@ -1,15 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 
-export function Header() {
-  return (
-    <header className="flex flex-col p-6 gap-6">
-      <h1 className="text-4xl font-semibold font-drip">Drip</h1>
-      <Search />
-    </header>
-  );
-}
-
 export function Search() {
   const [search, setSearch] = useState<string>('');
   return (
@@ -43,5 +34,14 @@ export function SearchIcon({ className }: { className?: string }) {
       />
       <circle cx={10} cy={10} r={8} />
     </svg>
+  );
+}
+
+export function HomePageHeader() {
+  return (
+    <header className="flex flex-col p-6 gap-6">
+      <h1 className="text-4xl font-semibold font-drip">Drip</h1>
+      <Search />
+    </header>
   );
 }

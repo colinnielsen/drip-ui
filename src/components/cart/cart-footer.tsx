@@ -1,9 +1,4 @@
-import { Order } from '@/data-model/order/OrderType';
-import { TESTING_USER_UUID } from '@/data-model/user/UserType';
-import { useShop } from '@/queries/ShopQuery';
-import { useCart } from '@/queries/OrderQuery';
-import { ShoppingCart, X } from 'lucide-react';
-import { CartSvg } from '@/components/icons';
+import { CartItem } from '@/components/cart/cart-item';
 import {
   Drawer,
   DrawerClose,
@@ -12,13 +7,28 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { CartItem } from '@/components/cart/cart-item';
-import { Headline, Label1, Label2, Mono, Title1 } from '../base/typography';
-import { Button } from '../ui/button';
-import { Fragment } from 'react';
+import { Order } from '@/data-model/order/OrderType';
+import { TESTING_USER_UUID } from '@/data-model/user/UserType';
+import { useCart } from '@/queries/OrderQuery';
+import { useShop } from '@/queries/ShopQuery';
+import { ShoppingCart, X } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Fragment, useState } from 'react';
 import { Divider } from '../base/Divider';
+import { Headline, Label2, Title1 } from '../base/typography';
+import { isSSR } from '@/lib/utils';
 
-export const CartDrawer = (cart: Order) => {
+const DynamicCheckoutFlow = dynamic(() => import('./checkout-flow'), {
+  ssr: false,
+});
+
+export const CartDrawer = ({
+  cart,
+  drawerOpen,
+}: {
+  cart: Order;
+  drawerOpen: boolean;
+}) => {
   const { data: shop } = useShop(cart.shop);
   if (!shop) return null;
 
@@ -50,14 +60,17 @@ export const CartDrawer = (cart: Order) => {
         </div>
       </DrawerTrigger>
 
-      <DrawerContent className="flex flex-col px-6 h-full bg-background">
+      <DrawerContent
+        className="flex flex-col px-6 h-full bg-background"
+        aria-describedby="cart-footer"
+      >
         <DrawerClose asChild>
           <div className="flex justify-start h-14 w-full items-center">
             <X height={24} width={24} />
           </div>
         </DrawerClose>
         <DrawerTitle>
-          <Title1>{shop.label}</Title1>
+          <Title1 as="div">{shop.label}</Title1>
         </DrawerTitle>
         <div className="flex flex-col gap-6 pt-4">
           {cart.orderItems.map((item, index) => (
@@ -67,11 +80,7 @@ export const CartDrawer = (cart: Order) => {
             </Fragment>
           ))}
         </div>
-        <DrawerFooter>
-          <Button className="bg-secondary-pop py-6">
-            <Mono className="uppercase">Checkout</Mono>
-          </Button>
-        </DrawerFooter>
+        <DrawerFooter>{drawerOpen && <DynamicCheckoutFlow />}</DrawerFooter>
       </DrawerContent>
     </>
   );
@@ -79,11 +88,12 @@ export const CartDrawer = (cart: Order) => {
 
 export default function () {
   const { data: cart } = useCart(TESTING_USER_UUID);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   if (!cart) return null;
   return (
-    <Drawer key={'drawer'}>
-      <CartDrawer {...cart} />
+    <Drawer key={'drawer'} open={drawerOpen} onOpenChange={setDrawerOpen}>
+      <CartDrawer cart={cart} drawerOpen={drawerOpen} />
     </Drawer>
   );
 }

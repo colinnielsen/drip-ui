@@ -12,8 +12,7 @@ const CART_QUERY_KEY = 'cart';
 export const useCart = (userId: UUID) =>
   useQuery({
     queryKey: [CART_QUERY_KEY],
-    queryFn: async () =>
-      (await database.orders.getActiveUserOrder(userId)) ?? undefined,
+    queryFn: async () => await database.orders.getActiveUserOrder(userId),
   });
 
 //
@@ -53,11 +52,10 @@ export const useAddToCart = ({
           { __type: 'add', item: itemArray },
         ]);
     },
-    onSuccess: () => {
+    onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: [CART_QUERY_KEY],
-      });
-    },
+      }),
   });
 };
 

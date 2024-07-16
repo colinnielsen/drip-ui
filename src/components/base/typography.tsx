@@ -7,7 +7,7 @@ interface TypographyProps {
 }
 
 export const Title1 = ({
-  as: Component = 'h1',
+  as: Component = 'h2',
   className,
   children,
   ...rest

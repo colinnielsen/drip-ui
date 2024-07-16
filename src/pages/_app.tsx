@@ -3,11 +3,18 @@ import { ReactQueryClientProvider } from '@/components/ReactQueryClientProvider'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { cn } from '@/lib/utils';
 import { AppProps } from 'next/app';
-import { Inter } from 'next/font/google';
+import { EB_Garamond, Libre_Franklin } from 'next/font/google';
 import localFont from 'next/font/local';
 import { Footer } from '@/components/Footer';
 
-const inter = Inter({ subsets: ['latin'] });
+const garamond = EB_Garamond({
+  subsets: ['latin'],
+  variable: '--font-garamond',
+});
+const libreFranklin = Libre_Franklin({
+  subsets: ['latin'],
+  variable: '--font-libre-franklin',
+});
 const diaryNotes = localFont({
   src: '../assets/fonts/diary-notes.ttf',
   variable: '--font-diary-notes',
@@ -21,7 +28,15 @@ const diaryNotes = localFont({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ReactQueryClientProvider>
-      <main className={cn('antialiased', diaryNotes.variable, inter.className)}>
+      <main
+        className={cn(
+          'antialiased',
+          diaryNotes.variable,
+          garamond.variable,
+          `${libreFranklin.variable} font-sans`,
+          // 'prose',
+        )}
+      >
         <Component {...pageProps} />
       </main>
       <Footer />

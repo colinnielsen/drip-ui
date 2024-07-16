@@ -4,6 +4,7 @@ import { Coffee } from '@phosphor-icons/react/dist/ssr';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Skeleton } from '../ui/skeleton';
+import { Headline, Label2, Title1 } from '../base/typography';
 
 export function ShopCard({
   label,
@@ -15,7 +16,7 @@ export function ShopCard({
 
   return (
     <Link href={`/shop/${id}`}>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-4">
         <div className="overflow-hidden h-40 relative w-full">
           <Image
             src={backgroundImage}
@@ -25,17 +26,19 @@ export function ShopCard({
             className="rounded-3xl object-cover"
           />
         </div>
-        <h3 className="font-semibold text-lg">{label}</h3>
-        <div className="flex items-center gap-2 text-sm text-neutral-400">
-          <p>tbd mi</p>
-          <div className="rounded-full h-1 w-1 bg-neutral-400"></div>
-          <p>tbd district</p>
-        </div>
-        <div className="flex items-center gap-1">
-          <Coffee />
-          <p className="text-xs font-bold">
-            {allocationTotal / 100}% FOR THE GROWER
-          </p>
+        <div className="flex flex-col gap-y-1">
+          <Headline>{label}</Headline>
+          <div className="flex items-center gap-x-2 text-primary-gray">
+            <Label2>tbd mi</Label2>
+            <div className="rounded-full h-0.5 w-0.5 bg-primary-gray" />
+            <Label2>tbd district</Label2>
+          </div>
+          <div className="flex items-center gap-x-1">
+            <Coffee />
+            <p className="text-xs font-semibold">
+              {allocationTotal / 100}% FOR THE GROWER
+            </p>
+          </div>
         </div>
       </div>
     </Link>
@@ -53,7 +56,7 @@ export function ShopList({
 }) {
   return (
     <div className="w-full px-4">
-      <h2 className="text-2xl font-semibold">{title}</h2>
+      <Title1>{title}</Title1>
       <div className="grid grid-cols-1 gap-8 mt-5">
         {isLoading
           ? Array.from({ length: 2 }).map((_, index) => (

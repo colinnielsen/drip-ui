@@ -1,4 +1,5 @@
 import { Input } from '@/components/ui/input';
+import { Search as SearchIcon } from 'lucide-react';
 import { useState } from 'react';
 
 export function Search() {
@@ -17,30 +18,10 @@ export function Search() {
   );
 }
 
-export function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2.5}
-        d="M21 21l-5.2-5.2"
-      />
-      <circle cx={10} cy={10} r={8} />
-    </svg>
-  );
-}
-
 export function HomePageHeader() {
   return (
-    <header className="flex flex-col p-6 gap-6">
-      <h1 className="text-4xl font-semibold font-drip">Drip</h1>
+    <header className="flex flex-col p-6 pb-2 gap-6">
+      <h1 className="font-semibold font-drip text-4xl">Drip</h1>
       <Search />
     </header>
   );

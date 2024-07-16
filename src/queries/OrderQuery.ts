@@ -44,7 +44,6 @@ export const useAddToCart = ({
   const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
   return useMutation({
     mutationFn: async () => {
-      debugger;
       // if there's no order, create one
       if (!orderId)
         return await database.orders.save(shopId, userId, itemArray);

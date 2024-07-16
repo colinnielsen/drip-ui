@@ -1,6 +1,6 @@
 import { TESTING_USER_UUID } from '@/data-model/user/UserType';
 import { useCart } from '@/queries/OrderQuery';
-import { CartFooter } from './Cart';
+import { CartFooter } from './cart/drawer';
 import { HomeSvg, MapSvg, ProfileSvg } from './Helpers';
 
 export function Footer() {

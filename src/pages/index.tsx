@@ -8,15 +8,7 @@ export default function Home() {
   const { data: shops, isLoading, error } = useShops();
 
   return (
-    <div className="flex flex-col gap-5 mb-32 bg-red">
-      <WelcomeDialog
-        title="Welcome to Drip"
-        image={drip}
-        imageAlt="coffee"
-        description="Drip is a coffee app designed to reward growers and local farms. For every coffee you buy with USDC, the more growers earn."
-        buttonText="let's go"
-        defaultOpen={false}
-      />
+    <div className="flex flex-col gap-5 pb-32 bg-red bg-background">
       <HomePageHeader />
       {/* <div className="w-screen max-h-64 overflow-hidden">
         <Image src={map} alt="coffee" />
@@ -31,6 +23,15 @@ export default function Home() {
           isLoading={isLoading}
         />
       )}
+
+      <WelcomeDialog
+        title="Welcome to Drip"
+        image={drip}
+        imageAlt="coffee"
+        description="Drip is a coffee app designed to reward growers and local farms. For every coffee you buy with USDC, the more growers earn."
+        buttonText="let's go"
+        defaultOpen={false}
+      />
     </div>
   );
 }

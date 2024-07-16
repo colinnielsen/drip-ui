@@ -14,9 +14,20 @@ const config: Config = {
     extend: {
       fontFamily: {
         drip: ['var(--font-diary-notes)'],
+        garamond: ['var(--font-garamond)'],
+        libreFranklin: ['var(--font-libre-franklin)'],
+        sans: ['var(--font-libre-franklin)'],
       },
       colors: {
+        'primary-gray': '#747474',
+        'light-gray': '#E4E4E4',
+        black: '#000000',
+        'secondary-gray': '#C6C6C6',
+        white: '#FFFFFF',
         'secondary-background': '#EFE8DB',
+        'secondary-pop': '#446144',
+        background: '#F3F1EC',
+        'background-card': '#F9F9F9',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -44,6 +55,7 @@ const config: Config = {
     plugin(function ({ addVariant }) {
       addVariant('not-last', '&:not(:last-child)');
     }),
+    require('@tailwindcss/typography'),
   ],
 };
 

@@ -1,38 +1,19 @@
-import { Order, OrderItem } from '@/data-model/order/OrderType';
+import { Order } from '@/data-model/order/OrderType';
 import { TESTING_USER_UUID } from '@/data-model/user/UserType';
 import { useShop } from '@/queries/ShopQuery';
 import { useCart } from '@/queries/OrderQuery';
 import { X } from 'lucide-react';
-import Image from 'next/image';
-import { CartSvg, Price } from './Helpers';
+import { CartSvg } from '@/components/Helpers';
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
   DrawerTitle,
   DrawerTrigger,
-} from './ui/drawer';
+} from '@/components/ui/drawer';
+import { CartItem } from '@/components/cart/cart-item';
 
-export function CheckoutItem(o: OrderItem) {
-  return (
-    <div className="flex items-center gap-4">
-      <div className="rounded-xl overflow-hidden h-24 w-24 relative">
-        <Image src={o.item.image} alt="coffee" fill />
-      </div>
-      <div>
-        <p>{o.item.name}</p>
-        {o.mods.map(m => (
-          <p key={m.id}>
-            {m.name} x{Number(m.value)}
-          </p>
-        ))}
-        <Price price={o.item.price} />
-      </div>
-    </div>
-  );
-}
-
-export const Cart = (cart: Order) => {
+export const CartDrawer = (cart: Order) => {
   const { data: shop } = useShop(cart.shop);
   if (!shop) return null;
 
@@ -57,7 +38,7 @@ export const Cart = (cart: Order) => {
         </DrawerClose>
         <DrawerTitle className="text-3xl">{shop.label}</DrawerTitle>
         {cart.orderItems.map((o, index) => (
-          <CheckoutItem {...o} key={index} />
+          <CartItem {...o} key={index} />
         ))}
       </DrawerContent>
     </>
@@ -70,7 +51,7 @@ export function CartFooter() {
   if (!cart) return null;
   return (
     <Drawer key={'drawer'}>
-      <Cart {...cart} />
+      <CartDrawer {...cart} />
     </Drawer>
   );
 }

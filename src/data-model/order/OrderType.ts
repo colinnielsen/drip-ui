@@ -25,7 +25,7 @@ export type OrderItem = {
 //// DTO
 //
 
-export const isPending = (o: Order) => o.status === 'complete';
+export const isPending = (o: Order) => o.status === 'pending';
 
 export const isInProgress = (o: Order) => o.status === 'in-progress';
 

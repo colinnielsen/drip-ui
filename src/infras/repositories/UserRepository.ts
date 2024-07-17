@@ -59,11 +59,6 @@ export class JSONUserRepository implements UserRepository {
     return this.save(mapToSessionUser(sessionId));
   }
 
-  async logAll() {
-    const data = await this.readFromFile();
-    console.log(data);
-  }
-
   async save<T extends User>(user: T): Promise<T> {
     const data = await this.readFromFile();
     data[user.id] = user;

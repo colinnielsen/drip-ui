@@ -6,21 +6,19 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { OrderItem } from '@/data-model/order/OrderType';
-import { useAddToCart, useCart } from '@/queries/OrderQuery';
+import { useAddToCart } from '@/queries/OrderQuery';
+import { useItemMods } from '@/queries/ShopQuery';
 import { useActiveUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { PlusSvg, Price } from '../icons';
-import { NumberInput } from '../ui/number-input';
 import { Checkbox } from '../ui/checkbox';
-import { useItemMods } from '@/queries/ShopQuery';
-import { TESTING_USER_UUID } from '@/data-model/user/UserType';
+import { NumberInput } from '../ui/number-input';
 
 export type DrawerProps = {
   item: Item;
@@ -37,12 +35,10 @@ function AddToBasketButton({
   shopId: UUID;
   orderItem: Unsaved<OrderItem>;
 }) {
-  const { data: maybeCart } = useCart(TESTING_USER_UUID);
   const { mutate } = useAddToCart({
     shopId,
     userId,
     orderItem,
-    orderId: maybeCart?.id,
   });
 
   return (
@@ -69,7 +65,6 @@ export function ItemPreviewTrigger({
   item: Item;
 }) {
   const { image, name, price } = item;
-  const { data: cart } = useCart(userId);
   const { mutate } = useAddToCart({
     shopId,
     userId,
@@ -77,7 +72,6 @@ export function ItemPreviewTrigger({
       item,
       mods: [],
     },
-    orderId: cart?.id,
   });
 
   return (

@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 export function CartItem({ item }: { item: OrderItem }) {
   const [quantity, setQuantity] = useState(1);
+
   return (
     <div className="flex items-start gap-4 w-full">
       <div className="rounded-2xl overflow-hidden h-24 w-24 relative">

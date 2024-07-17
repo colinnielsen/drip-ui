@@ -88,7 +88,7 @@ export const CartDrawer = ({
 };
 
 export default function () {
-  const { data: cart } = useCart(TESTING_USER_UUID);
+  const { data: cart } = useCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   if (!cart) return null;

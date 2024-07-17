@@ -1,4 +1,3 @@
-// src/infrastructure/repositories/implementations/InMemoryShopRepository.ts
 import { FAKE_DB_SLEEP_MS } from '@/data-model/__global/constants';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import {
@@ -9,17 +8,35 @@ import { Order, OrderItem, isPending } from '@/data-model/order/OrderType';
 import { sleep } from '@/lib/utils';
 import { UUID } from 'crypto';
 import { v4 } from 'uuid';
+import fs from 'fs';
 
-export class InMemoryOrderRepository implements OrderRepository {
-  private items: Map<UUID, Order> = new Map();
+const FILE_PATH = 'orders.json';
 
-  constructor() {
-    this.items = new Map();
+export class JSONOrderRepository implements OrderRepository {
+  private async readFromFile(): Promise<Record<UUID, Order>> {
+    try {
+      if (!fs.existsSync(FILE_PATH)) return {};
+      await sleep(FAKE_DB_SLEEP_MS);
+      const data = fs.readFileSync(FILE_PATH, 'utf-8');
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Error reading data from file:', error);
+      return {};
+    }
+  }
+
+  private async writeToFile(data: Record<UUID, Order>) {
+    try {
+      await sleep(FAKE_DB_SLEEP_MS);
+      fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2), 'utf-8');
+    } catch (error) {
+      console.error('Error writing data to file:', error);
+    }
   }
 
   async findById(id: UUID): Promise<Order | null> {
-    await sleep(FAKE_DB_SLEEP_MS);
-    return this.items.get(id) || null;
+    const data = await this.readFromFile();
+    return data[id] || null;
   }
 
   async save(
@@ -33,15 +50,16 @@ export class InMemoryOrderRepository implements OrderRepository {
       shop: shopId,
       user: userId,
       status: 'pending',
-      timestamp: Date().toString(),
+      timestamp: new Date().toISOString(),
       orderItems: items.map(i => ({
         id: v4() as UUID,
         ...i,
       })),
     };
 
-    await sleep(FAKE_DB_SLEEP_MS);
-    this.items.set(id, orderItem);
+    const data = await this.readFromFile();
+    data[id] = orderItem;
+    await this.writeToFile(data);
 
     return orderItem;
   }
@@ -50,13 +68,13 @@ export class InMemoryOrderRepository implements OrderRepository {
     orderId: UUID,
     operations: UpdateOrderOperation[],
   ): Promise<Order> {
-    await sleep(FAKE_DB_SLEEP_MS);
-    const order = this.items.get(orderId);
+    const data = await this.readFromFile();
+    const order = data[orderId];
     if (!order) throw Error('Order not found');
-    if (!isPending) throw Error('Order is not pending');
+    if (!isPending(order)) throw Error('Order is not pending');
 
     for (const op of operations) {
-      let orderId: number;
+      let orderItemId: number;
 
       switch (op.__type) {
         case 'add':
@@ -68,14 +86,14 @@ export class InMemoryOrderRepository implements OrderRepository {
           else order.orderItems.push({ id: v4() as UUID, ...op.item });
           break;
         case 'delete':
-          orderId = order.orderItems.findIndex(o => o.id === op.itemId);
-          if (orderId == -1) throw Error('bad order id');
-          order.orderItems.splice(orderId);
+          orderItemId = order.orderItems.findIndex(o => o.id === op.itemId);
+          if (orderItemId === -1) throw Error('bad order id');
+          order.orderItems.splice(orderItemId, 1);
           break;
         case 'update':
-          orderId = order.orderItems.findIndex(o => o.id === op.itemId);
-          if (orderId == -1) throw Error('bad order id');
-          order.orderItems[orderId] = op.item;
+          orderItemId = order.orderItems.findIndex(o => o.id === op.itemId);
+          if (orderItemId === -1) throw Error('bad order id');
+          order.orderItems[orderItemId] = op.item;
           break;
         default:
           let _err: never;
@@ -83,35 +101,44 @@ export class InMemoryOrderRepository implements OrderRepository {
       }
     }
 
+    data[orderId] = order;
+    await this.writeToFile(data);
+
     return order;
   }
 
   async delete(id: UUID): Promise<void> {
-    if (!this.items.delete(id)) throw Error('could not delete');
+    const data = await this.readFromFile();
+    if (!data[id]) throw Error('could not delete');
+    delete data[id];
+    await this.writeToFile(data);
   }
 
   async clear(orderId: UUID): Promise<Order> {
-    await sleep(FAKE_DB_SLEEP_MS);
-    const order = this.items.get(orderId);
+    const data = await this.readFromFile();
+    const order = data[orderId];
     if (!order) throw Error('Order not found');
 
     order.orderItems = [];
+    data[orderId] = order;
+    await this.writeToFile(data);
 
     return order;
   }
 
   async getOrdersByUserId(userId: UUID): Promise<Order[]> {
-    return Array.from(this.items.values()).filter(o => o.user === userId);
+    const data = await this.readFromFile();
+    return Object.values(data).filter(o => o.user === userId);
   }
 
   async getActiveUserOrder(userId: UUID): Promise<Order | null> {
-    return this.getOrdersByUserId(userId).then(
-      orders =>
-        orders
-          .sort((a, b) =>
-            new Date(a.timestamp) < new Date(b.timestamp) ? -1 : 1,
-          )
-          .find(o => o.status === 'pending') ?? null,
+    const orders = await this.getOrdersByUserId(userId);
+    return (
+      orders
+        .sort((a, b) =>
+          new Date(a.timestamp) < new Date(b.timestamp) ? -1 : 1,
+        )
+        .find(o => o.status === 'pending') ?? null
     );
   }
 }

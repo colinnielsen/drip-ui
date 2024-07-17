@@ -1,4 +1,4 @@
-import { Label2 } from './base/typography';
+import { Label2 } from './ui/typography';
 
 export function Price({ price }: { price: number }) {
   return (

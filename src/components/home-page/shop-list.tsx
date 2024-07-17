@@ -4,7 +4,7 @@ import { Coffee } from '@phosphor-icons/react/dist/ssr';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Skeleton } from '../ui/skeleton';
-import { Headline, Label2, Title1 } from '../base/typography';
+import { Headline, Label2, Title1 } from '../ui/typography';
 
 export function ShopCard({
   label,

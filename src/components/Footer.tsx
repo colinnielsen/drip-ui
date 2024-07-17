@@ -1,18 +1,15 @@
-import { TESTING_USER_UUID } from '@/data-model/user/UserType';
-import { useCart } from '@/queries/OrderQuery';
+import Link from 'next/link';
 import CartFooter from './cart/cart-footer';
 import { HomeSvg, MapSvg, ProfileSvg } from './icons';
 
 export function Footer() {
-  const { data: cart } = useCart(TESTING_USER_UUID);
-
   return (
     <footer className="fixed bottom-0 w-full">
-      {!!cart && <CartFooter />}
+      <CartFooter />
       <div className="flex justify-between bg-white py-4">
-        <div className="flex justify-center w-1/3">
+        <Link href="/" className="flex justify-center w-1/3">
           <HomeSvg />
-        </div>
+        </Link>
         <div className="flex justify-center w-1/3">
           <MapSvg />
         </div>

@@ -1,0 +1,16 @@
+{
+  "4458f2a9-47b3-4e9d-84b0-860fbbda7553": {
+    "__type": "user",
+    "id": "4458f2a9-47b3-4e9d-84b0-860fbbda7553",
+    "role": "user",
+    "authServiceId": {
+      "__type": "privy",
+      "id": "did:privy:clyq5h7qh007lx61k64u9j9fo"
+    },
+    "wallet": {
+      "__type": "injected",
+      "address": "0xe2B28b58cc5d34872794E861fd1ba1982122B907"
+    },
+    "createdAt": "2024-07-17T18:24:42.227Z"
+  }
+}

@@ -31,7 +31,10 @@ export function WelcomeDialog({
   return (
     <Dialog defaultOpen={defaultOpen}>
       <DialogOverlay className="opacity-30">
-        <DialogContent className="w-4/5 rounded-xl flex flex-col gap-5">
+        <DialogContent
+          className="w-4/5 rounded-xl flex flex-col gap-5"
+          aria-describedby="welcome-dialog"
+        >
           <CloseIcon />
           <DialogTitle className="text-left font-semibold text-xl">
             {title}

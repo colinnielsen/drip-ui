@@ -1,8 +1,23 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import { Item, ItemCategory } from '@/data-model/item/ItemType';
+import { cn } from '@/lib/utils';
+import { useActiveUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import { ItemWithSelector } from './item';
-import { cn } from '@/lib/utils';
-import { Skeleton } from '@/components/ui/skeleton';
+
+const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
+  <div className="flex gap-5 w-full overflow-x-auto">
+    {Array.from({ length: count }).map((_, index) => (
+      <div className="flex flex-col gap-2 bg-white" key={index}>
+        <Skeleton className="h-36 w-36 flex-shrink-0" />
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 export function ItemList({
   title,
@@ -17,21 +32,10 @@ export function ItemList({
   shopId?: UUID;
   items?: Item[];
 }) {
-  const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
-    <div className="flex gap-5 w-full overflow-x-auto">
-      {Array.from({ length: count }).map((_, index) => (
-        <div className="flex flex-col gap-2 bg-white" key={index}>
-          <Skeleton className="h-36 w-36 flex-shrink-0" />
-          <div className="flex flex-col gap-1">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  const { isLoading: userIsLoading } = useActiveUser();
+  const isLoading = !shopId || !items || userIsLoading;
 
-  if (!shopId || !items) {
+  if (isLoading) {
     return (
       <div className="flex flex-col">
         <div className="py-3">

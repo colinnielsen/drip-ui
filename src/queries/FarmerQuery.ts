@@ -9,7 +9,7 @@ import { Farmer } from '@/data-model/farmer/FarmerType';
 export const useFarmers = () =>
   useQuery({
     queryKey: ['farmers'],
-    queryFn: () => axiosFetcher('/api/farmers'),
+    queryFn: () => axiosFetcher<Farmer[]>('/api/farmers'),
   });
 
 export const farmerQuery = (id: UUID) => ({

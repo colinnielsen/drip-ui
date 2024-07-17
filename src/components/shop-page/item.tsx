@@ -6,20 +6,19 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { OrderItem } from '@/data-model/order/OrderType';
-import { useAddToCart, useCart } from '@/queries/OrderQuery';
+import { useAddToCart } from '@/queries/OrderQuery';
+import { useItemMods } from '@/queries/ShopQuery';
 import { useActiveUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { PlusSvg, Price } from '../icons';
-import { NumberInput } from '../base/NumberInput';
 import { Checkbox } from '../ui/checkbox';
-import { useItemMods } from '@/queries/ShopQuery';
+import { NumberInput } from '../ui/number-input';
 
 export type DrawerProps = {
   item: Item;
@@ -36,12 +35,10 @@ function AddToBasketButton({
   shopId: UUID;
   orderItem: Unsaved<OrderItem>;
 }) {
-  const { data: maybeCart } = useCart(userId);
   const { mutate } = useAddToCart({
     shopId,
     userId,
     orderItem,
-    orderId: maybeCart?.id,
   });
 
   return (
@@ -58,17 +55,36 @@ function AddToBasketButton({
   );
 }
 
-export function ItemPreviewTrigger({ name, image, price }: Item) {
+export function ItemPreviewTrigger({
+  userId,
+  shopId,
+  item,
+}: {
+  userId: UUID;
+  shopId: UUID;
+  item: Item;
+}) {
+  const { image, name, price } = item;
+  const { mutate } = useAddToCart({
+    shopId,
+    userId,
+    orderItem: {
+      item,
+      mods: [],
+    },
+  });
+
   return (
     <div className="flex flex-col gap-2 bg-white">
-      <DrawerTrigger asChild>
-        <div className="relative overflow-hidden rounded-xl h-36 w-36">
-          <Image src={image} alt={name} fill />
-          <button className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:scale-95">
-            <PlusSvg />
-          </button>
-        </div>
-      </DrawerTrigger>
+      <div className="relative overflow-hidden rounded-xl h-36 w-36">
+        <Image src={image} alt={name} fill />
+        <button
+          className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:scale-95"
+          onClick={() => mutate()}
+        >
+          <PlusSvg />
+        </button>
+      </div>
       <div className="flex flex-col gap-1">
         <h3 className="font-medium">{name}</h3>
         <Price price={price} />
@@ -173,7 +189,9 @@ export function ItemWithSelector({ item, category, shopId }: DrawerProps) {
 
   return (
     <Drawer>
-      <ItemPreviewTrigger {...item} />
+      {user?.id && (
+        <ItemPreviewTrigger item={item} userId={user.id} shopId={shopId} />
+      )}
       <DrawerContent className="border-none rounded-t-xl overflow-hidden">
         <div className="h-[75vh] overflow-y-scroll">
           {/* <pre className="text-xs">

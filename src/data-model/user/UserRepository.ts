@@ -7,7 +7,7 @@ export type UserRepository = {
   /**
    * @dev creates a new User
    */
-  save: (data: Unsaved<User>) => Promise<User>;
+  save: (data: User) => Promise<User>;
   /**
    * @dev updates an User
    */

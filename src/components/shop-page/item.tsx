@@ -20,6 +20,7 @@ import { PlusSvg, Price } from '../icons';
 import { NumberInput } from '../ui/number-input';
 import { Checkbox } from '../ui/checkbox';
 import { useItemMods } from '@/queries/ShopQuery';
+import { TESTING_USER_UUID } from '@/data-model/user/UserType';
 
 export type DrawerProps = {
   item: Item;
@@ -36,10 +37,10 @@ function AddToBasketButton({
   shopId: UUID;
   orderItem: Unsaved<OrderItem>;
 }) {
-  const { data: maybeCart } = useCart(userId);
+  const { data: maybeCart } = useCart(TESTING_USER_UUID);
   const { mutate } = useAddToCart({
     shopId,
-    // userId,
+    userId,
     orderItem,
     orderId: maybeCart?.id,
   });
@@ -71,6 +72,7 @@ export function ItemPreviewTrigger({
   const { data: cart } = useCart(userId);
   const { mutate } = useAddToCart({
     shopId,
+    userId,
     orderItem: {
       item,
       mods: [],

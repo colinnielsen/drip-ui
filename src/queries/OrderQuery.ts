@@ -20,31 +20,29 @@ export const useCart = (userId: UUID) =>
 //
 //// MUTATIONS
 //
-export const useSaveOrder = (
-  shopId: UUID,
-  userId: UUID,
-  orderItems: OrderItem[],
-) =>
-  useMutation({
-    mutationFn: async () =>
-      await database.orders.save(shopId, userId, orderItems),
-  });
+// export const useSaveOrder = (
+//   shopId: UUID,
+//   userId: UUID,
+//   orderItems: OrderItem[],
+// ) =>
+//   useMutation({
+//     mutationFn: async () =>
+//       await database.orders.save(shopId, userId, orderItems),
+//   });
 
 export const useAddToCart = ({
   shopId,
+  userId,
   orderId,
   orderItem,
 }: {
   shopId: UUID;
+  userId: UUID;
   orderId?: UUID;
   orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[];
 }) => {
   const queryClient = useQueryClient();
   const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
-
-  const { data: activeUser } = useActiveUser();
-
-  const userId = activeUser?.id || TESTING_USER_UUID;
 
   return useMutation({
     mutationFn: async () => {

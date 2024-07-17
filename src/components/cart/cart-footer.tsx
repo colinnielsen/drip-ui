@@ -14,12 +14,13 @@ import { useShop } from '@/queries/ShopQuery';
 import { ShoppingCart, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { Fragment, useState } from 'react';
-import { Divider } from '../base/Divider';
-import { Headline, Label2, Title1 } from '../base/typography';
-import { isSSR } from '@/lib/utils';
+import { Divider } from '../ui/divider';
+import { Headline, Label2, Title1 } from '../ui/typography';
+import { Skeleton } from '../ui/skeleton';
 
 const DynamicCheckoutFlow = dynamic(() => import('./checkout-flow'), {
   ssr: false,
+  loading: () => <Skeleton className="h-12 w-full rounded-lg" />,
 });
 
 export const CartDrawer = ({
@@ -92,7 +93,12 @@ export default function () {
 
   if (!cart) return null;
   return (
-    <Drawer key={'drawer'} open={drawerOpen} onOpenChange={setDrawerOpen}>
+    <Drawer
+      key={'drawer'}
+      open={drawerOpen}
+      onOpenChange={setDrawerOpen}
+      shouldScaleBackground
+    >
       <CartDrawer cart={cart} drawerOpen={drawerOpen} />
     </Drawer>
   );

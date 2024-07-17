@@ -2,7 +2,11 @@
 import { FAKE_DB_SLEEP_MS } from '@/data-model/__global/constants';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { UserRepository } from '@/data-model/user/UserRepository';
-import { TESTING_USER_UUID, User } from '@/data-model/user/UserType';
+import {
+  TESTING_USER,
+  TESTING_USER_UUID,
+  User,
+} from '@/data-model/user/UserType';
 import { sleep } from '@/lib/utils';
 import { UUID } from 'crypto';
 import { v4 } from 'uuid';
@@ -12,12 +16,7 @@ export class InMemoryUserRepository implements UserRepository {
 
   constructor() {
     this.items = new Map();
-    this.items.set(TESTING_USER_UUID, {
-      id: TESTING_USER_UUID,
-      email: 'yo@yo.yo',
-      name: 'colin nielsen',
-      role: 'admin',
-    });
+    this.items.set(TESTING_USER_UUID, TESTING_USER);
   }
 
   async findById(id: UUID): Promise<User | null> {

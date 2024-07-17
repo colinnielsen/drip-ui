@@ -1,5 +1,5 @@
 import '../styles/globals.css';
-import { ReactQueryClientProvider } from '@/components/ReactQueryClientProvider';
+import { ReactQueryClientProvider } from '@/components/providers.tsx/ReactQueryClientProvider';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { cn } from '@/lib/utils';
 import { AppProps } from 'next/app';

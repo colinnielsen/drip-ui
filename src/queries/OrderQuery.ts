@@ -3,6 +3,8 @@ import { OrderItem } from '@/data-model/order/OrderType';
 import { database } from '@/infras/database';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UUID } from 'crypto';
+import { useActiveUser } from './UserQuery';
+import { TESTING_USER_UUID } from '@/data-model/user/UserType';
 
 //
 //// QUERIES
@@ -30,17 +32,20 @@ export const useSaveOrder = (
 
 export const useAddToCart = ({
   shopId,
-  userId,
   orderId,
   orderItem,
 }: {
   shopId: UUID;
-  userId: UUID;
   orderId?: UUID;
   orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[];
 }) => {
   const queryClient = useQueryClient();
   const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
+
+  const { data: activeUser } = useActiveUser();
+
+  const userId = activeUser?.id || TESTING_USER_UUID;
+
   return useMutation({
     mutationFn: async () => {
       // if there's no order, create one

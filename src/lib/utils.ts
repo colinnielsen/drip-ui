@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { type ClassValue, clsx } from 'clsx';
 import { UUID } from 'crypto';
 import { twMerge } from 'tailwind-merge';
@@ -7,14 +7,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const axiosFetcher = async <T>(url: string): Promise<T> => {
+export const axiosFetcher = async <T>(
+  url: string,
+  options?: AxiosRequestConfig,
+): Promise<T> => {
   try {
-    const response = await axios.get<T>(url);
+    const response = await axios<T>(url, {
+      withCredentials: true,
+      ...options,
+    });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.error || error.response.statusText);
-    }
+    if (axios.isAxiosError(error) && error.response) throw error;
+
     throw new Error('An unexpected error occurred');
   }
 };

@@ -17,7 +17,7 @@ import { UUID } from 'crypto';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { PlusSvg, Price } from '../icons';
-import { NumberInput } from '../base/NumberInput';
+import { NumberInput } from '../ui/number-input';
 import { Checkbox } from '../ui/checkbox';
 import { useItemMods } from '@/queries/ShopQuery';
 
@@ -39,7 +39,7 @@ function AddToBasketButton({
   const { data: maybeCart } = useCart(userId);
   const { mutate } = useAddToCart({
     shopId,
-    userId,
+    // userId,
     orderItem,
     orderId: maybeCart?.id,
   });
@@ -71,7 +71,6 @@ export function ItemPreviewTrigger({
   const { data: cart } = useCart(userId);
   const { mutate } = useAddToCart({
     shopId,
-    userId,
     orderItem: {
       item,
       mods: [],
@@ -81,7 +80,6 @@ export function ItemPreviewTrigger({
 
   return (
     <div className="flex flex-col gap-2 bg-white">
-      {/* <DrawerTrigger asChild> */}
       <div className="relative overflow-hidden rounded-xl h-36 w-36">
         <Image src={image} alt={name} fill />
         <button
@@ -91,7 +89,6 @@ export function ItemPreviewTrigger({
           <PlusSvg />
         </button>
       </div>
-      {/* </DrawerTrigger> */}
       <div className="flex flex-col gap-1">
         <h3 className="font-medium">{name}</h3>
         <Price price={price} />

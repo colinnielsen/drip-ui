@@ -28,7 +28,7 @@ import { OrderSummary } from './summary';
 const DynamicCheckoutFlow = dynamic(() => import('./checkout-flow'), {
   ssr: false,
   loading: () => (
-    <Skeleton className="h-12 w-full rounded-[50px] bg-secondary-pop" />
+    <Skeleton className="h-14 w-full rounded-[50px] bg-secondary-pop" />
   ),
 });
 
@@ -139,7 +139,7 @@ export const CartDrawer = ({
 
         <DrawerFooter className="p-0">
           <FooterTotal cart={cart} />
-          <div className="px-6 pb-6 w-full">
+          <div className="px-6 pb-6 w-full min-h-20">
             {drawerOpen && <DynamicCheckoutFlow />}
           </div>
         </DrawerFooter>

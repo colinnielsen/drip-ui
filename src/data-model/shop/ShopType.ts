@@ -1,14 +1,13 @@
 import { BaseEntity, Entity } from '@/data-model/__global/entities';
-import { UUID } from 'crypto';
-import { v4 } from 'uuid';
 import { FarmerAllocation } from '../farmer/FarmerType';
 import { Item, ItemCategory } from '../item/ItemType';
-
-export type Coords = [number, number];
+import { Location } from '@/data-model/_common/type/LocationType';
+import { SliceStoreId } from '../_common/type/SliceDTO';
 
 export type Menu = {
   [category in ItemCategory | 'other']: Item[];
 };
+
 // export type CategoryOptions = Record<ItemCategory, ItemCategory[]>;
 // export type Options = Record<ItemCategory, ItemMod[]>;
 
@@ -16,7 +15,7 @@ export type ManualStoreConfig = {
   sliceId: number;
   sliceVersion: number;
   name?: string;
-  location: [number, number];
+  location: Location;
   logo?: string;
   backgroundImage?: string;
   url?: string;
@@ -29,7 +28,7 @@ export type ManualStoreConfig = {
 
 export type BaseShop = BaseEntity & {
   __entity: Entity.shop;
-  sliceStoreId: string;
+  sliceStoreId: SliceStoreId;
   label: string;
   backgroundImage: string;
   logo: string;
@@ -51,7 +50,7 @@ export type BaseShop = BaseEntity & {
 
 export type Storefront = BaseShop & {
   __type: 'storefront';
-  location: Coords | null;
+  location: Location | null;
 };
 
 export type OnlineShop = BaseShop & {

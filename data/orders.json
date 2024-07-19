@@ -1,13 +1,107 @@
 {
-  "03c1482a-304c-4cb4-b974-f6482b650734": {
-    "id": "03c1482a-304c-4cb4-b974-f6482b650734",
+  "46f2a25c-38f3-4bb1-a8cb-2d97b3a08c88": {
+    "id": "46f2a25c-38f3-4bb1-a8cb-2d97b3a08c88",
     "shop": "837bdfd9-bb49-5e2a-9d49-438dce9d5926",
     "user": "7c05dc2a-cd8d-4804-a000-7bf372cb8c31",
     "status": "pending",
-    "timestamp": "2024-07-19T11:58:57.604Z",
+    "timestamp": "2024-07-19T12:58:50.961Z",
     "orderItems": [
       {
-        "id": "e516ab3b-5a73-49af-81ac-700cf8aa6882",
+        "id": "4fc38bfb-1030-4eb8-a236-3c1af3fbfb09",
+        "item": {
+          "id": "e0c5117c-7db6-53a7-988b-4b9c0963aa7d",
+          "sliceId": "401",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_i406m939i.png",
+          "name": "Drip Coffee - 12 oz",
+          "price": "3250000",
+          "prettyPrice": "3.25",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "fb737033-e3a2-55cd-b524-b82067c1b7c9",
+              "sliceId": "1570",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "9ce7701b-5686-5baf-aef8-7b0bc0ac31c8",
+              "sliceId": "1571",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "f2b7d36c-7832-544c-b2eb-473351e236f5",
+              "sliceId": "1572",
+              "name": "Skim Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "5b7ad2b7-dfee-5a0f-9c1a-bdf4f2b5905f",
+              "sliceId": "1573",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "5157c386-63fc-518f-8656-ec942842fbab",
+              "sliceId": "1574",
+              "name": "Macadamia Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "276c11a7-604b-57bc-8d63-082b1812eb69",
+              "sliceId": "2218",
+              "name": "Breve",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      }
+    ]
+  },
+  "94148dbe-7ab8-4802-8bbe-423b4c53aa61": {
+    "id": "94148dbe-7ab8-4802-8bbe-423b4c53aa61",
+    "shop": "837bdfd9-bb49-5e2a-9d49-438dce9d5926",
+    "user": "36e2fd18-ae1b-4980-906f-490c1a14231c",
+    "status": "pending",
+    "timestamp": "2024-07-19T19:40:03.172Z",
+    "orderItems": [
+      {
+        "id": "416f92b1-e6a9-4e29-a3c0-93e7a13d9b49",
         "item": {
           "id": "e0c5117c-7db6-53a7-988b-4b9c0963aa7d",
           "sliceId": "401",
@@ -92,7 +186,195 @@
         "mods": []
       },
       {
-        "id": "b9a2bafa-ead8-457d-bfb8-99770e078358",
+        "id": "b06a93eb-93f1-4a83-a475-9682e3002da2",
+        "item": {
+          "id": "babc9023-692d-53bc-9116-3d05e78a85d6",
+          "sliceId": "511",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_joelmw1z.png",
+          "name": "Drip Coffee - 16oz.",
+          "price": "3750000",
+          "prettyPrice": "3.75",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "f4a50e1b-6108-5360-98cb-b966cd19daab",
+              "sliceId": "1759",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "1bbe7889-534e-5e8e-84e0-228291c1f7a6",
+              "sliceId": "1760",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "503a3266-515c-559b-b31f-83fcd3176fc9",
+              "sliceId": "1761",
+              "name": "Skim Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "e1c78330-95a2-5f07-8b15-b80d4ee8db2a",
+              "sliceId": "1762",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "d6d072fc-d8ca-583e-8806-ced3765b7a66",
+              "sliceId": "1763",
+              "name": "Macadamia Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "00f9ecf7-d5e1-51ab-9bf5-ef4978380e1f",
+              "sliceId": "2217",
+              "name": "Breve",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      }
+    ]
+  },
+  "efb523b3-cb6e-465a-a918-61ae7c3b5089": {
+    "id": "efb523b3-cb6e-465a-a918-61ae7c3b5089",
+    "shop": "837bdfd9-bb49-5e2a-9d49-438dce9d5926",
+    "user": "1cbd1125-4e8f-46d9-822a-0288a1025056",
+    "status": "pending",
+    "timestamp": "2024-07-19T21:59:01.688Z",
+    "orderItems": [
+      {
+        "id": "dd1ee25f-45ad-44bc-bc3e-ea631319094b",
+        "item": {
+          "id": "babc9023-692d-53bc-9116-3d05e78a85d6",
+          "sliceId": "511",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_joelmw1z.png",
+          "name": "Drip Coffee - 16oz.",
+          "price": "3750000",
+          "prettyPrice": "3.75",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "f4a50e1b-6108-5360-98cb-b966cd19daab",
+              "sliceId": "1759",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "1bbe7889-534e-5e8e-84e0-228291c1f7a6",
+              "sliceId": "1760",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "503a3266-515c-559b-b31f-83fcd3176fc9",
+              "sliceId": "1761",
+              "name": "Skim Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "e1c78330-95a2-5f07-8b15-b80d4ee8db2a",
+              "sliceId": "1762",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "d6d072fc-d8ca-583e-8806-ced3765b7a66",
+              "sliceId": "1763",
+              "name": "Macadamia Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "00f9ecf7-d5e1-51ab-9bf5-ef4978380e1f",
+              "sliceId": "2217",
+              "name": "Breve",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      }
+    ]
+  },
+  "fbf44004-f033-4d0c-9101-482b02330245": {
+    "id": "fbf44004-f033-4d0c-9101-482b02330245",
+    "shop": "837bdfd9-bb49-5e2a-9d49-438dce9d5926",
+    "user": "a6312d92-c699-454d-8b4b-f6e73895d06e",
+    "status": "pending",
+    "timestamp": "2024-07-19T22:30:37.098Z",
+    "orderItems": [
+      {
+        "id": "e4afabdd-7b80-4e80-a2d2-a80f6377f0b4",
         "item": {
           "id": "e0c5117c-7db6-53a7-988b-4b9c0963aa7d",
           "sliceId": "401",
@@ -177,7 +459,101 @@
         "mods": []
       },
       {
-        "id": "76507fa0-d30b-47ac-ba5a-cb4f88d3a54d",
+        "id": "34373617-33f4-4422-8f4f-dcc6350c3d44",
+        "item": {
+          "id": "babc9023-692d-53bc-9116-3d05e78a85d6",
+          "sliceId": "511",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_joelmw1z.png",
+          "name": "Drip Coffee - 16oz.",
+          "price": "3750000",
+          "prettyPrice": "3.75",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "f4a50e1b-6108-5360-98cb-b966cd19daab",
+              "sliceId": "1759",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "1bbe7889-534e-5e8e-84e0-228291c1f7a6",
+              "sliceId": "1760",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "503a3266-515c-559b-b31f-83fcd3176fc9",
+              "sliceId": "1761",
+              "name": "Skim Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "e1c78330-95a2-5f07-8b15-b80d4ee8db2a",
+              "sliceId": "1762",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "d6d072fc-d8ca-583e-8806-ced3765b7a66",
+              "sliceId": "1763",
+              "name": "Macadamia Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "00f9ecf7-d5e1-51ab-9bf5-ef4978380e1f",
+              "sliceId": "2217",
+              "name": "Breve",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      }
+    ]
+  },
+  "4a9048b0-950e-409b-bc12-7835ba210787": {
+    "id": "4a9048b0-950e-409b-bc12-7835ba210787",
+    "shop": "837bdfd9-bb49-5e2a-9d49-438dce9d5926",
+    "user": "ecf6c247-cde1-458c-b969-854b969106e9",
+    "status": "pending",
+    "timestamp": "2024-07-19T22:30:59.234Z",
+    "orderItems": [
+      {
+        "id": "e70553d0-3131-46c6-ae65-63d80f5706b9",
         "item": {
           "id": "e0c5117c-7db6-53a7-988b-4b9c0963aa7d",
           "sliceId": "401",
@@ -262,7 +638,92 @@
         "mods": []
       },
       {
-        "id": "3e7d5f56-0e98-47fa-99c8-46657465c557",
+        "id": "d8b93705-e974-4f3e-8d03-b4c15394ade1",
+        "item": {
+          "id": "babc9023-692d-53bc-9116-3d05e78a85d6",
+          "sliceId": "511",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_joelmw1z.png",
+          "name": "Drip Coffee - 16oz.",
+          "price": "3750000",
+          "prettyPrice": "3.75",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "f4a50e1b-6108-5360-98cb-b966cd19daab",
+              "sliceId": "1759",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "1bbe7889-534e-5e8e-84e0-228291c1f7a6",
+              "sliceId": "1760",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "503a3266-515c-559b-b31f-83fcd3176fc9",
+              "sliceId": "1761",
+              "name": "Skim Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "e1c78330-95a2-5f07-8b15-b80d4ee8db2a",
+              "sliceId": "1762",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "d6d072fc-d8ca-583e-8806-ced3765b7a66",
+              "sliceId": "1763",
+              "name": "Macadamia Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "00f9ecf7-d5e1-51ab-9bf5-ef4978380e1f",
+              "sliceId": "2217",
+              "name": "Breve",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      },
+      {
+        "id": "77dfcbea-edf6-43b8-8179-1c68a0b1c908",
         "item": {
           "id": "370f3135-cc42-5f3b-bd42-3bda002269d9",
           "sliceId": "525",
@@ -345,25 +806,34 @@
           ]
         },
         "mods": []
-      },
+      }
+    ]
+  },
+  "5f5947d0-a889-4303-ae3d-d2059e157ec6": {
+    "id": "5f5947d0-a889-4303-ae3d-d2059e157ec6",
+    "shop": "837bdfd9-bb49-5e2a-9d49-438dce9d5926",
+    "user": "0bf83a02-17c6-4fec-b9d2-4e2d7538ad41",
+    "status": "pending",
+    "timestamp": "2024-07-19T22:34:26.143Z",
+    "orderItems": [
       {
-        "id": "37adf082-d60d-4023-9745-82dcabcaf725",
+        "id": "e57295f9-8513-4615-b89f-bb7b22ded536",
         "item": {
-          "id": "1227ebf4-4899-52c2-9a40-e6ba9ed36e71",
-          "sliceId": "526",
+          "id": "babc9023-692d-53bc-9116-3d05e78a85d6",
+          "sliceId": "511",
           "description": "",
-          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/coldbrewpng_k5rhw1fqq.png",
-          "name": "Cold Brew - 16oz.",
-          "price": "1000000",
-          "prettyPrice": "1",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_joelmw1z.png",
+          "name": "Drip Coffee - 16oz.",
+          "price": "3750000",
+          "prettyPrice": "3.75",
           "currency": "usdc",
           "currencyDecimals": 6,
           "availability": "onsite-only",
           "category": null,
           "mods": [
             {
-              "id": "f94dc2dc-246f-5f52-9573-b2bc8dfd9dd9",
-              "sliceId": "1781",
+              "id": "f4a50e1b-6108-5360-98cb-b966cd19daab",
+              "sliceId": "1759",
               "name": "No Milk",
               "type": "exclusive",
               "price": "0",
@@ -373,8 +843,8 @@
               "isOptional": true
             },
             {
-              "id": "0685a401-a351-5625-aa0e-8e326e3bd9df",
-              "sliceId": "1782",
+              "id": "1bbe7889-534e-5e8e-84e0-228291c1f7a6",
+              "sliceId": "1760",
               "name": "Whole Milk",
               "type": "exclusive",
               "price": "0",
@@ -384,8 +854,8 @@
               "isOptional": true
             },
             {
-              "id": "7cd3f834-6289-5f21-af59-d1221b29ecb4",
-              "sliceId": "1783",
+              "id": "503a3266-515c-559b-b31f-83fcd3176fc9",
+              "sliceId": "1761",
               "name": "Skim Milk",
               "type": "exclusive",
               "price": "0",
@@ -395,8 +865,8 @@
               "isOptional": true
             },
             {
-              "id": "cd3b9c54-8bca-5b5a-9b73-af8356ec1650",
-              "sliceId": "1784",
+              "id": "e1c78330-95a2-5f07-8b15-b80d4ee8db2a",
+              "sliceId": "1762",
               "name": "Oat Milk",
               "type": "exclusive",
               "price": "0",
@@ -406,8 +876,8 @@
               "isOptional": true
             },
             {
-              "id": "1f907b20-bf06-5543-9578-9c841fce91ed",
-              "sliceId": "1785",
+              "id": "d6d072fc-d8ca-583e-8806-ced3765b7a66",
+              "sliceId": "1763",
               "name": "Macadamia Milk",
               "type": "exclusive",
               "price": "0",
@@ -417,8 +887,8 @@
               "isOptional": true
             },
             {
-              "id": "13cdbd38-78dc-5e5c-a72a-4ac36561b7b9",
-              "sliceId": "2215",
+              "id": "00f9ecf7-d5e1-51ab-9bf5-ef4978380e1f",
+              "sliceId": "2217",
               "name": "Breve",
               "type": "exclusive",
               "price": "0",
@@ -432,23 +902,23 @@
         "mods": []
       },
       {
-        "id": "5c8060d3-c99d-4a4a-b4f8-f758efb83277",
+        "id": "ced51238-92e7-4583-97b4-5e75bb0c079c",
         "item": {
-          "id": "1227ebf4-4899-52c2-9a40-e6ba9ed36e71",
-          "sliceId": "526",
+          "id": "e0c5117c-7db6-53a7-988b-4b9c0963aa7d",
+          "sliceId": "401",
           "description": "",
-          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/coldbrewpng_k5rhw1fqq.png",
-          "name": "Cold Brew - 16oz.",
-          "price": "1000000",
-          "prettyPrice": "1",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_i406m939i.png",
+          "name": "Drip Coffee - 12 oz",
+          "price": "3250000",
+          "prettyPrice": "3.25",
           "currency": "usdc",
           "currencyDecimals": 6,
           "availability": "onsite-only",
           "category": null,
           "mods": [
             {
-              "id": "f94dc2dc-246f-5f52-9573-b2bc8dfd9dd9",
-              "sliceId": "1781",
+              "id": "fb737033-e3a2-55cd-b524-b82067c1b7c9",
+              "sliceId": "1570",
               "name": "No Milk",
               "type": "exclusive",
               "price": "0",
@@ -458,8 +928,8 @@
               "isOptional": true
             },
             {
-              "id": "0685a401-a351-5625-aa0e-8e326e3bd9df",
-              "sliceId": "1782",
+              "id": "9ce7701b-5686-5baf-aef8-7b0bc0ac31c8",
+              "sliceId": "1571",
               "name": "Whole Milk",
               "type": "exclusive",
               "price": "0",
@@ -469,8 +939,8 @@
               "isOptional": true
             },
             {
-              "id": "7cd3f834-6289-5f21-af59-d1221b29ecb4",
-              "sliceId": "1783",
+              "id": "f2b7d36c-7832-544c-b2eb-473351e236f5",
+              "sliceId": "1572",
               "name": "Skim Milk",
               "type": "exclusive",
               "price": "0",
@@ -480,8 +950,8 @@
               "isOptional": true
             },
             {
-              "id": "cd3b9c54-8bca-5b5a-9b73-af8356ec1650",
-              "sliceId": "1784",
+              "id": "5b7ad2b7-dfee-5a0f-9c1a-bdf4f2b5905f",
+              "sliceId": "1573",
               "name": "Oat Milk",
               "type": "exclusive",
               "price": "0",
@@ -491,8 +961,8 @@
               "isOptional": true
             },
             {
-              "id": "1f907b20-bf06-5543-9578-9c841fce91ed",
-              "sliceId": "1785",
+              "id": "5157c386-63fc-518f-8656-ec942842fbab",
+              "sliceId": "1574",
               "name": "Macadamia Milk",
               "type": "exclusive",
               "price": "0",
@@ -502,8 +972,8 @@
               "isOptional": true
             },
             {
-              "id": "13cdbd38-78dc-5e5c-a72a-4ac36561b7b9",
-              "sliceId": "2215",
+              "id": "276c11a7-604b-57bc-8d63-082b1812eb69",
+              "sliceId": "2218",
               "name": "Breve",
               "type": "exclusive",
               "price": "0",
@@ -513,6 +983,297 @@
               "isOptional": true
             }
           ]
+        },
+        "mods": []
+      }
+    ]
+  },
+  "72edb980-c8a3-49d5-9b87-ef64550e86f7": {
+    "id": "72edb980-c8a3-49d5-9b87-ef64550e86f7",
+    "shop": "837bdfd9-bb49-5e2a-9d49-438dce9d5926",
+    "user": "c2417043-6387-4bcc-b7ba-064aef199599",
+    "status": "pending",
+    "timestamp": "2024-07-19T22:48:11.977Z",
+    "orderItems": [
+      {
+        "id": "83a58295-8be7-40cf-a400-e353dddaf072",
+        "item": {
+          "id": "e0c5117c-7db6-53a7-988b-4b9c0963aa7d",
+          "sliceId": "401",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_i406m939i.png",
+          "name": "Drip Coffee - 12 oz",
+          "price": "3250000",
+          "prettyPrice": "3.25",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "fb737033-e3a2-55cd-b524-b82067c1b7c9",
+              "sliceId": "1570",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "9ce7701b-5686-5baf-aef8-7b0bc0ac31c8",
+              "sliceId": "1571",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "f2b7d36c-7832-544c-b2eb-473351e236f5",
+              "sliceId": "1572",
+              "name": "Skim Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "5b7ad2b7-dfee-5a0f-9c1a-bdf4f2b5905f",
+              "sliceId": "1573",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "5157c386-63fc-518f-8656-ec942842fbab",
+              "sliceId": "1574",
+              "name": "Macadamia Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "276c11a7-604b-57bc-8d63-082b1812eb69",
+              "sliceId": "2218",
+              "name": "Breve",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      },
+      {
+        "id": "939878b1-97ce-4d0e-97e5-29565f8dd4d3",
+        "item": {
+          "id": "babc9023-692d-53bc-9116-3d05e78a85d6",
+          "sliceId": "511",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_joelmw1z.png",
+          "name": "Drip Coffee - 16oz.",
+          "price": "3750000",
+          "prettyPrice": "3.75",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "f4a50e1b-6108-5360-98cb-b966cd19daab",
+              "sliceId": "1759",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "1bbe7889-534e-5e8e-84e0-228291c1f7a6",
+              "sliceId": "1760",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "503a3266-515c-559b-b31f-83fcd3176fc9",
+              "sliceId": "1761",
+              "name": "Skim Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "e1c78330-95a2-5f07-8b15-b80d4ee8db2a",
+              "sliceId": "1762",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "d6d072fc-d8ca-583e-8806-ced3765b7a66",
+              "sliceId": "1763",
+              "name": "Macadamia Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "00f9ecf7-d5e1-51ab-9bf5-ef4978380e1f",
+              "sliceId": "2217",
+              "name": "Breve",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      },
+      {
+        "id": "bf02509a-9992-4310-9363-07c5e1d1b6cd",
+        "item": {
+          "id": "e0c5117c-7db6-53a7-988b-4b9c0963aa7d",
+          "sliceId": "401",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/799/products/dripcoffeepng_i406m939i.png",
+          "name": "Drip Coffee - 12 oz",
+          "price": "3250000",
+          "prettyPrice": "3.25",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "fb737033-e3a2-55cd-b524-b82067c1b7c9",
+              "sliceId": "1570",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "9ce7701b-5686-5baf-aef8-7b0bc0ac31c8",
+              "sliceId": "1571",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "f2b7d36c-7832-544c-b2eb-473351e236f5",
+              "sliceId": "1572",
+              "name": "Skim Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "5b7ad2b7-dfee-5a0f-9c1a-bdf4f2b5905f",
+              "sliceId": "1573",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "5157c386-63fc-518f-8656-ec942842fbab",
+              "sliceId": "1574",
+              "name": "Macadamia Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "276c11a7-604b-57bc-8d63-082b1812eb69",
+              "sliceId": "2218",
+              "name": "Breve",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      }
+    ]
+  },
+  "19fb278f-a3ba-43b0-aa34-ed56ecf8462d": {
+    "id": "19fb278f-a3ba-43b0-aa34-ed56ecf8462d",
+    "shop": "cefd7d06-e46d-5365-bb25-a996bfa93470",
+    "user": "b330a0ea-5fe6-4c66-a840-ddf7621c97cf",
+    "status": "pending",
+    "timestamp": "2024-07-19T23:13:05.443Z",
+    "orderItems": [
+      {
+        "id": "81b5e701-f5f6-48b7-badb-e2aa716e1891",
+        "item": {
+          "id": "8e51d73d-0996-5f9c-b920-e1a616d5ba66",
+          "sliceId": "661",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/827/products/coldbrewpng_234a1yfdn.png",
+          "name": "Cold Brew Iced Coffee",
+          "price": "3500000",
+          "prettyPrice": "3.5",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "online-only",
+          "category": null,
+          "mods": []
         },
         "mods": []
       }

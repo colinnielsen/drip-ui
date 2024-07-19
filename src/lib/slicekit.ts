@@ -1,18 +1,23 @@
-import { createConfig, http } from '@wagmi/core';
-import { base } from '@wagmi/core/chains';
+import { ConnectedWallet } from '@privy-io/react-auth';
 import {
-  getStores,
-  getStoreProducts,
-  GetStoresParams,
-  GetStoreProductsParams,
-  getProduct,
   GetProductParams,
+  GetStoreProductsParams,
+  GetStoresParams,
+  PayProductsParams,
+  ProductCart,
+  getProduct,
+  getStoreProducts,
+  getStores,
+  payProducts,
 } from '@slicekit/core';
+import { createConfig, custom, injected } from '@wagmi/core';
+import { BASE_RPC_CONFIG } from './constants';
+import { axiosFetcher } from './utils';
 
 const sliceConfig = createConfig({
-  chains: [base],
+  chains: BASE_RPC_CONFIG.chains,
   transports: {
-    [base.id]: http(base.rpcUrls.default.http[0]),
+    '8453': BASE_RPC_CONFIG.transport,
   },
 });
 
@@ -21,5 +26,33 @@ export default {
   getStores: (params: GetStoresParams) => getStores(params),
   getStoreProducts: (params: GetStoreProductsParams) =>
     getStoreProducts(sliceConfig, params),
+  getStoreProducts_proxied: (params: GetStoreProductsParams) =>
+    axiosFetcher<{ cartProducts: ProductCart[]; storeClosed: boolean }>(
+      `/api/slice/get-store-products`,
+      { data: params, method: 'POST' },
+    ),
   getProduct: (params: GetProductParams) => getProduct(sliceConfig, params),
+  payProducts: async (wallet: ConnectedWallet, params: PayProductsParams) => {
+    const provider = await wallet.getEthereumProvider();
+
+    return payProducts(
+      createConfig({
+        chains: BASE_RPC_CONFIG.chains,
+
+        connectors: [
+          injected({
+            target: {
+              id: 'privy',
+              name: 'Privy',
+              provider: provider as any,
+            },
+          }),
+        ],
+        transports: {
+          '8453': custom(provider),
+        },
+      }),
+      params,
+    );
+  },
 };

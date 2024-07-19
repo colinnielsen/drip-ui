@@ -3,6 +3,7 @@ import { SlicerBasics } from '@slicekit/core';
 import { UUID } from 'crypto';
 import { Entity } from '../__global/entities';
 import { ManualStoreConfig, OnlineShop, Shop, Storefront } from './ShopType';
+import { SLICE_VERSION, SliceStoreId } from '../_common/type/SliceDTO';
 
 // export const saveStorefront =
 //   (repo: ShopRepository) =>
@@ -57,11 +58,21 @@ export const isOnlineShop = (shop: Shop): shop is OnlineShop => {
   return shop.__type === 'online';
 };
 
-export const mapSliceStoreIdToShopId = (
+export const deriveShopIdFromSliceStoreId = (
   sliceId: number,
   sliceVersion: number,
-): UUID => {
-  return generateUUID(`SLICE_V${sliceVersion}::${sliceId}`);
+): UUID => generateUUID(`SLICE_V${sliceVersion}::${sliceId}`);
+
+export const getSliceStoreIdFromSliceId = (sliceId: number): SliceStoreId =>
+  `SLICE_STORE::V${SLICE_VERSION}::${sliceId}`;
+
+export const getSlicerIdFromSliceStoreId = (
+  sliceStoreId: SliceStoreId,
+): number => {
+  const [, , sliceId] = sliceStoreId.split('::');
+  if (!sliceId) throw new Error('Fatal Error parsing slice store id!');
+
+  return parseInt(sliceId);
 };
 
 export const mapSliceStoreToShop = (
@@ -70,8 +81,8 @@ export const mapSliceStoreToShop = (
 ): Shop => ({
   __entity: Entity.shop,
   __type: 'storefront',
-  id: mapSliceStoreIdToShopId(sliceStore.id, 1),
-  sliceStoreId: sliceStore.id.toString(),
+  id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
+  sliceStoreId: getSliceStoreIdFromSliceId(sliceStore.id),
   menu: {
     espresso: [],
     coffee: [],

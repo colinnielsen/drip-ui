@@ -1,7 +1,11 @@
 import FarmerCard from '@/components/shop-page/farmer-intro-card';
-import { ItemList } from '@/components/shop-page/item-list';
 import { ShopHeader, ShopHeaderDetails } from '@/components/shop-page/header';
-import { Menu, Shop } from '@/data-model/shop/ShopType';
+import { ItemList } from '@/components/shop-page/item-list';
+import { SLICE_VERSION } from '@/data-model/_common/type/SliceDTO';
+import { ItemCategory } from '@/data-model/item/ItemType';
+import { deriveShopIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
+import { Shop } from '@/data-model/shop/ShopType';
+import { ONBOARDED_SHOPS } from '@/lib/constants';
 import { farmerQuery } from '@/queries/FarmerQuery';
 import { shopQuery, useShop } from '@/queries/ShopQuery';
 import {
@@ -12,9 +16,6 @@ import {
 } from '@tanstack/react-query';
 import { UUID } from 'crypto';
 import { GetStaticPaths, GetStaticProps } from 'next/types';
-import { ONBOARDED_SHOPS } from '@/lib/constants';
-import { mapSliceStoreIdToShopId } from '@/data-model/shop/ShopDTO';
-import { ItemCategory } from '@/data-model/item/ItemType';
 
 ///
 ///// STATIC SITE GENERATION
@@ -22,7 +23,7 @@ import { ItemCategory } from '@/data-model/item/ItemType';
 
 const STATIC_PAGE_DATA = ONBOARDED_SHOPS.map(c => ({
   __type: 'storefront',
-  id: mapSliceStoreIdToShopId(c.sliceId, 1),
+  id: deriveShopIdFromSliceStoreId(c.sliceId, SLICE_VERSION),
   label: c.name,
   backgroundImage: c.backgroundImage ?? '',
   logo: c.logo ?? '',

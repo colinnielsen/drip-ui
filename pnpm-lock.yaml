@@ -12,7 +12,7 @@ importers:
         version: 2.1.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@privy-io/react-auth':
         specifier: ^1.74.1
-        version: 1.74.1(@babel/core@7.24.9)(@types/react@18.3.3)(@upstash/redis@1.32.0)(@vercel/kv@2.0.0)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-is@16.13.1)(react@18.3.1)(typescript@5.5.3)(utf-8-validate@5.0.10)
+        version: 1.74.1(@babel/core@7.24.9)(@types/react@18.3.3)(@upstash/redis@1.32.0)(@vercel/kv@2.0.0)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1)(typescript@5.5.3)(utf-8-validate@5.0.10)
       '@privy-io/server-auth':
         specifier: ^1.9.2
         version: 1.9.2
@@ -5798,6 +5798,12 @@ packages:
         integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==,
       }
 
+  react-is@18.3.1:
+    resolution:
+      {
+        integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==,
+      }
+
   react-remove-scroll-bar@2.3.6:
     resolution:
       {
@@ -8044,7 +8050,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@privy-io/react-auth@1.74.1(@babel/core@7.24.9)(@types/react@18.3.3)(@upstash/redis@1.32.0)(@vercel/kv@2.0.0)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-is@16.13.1)(react@18.3.1)(typescript@5.5.3)(utf-8-validate@5.0.10)':
+  '@privy-io/react-auth@1.74.1(@babel/core@7.24.9)(@types/react@18.3.3)(@upstash/redis@1.32.0)(@vercel/kv@2.0.0)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1)(typescript@5.5.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@coinbase/wallet-sdk': 4.0.3
       '@ethersproject/abstract-signer': 5.7.0
@@ -8083,7 +8089,7 @@ snapshots:
       react-device-detect: 2.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
       secure-password-utilities: 0.2.1
-      styled-components: 5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@16.13.1)(react@18.3.1)
+      styled-components: 5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1)
       tinycolor2: 1.6.0
       uuid: 9.0.1
       web3-core: 1.10.4(encoding@0.1.13)
@@ -9256,14 +9262,14 @@ snapshots:
     dependencies:
       deep-equal: 2.2.3
 
-  babel-plugin-styled-components@2.1.4(@babel/core@7.24.9)(styled-components@5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@16.13.1)(react@18.3.1))(supports-color@5.5.0):
+  babel-plugin-styled-components@2.1.4(@babel/core@7.24.9)(styled-components@5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1))(supports-color@5.5.0):
     dependencies:
       '@babel/helper-annotate-as-pure': 7.24.7
       '@babel/helper-module-imports': 7.24.7(supports-color@5.5.0)
       '@babel/plugin-syntax-jsx': 7.24.7(@babel/core@7.24.9)
       lodash: 4.17.21
       picomatch: 2.3.1
-      styled-components: 5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@16.13.1)(react@18.3.1)
+      styled-components: 5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1)
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
@@ -11204,6 +11210,8 @@ snapshots:
 
   react-is@16.13.1: {}
 
+  react-is@18.3.1: {}
+
   react-remove-scroll-bar@2.3.6(@types/react@18.3.3)(react@18.3.1):
     dependencies:
       react: 18.3.1
@@ -11549,19 +11557,19 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  styled-components@5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@16.13.1)(react@18.3.1):
+  styled-components@5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1):
     dependencies:
       '@babel/helper-module-imports': 7.24.7(supports-color@5.5.0)
       '@babel/traverse': 7.24.8(supports-color@5.5.0)
       '@emotion/is-prop-valid': 1.2.2
       '@emotion/stylis': 0.8.5
       '@emotion/unitless': 0.7.5
-      babel-plugin-styled-components: 2.1.4(@babel/core@7.24.9)(styled-components@5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@16.13.1)(react@18.3.1))(supports-color@5.5.0)
+      babel-plugin-styled-components: 2.1.4(@babel/core@7.24.9)(styled-components@5.3.11(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react-is@18.3.1)(react@18.3.1))(supports-color@5.5.0)
       css-to-react-native: 3.2.0
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-is: 16.13.1
+      react-is: 18.3.1
       shallowequal: 1.1.0
       supports-color: 5.5.0
     transitivePeerDependencies:

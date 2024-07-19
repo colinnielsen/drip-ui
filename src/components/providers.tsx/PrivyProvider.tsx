@@ -10,6 +10,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
       config={{
         // Customize Privy's appearance in your app
         appearance: {
+          showWalletLoginFirst: true,
           theme: 'light',
           accentColor: '#446144',
           logo: '/drip.jpg',

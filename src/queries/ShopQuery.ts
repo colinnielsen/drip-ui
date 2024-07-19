@@ -10,13 +10,14 @@ export const useShops = () =>
     queryFn: () => axiosFetcher<Shop[]>('/api/shops'),
   });
 
-export const shopQuery = (id: UUID) =>
+export const shopQuery = (id?: UUID) =>
   ({
     queryKey: ['shop', id],
     queryFn: () => axiosFetcher<Shop>(`/api/shops/${id}`),
+    enabled: !!id,
   }) as const;
 
-export const useShop = (id: UUID) => useQuery(shopQuery(id));
+export const useShop = (id?: UUID) => useQuery(shopQuery(id));
 
 // export const useItemByName = (id: UUID, category: ItemCategory, name: string) =>
 //   useQuery({

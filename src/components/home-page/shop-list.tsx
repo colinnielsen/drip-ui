@@ -6,12 +6,8 @@ import Link from 'next/link';
 import { Skeleton } from '../ui/skeleton';
 import { Headline, Label2, Title1 } from '../ui/typography';
 
-export function ShopCard({
-  label,
-  backgroundImage,
-  farmerAllocations,
-  id,
-}: Shop) {
+export function ShopCard(shop: Shop) {
+  const { label, backgroundImage, farmerAllocations, id } = shop;
   const allocationTotal = getTotalAllocationBPS(farmerAllocations);
 
   return (
@@ -29,7 +25,11 @@ export function ShopCard({
         <div className="flex flex-col gap-y-1">
           <Headline>{label}</Headline>
           <div className="flex items-center gap-x-2 text-primary-gray">
-            <Label2>Atlanta, GA</Label2>
+            {shop.__type === 'storefront' && shop.location ? (
+              <Label2>{shop.location.label}</Label2>
+            ) : (
+              <Label2>Online only</Label2>
+            )}
             {/* <div className="rounded-full h-0.5 w-0.5 bg-primary-gray" />
             <Label2>tbd district</Label2> */}
           </div>
@@ -57,7 +57,7 @@ export function ShopList({
   return (
     <div className="w-full px-4">
       <Title1>{title}</Title1>
-      <div className="grid grid-cols-1 gap-8 mt-5">
+      <div className="grid grid-cols-1 gap-8 mt-5 pb-10">
         {isLoading
           ? Array.from({ length: 2 }).map((_, index) => (
               <div key={index} className="animate-pulse flex flex-col gap-y-2">

@@ -36,9 +36,7 @@ export function ShopHeaderDetails(staticShop: StaticPageData) {
       <div className="flex items-center gap-1">
         <CarSimple weight="bold" />
         <p className="text-sm font-normal text-neutral-400">
-          {staticShop.location
-            ? staticShop.location?.join(', ')
-            : 'Online only'}
+          {staticShop.location ? staticShop.location.label : 'Online only'}
         </p>
       </div>
     </div>

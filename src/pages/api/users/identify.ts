@@ -37,13 +37,13 @@ export default async function identify(
     const user = await database.users.findByPrivyId(
       verifResponse.userId as PrivyDID,
     );
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) return res.status(404).json({ error: 'privy: User not found' });
     return res.status(200).json(user);
   }
 
   // then we try and find by the user id
   const user = await database.users.findById(sessionId);
-  if (!user) return res.status(404).json({ error: 'User not found' });
+  if (!user) return res.status(404).json({ error: 'db: User not found' });
 
   return res.status(200).json(user);
 }

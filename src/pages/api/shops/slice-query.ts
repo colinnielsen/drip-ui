@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import slicekit from '@/lib/slicekit';
+import slicekit from '@/lib/sliceKit';
 
 export default async function handler(
   req: NextApiRequest,

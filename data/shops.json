@@ -3,7 +3,7 @@
     "__entity": "shop",
     "__type": "storefront",
     "id": "837bdfd9-bb49-5e2a-9d49-438dce9d5926",
-    "sliceStoreId": "799",
+    "sliceStoreId": "SLICE_STORE::V1::799",
     "menu": {
       "espresso": [],
       "coffee": [],
@@ -337,7 +337,11 @@
       ]
     },
     "label": "Prevail Coffee",
-    "location": [32.3792, 86.3077],
+    "location": {
+      "label": "Montgomery, AL",
+      "address": "39 Dexter Ave suite 102, Montgomery, AL 36104",
+      "coords": [32.3792, 86.3077]
+    },
     "backgroundImage": "/prevail-background.jpg",
     "logo": "/prevail.png",
     "url": "https://prevailcoffee.com/",
@@ -353,7 +357,7 @@
     "__entity": "shop",
     "__type": "storefront",
     "id": "cefd7d06-e46d-5365-bb25-a996bfa93470",
-    "sliceStoreId": "827",
+    "sliceStoreId": "SLICE_STORE::V1::827",
     "menu": {
       "espresso": [],
       "coffee": [],
@@ -391,7 +395,11 @@
       ]
     },
     "label": "Bicycle Coffee",
-    "location": [37.8044, 122.2712],
+    "location": {
+      "label": "Oakland, CA",
+      "address": "377 2ND ST, OAKLAND, CA 94607",
+      "coords": [37.7949, -122.2745]
+    },
     "backgroundImage": "/bicycle-background.jpg",
     "logo": "/bicycle-coffee.png",
     "url": "https://www.bicyclecoffeeco.com",
@@ -407,7 +415,7 @@
     "__entity": "shop",
     "__type": "storefront",
     "id": "5754d31d-a689-56b2-87f8-4f13f9ac4954",
-    "sliceStoreId": "805",
+    "sliceStoreId": "SLICE_STORE::V1::805",
     "menu": {
       "espresso": [],
       "coffee": [],
@@ -725,7 +733,11 @@
       ]
     },
     "label": "Base Cafe",
-    "location": [35.681236, 139.767173],
+    "location": {
+      "label": "Bruxelles, Belgium",
+      "address": "Mont des Arts, 1000 Bruxelles, Belgium",
+      "coords": [50.8443, 4.3563]
+    },
     "backgroundImage": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/805/main_6j25kd0y.png",
     "logo": "https://raw.githubusercontent.com/base-org/brand-kit/8984fe6e08be3058fd7cf5cd0b201f8b92b5a70e/logo/in-product/Base_Network_Logo.svg",
     "url": "",

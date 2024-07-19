@@ -1,10 +1,9 @@
 import { mapSliceProductCartToItem } from '@/data-model/item/ItemDTO';
 import { ItemRepository } from '@/data-model/item/ItemRepository';
-import { Item } from '@/data-model/item/ItemType';
 import { mapSliceStoreToShop } from '@/data-model/shop/ShopDTO';
 import { ShopRepository } from '@/data-model/shop/ShopRepository';
 import { ManualStoreConfig } from '@/data-model/shop/ShopType';
-import sliceKit from '@/lib/slicekit';
+import sliceKit from '@/lib/sliceKit';
 
 export class SyncService {
   constructor(

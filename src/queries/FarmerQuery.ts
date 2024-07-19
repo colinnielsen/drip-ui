@@ -12,12 +12,17 @@ export const useFarmers = () =>
     queryFn: () => axiosFetcher<Farmer[]>('/api/farmers'),
   });
 
-export const farmerQuery = (id: UUID) => ({
-  queryKey: ['farmer', id],
-  queryFn: () => axiosFetcher<Farmer>(`/api/farmers/${id}`),
-});
+export const farmerQuery = (id?: UUID, enabled: boolean = true) => {
+  console.log(id);
+  return {
+    queryKey: ['farmer', id],
+    queryFn: () => axiosFetcher<Farmer>(`/api/farmers/${id}`),
+    enabled: enabled && !!id,
+  };
+};
 
-export const useFarmer = (id: UUID) => useQuery(farmerQuery(id));
+export const useFarmer = (id?: UUID, enabled: boolean = true) =>
+  useQuery(farmerQuery(id, enabled));
 
 //
 //// MUTATIONS

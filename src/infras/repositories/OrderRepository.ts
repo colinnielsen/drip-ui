@@ -90,7 +90,8 @@ export class JSONOrderRepository
       }
     }
 
-    data[orderId] = order;
+    if (order.orderItems.length === 0) delete data[orderId];
+    else data[orderId] = order;
     await this.writeToFile(data);
 
     return order;

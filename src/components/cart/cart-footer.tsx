@@ -8,24 +8,28 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Order, OrderItem } from '@/data-model/order/OrderType';
-import { TESTING_USER_UUID } from '@/data-model/user/UserType';
+import { cn } from '@/lib/utils';
+import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
+import { useFarmer } from '@/queries/FarmerQuery';
 import { useCart } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
+import { useActiveUser } from '@/queries/UserQuery';
 import { ShoppingCart, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { Fragment, useState } from 'react';
 import { Divider } from '../ui/divider';
-import { Headline, Label2, Title1 } from '../ui/typography';
 import { Skeleton } from '../ui/skeleton';
-import { useActiveUser } from '@/queries/UserQuery';
-import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
-import { cn } from '@/lib/utils';
+import { Headline, Label2, Title1 } from '../ui/typography';
 import { AddTipSection } from './add-tip';
+import { FooterTotal } from './footer-total';
+import { GrowerBanner } from './grower-banner';
 import { OrderSummary } from './summary';
 
 const DynamicCheckoutFlow = dynamic(() => import('./checkout-flow'), {
   ssr: false,
-  loading: () => <Skeleton className="h-12 w-full rounded-lg" />,
+  loading: () => (
+    <Skeleton className="h-12 w-full rounded-[50px] bg-secondary-pop" />
+  ),
 });
 
 /**
@@ -57,6 +61,8 @@ export const CartDrawer = ({
 }) => {
   const { data: user } = useActiveUser();
   const { data: shop } = useShop(cart.shop);
+
+  const { data: farmer } = useFarmer(shop?.farmerAllocations[0].farmer);
 
   if (!shop || !user) return null;
 
@@ -92,7 +98,7 @@ export const CartDrawer = ({
 
       <DrawerContent
         className={cn(
-          'flex flex-col h-full ',
+          'flex flex-col',
           CSS_FONT_CLASS_CONFIG,
           'bg-background-card',
         )}
@@ -129,7 +135,14 @@ export const CartDrawer = ({
 
         <Divider />
 
-        <DrawerFooter>{drawerOpen && <DynamicCheckoutFlow />}</DrawerFooter>
+        <GrowerBanner {...{ farmer, allocation: shop.farmerAllocations[0] }} />
+
+        <DrawerFooter className="p-0">
+          <FooterTotal cart={cart} />
+          <div className="px-6 pb-6 w-full">
+            {drawerOpen && <DynamicCheckoutFlow />}
+          </div>
+        </DrawerFooter>
       </DrawerContent>
     </>
   );
@@ -141,12 +154,7 @@ export default function () {
 
   if (!cart || !cart.orderItems.length) return null;
   return (
-    <Drawer
-      key={'drawer'}
-      open={drawerOpen}
-      onOpenChange={setDrawerOpen}
-      shouldScaleBackground
-    >
+    <Drawer key={'drawer'} open={drawerOpen} onOpenChange={setDrawerOpen}>
       <CartDrawer cart={cart} drawerOpen={drawerOpen} />
     </Drawer>
   );

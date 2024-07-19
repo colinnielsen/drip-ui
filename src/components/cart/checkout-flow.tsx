@@ -60,10 +60,10 @@ const CheckoutFlow = () => {
 
   return (
     <CheckoutButton
-      className="bg-secondary-pop py-6"
+      className="bg-secondary-pop py-7 rounded-[50px] w-full"
       onClick={() => (authenticated ? logout() : loginOrCreate())}
     >
-      <Mono className="uppercase">Checkout</Mono>
+      <Mono className="uppercase">Checkout with USDC</Mono>
     </CheckoutButton>
   );
 };

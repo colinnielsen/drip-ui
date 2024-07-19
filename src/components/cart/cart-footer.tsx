@@ -21,7 +21,7 @@ import { useActiveUser } from '@/queries/UserQuery';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
 import { cn } from '@/lib/utils';
 import { AddTipSection } from './add-tip';
-import { OrderSummary } from './Summary';
+import { OrderSummary } from './summary';
 
 const DynamicCheckoutFlow = dynamic(() => import('./checkout-flow'), {
   ssr: false,

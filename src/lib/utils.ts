@@ -3,10 +3,26 @@ import { clsx, type ClassValue } from 'clsx';
 import { UUID } from 'crypto';
 import { twMerge } from 'tailwind-merge';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import { formatUnits } from 'viem';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const isAddressEql = (a?: string, b?: string) => {
+  return a?.toLowerCase() === b?.toLowerCase();
+};
+
+export const prettyFormatPrice = (
+  p: string | bigint,
+  decimals: number,
+  isUSD: boolean,
+) => {
+  const price = typeof p === 'string' ? BigInt(p) : p;
+  const priceString = formatUnits(price, decimals);
+  const displayPrice = !isUSD ? priceString : Number(priceString).toFixed(2);
+  return displayPrice;
+};
 
 export const axiosFetcher = async <T>(
   url: string,
@@ -19,7 +35,10 @@ export const axiosFetcher = async <T>(
     });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) throw error;
+    if (axios.isAxiosError(error) && error.response) {
+      console.error(error.response.data);
+      throw error;
+    }
 
     throw new Error('An unexpected error occurred');
   }

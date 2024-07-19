@@ -11,6 +11,6 @@ export type ShopRepository = {
     category?: ItemCategory,
   ) => Promise<Item | null>;
   getItemMods: (shopId: UUID, itemId: UUID) => Promise<ItemMod[]>;
-  save: (item: Shop) => Promise<void>;
+  save: (item: Shop) => Promise<Shop>;
   delete: (id: UUID) => Promise<void>;
 };

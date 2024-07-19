@@ -40,6 +40,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.1.0
         version: 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@slicekit/core':
+        specifier: ^0.3.82
+        version: 0.3.82(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8))
       '@tanstack/react-query':
         specifier: ^5.51.1
         version: 5.51.1(react@18.3.1)
@@ -49,6 +52,9 @@ importers:
       '@vercel/kv':
         specifier: ^2.0.0
         version: 2.0.0
+      '@wagmi/core':
+        specifier: ^2.12.1
+        version: 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8))
       axios:
         specifier: ^1.7.2
         version: 1.7.2
@@ -61,9 +67,15 @@ importers:
       embla-carousel-react:
         specifier: ^8.1.6
         version: 8.1.6(react@18.3.1)
+      ethers:
+        specifier: 5.7.2
+        version: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       lucide-react:
         specifier: ^0.397.0
         version: 0.397.0(react@18.3.1)
+      merkletreejs:
+        specifier: ^0.4.0
+        version: 0.4.0
       next:
         specifier: 14.2.4
         version: 14.2.4(@babel/core@7.24.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -91,6 +103,9 @@ importers:
       vaul:
         specifier: ^0.9.1
         version: 0.9.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      viem:
+        specifier: ^2.17.4
+        version: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.1.0
@@ -163,6 +178,12 @@ importers:
         version: 7.16.1(eslint@8.57.0)(typescript@5.5.3)
 
 packages:
+  '@adraffy/ens-normalize@1.10.0':
+    resolution:
+      {
+        integrity: sha512-nA9XHtlAkYfJxY7bce8DcN7eKxWWCWkU+1GR9d+U6MbNpfwQp8TI7vqOsBsMcHoT4mBu2kypKoSKnghEzOOq5Q==,
+      }
+
   '@alloc/quick-lru@5.2.0':
     resolution:
       {
@@ -1160,6 +1181,12 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@noble/curves@1.4.0':
+    resolution:
+      {
+        integrity: sha512-p+4cb332SFCrReJkCYe8Xzm0OWi4Jji5jVdIZRL/PmacmDkFNw6MrrV+gGpiPxLHbV+zKFRywUWbaseT+tZRXg==,
+      }
+
   '@noble/curves@1.4.2':
     resolution:
       {
@@ -1772,6 +1799,23 @@ packages:
         integrity: sha512-tGSRP1QvsAvsJmnOlRQyw/mvK9gnPtjEc5fg2+m8n+QUa+D7rvrKkOYyfpy42GTs90X3RDOnqJgfHt+qO67/+w==,
       }
 
+  '@slicekit/abi@0.0.11':
+    resolution:
+      {
+        integrity: sha512-kFFdI2DPAm8W8JwiPiizmsq4SYYADE1c7CN04xCSzLp+/mafrtM3s/Sdqq54vXsjHJZs9kmGEnTcdMoijP1I4w==,
+      }
+
+  '@slicekit/core@0.3.82':
+    resolution:
+      {
+        integrity: sha512-stnyNtrdPDlgCJpQung4n9hMW0YXcSDNNdS+Ng0y0aVSHaNNCfLisCZE1hWe1+1UjUGiImOOXQKljHP21MLmfA==,
+      }
+    peerDependencies:
+      '@wagmi/core': ^2.10.9
+      ethers: ^5.7.2
+      merkletreejs: 0.4.0
+      viem: ^2.17.0
+
   '@stablelib/aead@1.0.1':
     resolution:
       {
@@ -2231,6 +2275,21 @@ packages:
       }
     engines: { node: '>=14.6' }
 
+  '@wagmi/core@2.12.1':
+    resolution:
+      {
+        integrity: sha512-iriswtwfmclOnl3BLCxzy87bF9uuPM0hzjRUFRgk5LCdl5wpxDeAvVBovMkwNJNg2ly/1cc4D35q7Sqm90jo5w==,
+      }
+    peerDependencies:
+      '@tanstack/query-core': '>=5.0.0'
+      typescript: '>=5.0.4'
+      viem: 2.x
+    peerDependenciesMeta:
+      '@tanstack/query-core':
+        optional: true
+      typescript:
+        optional: true
+
   '@walletconnect/core@2.13.3':
     resolution:
       {
@@ -2385,6 +2444,20 @@ packages:
       {
         integrity: sha512-9koTqyGrM2cqFRW517BPY/iEtUDx2r1+Pwwu5m7sJ7ka79wi3EyqhqcICk/yDmv6jAS1rjKgTKXlEhanYjijcA==,
       }
+
+  abitype@1.0.5:
+    resolution:
+      {
+        integrity: sha512-YzDhti7cjlfaBhHutMaboYB21Ha3rXR9QTkNJFzYC4kC8YclaiwPBBBJY8ejFdu2wnJeZCVZSMlQJ7fi8S6hsw==,
+      }
+    peerDependencies:
+      typescript: '>=5.0.4'
+      zod: ^3 >=3.22.0
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+      zod:
+        optional: true
 
   abort-controller@3.0.0:
     resolution:
@@ -2720,6 +2793,12 @@ packages:
       }
     engines: { node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7 }
     hasBin: true
+
+  buffer-reverse@1.0.1:
+    resolution:
+      {
+        integrity: sha512-M87YIUBsZ6N924W57vDwT/aOu8hw7ZgdByz6ijksLjmHJELBASmYTTlNHRgjE+pTsT9oJXGaDSgqqwfdHotDUg==,
+      }
 
   buffer@6.0.3:
     resolution:
@@ -4557,6 +4636,14 @@ packages:
         integrity: sha512-geDJjpoZ8N0kWexiwkX8F9NkTsXhetLPVbZFQ+JTW239QNOwvB0gniuR1Wc6f0AMTn7/mFGyXvHTifrCp/GH8Q==,
       }
 
+  isows@1.0.4:
+    resolution:
+      {
+        integrity: sha512-hEzjY+x9u9hPmBom9IIAqdJCwNLax+xrPb51vEPpERoFlIxgmZcHzsT5jKG06nvInKOBGvReAVz80Umed5CczQ==,
+      }
+    peerDependencies:
+      ws: '*'
+
   iterator.prototype@1.1.2:
     resolution:
       {
@@ -4877,6 +4964,13 @@ packages:
         integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==,
       }
     engines: { node: '>= 8' }
+
+  merkletreejs@0.4.0:
+    resolution:
+      {
+        integrity: sha512-a48Ta5kWiVNBgeEbZVMm6FB1hBlp6vEuou/XnZdlkmd2zq6NZR6Sh2j+kR1B0iOZIXrTMcigBYzZ39MLdYhm1g==,
+      }
+    engines: { node: '>= 7.6.0' }
 
   micro-ftch@0.3.1:
     resolution:
@@ -6395,6 +6489,13 @@ packages:
         integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==,
       }
 
+  treeify@1.1.0:
+    resolution:
+      {
+        integrity: sha512-1m4RA7xVAJrSGrrXGs0L3YTwyvBs2S8PbRHaLZAkFw7JR8oIFwYtysxlBZhYIa7xSyiYJKZ3iGrrk55cGA3i9A==,
+      }
+    engines: { node: '>=0.6' }
+
   ts-api-utils@1.3.0:
     resolution:
       {
@@ -6748,6 +6849,17 @@ packages:
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
 
+  viem@2.17.4:
+    resolution:
+      {
+        integrity: sha512-6gmBB85I7z1qt/+yPPS+i4L2jNPJqCs+SEb+26WnKVYez13svSzjYMsU9OYYlPFpQmpGSy9dV2bKW6VX68FTgg==,
+      }
+    peerDependencies:
+      typescript: '>=5.0.4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   web3-core-helpers@1.10.3:
     resolution:
       {
@@ -6977,6 +7089,21 @@ packages:
       utf-8-validate:
         optional: true
 
+  ws@8.17.1:
+    resolution:
+      {
+        integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==,
+      }
+    engines: { node: '>=10.0.0' }
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   y18n@4.0.3:
     resolution:
       {
@@ -7031,7 +7158,27 @@ packages:
         integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==,
       }
 
+  zustand@4.4.1:
+    resolution:
+      {
+        integrity: sha512-QCPfstAS4EBiTQzlaGP1gmorkh/UL1Leaj2tdj+zZCZ/9bm0WS7sI2wnfD5lpOszFqWJ1DcPnGoY8RDL61uokw==,
+      }
+    engines: { node: '>=12.7.0' }
+    peerDependencies:
+      '@types/react': '>=16.8'
+      immer: '>=9.0'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+
 snapshots:
+  '@adraffy/ens-normalize@1.10.0': {}
+
   '@alloc/quick-lru@5.2.0': {}
 
   '@ampproject/remapping@2.3.0':
@@ -7772,6 +7919,10 @@ snapshots:
   '@next/swc-win32-x64-msvc@14.2.4':
     optional: true
 
+  '@noble/curves@1.4.0':
+    dependencies:
+      '@noble/hashes': 1.4.0
+
   '@noble/curves@1.4.2':
     dependencies:
       '@noble/hashes': 1.4.0
@@ -8253,6 +8404,16 @@ snapshots:
 
   '@simplewebauthn/types@9.0.1': {}
 
+  '@slicekit/abi@0.0.11': {}
+
+  '@slicekit/core@0.3.82(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8))':
+    dependencies:
+      '@slicekit/abi': 0.0.11
+      '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8))
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      merkletreejs: 0.4.0
+      viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+
   '@stablelib/aead@1.0.1': {}
 
   '@stablelib/binary@1.0.1':
@@ -8594,6 +8755,20 @@ snapshots:
     dependencies:
       '@upstash/redis': 1.32.0
 
+  '@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8))':
+    dependencies:
+      eventemitter3: 5.0.1
+      mipd: 0.0.7(typescript@5.5.3)
+      viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+      zustand: 4.4.1(@types/react@18.3.3)(react@18.3.1)
+    optionalDependencies:
+      '@tanstack/query-core': 5.51.1
+      typescript: 5.5.3
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - react
+
   '@walletconnect/core@2.13.3(@upstash/redis@1.32.0)(@vercel/kv@2.0.0)(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)':
     dependencies:
       '@walletconnect/heartbeat': 1.2.2
@@ -8912,6 +9087,11 @@ snapshots:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
 
+  abitype@1.0.5(typescript@5.5.3)(zod@3.23.8):
+    optionalDependencies:
+      typescript: 5.5.3
+      zod: 3.23.8
+
   abort-controller@3.0.0:
     dependencies:
       event-target-shim: 5.0.1
@@ -9125,6 +9305,8 @@ snapshots:
       electron-to-chromium: 1.4.825
       node-releases: 2.0.14
       update-browserslist-db: 1.1.0(browserslist@4.23.2)
+
+  buffer-reverse@1.0.1: {}
 
   buffer@6.0.3:
     dependencies:
@@ -10347,6 +10529,10 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  isows@1.0.4(ws@8.17.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)):
+    dependencies:
+      ws: 8.17.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+
   iterator.prototype@1.1.2:
     dependencies:
       define-properties: 1.2.1
@@ -10549,6 +10735,14 @@ snapshots:
   merge-stream@2.0.0: {}
 
   merge2@1.4.1: {}
+
+  merkletreejs@0.4.0:
+    dependencies:
+      bignumber.js: 9.1.2
+      buffer-reverse: 1.0.1
+      crypto-js: 4.2.0
+      treeify: 1.1.0
+      web3-utils: 1.10.4
 
   micro-ftch@0.3.1: {}
 
@@ -11463,6 +11657,8 @@ snapshots:
 
   tr46@0.0.3: {}
 
+  treeify@1.1.0: {}
+
   ts-api-utils@1.3.0(typescript@5.5.3):
     dependencies:
       typescript: 5.5.3
@@ -11666,6 +11862,23 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
       - '@types/react-dom'
+
+  viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)(zod@3.23.8):
+    dependencies:
+      '@adraffy/ens-normalize': 1.10.0
+      '@noble/curves': 1.4.0
+      '@noble/hashes': 1.4.0
+      '@scure/bip32': 1.4.0
+      '@scure/bip39': 1.3.0
+      abitype: 1.0.5(typescript@5.5.3)(zod@3.23.8)
+      isows: 1.0.4(ws@8.17.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      ws: 8.17.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    optionalDependencies:
+      typescript: 5.5.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
 
   web3-core-helpers@1.10.3:
     dependencies:
@@ -11872,6 +12085,11 @@ snapshots:
       bufferutil: 4.0.8
       utf-8-validate: 5.0.10
 
+  ws@8.17.1(bufferutil@4.0.8)(utf-8-validate@5.0.10):
+    optionalDependencies:
+      bufferutil: 4.0.8
+      utf-8-validate: 5.0.10
+
   y18n@4.0.3: {}
 
   yaeti@0.0.6: {}
@@ -11902,3 +12120,10 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   zod@3.23.8: {}
+
+  zustand@4.4.1(@types/react@18.3.3)(react@18.3.1):
+    dependencies:
+      use-sync-external-store: 1.2.0(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.3
+      react: 18.3.1

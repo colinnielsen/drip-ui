@@ -1,11 +1,25 @@
+import { formatUnits } from 'viem';
 import { Label2 } from './ui/typography';
+import { prettyFormatPrice } from '@/lib/utils';
+import { SupportedCurrency } from '@/data-model/_common/type/CommonType';
 
-export function Price({ price }: { price: number }) {
+export function Price({
+  currency,
+  price,
+  currencyDecimals,
+}: {
+  currency: SupportedCurrency;
+  price: string | bigint;
+  currencyDecimals: number;
+}) {
+  const isUSDC = currency === 'usdc';
+  const displayPrice = prettyFormatPrice(price, currencyDecimals, isUSDC);
+
   return (
     <div className="flex items-center gap-1">
-      <UsdcSVG />
+      {isUSDC && <UsdcSVG />}
       <Label2 as="span" className="font-normal text-sm text-primary-gray">
-        {price.toFixed(2)}
+        {displayPrice}
       </Label2>
     </div>
   );

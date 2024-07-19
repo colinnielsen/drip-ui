@@ -2,7 +2,7 @@ import { PrivyDID } from '@/data-model/_external/privy';
 import { User } from '@/data-model/user/UserType';
 import { database } from '@/infras/database';
 import privy from '@/lib/privy';
-import { getSessionId } from '@/lib/session';
+import { retreiveOrGenerateSessionId } from '@/lib/session';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 /**
@@ -17,14 +17,13 @@ export default async function identify(
     return res.status(405).json({ error: 'Method not allowed' });
 
   const privyLoginToken = req.cookies['privy-token'];
-  const sessionId = getSessionId(req, res);
+  const sessionId = retreiveOrGenerateSessionId(req, res);
 
   // if they have never used the app or cleared their cookies
-  if (!privyLoginToken && !sessionId) {
+  if (!privyLoginToken) {
     const sessionUser = await database.users.getOrCreateSessionUser(sessionId);
     return res.status(200).json(sessionUser);
   }
-
   // privy is the first class citizen
   if (privyLoginToken) {
     const verifResponse = await privy

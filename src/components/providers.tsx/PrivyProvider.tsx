@@ -13,12 +13,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
           theme: 'light',
           accentColor: '#446144',
           logo: '/drip.jpg',
-          walletList: [
-            'coinbase_wallet',
-            'rainbow',
-            'rabby_wallet',
-            'detected_wallets',
-          ],
+          walletList: ['coinbase_wallet', 'rainbow', 'detected_wallets'],
         },
         // Create embedded wallets for users who don't have a wallet
         embeddedWallets: {

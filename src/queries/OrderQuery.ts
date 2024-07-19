@@ -44,7 +44,33 @@ export const useAddToCart = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        data: { shopId, orderItems: itemArray },
+        data: { action: 'add', shopId, orderItems: itemArray },
+        withCredentials: true,
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [CART_QUERY_KEY] }),
+  });
+};
+
+export const useRemoveItemFromCart = ({
+  orderItemId,
+  userId,
+  shopId,
+}: {
+  orderItemId: UUID;
+  userId: UUID;
+  shopId: UUID;
+}) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () =>
+      axiosFetcher<Order>(`/api/orders/cart?userId=${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: { action: 'delete', orderItemId, shopId },
         withCredentials: true,
       }),
     onSuccess: () =>

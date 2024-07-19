@@ -4,9 +4,9 @@ import { HomeSvg, MapSvg, ProfileSvg } from './icons';
 
 export function Footer() {
   return (
-    <footer className="fixed bottom-0 w-full">
+    <footer className="fixed bottom-0 w-full shadow-lg">
       <CartFooter />
-      <div className="flex justify-between bg-white py-4">
+      <div className="flex justify-between bg-background py-4">
         <Link href="/" className="flex justify-center w-1/3">
           <HomeSvg />
         </Link>

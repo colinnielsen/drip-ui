@@ -1,0 +1,115 @@
+{
+  "7a4e895f-f05a-476d-b7bf-0843f8b15571": {
+    "id": "7a4e895f-f05a-476d-b7bf-0843f8b15571",
+    "shop": "5754d31d-a689-56b2-87f8-4f13f9ac4954",
+    "user": "7c05dc2a-cd8d-4804-a000-7bf372cb8c31",
+    "status": "pending",
+    "timestamp": "2024-07-18T22:34:23.503Z",
+    "orderItems": [
+      {
+        "id": "a3e8f6c5-e4fe-4e3d-9273-8bcd35e839bd",
+        "item": {
+          "id": "966829fe-e0cb-52b3-8f4f-208f6a2b233b",
+          "sliceId": "678",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/805/products/espressopng_wh8ywrmf.png",
+          "name": "Espresso",
+          "price": "2000000",
+          "prettyPrice": "2",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "841aaa67-376f-5857-9d96-695074225262",
+              "sliceId": "2222",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "abfe283c-e688-5b99-8566-0c8f496f738f",
+              "sliceId": "2223",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "537c7e5d-4526-5444-a3e2-2c50e4c49004",
+              "sliceId": "2224",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      },
+      {
+        "id": "be844422-4f83-441e-b2f2-f7f3a500f129",
+        "item": {
+          "id": "966829fe-e0cb-52b3-8f4f-208f6a2b233b",
+          "sliceId": "678",
+          "description": "",
+          "image": "https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/805/products/espressopng_wh8ywrmf.png",
+          "name": "Espresso",
+          "price": "2000000",
+          "prettyPrice": "2",
+          "currency": "usdc",
+          "currencyDecimals": 6,
+          "availability": "onsite-only",
+          "category": null,
+          "mods": [
+            {
+              "id": "841aaa67-376f-5857-9d96-695074225262",
+              "sliceId": "2222",
+              "name": "No Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "abfe283c-e688-5b99-8566-0c8f496f738f",
+              "sliceId": "2223",
+              "name": "Whole Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            },
+            {
+              "id": "537c7e5d-4526-5444-a3e2-2c50e4c49004",
+              "sliceId": "2224",
+              "name": "Oat Milk",
+              "type": "exclusive",
+              "price": "0",
+              "prettyPrice": "0",
+              "currency": "usdc",
+              "currencyDecimals": 6,
+              "isOptional": true
+            }
+          ]
+        },
+        "mods": []
+      }
+    ]
+  }
+}

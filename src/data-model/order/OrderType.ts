@@ -3,6 +3,14 @@ import { Item, ItemMod } from '../item/ItemType';
 
 export type OrderStatus = 'pending' | 'in-progress' | 'complete';
 
+export const DRIP_TIP_ITEM_NAME = '__drip-tip';
+
+export type OrderItem = {
+  id: UUID;
+  item: Item;
+  mods: ItemMod[];
+};
+
 export type Order = {
   id: UUID;
   status: OrderStatus;
@@ -14,19 +22,3 @@ export type Order = {
   /** The items the user ordered */
   orderItems: OrderItem[];
 };
-
-export type OrderItem = {
-  id: UUID;
-  item: Item;
-  mods: ItemMod[];
-};
-
-//
-//// DTO
-//
-
-export const isPending = (o: Order) => o.status === 'pending';
-
-export const isInProgress = (o: Order) => o.status === 'in-progress';
-
-export const isComplete = (o: Order) => o.status === 'complete';

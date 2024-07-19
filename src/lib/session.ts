@@ -4,7 +4,7 @@ import { generateUUID, isProd } from './utils';
 
 export const SESSION_COOKIE_NAME = 'session_id';
 
-export const getSessionId = (
+export const retreiveOrGenerateSessionId = (
   req: NextApiRequest,
   res: NextApiResponse,
 ): UUID => {

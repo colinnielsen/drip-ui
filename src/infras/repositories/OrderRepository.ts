@@ -1,37 +1,21 @@
-import { FAKE_DB_SLEEP_MS } from '@/data-model/__global/constants';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import {
   OrderRepository,
   UpdateOrderOperation,
 } from '@/data-model/order/OrderRepository';
 import { Order, OrderItem, isPending } from '@/data-model/order/OrderType';
-import { sleep } from '@/lib/utils';
 import { UUID } from 'crypto';
 import { v4 } from 'uuid';
-import fs from 'fs';
+import { JSONRepository } from './JSONRepository';
 
 const FILE_PATH = 'orders.json';
 
-export class JSONOrderRepository implements OrderRepository {
-  private async readFromFile(): Promise<Record<UUID, Order>> {
-    try {
-      if (!fs.existsSync(FILE_PATH)) return {};
-      await sleep(FAKE_DB_SLEEP_MS);
-      const data = fs.readFileSync(FILE_PATH, 'utf-8');
-      return JSON.parse(data);
-    } catch (error) {
-      console.error('Error reading data from file:', error);
-      return {};
-    }
-  }
-
-  private async writeToFile(data: Record<UUID, Order>) {
-    try {
-      await sleep(FAKE_DB_SLEEP_MS);
-      fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2), 'utf-8');
-    } catch (error) {
-      console.error('Error writing data to file:', error);
-    }
+export class JSONOrderRepository
+  extends JSONRepository<Order>
+  implements OrderRepository
+{
+  constructor() {
+    super(FILE_PATH);
   }
 
   async findById(id: UUID): Promise<Order | null> {
@@ -78,22 +62,26 @@ export class JSONOrderRepository implements OrderRepository {
 
       switch (op.__type) {
         case 'add':
-          if (Array.isArray(op.item))
+          if (Array.isArray(op.orderItem))
             order.orderItems = [
               ...order.orderItems,
-              ...op.item.map<OrderItem>(o => ({ id: v4() as UUID, ...o })),
+              ...op.orderItem.map<OrderItem>(o => ({ id: v4() as UUID, ...o })),
             ];
-          else order.orderItems.push({ id: v4() as UUID, ...op.item });
+          else order.orderItems.push({ id: v4() as UUID, ...op.orderItem });
           break;
         case 'delete':
-          orderItemId = order.orderItems.findIndex(o => o.id === op.itemId);
+          orderItemId = order.orderItems.findIndex(
+            o => o.id === op.orderItemId,
+          );
           if (orderItemId === -1) throw Error('bad order id');
           order.orderItems.splice(orderItemId, 1);
           break;
         case 'update':
-          orderItemId = order.orderItems.findIndex(o => o.id === op.itemId);
+          orderItemId = order.orderItems.findIndex(
+            o => o.id === op.orderItemId,
+          );
           if (orderItemId === -1) throw Error('bad order id');
-          order.orderItems[orderItemId] = op.item;
+          order.orderItems[orderItemId] = op.orderItem;
           break;
         default:
           let _err: never;

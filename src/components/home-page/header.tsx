@@ -10,7 +10,7 @@ export function Search() {
       <Input
         type="search"
         placeholder="Search for coffee shops"
-        className="pl-10 rounded-3xl w-full bg-neutral-100"
+        className="pl-10 rounded-3xl w-full bg-light-gray text-primary-gray"
         value={search}
         onChange={e => setSearch(e.target.value)}
       />
@@ -21,7 +21,9 @@ export function Search() {
 export function HomePageHeader() {
   return (
     <header className="flex flex-col p-6 pb-2 gap-6">
-      <h1 className="font-semibold font-drip text-4xl">Drip</h1>
+      <h1 className="font-semibold font-drip text-4xl text-secondary-pop">
+        Drip
+      </h1>
       <Search />
     </header>
   );

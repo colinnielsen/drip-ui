@@ -8,7 +8,7 @@ export default function Home() {
   const { data: shops, isLoading, error } = useShops();
 
   return (
-    <div className="flex flex-col gap-5 pb-32 bg-red bg-background">
+    <div className="flex flex-col gap-5 pb-32">
       <HomePageHeader />
       {/* <div className="w-screen max-h-64 overflow-hidden">
         <Image src={map} alt="coffee" />

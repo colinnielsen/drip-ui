@@ -3,9 +3,9 @@ import { Order, OrderItem } from './OrderType';
 import { Unsaved } from '../_common/type/CommonType';
 
 export type UpdateOrderOperation =
-  | { __type: 'add'; item: Unsaved<OrderItem> | Unsaved<OrderItem>[] }
-  | { __type: 'delete'; itemId: UUID }
-  | { __type: 'update'; itemId: UUID; item: OrderItem };
+  | { __type: 'add'; orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[] }
+  | { __type: 'delete'; orderItemId: UUID }
+  | { __type: 'update'; orderItemId: UUID; orderItem: OrderItem };
 
 export type OrderRepository = {
   findById: (orderId: UUID) => Promise<Order | null>;

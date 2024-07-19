@@ -1,4 +1,5 @@
 import { database } from '@/infras/database';
+import { never } from '@/lib/utils';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -18,7 +19,7 @@ export default async function handler(
     case 'GET':
       return handleGetCart(res, userUUID);
     case 'POST':
-      return handleAddToCart(req, res, userUUID);
+      return handleUpdateCart(req, res, userUUID);
     case 'DELETE':
       return handleClearCart(res, userUUID);
     default:
@@ -36,25 +37,38 @@ async function handleGetCart(res: NextApiResponse, userId: UUID) {
   }
 }
 
-async function handleAddToCart(
+async function handleUpdateCart(
   req: NextApiRequest,
   res: NextApiResponse,
   userId: UUID,
 ) {
-  const { shopId, orderItems } = req.body;
-  if (!shopId || !orderItems) {
-    return res.status(400).json({ error: 'Missing shopId or orderItem' });
+  const { action, shopId } = req.body;
+  if (!shopId || !action) {
+    return res.status(400).json({ error: 'Missing shopId or action' });
   }
 
   try {
     const maybeCart = await database.orders.getActiveUserOrder(userId);
-    const updatedCart = maybeCart
-      ? await database.orders.update(maybeCart.id, [
-          { __type: 'add', item: orderItems },
-        ])
-      : await database.orders.save(shopId, userId, orderItems);
+    if (action === 'add') {
+      const { orderItems } = req.body;
+      const updatedCart = maybeCart
+        ? await database.orders.update(maybeCart.id, [
+            { __type: 'add', orderItem: orderItems },
+          ])
+        : await database.orders.save(shopId, userId, orderItems);
+      return res.status(200).json(updatedCart);
+    }
+    if (action === 'delete') {
+      if (!maybeCart) return res.status(500).json({ error: 'Cart not found' });
 
-    return res.status(200).json(updatedCart);
+      const { orderItemId } = req.body;
+      const updatedCart = await database.orders.update(maybeCart.id, [
+        { __type: 'delete', orderItemId },
+      ]);
+      return res.status(200).json(updatedCart);
+    }
+
+    return never('Invalid action');
   } catch (error) {
     console.error('Error adding to cart:', error);
     return res.status(500).json({ error: 'Failed to add to cart' });

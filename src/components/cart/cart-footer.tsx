@@ -7,7 +7,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { Order } from '@/data-model/order/OrderType';
+import { Order, OrderItem } from '@/data-model/order/OrderType';
 import { TESTING_USER_UUID } from '@/data-model/user/UserType';
 import { useCart } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
@@ -17,11 +17,36 @@ import { Fragment, useState } from 'react';
 import { Divider } from '../ui/divider';
 import { Headline, Label2, Title1 } from '../ui/typography';
 import { Skeleton } from '../ui/skeleton';
+import { useActiveUser } from '@/queries/UserQuery';
+import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
+import { cn } from '@/lib/utils';
+import { AddTipSection } from './add-tip';
+import { OrderSummary } from './Summary';
 
 const DynamicCheckoutFlow = dynamic(() => import('./checkout-flow'), {
   ssr: false,
   loading: () => <Skeleton className="h-12 w-full rounded-lg" />,
 });
+
+/**
+ * @dev if a cart item has the same id and the same mods, then it can be squashed with a quantity
+ */
+function collapseDuplicateItems(orderItems: OrderItem[]) {
+  const itemMap = new Map<string, [OrderItem, number]>();
+
+  orderItems.forEach(orderItem => {
+    const allIds = [
+      orderItem.item.id,
+      ...orderItem.mods.map(mod => mod.id),
+    ].sort();
+    const key = allIds.join('-');
+    console.log(key);
+    if (itemMap.has(key)) itemMap.get(key)![1] += 1;
+    else itemMap.set(key, [orderItem, 1]);
+  });
+
+  return Array.from(itemMap.values());
+}
 
 export const CartDrawer = ({
   cart,
@@ -30,8 +55,12 @@ export const CartDrawer = ({
   cart: Order;
   drawerOpen: boolean;
 }) => {
+  const { data: user } = useActiveUser();
   const { data: shop } = useShop(cart.shop);
-  if (!shop) return null;
+
+  if (!shop || !user) return null;
+
+  const orderItems = collapseDuplicateItems(cart.orderItems);
 
   return (
     <>
@@ -62,25 +91,44 @@ export const CartDrawer = ({
       </DrawerTrigger>
 
       <DrawerContent
-        className="flex flex-col px-6 h-full bg-background"
+        className={cn(
+          'flex flex-col h-full ',
+          CSS_FONT_CLASS_CONFIG,
+          'bg-background-card',
+        )}
         aria-describedby="cart-footer"
       >
         <DrawerClose asChild>
-          <div className="flex justify-start h-14 w-full items-center">
+          <div className="flex justify-start h-14 w-full items-center px-6">
             <X height={24} width={24} />
           </div>
         </DrawerClose>
+
         <DrawerTitle>
-          <Title1 as="div">{shop.label}</Title1>
+          <Title1 as="div" className="text-palette-foreground px-6">
+            {shop.label}
+          </Title1>
         </DrawerTitle>
+
         <div className="flex flex-col gap-6 pt-4">
-          {cart.orderItems.map((item, index) => (
+          {orderItems.map(([orderItem, quantity], index) => (
             <Fragment key={index}>
-              <CartItem key={index} item={item} />
+              <CartItem
+                {...{ orderItem, quantity, shopId: shop.id, userId: user.id }}
+              />
               <Divider />
             </Fragment>
           ))}
         </div>
+
+        <AddTipSection cart={cart} shopId={shop.id} userId={user.id} />
+
+        <Divider />
+
+        <OrderSummary cart={cart} />
+
+        <Divider />
+
         <DrawerFooter>{drawerOpen && <DynamicCheckoutFlow />}</DrawerFooter>
       </DrawerContent>
     </>
@@ -91,7 +139,7 @@ export default function () {
   const { data: cart } = useCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  if (!cart) return null;
+  if (!cart || !cart.orderItems.length) return null;
   return (
     <Drawer
       key={'drawer'}

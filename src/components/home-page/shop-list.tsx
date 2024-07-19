@@ -30,8 +30,8 @@ export function ShopCard({
           <Headline>{label}</Headline>
           <div className="flex items-center gap-x-2 text-primary-gray">
             <Label2>tbd mi</Label2>
-            <div className="rounded-full h-0.5 w-0.5 bg-primary-gray" />
-            <Label2>tbd district</Label2>
+            {/* <div className="rounded-full h-0.5 w-0.5 bg-primary-gray" />
+            <Label2>tbd district</Label2> */}
           </div>
           <div className="flex items-center gap-x-1">
             <Coffee />

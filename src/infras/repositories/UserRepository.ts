@@ -1,35 +1,19 @@
-import { FAKE_DB_SLEEP_MS } from '@/data-model/__global/constants';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { PrivyDID } from '@/data-model/_external/privy';
 import { mapToSessionUser } from '@/data-model/user/UserDTO';
 import { UserRepository } from '@/data-model/user/UserRepository';
 import { SavedUser, SessionUser, User } from '@/data-model/user/UserType';
-import { sleep } from '@/lib/utils';
 import { UUID } from 'crypto';
-import fs from 'fs';
+import { JSONRepository } from './JSONRepository';
 
 const FILE_PATH = 'users.json';
 
-export class JSONUserRepository implements UserRepository {
-  private async readFromFile(): Promise<Record<UUID, User>> {
-    try {
-      if (!fs.existsSync(FILE_PATH)) return {};
-      await sleep(FAKE_DB_SLEEP_MS);
-      const data = fs.readFileSync(FILE_PATH, 'utf-8');
-      return JSON.parse(data);
-    } catch (error) {
-      console.error('Error reading data from file:', error);
-      return {};
-    }
-  }
-
-  private async writeToFile(data: Record<UUID, User>) {
-    try {
-      await sleep(FAKE_DB_SLEEP_MS);
-      fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2), 'utf-8');
-    } catch (error) {
-      console.error('Error writing data to file:', error);
-    }
+export class JSONUserRepository
+  extends JSONRepository<User>
+  implements UserRepository
+{
+  constructor() {
+    super(FILE_PATH);
   }
 
   async findById<U extends User['__type']>(id: UUID, type?: U) {

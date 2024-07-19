@@ -5,10 +5,10 @@ import { useActiveUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import { ItemWithSelector } from './item';
 
-const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
+export const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-5 w-full overflow-x-auto">
     {Array.from({ length: count }).map((_, index) => (
-      <div className="flex flex-col gap-2 bg-white" key={index}>
+      <div className="flex flex-col gap-2" key={index}>
         <Skeleton className="h-36 w-36 flex-shrink-0" />
         <div className="flex flex-col gap-1">
           <Skeleton className="h-4 w-3/4" />
@@ -39,7 +39,7 @@ export function ItemList({
     return (
       <div className="flex flex-col">
         <div className="py-3">
-          <h2 className="text-lg font-normal">{title}</h2>
+          <h2 className="text-lg font-normal capitalize">{title}</h2>
         </div>
         <ItemSkeleton />
       </div>
@@ -49,7 +49,7 @@ export function ItemList({
   return (
     <div className="flex flex-col">
       <div className="py-3">
-        <h2 className="text-lg font-normal">{title}</h2>
+        <h2 className="text-lg font-normal capitalize">{title}</h2>
       </div>
       <div
         className={cn(

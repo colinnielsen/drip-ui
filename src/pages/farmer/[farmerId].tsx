@@ -1,5 +1,6 @@
 import { FarmerDetails, FarmerHeader } from '@/components/FarmerHeader';
-import { database } from '@/infras/database';
+import { Farmer } from '@/data-model/farmer/FarmerType';
+import { axiosFetcher } from '@/lib/utils';
 import { useFarmer } from '@/queries/FarmerQuery';
 import { UUID } from 'crypto';
 import { GetStaticPaths } from 'next';
@@ -15,7 +16,7 @@ import { GetStaticPaths } from 'next';
 
 export const getStaticPaths = (async () => {
   return {
-    paths: (await database.farmers.findAll()).map(farmer => ({
+    paths: (await axiosFetcher<Farmer[]>('/api/farmers')).map(farmer => ({
       params: { farmerId: farmer.id },
     })),
     fallback: true,

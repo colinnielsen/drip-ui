@@ -1,8 +1,7 @@
 import FarmerCard from '@/components/shop-page/farmer-intro-card';
 import { ItemList } from '@/components/shop-page/item-list';
 import { ShopHeader, ShopHeaderDetails } from '@/components/shop-page/header';
-import { Shop } from '@/data-model/shop/ShopType';
-import { STATIC_SHOP_DATA } from '@/infras/static-data/StaticShopData';
+import { Menu, Shop } from '@/data-model/shop/ShopType';
 import { farmerQuery } from '@/queries/FarmerQuery';
 import { shopQuery, useShop } from '@/queries/ShopQuery';
 import {
@@ -13,17 +12,20 @@ import {
 } from '@tanstack/react-query';
 import { UUID } from 'crypto';
 import { GetStaticPaths, GetStaticProps } from 'next/types';
+import { ONBOARDED_SHOPS } from '@/lib/constants';
+import { mapSliceStoreIdToShopId } from '@/data-model/shop/ShopDTO';
+import { ItemCategory } from '@/data-model/item/ItemType';
 
 ///
 ///// STATIC SITE GENERATION
 ///
 
-const STATIC_PAGE_DATA = STATIC_SHOP_DATA.map(c => ({
-  __type: c.__type,
-  id: c.id,
-  label: c.label,
-  backgroundImage: c.backgroundImage,
-  logo: c.logo,
+const STATIC_PAGE_DATA = ONBOARDED_SHOPS.map(c => ({
+  __type: 'storefront',
+  id: mapSliceStoreIdToShopId(c.sliceId, 1),
+  label: c.name,
+  backgroundImage: c.backgroundImage ?? '',
+  logo: c.logo ?? '',
   location: 'location' in c ? c.location : null,
 }));
 
@@ -70,34 +72,47 @@ export const getStaticProps: GetStaticProps<{
 function DynamicShopPage(staticShop: StaticPageData) {
   const { data: shop, error, isLoading } = useShop(staticShop.id);
 
-  // return <FarmerLoadingCard />
   if (error) return <div className="text-red-500">{error.message}</div>;
+
+  const emptyMenu = {
+    espresso: [],
+    coffee: [],
+    other: [],
+  };
+
+  const items = Object.entries(shop?.menu || emptyMenu).filter(([_, items]) =>
+    isLoading ? true : items.length > 0,
+  );
+  console.log(items);
 
   return (
     <>
-      <FarmerCard
-        farmer={shop?.farmerAllocations[0]?.farmer}
-        allocationBPS={shop?.farmerAllocations[0]?.allocationBPS}
-        isLoading={isLoading}
-      />
+      {shop?.farmerAllocations?.length ? (
+        <FarmerCard
+          farmer={shop?.farmerAllocations[0]?.farmer}
+          allocationBPS={shop?.farmerAllocations[0]?.allocationBPS}
+          isLoading={isLoading}
+        />
+      ) : null}
       {/* <ItemCarousel
             data={allocations}
             renderFn={(f, i) => }
           /> */}
-      <ItemList
-        title="Espresso"
-        category="espresso"
-        horizontal
-        shopId={shop?.id}
-        items={shop?.menu['espresso']}
-      />
-      <ItemList
-        title="Coffee"
-        category="coffee"
-        horizontal
-        shopId={shop?.id}
-        items={shop?.menu['coffee']}
-      />
+      {shop && items.length === 0 && (
+        <div className="text-center text-gray-500">
+          No items available at this time
+        </div>
+      )}
+      {items.map(([category, items]) => (
+        <ItemList
+          key={category}
+          title={category}
+          category={category as ItemCategory}
+          horizontal
+          shopId={shop?.id}
+          items={items}
+        />
+      ))}
     </>
   );
 }

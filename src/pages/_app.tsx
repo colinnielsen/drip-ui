@@ -1,11 +1,10 @@
-import '../styles/globals.css';
+import { Footer } from '@/components/Footer';
 import { ReactQueryClientProvider } from '@/components/providers.tsx/ReactQueryClientProvider';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { cn } from '@/lib/utils';
 import { AppProps } from 'next/app';
 import { EB_Garamond, Libre_Franklin, Roboto_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
-import { Footer } from '@/components/Footer';
+import '../styles/globals.css';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -25,6 +24,14 @@ const diaryNotes = localFont({
   variable: '--font-diary-notes',
 });
 
+export const CSS_FONT_CLASS_CONFIG = cn(
+  'antialiased',
+  diaryNotes.variable,
+  garamond.variable,
+  `${libreFranklin.variable} font-sans`,
+  `${robotoMono.variable}`,
+);
+
 /* export const metadata: Metadata = {
  *   title: "Drip Coffee",
  *   description: "Onchain coffee breh",
@@ -35,18 +42,15 @@ export default function App({ Component, pageProps }: AppProps) {
     <ReactQueryClientProvider>
       <div
         className={cn(
-          'antialiased',
-          diaryNotes.variable,
-          garamond.variable,
-          `${libreFranklin.variable} font-sans`,
-          `${robotoMono.variable}`,
+          CSS_FONT_CLASS_CONFIG,
+          'bg-background',
+          'min-h-screen',
           // 'prose',
         )}
       >
         <Component {...pageProps} />
         <Footer />
       </div>
-      <ReactQueryDevtools initialIsOpen={false} />
     </ReactQueryClientProvider>
   );
 }

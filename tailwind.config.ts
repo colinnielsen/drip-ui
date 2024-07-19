@@ -27,8 +27,9 @@ const config: Config = {
         white: '#FFFFFF',
         'secondary-background': '#EFE8DB',
         'secondary-pop': '#446144',
-        background: '#F3F1EC',
+        background: '#FBFBFB',
         'background-card': '#F9F9F9',
+        'palette-foreground': '#0A0B0D',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

@@ -1,81 +1,86 @@
 // src/infrastructure/repositories/implementations/InMemoryShopRepository.ts
+import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { ShopRepository } from '@/data-model/shop/ShopRepository';
 import { Shop } from '@/data-model/shop/ShopType';
 import { UUID } from 'crypto';
-import { STATIC_SHOP_DATA } from '../static-data/StaticShopData';
-import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
-import { validate } from 'uuid';
-import { sleep } from '@/lib/utils';
-import { FAKE_DB_SLEEP_MS } from '@/data-model/__global/constants';
+import { JSONRepository } from './JSONRepository';
 
-export class InMemoryShopRepository implements ShopRepository {
-  private shops: Map<UUID, Shop> = new Map();
+const FILE_PATH = 'shops.json';
 
+export class JSONShopRepository
+  extends JSONRepository<Shop>
+  implements ShopRepository
+{
   constructor() {
-    this.shops = new Map();
-    STATIC_SHOP_DATA.forEach(shop => this.shops.set(shop.id, shop));
+    super(FILE_PATH);
   }
 
   async findById(id: UUID): Promise<Shop | null> {
-    await sleep(FAKE_DB_SLEEP_MS);
-    return this.shops.get(id) || null;
+    const data = await this.readFromFile();
+    return data[id] || null;
   }
 
   async findAll(): Promise<Shop[]> {
-    await sleep(FAKE_DB_SLEEP_MS);
-    return Array.from(this.shops.values());
+    const data = await this.readFromFile();
+    return Object.values(data);
   }
 
   async findItem(shopId: UUID, nameOrID: UUID | string): Promise<Item | null> {
-    const shop = await this.findById(shopId);
-    if (!shop) return null;
+    throw new Error('unimplemented');
+    // const shop = await this.findById(shopId);
+    // if (!shop) return null;
 
-    const isFindByName = !validate(nameOrID);
-    const items = Object.values(shop.menu).flat();
+    // const isFindByName = !validate(nameOrID);
+    // const items = Object.values(shop.menu).flat();
 
-    return (
-      items.find(item =>
-        isFindByName ? item.name === nameOrID : item.id === nameOrID,
-      ) || null
-    );
+    // return (
+    //   items.find(item =>
+    //     isFindByName ? item.name === nameOrID : item.id === nameOrID,
+    //   ) || null
+    // );
   }
 
-  async findCategoryOptions(
-    id: UUID,
-    category: ItemCategory,
-  ): Promise<Map<ItemCategory, ItemMod[]> | null> {
-    const shop = await this.findById(id);
-    if (!shop) return null;
+  // async findCategoryOptions(
+  //   id: UUID,
+  //   category: ItemCategory,
+  // ): Promise<Map<ItemCategory, ItemMod[]> | null> {
+  //   const shop = await this.findById(id);
+  //   if (!shop) return null;
 
-    const categoryOptions = shop.categoryOptions[category];
-    if (!categoryOptions) {
-      throw new Error(`No category options found for category ${category}`);
-    }
-    const optionMap = new Map<ItemCategory, ItemMod[]>();
+  //   const categoryOptions = shop.categoryOptions[category];
+  //   if (!categoryOptions)
+  //     throw new Error(`No category options found for category ${category}`);
 
-    for (const cat of categoryOptions) {
-      const options = shop.options[cat];
-      if (!options) {
-        throw new Error(`No options found for category ${cat}`);
-      }
-      optionMap.set(cat, options);
-    }
+  //   const optionMap = new Map<ItemCategory, ItemMod[]>();
 
-    return optionMap;
-  }
+  //   for (const cat of categoryOptions) {
+  //     const options = shop.options[cat];
+  //     if (!options) throw new Error(`No options found for category ${cat}`);
+  //     optionMap.set(cat, options);
+  //   }
+
+  //   return optionMap;
+  // }
 
   async getItemMods(shopId: UUID, itemId: UUID): Promise<ItemMod[]> {
-    throw Error('unimplemented');
+    // throw Error('unimplemented');
 
     const item = await this.findItem(shopId, itemId);
     if (!item) throw Error('findItemMods() > item not found');
+    return item.mods;
   }
 
-  async save(shop: Shop): Promise<void> {
-    this.shops.set(shop.id as UUID, shop);
+  async save(shop: Shop): Promise<Shop> {
+    const data = await this.readFromFile();
+    data[shop.id] = shop;
+    await this.writeToFile(data);
+    return shop;
   }
 
   async delete(id: UUID): Promise<void> {
-    this.shops.delete(id);
+    const data = await this.readFromFile();
+    if (!data[id]) throw Error('could not delete');
+    delete data[id];
+    await this.writeToFile(data);
   }
 }

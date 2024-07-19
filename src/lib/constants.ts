@@ -5,6 +5,38 @@ export const USDC_ADDRESS_BASE =
 
 export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   {
+    sliceId: 799,
+    sliceVersion: 1,
+    location: [32.3792, 86.3077],
+    name: 'Prevail Coffee (Montomery)',
+    logo: '/prevail.png',
+    url: 'https://prevailcoffee.com/',
+    backgroundImage: '/prevail-background.jpg',
+    farmerAllocation: [
+      {
+        allocationBPS: 300,
+        farmer: '2-2-3-4-5',
+        id: '2-2-3-4-5',
+      },
+    ],
+  },
+  {
+    sliceId: 827,
+    sliceVersion: 1,
+    location: [37.8044, 122.2712],
+    name: 'Bicycle Coffee Co',
+    logo: '/bicycle-coffee.png',
+    url: 'https://www.bicyclecoffeeco.com',
+    backgroundImage: '/bicycle-background.jpg',
+    farmerAllocation: [
+      {
+        allocationBPS: 300,
+        farmer: '2-2-3-4-5',
+        id: '2-2-3-4-5',
+      },
+    ],
+  },
+  {
     sliceId: 805,
     sliceVersion: 1,
     location: [35.681236, 139.767173],
@@ -19,14 +51,6 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
         id: '2-2-3-4-5',
       },
     ],
-  },
-  {
-    sliceId: 769,
-    sliceVersion: 1,
-    location: [35.681236, 139.767173],
-    name: 'Test Cafe',
-    logo: '/cha-cha-logo.jpg',
-    backgroundImage: '/cha-cha.jpg',
   },
 ];
 

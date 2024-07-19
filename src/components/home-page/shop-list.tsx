@@ -29,7 +29,7 @@ export function ShopCard({
         <div className="flex flex-col gap-y-1">
           <Headline>{label}</Headline>
           <div className="flex items-center gap-x-2 text-primary-gray">
-            <Label2>tbd mi</Label2>
+            <Label2>Atlanta, GA</Label2>
             {/* <div className="rounded-full h-0.5 w-0.5 bg-primary-gray" />
             <Label2>tbd district</Label2> */}
           </div>

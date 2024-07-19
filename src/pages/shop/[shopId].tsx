@@ -125,7 +125,7 @@ export default function StaticShopPage(
   ...dehydratedState: DehydratedState[]
 ) {
   return (
-    <main className="flex flex-col mb-32">
+    <main className="flex flex-col pb-40">
       <HydrationBoundary state={dehydratedState}>
         <ShopHeader {...staticShop} />
         <div className="p-5 px-6 flex flex-col gap-5">

@@ -15,6 +15,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'slice.so',
+        port: '',
+        pathname: '/_next/**',
+      },
     ],
   },
   // webpack: (config, { isServer }) => {

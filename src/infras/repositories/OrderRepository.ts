@@ -3,10 +3,11 @@ import {
   OrderRepository,
   UpdateOrderOperation,
 } from '@/data-model/order/OrderRepository';
-import { Order, OrderItem, isPending } from '@/data-model/order/OrderType';
+import { Order, OrderItem } from '@/data-model/order/OrderType';
 import { UUID } from 'crypto';
 import { v4 } from 'uuid';
 import { JSONRepository } from './JSONRepository';
+import { isPending } from '@/data-model/order/OrderDTO';
 
 const FILE_PATH = 'orders.json';
 

@@ -5,7 +5,7 @@ import { ItemRepository } from '@/data-model/item/ItemRepository';
 import { mapSliceStoreToShop } from '@/data-model/shop/ShopDTO';
 import { ShopRepository } from '@/data-model/shop/ShopRepository';
 import { ManualStoreConfig } from '@/data-model/shop/ShopType';
-import { sliceKit } from '@/lib/sliceKit';
+import { sliceKit } from '@/lib/slice';
 
 export class SyncService {
   constructor(

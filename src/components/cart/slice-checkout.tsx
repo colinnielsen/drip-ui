@@ -1,6 +1,6 @@
 import { Order } from '@/data-model/order/OrderType';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
-import { sliceKit } from '@/lib/sliceKit';
+import { sliceKit } from '../../lib/sliceKit';
 import { ACTIVE_USER_QUERY_KEY, useActiveUser } from '@/queries/UserQuery';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useQueryClient } from '@tanstack/react-query';

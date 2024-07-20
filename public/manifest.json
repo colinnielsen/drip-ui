@@ -1,0 +1,16 @@
+{
+  "name": "Drip",
+  "short_name": "Drip",
+  "icons": [
+    {
+      "src": "/drip.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#FFFFFF",
+  "background_color": "#446144",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}

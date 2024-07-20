@@ -9,7 +9,6 @@ import { Headline, Label2, Title1 } from '../ui/typography';
 export function ShopCard(shop: Shop) {
   const { label, backgroundImage, farmerAllocations, id } = shop;
   const allocationTotal = getTotalAllocationBPS(farmerAllocations);
-
   return (
     <Link href={`/shop/${id}`}>
       <div className="flex flex-col gap-4">

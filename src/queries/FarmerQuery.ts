@@ -13,7 +13,6 @@ export const useFarmers = () =>
   });
 
 export const farmerQuery = (id?: UUID, enabled: boolean = true) => {
-  console.log(id);
   return {
     queryKey: ['farmer', id],
     queryFn: () => axiosFetcher<Farmer>(`/api/farmers/${id}`),

@@ -1,5 +1,8 @@
+import { createFarmer } from '@/data-model/farmer/FarmerDTO';
+import { Farmer } from '@/data-model/farmer/FarmerType';
 import { ManualStoreConfig } from '@/data-model/shop/ShopType';
-import { createClient, getContract, http } from 'viem';
+import { UUID } from 'crypto';
+import { createClient, getContract, http, zeroAddress } from 'viem';
 import { base } from 'viem/chains';
 
 export const USDC_ADDRESS_BASE =
@@ -40,6 +43,34 @@ export const USDC_INSTANCE = getContract({
   client: BASE_CLIENT,
 });
 
+export const STATIC_FARMER_DATA: Farmer[] = [
+  createFarmer({
+    id: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
+    name: 'Gilgamesh',
+    image: '/farmer1.jpg',
+    shortDescription: 'The oldest farmer in the world',
+    infoUrl: 'https://gilgamesh.com',
+    ethAddress: zeroAddress,
+  }),
+  createFarmer({
+    id: 'A1EA7B69-C1D9-463E-BCDB-E3F511B9AE4E',
+    name: 'Richard Stallman',
+    image: '/farmer2.jpg',
+    shortDescription: 'The most free and open source farmer in the world',
+    infoUrl: 'https://fsf.org',
+    ethAddress: zeroAddress,
+  }),
+  createFarmer({
+    id: 'FE56D758-8379-4565-A192-B87DDF316013',
+    name: 'Stichard Rallman',
+    image: '/farmer3.jpg',
+    shortDescription:
+      'The least free and open source farmer in the world. Hates freedom.',
+    infoUrl: 'https://fsf.org',
+    ethAddress: zeroAddress,
+  }),
+];
+
 export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   {
     sliceId: 799,
@@ -56,8 +87,8 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     farmerAllocation: [
       {
         allocationBPS: 300,
-        farmer: '2-2-3-4-5',
-        id: '2-2-3-4-5',
+        farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
+        id: crypto.randomUUID() as UUID,
       },
     ],
   },
@@ -76,8 +107,8 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     farmerAllocation: [
       {
         allocationBPS: 300,
-        farmer: '2-2-3-4-5',
-        id: '2-2-3-4-5',
+        farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
+        id: crypto.randomUUID() as UUID,
       },
     ],
   },
@@ -96,8 +127,8 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     farmerAllocation: [
       {
         allocationBPS: 300,
-        farmer: '2-2-3-4-5',
-        id: '2-2-3-4-5',
+        farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
+        id: crypto.randomUUID() as UUID,
       },
     ],
   },

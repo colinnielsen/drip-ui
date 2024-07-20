@@ -36,7 +36,7 @@ export class SQLOrderRepository implements OrderRepository {
     };
 
     await sql`
-      INSERT INTO orders (id, shop, user, status, timestamp, orderItems)
+      INSERT INTO orders (id, shop, "user", status, timestamp, "orderItems")
       VALUES (${order.id}, ${order.shop}, ${order.user}, ${order.status}, ${order.timestamp}, ${JSON.stringify(order.orderItems)})
     `;
 
@@ -86,7 +86,7 @@ export class SQLOrderRepository implements OrderRepository {
 
     await sql`
       UPDATE orders
-      SET orderItems = ${JSON.stringify(order.orderItems)}
+      SET "orderItems" = ${JSON.stringify(order.orderItems)}
       WHERE id = ${orderId}
     `;
 
@@ -106,7 +106,7 @@ export class SQLOrderRepository implements OrderRepository {
     order.orderItems = [];
     await sql`
       UPDATE orders
-      SET orderItems = ${JSON.stringify(order.orderItems)}
+      SET "orderItems" = ${JSON.stringify(order.orderItems)}
       WHERE id = ${orderId}
     `;
 
@@ -114,7 +114,7 @@ export class SQLOrderRepository implements OrderRepository {
   }
 
   async getOrdersByUserId(userId: UUID): Promise<Order[]> {
-    const result = await sql`SELECT * FROM orders WHERE user = ${userId}`;
+    const result = await sql`SELECT * FROM orders WHERE "user" = ${userId}`;
     return result.rows as Order[];
   }
 

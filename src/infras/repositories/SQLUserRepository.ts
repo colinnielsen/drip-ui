@@ -22,7 +22,7 @@ export class SQLUserRepository implements UserRepository {
 
   async findByPrivyId(id: PrivyDID) {
     const result =
-      await sql`SELECT * FROM users WHERE authServiceId->>'id' = ${id}`;
+      await sql`SELECT * FROM users WHERE "authServiceId"->>'id' = ${id}`;
     const maybeUser = result.rows[0];
     return maybeUser as User | null;
   }
@@ -36,14 +36,14 @@ export class SQLUserRepository implements UserRepository {
 
   async save<T extends User>(user: T): Promise<T> {
     await sql`
-      INSERT INTO users (id, __type, role, authServiceId, wallet, createdAt)
+      INSERT INTO "users" (id, __type, role, "authServiceId", wallet, "createdAt")
       VALUES (${user.id}, ${user.__type}, ${user.role}, ${JSON.stringify(user.authServiceId)}, ${JSON.stringify(user.wallet)}, ${user.createdAt})
       ON CONFLICT (id) DO UPDATE SET
         __type = EXCLUDED.__type,
         role = EXCLUDED.role,
-        authServiceId = EXCLUDED.authServiceId,
+        "authServiceId" = EXCLUDED."authServiceId",
         wallet = EXCLUDED.wallet,
-        createdAt = EXCLUDED.createdAt
+        "createdAt" = EXCLUDED."createdAt"
     `;
     return user as T;
   }

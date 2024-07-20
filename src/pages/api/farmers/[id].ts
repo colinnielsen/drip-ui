@@ -1,5 +1,6 @@
 import { database } from '@/infras/database';
 import { isUUID } from '@/lib/utils';
+import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -11,12 +12,11 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (typeof id !== 'string' || !isUUID(id)) {
+  if (typeof id !== 'string')
     return res.status(400).json({ error: 'Invalid farmerId' });
-  }
 
   try {
-    const farmer = await database.farmers.findById(id);
+    const farmer = await database.farmers.findById(id as UUID);
     if (!farmer) {
       return res.status(404).json({ error: `Farmer with id ${id} not found` });
     }

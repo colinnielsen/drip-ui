@@ -4,7 +4,7 @@ import { FarmerAllocation, Farmer } from './FarmerType';
 export const getTotalAllocationBPS = (
   allocations: FarmerAllocation[],
 ): number => {
-  return allocations.reduce((acc, curr) => curr.allocationBPS + acc, 0);
+  return allocations?.reduce((acc, curr) => curr.allocationBPS + acc, 0);
 };
 
 export const createFarmer = (data: {

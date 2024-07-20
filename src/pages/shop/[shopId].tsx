@@ -84,7 +84,6 @@ function DynamicShopPage(staticShop: StaticPageData) {
   const items = Object.entries(shop?.menu || emptyMenu).filter(([_, items]) =>
     isLoading ? true : items.length > 0,
   );
-  console.log(items);
 
   return (
     <>

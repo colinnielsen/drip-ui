@@ -46,7 +46,7 @@ export const PayButton = () => {
   if (!cart || !wallet) return null;
 
   const purchase = async () =>
-    slicekit.payProducts(wallet.provider, {
+    slicekit.payProducts({
       account: wallet.address,
       cart,
     });

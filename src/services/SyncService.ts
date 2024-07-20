@@ -1,3 +1,5 @@
+import { FarmerRepository } from '@/data-model/farmer/FarmerRepository';
+import { Farmer } from '@/data-model/farmer/FarmerType';
 import { mapSliceProductCartToItem } from '@/data-model/item/ItemDTO';
 import { ItemRepository } from '@/data-model/item/ItemRepository';
 import { mapSliceStoreToShop } from '@/data-model/shop/ShopDTO';
@@ -7,8 +9,11 @@ import sliceKit from '@/lib/sliceKit';
 
 export class SyncService {
   constructor(
-    private shopRepository: ShopRepository,
-    private itemRepository: ItemRepository,
+    private database: {
+      items: ItemRepository;
+      shops: ShopRepository;
+      farmers: FarmerRepository;
+    },
   ) {}
 
   private async fetchStoreData(storeId: number) {
@@ -26,7 +31,7 @@ export class SyncService {
 
       // map every slice productƒ to an item object and save
       const items = products.cartProducts.map(mapSliceProductCartToItem);
-      for (const item of items) await this.itemRepository.save(item);
+      for (const item of items) await this.database.items.save(item);
 
       // map the slice store to a shop object and save
       // and map the items to the menu
@@ -36,7 +41,11 @@ export class SyncService {
         shop.menu[item.category ?? 'other'].push(item);
       });
 
-      await this.shopRepository.save(shop);
+      await this.database.shops.save(shop);
     }
+  }
+
+  async syncFarmers(farmers: Farmer[]) {
+    for (const farmer of farmers) await this.database.farmers.save(farmer);
   }
 }

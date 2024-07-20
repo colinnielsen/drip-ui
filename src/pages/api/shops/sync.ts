@@ -3,7 +3,7 @@ import { SyncService } from '@/services/SyncService';
 import { ONBOARDED_SHOPS } from '@/lib/constants';
 import { database } from '@/infras/database';
 
-const syncService = new SyncService(database.shops, database.items);
+const syncService = new SyncService(database);
 
 export default async function handler(
   _req: NextApiRequest,

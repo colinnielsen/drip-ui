@@ -5,6 +5,11 @@ import { AppProps } from 'next/app';
 import { EB_Garamond, Libre_Franklin, Roboto_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
 import '../styles/globals.css';
+import {
+  PrivyProvider,
+  privyWagmiConfig,
+} from '@/components/providers.tsx/PrivyProvider';
+import { WagmiProvider } from '@privy-io/wagmi';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -39,18 +44,22 @@ export const CSS_FONT_CLASS_CONFIG = cn(
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ReactQueryClientProvider>
-      <div
-        className={cn(
-          CSS_FONT_CLASS_CONFIG,
-          'bg-background',
-          'min-h-screen',
-          // 'prose',
-        )}
-      >
-        <Component {...pageProps} />
-        <Footer />
-      </div>
-    </ReactQueryClientProvider>
+    <PrivyProvider>
+      <ReactQueryClientProvider>
+        <WagmiProvider config={privyWagmiConfig}>
+          <div
+            className={cn(
+              CSS_FONT_CLASS_CONFIG,
+              'bg-background',
+              'min-h-screen',
+              // 'prose',
+            )}
+          >
+            <Component {...pageProps} />
+            <Footer />
+          </div>
+        </WagmiProvider>
+      </ReactQueryClientProvider>
+    </PrivyProvider>
   );
 }

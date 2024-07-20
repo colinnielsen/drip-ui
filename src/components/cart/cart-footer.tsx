@@ -44,7 +44,6 @@ function collapseDuplicateItems(orderItems: OrderItem[]) {
       ...orderItem.mods.map(mod => mod.id),
     ].sort();
     const key = allIds.join('-');
-    console.log(key);
     if (itemMap.has(key)) itemMap.get(key)![1] += 1;
     else itemMap.set(key, [orderItem, 1]);
   });
@@ -152,7 +151,7 @@ export default function () {
   const { data: cart } = useCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  if (!cart || !cart.orderItems.length) return null;
+  if (!cart) return null;
   return (
     <Drawer key={'drawer'} open={drawerOpen} onOpenChange={setDrawerOpen}>
       <CartDrawer cart={cart} drawerOpen={drawerOpen} />

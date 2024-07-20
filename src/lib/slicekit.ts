@@ -1,4 +1,4 @@
-import { ConnectedWallet } from '@privy-io/react-auth';
+import { privyWagmiConfig } from '@/components/providers.tsx/PrivyProvider';
 import {
   GetProductParams,
   GetStoreProductsParams,
@@ -10,12 +10,9 @@ import {
   getStores,
   payProducts,
 } from '@slicekit/core';
-import { createConfig, custom, injected } from '@wagmi/core';
-import { BASE_RPC_CONFIG } from './constants';
 import { axiosFetcher } from './utils';
-import { privyWagmiConfig } from '@/components/providers.tsx/PrivyProvider';
 
-export default {
+export const sliceKit = {
   wagmiConfig: privyWagmiConfig,
   getStores: (params: GetStoresParams) => getStores(params),
   getStoreProducts: (params: GetStoreProductsParams) =>

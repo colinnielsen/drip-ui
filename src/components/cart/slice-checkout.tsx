@@ -1,6 +1,6 @@
 import { Order } from '@/data-model/order/OrderType';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
-import slicekit from '@/lib/sliceKit';
+import { sliceKit } from '@/lib/sliceKit';
 import { ACTIVE_USER_QUERY_KEY, useActiveUser } from '@/queries/UserQuery';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -46,7 +46,7 @@ export const PayButton = () => {
   if (!cart || !wallet) return null;
 
   const purchase = async () =>
-    slicekit.payProducts({
+    sliceKit.payProducts({
       account: wallet.address,
       cart,
     });

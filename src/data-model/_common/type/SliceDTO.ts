@@ -1,7 +1,7 @@
 import { Order } from '@/data-model/order/OrderType';
 import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
-import sliceKit from '@/lib/sliceKit';
+import { sliceKit } from '@/lib/sliceKit';
 import { ProductCart } from '@slicekit/core';
 import { Address } from 'viem';
 

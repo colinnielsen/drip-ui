@@ -5,23 +5,14 @@ import {
 } from '@/data-model/order/OrderRepository';
 import { Order, OrderItem } from '@/data-model/order/OrderType';
 import { UUID } from 'crypto';
+import { sql } from '@vercel/postgres';
 import { v4 } from 'uuid';
-import { JSONRepository } from './JSONRepository';
 import { isPending } from '@/data-model/order/OrderDTO';
 
-const FILE_PATH = 'orders.json';
-
-export class JSONOrderRepository
-  extends JSONRepository<Order>
-  implements OrderRepository
-{
-  constructor() {
-    super(FILE_PATH);
-  }
-
+export class SQLOrderRepository implements OrderRepository {
   async findById(id: UUID): Promise<Order | null> {
-    const data = await this.readFromFile();
-    return data[id] || null;
+    const result = await sql`SELECT * FROM orders WHERE id = ${id}`;
+    return result.rows[0] as Order | null;
   }
 
   async save(
@@ -30,31 +21,34 @@ export class JSONOrderRepository
     items: Unsaved<OrderItem>[],
   ): Promise<Order> {
     const id = v4() as UUID;
-    const orderItem: Order = {
+    const orderItems = items.map(i => ({
+      id: v4() as UUID,
+      ...i,
+    }));
+
+    const order: Order = {
       id,
       shop: shopId,
       user: userId,
       status: 'pending',
       timestamp: new Date().toISOString(),
-      orderItems: items.map(i => ({
-        id: v4() as UUID,
-        ...i,
-      })),
+      orderItems,
     };
 
-    const data = await this.readFromFile();
-    data[id] = orderItem;
-    await this.writeToFile(data);
+    await sql`
+      INSERT INTO orders (id, shop, user, status, timestamp, orderItems)
+      VALUES (${order.id}, ${order.shop}, ${order.user}, ${order.status}, ${order.timestamp}, ${JSON.stringify(order.orderItems)})
+    `;
 
-    return orderItem;
+    return order;
   }
 
   async update(
     orderId: UUID,
     operations: UpdateOrderOperation[],
   ): Promise<Order> {
-    const data = await this.readFromFile();
-    const order = data[orderId];
+    const result = await sql`SELECT * FROM orders WHERE id = ${orderId}`;
+    const order = result.rows[0] as Order;
     if (!order) throw Error('Order not found');
     if (!isPending(order)) throw Error('Order is not pending');
 
@@ -90,35 +84,38 @@ export class JSONOrderRepository
       }
     }
 
-    if (order.orderItems.length === 0) delete data[orderId];
-    else data[orderId] = order;
-    await this.writeToFile(data);
+    await sql`
+      UPDATE orders
+      SET orderItems = ${JSON.stringify(order.orderItems)}
+      WHERE id = ${orderId}
+    `;
 
     return order;
   }
 
   async delete(id: UUID): Promise<void> {
-    const data = await this.readFromFile();
-    if (!data[id]) throw Error('could not delete');
-    delete data[id];
-    await this.writeToFile(data);
+    const result = await sql`DELETE FROM orders WHERE id = ${id}`;
+    if (result.rowCount === 0) throw Error('could not delete');
   }
 
   async clear(orderId: UUID): Promise<Order> {
-    const data = await this.readFromFile();
-    const order = data[orderId];
+    const result = await sql`SELECT * FROM orders WHERE id = ${orderId}`;
+    const order = result.rows[0] as Order;
     if (!order) throw Error('Order not found');
 
     order.orderItems = [];
-    data[orderId] = order;
-    await this.writeToFile(data);
+    await sql`
+      UPDATE orders
+      SET orderItems = ${JSON.stringify(order.orderItems)}
+      WHERE id = ${orderId}
+    `;
 
     return order;
   }
 
   async getOrdersByUserId(userId: UUID): Promise<Order[]> {
-    const data = await this.readFromFile();
-    return Object.values(data).filter(o => o.user === userId);
+    const result = await sql`SELECT * FROM orders WHERE user = ${userId}`;
+    return result.rows as Order[];
   }
 
   async getActiveUserOrder(userId: UUID): Promise<Order | null> {

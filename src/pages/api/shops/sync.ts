@@ -1,12 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SyncService } from '@/services/SyncService';
-import { JSONShopRepository } from '@/infras/repositories/ShopRepository';
-import { JSONItemRepository } from '@/infras/repositories/ItemRepository';
 import { ONBOARDED_SHOPS } from '@/lib/constants';
+import { database } from '@/infras/database';
 
-const shopRepository = new JSONShopRepository();
-const itemRepository = new JSONItemRepository();
-const syncService = new SyncService(shopRepository, itemRepository);
+const syncService = new SyncService(database.shops, database.items);
 
 export default async function handler(
   _req: NextApiRequest,

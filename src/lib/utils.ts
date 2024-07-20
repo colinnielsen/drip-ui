@@ -40,7 +40,7 @@ export const axiosFetcher = async <T>(
       throw error;
     }
 
-    throw new Error('An unexpected error occurred');
+    throw new Error('An unexpected error occurred: ' + error);
   }
 };
 

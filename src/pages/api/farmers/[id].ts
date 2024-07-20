@@ -8,9 +8,8 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   const { id } = req.query;
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET')
     return res.status(405).json({ error: 'Method not allowed' });
-  }
 
   if (typeof id !== 'string')
     return res.status(400).json({ error: 'Invalid farmerId' });

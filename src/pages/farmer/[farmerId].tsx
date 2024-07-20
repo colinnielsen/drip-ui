@@ -15,8 +15,9 @@ import { GetStaticPaths } from 'next';
 //
 
 export const getStaticPaths = (async () => {
+  const res = await axiosFetcher<Farmer[]>('/api/farmers');
   return {
-    paths: (await axiosFetcher<Farmer[]>('/api/farmers')).map(farmer => ({
+    paths: res.map(farmer => ({
       params: { farmerId: farmer.id },
     })),
     fallback: true,

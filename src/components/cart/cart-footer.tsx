@@ -96,52 +96,61 @@ export const CartDrawer = ({
       </DrawerTrigger>
 
       <DrawerContent
+        full
         className={cn(
           'flex flex-col',
           CSS_FONT_CLASS_CONFIG,
           'bg-background-card',
+          'bg-white',
         )}
         aria-describedby="cart-footer"
       >
-        <DrawerClose asChild>
-          <div className="flex justify-start h-14 w-full items-center px-6">
-            <X height={24} width={24} />
+        <div className="w-full flex flex-col overflow-auto h-full">
+          <div className="flex justify-start h-14 w-full items-center px-6 py-4">
+            <DrawerClose asChild>
+              <button>
+                <X height={24} width={24} />
+              </button>
+            </DrawerClose>
           </div>
-        </DrawerClose>
 
-        <DrawerTitle>
-          <Title1 as="div" className="text-palette-foreground px-6">
-            {shop.label}
-          </Title1>
-        </DrawerTitle>
+          <DrawerTitle>
+            <Title1 as="div" className="text-palette-foreground px-6">
+              {shop.label}
+            </Title1>
+          </DrawerTitle>
 
-        <div className="flex flex-col gap-6 pt-4">
-          {orderItems.map(([orderItem, quantity], index) => (
-            <Fragment key={index}>
-              <CartItem
-                {...{ orderItem, quantity, shopId: shop.id, userId: user.id }}
-              />
-              <Divider />
-            </Fragment>
-          ))}
+          <div className="flex flex-col gap-6 pt-4">
+            {orderItems.map(([orderItem, quantity], index) => (
+              <Fragment key={index}>
+                <CartItem
+                  {...{ orderItem, quantity, shopId: shop.id, userId: user.id }}
+                />
+                <Divider />
+              </Fragment>
+            ))}
+          </div>
+
+          <AddTipSection cart={cart} shopId={shop.id} userId={user.id} />
+
+          <div className="flex-grow" />
+          <Divider />
+
+          <OrderSummary cart={cart} />
+
+          <Divider />
+
+          <GrowerBanner
+            {...{ farmer, allocation: shop.farmerAllocations[0] }}
+          />
+
+          <DrawerFooter className="p-0">
+            <FooterTotal cart={cart} />
+            <div className="px-6 pb-6 w-full min-h-20">
+              {drawerOpen && <DynamicCheckoutFlow />}
+            </div>
+          </DrawerFooter>
         </div>
-
-        <AddTipSection cart={cart} shopId={shop.id} userId={user.id} />
-
-        <Divider />
-
-        <OrderSummary cart={cart} />
-
-        <Divider />
-
-        <GrowerBanner {...{ farmer, allocation: shop.farmerAllocations[0] }} />
-
-        <DrawerFooter className="p-0">
-          <FooterTotal cart={cart} />
-          <div className="px-6 pb-6 w-full min-h-20">
-            {drawerOpen && <DynamicCheckoutFlow />}
-          </div>
-        </DrawerFooter>
       </DrawerContent>
     </>
   );
@@ -153,7 +162,12 @@ export default function () {
 
   if (!cart) return null;
   return (
-    <Drawer key={'drawer'} open={drawerOpen} onOpenChange={setDrawerOpen}>
+    <Drawer
+      key={'drawer'}
+      open={drawerOpen}
+      onOpenChange={setDrawerOpen}
+      handleOnly
+    >
       <CartDrawer cart={cart} drawerOpen={drawerOpen} />
     </Drawer>
   );

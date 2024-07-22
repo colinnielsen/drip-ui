@@ -34,19 +34,24 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
+    full?: boolean;
+  }
+>(({ className, children, full = false, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border border-gray-200 bg-white',
+        'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col border border-gray-200 bg-white max-h-screen',
+        { 'min-h-screen': full, 'rounded-t-[10px]': !full },
         className,
       )}
       {...props}
     >
-      <div className="mx-auto  h-[6px] w-[75px] rounded-full  absolute -top-4  bg-white -translate-x-1/2 left-1/2 z-[51]" />
+      {!full && (
+        <div className="mx-auto  h-[6px] w-[75px] rounded-full  absolute -top-4  bg-white -translate-x-1/2 left-1/2 z-[51]" />
+      )}
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>

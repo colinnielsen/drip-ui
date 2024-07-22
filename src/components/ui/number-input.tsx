@@ -19,7 +19,7 @@ export function NumberInput({
   return (
     <div
       className={cn(
-        'flex items-center gap-2 px-4 py-2 font-normal text-sm bg-light-gray w-fit rounded-2xl',
+        'flex items-center gap-2 px-4 py-2 font-normal text-sm bg-light-gray rounded-2xl w-[105px] justify-between',
         className,
       )}
     >
@@ -30,7 +30,9 @@ export function NumberInput({
           <Minus height={16} strokeWidth={strokeWidth} />
         )}
       </button>
-      <Label2>{value}</Label2>
+      <div className="flex items-center justify-center grow">
+        <Label2>{value}</Label2>
+      </div>
       <button onClick={onPlus}>
         <Plus height={16} strokeWidth={strokeWidth} />
       </button>

@@ -7,30 +7,25 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '../ui/carousel';
-import { Overview } from './overview';
+import { CheckoutProvider, useCheckoutContext } from './checkout-context';
+import OverviewSlide from './overview';
+import WelcomeSlide, { shouldGoToWelcomeSlide } from './welcome';
 
-// const DevButtons = () => {
-//   const { scrollNext, scrollPrev } = useCarousel();
-//   return (
-//     <div className="z-[10000] flex justify-center items-center gap-4 absolute bottom-5 left-5">
-//       <button onClick={scrollPrev} className="bg-slate-200 p-2 rounded-md">
-//         {'<-'}
-//       </button>
-//       <button onClick={scrollNext} className="bg-slate-200 p-2 rounded-md">
-//         {'->'}
-//       </button>
-//     </div>
-//   );
-// };
+/**
+ * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
+ */
+export const AsCheckoutSlide = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => (
+  <CarouselItem className="w-screen h-full overflow-y-scroll">
+    {children}
+  </CarouselItem>
+);
 
-// const CheckoutSlides = () => {
-//   return (
-
-//   );
-// };
-
-export default function ({ shop, cart }: { shop: Shop; cart: Order }) {
-  // return <Overview cart={cart} shop={shop} />;
+function CheckoutSlides({ shop, cart }: { shop: Shop; cart: Order }) {
+  const { step } = useCheckoutContext();
   return (
     <Carousel
       className="h-full"
@@ -38,18 +33,28 @@ export default function ({ shop, cart }: { shop: Shop; cart: Order }) {
       stiff
     >
       <CarouselContent className="h-full">
-        <CarouselItem className="w-screen h-full overflow-y-scroll">
-          <Overview cart={cart} shop={shop} />
-        </CarouselItem>
-        <CarouselItem className="w-screen h-full bg-blue-500">...</CarouselItem>
-        <CarouselItem className="w-screen h-full bg-green-500">
-          ...
-        </CarouselItem>
+        <OverviewSlide cart={cart} shop={shop} />
+
+        {shouldGoToWelcomeSlide(step) ? (
+          <WelcomeSlide />
+        ) : (
+          <CarouselItem className="w-screen h-full bg-green-500">
+            ...
+          </CarouselItem>
+        )}
       </CarouselContent>
       <div className="absolute top-7 right-20">
         <CarouselPrevious />
         <CarouselNext />
       </div>
     </Carousel>
+  );
+}
+
+export default function ({ shop, cart }: { shop: Shop; cart: Order }) {
+  return (
+    <CheckoutProvider>
+      <CheckoutSlides shop={shop} cart={cart} />
+    </CheckoutProvider>
   );
 }

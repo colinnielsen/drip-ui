@@ -15,7 +15,7 @@ const buttonVariants = cva(
         icon: 'h-9 w-9',
       },
       variant: {
-        cta: 'flex-grow bg-secondary-pop rounded-[50px] h-14 flex flex-col justify-center',
+        cta: 'flex-grow bg-secondary-pop rounded-[50px] h-14 max-h-14 flex flex-col justify-center',
         default: 'bg-gray-900 text-gray-50 shadow hover:bg-gray-900/90',
         destructive: 'bg-red-500 text-gray-50 shadow-sm hover:bg-red-500/90',
         outline:
@@ -53,7 +53,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button';
 
 const CTAButton = (props: ButtonProps) => (
-  <Button variant="cta" {...props}>
+  <Button variant="cta" {...props} className="w-full">
     <Mono className="text-white uppercase">{props.children}</Mono>
   </Button>
 );

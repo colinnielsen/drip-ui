@@ -12,7 +12,7 @@ export const useConnectedWallet = () => {
   if (!wallet) return null;
   return {
     address: wallet.address as Address,
-    provider: wallet,
+    wallet: wallet,
   };
 };
 

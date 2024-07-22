@@ -1,27 +1,19 @@
 import { Divider } from '@/components/ui/divider';
 import { DrawerClose, DrawerFooter, DrawerTitle } from '@/components/ui/drawer';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Title1 } from '@/components/ui/typography';
 import { Order, OrderItem } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { useFarmer } from '@/queries/FarmerQuery';
 import { useActiveUser } from '@/queries/UserQuery';
 import { X } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { Fragment } from 'react';
 import { AddTipSection } from './add-tip';
 import { CartItem } from './cart-item';
 import { FooterTotal } from './footer-total';
 import { GrowerBanner } from './grower-banner';
 import { OrderSummary } from './summary';
-import { useCarousel } from '@/components/ui/carousel';
-
-const DynamicCheckoutFlow = dynamic(() => import('../checkout'), {
-  ssr: false,
-  loading: () => (
-    <Skeleton className="h-14 w-full rounded-[50px] bg-secondary-pop" />
-  ),
-});
+import { AsCheckoutSlide } from '../checkout-slides';
+import { NextButton } from './next-button';
 
 /**
  * @dev if a cart item has the same id and the same mods, then it can be squashed with a quantity
@@ -42,7 +34,7 @@ function collapseDuplicateItems(orderItems: OrderItem[]) {
   return Array.from(itemMap.values());
 }
 
-export const Overview = ({ cart, shop }: { cart: Order; shop: Shop }) => {
+const Overview = ({ cart, shop }: { cart: Order; shop: Shop }) => {
   const { data: user } = useActiveUser();
   const { data: farmer } = useFarmer(shop?.farmerAllocations[0].farmer);
 
@@ -88,12 +80,18 @@ export const Overview = ({ cart, shop }: { cart: Order; shop: Shop }) => {
 
       <GrowerBanner {...{ farmer, allocation: shop.farmerAllocations[0] }} />
 
-      <DrawerFooter className="p-0">
+      <DrawerFooter className="p-0 w-full">
         <FooterTotal cart={cart} />
-        <div className="px-6 pb-6 w-full min-h-20">
-          <DynamicCheckoutFlow />
-        </div>
+        <NextButton />
       </DrawerFooter>
     </>
   );
 };
+
+export default function ({ cart, shop }: { cart: Order; shop: Shop }) {
+  return (
+    <AsCheckoutSlide>
+      <Overview cart={cart} shop={shop} />
+    </AsCheckoutSlide>
+  );
+}

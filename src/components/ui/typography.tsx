@@ -6,6 +6,23 @@ interface TypographyProps {
   as?: keyof JSX.IntrinsicElements;
 }
 
+export const Drip = ({
+  as: Component = 'h1',
+  className,
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn(
+      'font-semibold font-drip text-4xl text-secondary-pop',
+      className,
+    )}
+    {...rest}
+  >
+    {children}
+  </Component>
+);
+
 export const Title1 = ({
   as: Component = 'h2',
   className,

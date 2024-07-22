@@ -41,6 +41,20 @@ export function useCarousel() {
   return context;
 }
 
+export const useScrollTo = () => {
+  const { api } = useCarousel();
+  if (!api) throw new Error('useScrollTo must be used within a <Carousel />');
+
+  return api.scrollTo.bind(api);
+};
+
+export function usePreviousSlide() {
+  const { api } = useCarousel();
+  if (!api)
+    throw new Error('usePreviousSlide must be used within a <Carousel />');
+  return api.scrollPrev.bind(api);
+}
+
 const Carousel = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & CarouselProps
@@ -81,9 +95,12 @@ const Carousel = React.forwardRef<
       api?.scrollPrev();
     }, [api]);
 
-    const scrollNext = React.useCallback(() => {
-      api?.scrollNext();
-    }, [api]);
+    const scrollNext = React.useCallback(
+      (jump = false) => {
+        api?.scrollNext(jump);
+      },
+      [api],
+    );
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {

@@ -1,8 +1,8 @@
 import { OrderItem } from '@/data-model/order/OrderType';
 import Image from 'next/image';
-import { Price } from '../icons';
-import { Headline, Label2 } from '../ui/typography';
-import { NumberInput } from '../ui/number-input';
+import { Price } from '../../icons';
+import { Headline, Label2 } from '../../ui/typography';
+import { NumberInput } from '../../ui/number-input';
 import { useAddToCart, useRemoveItemFromCart } from '@/queries/OrderQuery';
 import { UUID } from 'crypto';
 

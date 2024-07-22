@@ -1,16 +1,13 @@
-import { Order } from '@/data-model/order/OrderType';
+import { getOrderSummary } from '@/data-model/order/OrderDTO';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
-import { sliceKit } from '../../lib/slice';
+import { cn } from '@/lib/utils';
+import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
+import { useCart, useCartInSliceFormat } from '@/queries/OrderQuery';
 import { ACTIVE_USER_QUERY_KEY, useActiveUser } from '@/queries/UserQuery';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useQueryClient } from '@tanstack/react-query';
-import { Address } from 'viem';
-import { Skeleton } from '../ui/skeleton';
-import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
-import { useCart, useCartInSliceFormat } from '@/queries/OrderQuery';
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
-import { Mono } from '../ui/typography';
-import { cn } from '@/lib/utils';
+import { sliceKit } from '../../../lib/slice';
+import { Mono } from '../../ui/typography';
 
 const btnClass = 'flex-grow bg-secondary-pop rounded-[50px]';
 

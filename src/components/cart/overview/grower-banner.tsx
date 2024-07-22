@@ -1,8 +1,8 @@
 import { Farmer, FarmerAllocation } from '@/data-model/farmer/FarmerType';
 import dripCup2 from '@/assets/drip-cup-2.png';
 import Image from 'next/image';
-import { Label1, Title2 } from '../ui/typography';
-import { Skeleton } from '../ui/skeleton';
+import { Label1, Title2 } from '../../ui/typography';
+import { Skeleton } from '../../ui/skeleton';
 
 export const GrowerBanner = ({
   farmer,

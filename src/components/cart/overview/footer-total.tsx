@@ -1,8 +1,8 @@
 import { getOrderSummary } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
-import { Headline } from '../ui/typography';
-import { Price } from '../icons';
-import { Divider } from '../ui/divider';
+import { Headline } from '../../ui/typography';
+import { Price } from '../../icons';
+import { Divider } from '../../ui/divider';
 
 export const FooterTotal = ({ cart }: { cart: Order }) => {
   const summary = getOrderSummary(cart);

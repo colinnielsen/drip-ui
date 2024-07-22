@@ -10,6 +10,7 @@ type BaseMod = {
   id: UUID;
   sliceId: string;
   type: 'exclusive' | 'inclusive';
+  category: ItemCategory | null;
   name: string;
   /**
    * @dev wei formats

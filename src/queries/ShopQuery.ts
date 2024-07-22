@@ -43,16 +43,16 @@ export const useShop = (id?: UUID) => useQuery(shopQuery(id));
 //     },
 //   });
 
-export const useItemMods = (shopId: UUID, category: ItemCategory) =>
-  useQuery({
-    queryKey: ['itemMods', shopId, category],
-    queryFn: async () => {
-      const shop = await axiosFetcher<Shop>(`/api/shops/${shopId}`);
-      const options = shop.menu[category];
+// export const useItemMods = (shopId: UUID, category: ItemCategory) =>
+//   useQuery({
+//     queryKey: ['itemMods', shopId, category],
+//     queryFn: async () => {
+//       const shop = await axiosFetcher<Shop>(`/api/shops/${shopId}`);
+//       const options = shop.menu[category];
 
-      if (!options.length)
-        throw new Error(`No options found for category ${category}`);
+//       if (!options.length)
+//         throw new Error(`No options found for category ${category}`);
 
-      return options;
-    },
-  });
+//       return options;
+//     },
+//   });

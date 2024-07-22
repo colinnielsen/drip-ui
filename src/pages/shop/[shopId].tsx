@@ -107,7 +107,6 @@ function DynamicShopPage(staticShop: StaticPageData) {
         <ItemList
           key={category}
           title={category}
-          category={category as ItemCategory}
           horizontal
           shopId={shop?.id}
           items={items}

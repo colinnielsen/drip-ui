@@ -49,6 +49,7 @@ function mapVariantsToMods(variants: Variant[]): ItemMod[] {
       currency: 'usdc',
       currencyDecimals: 6,
       isOptional: true,
+      category: null,
     };
     return [...acc, mod];
   }, []);
@@ -81,3 +82,6 @@ export const mapSliceProductCartToItem = (product: ProductCart): Item => {
     mods: hasVariants ? mapVariantsToMods(variants) : [],
   };
 };
+
+export const convertItemPriceToBigInt = (item: Item | ItemMod): bigint =>
+  BigInt(item.price);

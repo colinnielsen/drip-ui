@@ -1,31 +1,30 @@
-import { Button } from '@/components/ui/button';
+import { CTAButton } from '@/components/ui/button';
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
-  DrawerTitle,
+  DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
+import { convertItemPriceToBigInt } from '@/data-model/item/ItemDTO';
 import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { OrderItem } from '@/data-model/order/OrderType';
 import { useAddToCart } from '@/queries/OrderQuery';
-import { useItemMods } from '@/queries/ShopQuery';
 import { useActiveUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { PlusSvg, Price } from '../icons';
 import { Checkbox } from '../ui/checkbox';
+import { Divider } from '../ui/divider';
 import { NumberInput } from '../ui/number-input';
 import { Skeleton } from '../ui/skeleton';
+import { Body, Headline, Label2, Title1 } from '../ui/typography';
 
-export type DrawerProps = {
-  item: Item;
-  category: ItemCategory;
-  shopId: UUID;
-};
+type CategorySections = ItemCategory | '__misc__';
+type ModSection = { [key in CategorySections]: ItemMod[] };
 
 function AddToBasketButton({
   userId,
@@ -45,12 +44,7 @@ function AddToBasketButton({
   return (
     <DrawerFooter>
       <DrawerClose asChild>
-        <Button
-          className="bg-black text-white rounded-3xl py-6"
-          onClick={() => mutate()}
-        >
-          Add to Basket
-        </Button>
+        <CTAButton onClick={() => mutate()}>Add to Basket</CTAButton>
       </DrawerClose>
     </DrawerFooter>
   );
@@ -96,48 +90,70 @@ export function ItemPreviewTrigger({
   const { image, name } = item;
 
   return (
-    <div className="flex flex-col gap-2  ">
-      <div className="relative overflow-hidden rounded-xl h-36 w-36">
-        <Image src={image} alt={name} fill />
-        {user?.id ? (
-          <AddButton {...{ shopId, userId: user.id, item }} />
-        ) : (
-          <Skeleton className="h-7 w-7 rounded-full" />
-        )}
+    <DrawerTrigger asChild>
+      <div className="flex flex-col gap-2">
+        <div className="relative overflow-hidden rounded-xl h-36 w-36">
+          <Image src={image} alt={name} fill />
+          {user?.id ? (
+            <AddButton {...{ shopId, userId: user.id, item }} />
+          ) : (
+            <Skeleton className="h-7 w-7 rounded-full" />
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <h3 className="font-medium">{name}</h3>
+          <Price {...item} />
+        </div>
       </div>
-      <div className="flex flex-col gap-1">
-        <h3 className="font-medium">{name}</h3>
-        <Price {...item} />
-      </div>
-    </div>
+    </DrawerTrigger>
   );
 }
 
 export const ItemOption = ({
-  option,
+  mod,
   setSelectedOptions,
+  selectedOptions,
 }: {
-  option: ItemMod;
+  mod: ItemMod;
   setSelectedOptions: Dispatch<
     SetStateAction<
       Record<`${string}-${string}-${string}-${string}-${string}`, ItemMod>
     >
   >;
+  selectedOptions: Record<UUID, ItemMod>;
 }) => {
+  const checked = !!selectedOptions[mod.id];
   // const [quantity, setQuantity] = useState(0);
   function selectBooleanMod(checked: boolean) {
     setSelectedOptions(prev => {
       if (!checked) {
-        const { [option.id]: _, ...next } = prev;
+        const { [mod.id]: _, ...next } = prev;
         return next;
       }
-      return {
-        ...prev,
-        [option.id]: {
-          ...option,
-          value: !!checked,
-        },
-      };
+
+      if (mod.type === 'exclusive') {
+        const previousWithoutSameCategory = Object.values(prev)
+          .filter(m => m.category !== mod.category)
+          .reduce<Record<UUID, ItemMod>>((acc, m) => {
+            acc[m.id] = m;
+            return acc;
+          }, {});
+
+        return {
+          ...previousWithoutSameCategory,
+          [mod.id]: {
+            ...mod,
+            value: !!checked,
+          },
+        };
+      } else
+        return {
+          ...prev,
+          [mod.id]: {
+            ...mod,
+            value: !!checked,
+          },
+        };
     });
   }
 
@@ -166,12 +182,13 @@ export const ItemOption = ({
       <div className="flex justify-between items-center py-4 border-b border-b-gray-50">
         <div className="flex gap-2 items-center w-full">
           <Checkbox
-            id={option.name}
+            id={mod.name}
+            checked={checked}
             className="w-5 h-5"
             onCheckedChange={selectBooleanMod}
           />
           <div className="w-full flex gap-x-2 items-center">
-            <label htmlFor={option.name}>{option.name}</label>
+            <label htmlFor={mod.name}>{mod.name}</label>
             {/* {option.type === 'number' && (
               <NumberInput
                 id={option.name}
@@ -182,82 +199,127 @@ export const ItemOption = ({
             )} */}
           </div>
         </div>
-        {option.price ? <Price {...option} /> : null}
+        {convertItemPriceToBigInt(mod) > 0 ? <Price {...mod} /> : null}
       </div>
     </>
   );
 };
 
-export function ItemWithSelector({ item, category, shopId }: DrawerProps) {
+export function ModSection({
+  mods,
+  category,
+  setSelectedOptions,
+  selectedOptions,
+}: {
+  mods: ItemMod[];
+  category: CategorySections;
+  setSelectedOptions: Dispatch<SetStateAction<Record<UUID, ItemMod>>>;
+  selectedOptions: Record<UUID, ItemMod>;
+}) {
+  const label = category === '__misc__' ? 'Options' : category;
+
+  return (
+    <>
+      <Divider />
+      <div className="px-4 py-6">
+        <Headline>{label}</Headline>
+        {mods?.map((mod, i) => (
+          <ItemOption
+            key={i}
+            {...{ mod, setSelectedOptions, selectedOptions }}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+export function ItemWithSelector({
+  item,
+  shopId,
+}: {
+  item: Item;
+  shopId: UUID;
+}) {
   const [quantity, setQuantity] = useState(1);
 
-  const [selectionOptions, setSelectedOptions] = useState<
-    Record<UUID, ItemMod>
-  >({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<UUID, ItemMod>>(
+    {},
+  );
 
-  const { data: itemMods } = useItemMods(shopId, category);
+  const reset = () => {
+    setQuantity(1);
+    setSelectedOptions({});
+  };
 
   const { data: user } = useActiveUser();
 
   const orderItem: Unsaved<OrderItem> = {
     item,
-    mods: Object.values(selectionOptions),
+    mods: Object.values(selectedOptions),
   };
 
+  const modSections = item.mods.reduce((acc, mod) => {
+    if (!acc[mod?.category || '__misc__'])
+      acc[mod?.category || '__misc__'] = [];
+    acc[mod.category || '__misc__'].push(mod);
+    return acc;
+  }, {} as ModSection);
+
   return (
-    <Drawer>
+    <Drawer onClose={reset}>
       <ItemPreviewTrigger item={item} shopId={shopId} />
-      <DrawerContent className="border-none rounded-t-xl overflow-hidden">
-        <div className="h-[75vh] overflow-y-scroll">
-          {/* <pre className="text-xs">
-            {JSON.stringify(orderItem.mods, null, 2)}
-          </pre> */}
+
+      <DrawerContent>
+        <div className="min-h-[75vh] flex flex-col">
           <DrawerHeader className="p-0 rounded-t-xl">
-            <div className="min-h-64 relative rounded-t-xl">
+            <div className="min-h-64 relative rounded-t-xl overflow-clip">
               <Image
                 src={item.image}
                 alt={item.name}
                 fill
                 className="object-cover"
-                quality={30}
+                quality={100}
               />
             </div>
-            <DrawerTitle className="text-left pl-4 pt-4  font-sans font-medium text-[24px]">
-              {item.name}
-            </DrawerTitle>
-            <div className="pl-4">
+            <div className="flex flex-col px-6 py-4 gap-y-2">
+              <Title1 className="text-left">{item.name}</Title1>
+
               <Price {...item} />
+
+              <NumberInput
+                onPlus={() => setQuantity(quantity + 1)}
+                onMinus={() => quantity > 1 && setQuantity(quantity - 1)}
+                value={quantity}
+              />
             </div>
-            <NumberInput
-              onPlus={() => setQuantity(quantity + 1)}
-              onMinus={() => quantity && setQuantity(quantity - 1)}
-              value={quantity}
-            />
             {/* <RadioGroupDemo /> */}
           </DrawerHeader>
-          {/* {options
-              .filter(([, o]) => o.length > 0)
-              .map(([category, options]) => {
-                // Upper case the first letter of the category
-                const prettyCategory =
-                  category.charAt(0).toUpperCase() + category.slice(1);
 
-                return (
-                  <div
-                    key={`${category}-${options}`}
-                    className="p-4 flex flex-col gap-5"
-                  >
-                    <div className="flex flex-col">
-                      <h3 className="font-semibold font-sans text-lg">
-                        {prettyCategory}
-                      </h3>
-                      {options.map((option, i) => (
-                        <ItemOption key={i} {...{ option, setSelectedOptions }} />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })} */}
+          {item.description && (
+            <>
+              <Divider />
+              <div className="px-4 py-6 flex flex-col gap-y-2">
+                <Headline>Description</Headline>
+                <Body className="text-left">{item.description}</Body>
+              </div>
+            </>
+          )}
+
+          {Object.entries(modSections)
+            .filter(([, mods]) => mods.length > 0)
+            .map(([category, mods], i) => (
+              <ModSection
+                key={i}
+                mods={mods}
+                category={category as CategorySections}
+                selectedOptions={selectedOptions}
+                setSelectedOptions={setSelectedOptions}
+              />
+            ))}
+
+          <div className="flex-grow" />
+
           {user?.id && (
             <AddToBasketButton {...{ userId: user.id, shopId, orderItem }} />
           )}

@@ -21,13 +21,11 @@ export const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
 
 export function ItemList({
   title,
-  category,
   items,
   horizontal,
   shopId,
 }: {
   title: string;
-  category: ItemCategory;
   horizontal?: boolean;
   shopId?: UUID;
   items?: Item[];
@@ -58,12 +56,7 @@ export function ItemList({
         )}
       >
         {items.map((item, index) => (
-          <ItemWithSelector
-            key={index}
-            item={item}
-            category={category}
-            shopId={shopId}
-          />
+          <ItemWithSelector key={index} item={item} shopId={shopId} />
         ))}
       </div>
     </div>

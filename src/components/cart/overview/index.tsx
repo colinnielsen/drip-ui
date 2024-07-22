@@ -14,6 +14,7 @@ import { CartItem } from './cart-item';
 import { FooterTotal } from './footer-total';
 import { GrowerBanner } from './grower-banner';
 import { OrderSummary } from './summary';
+import { useCarousel } from '@/components/ui/carousel';
 
 const DynamicCheckoutFlow = dynamic(() => import('../checkout'), {
   ssr: false,

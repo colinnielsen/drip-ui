@@ -4,7 +4,7 @@ import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from 'embla-carousel-react';
 
-import { cn } from '@/lib/utils';
+import { cn, isSSR } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -14,6 +14,7 @@ type CarouselPlugin = UseCarouselParameters[1];
 
 type CarouselProps = {
   opts?: CarouselOptions;
+  stiff?: boolean;
   plugins?: CarouselPlugin;
   orientation?: 'horizontal' | 'vertical';
   setApi?: (api: CarouselApi) => void;
@@ -30,7 +31,7 @@ type CarouselContextProps = {
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
 
-function useCarousel() {
+export function useCarousel() {
   const context = React.useContext(CarouselContext);
 
   if (!context) {
@@ -48,6 +49,7 @@ const Carousel = React.forwardRef<
     {
       orientation = 'horizontal',
       opts,
+      stiff,
       setApi,
       plugins,
       className,
@@ -105,9 +107,40 @@ const Carousel = React.forwardRef<
     }, [api, setApi]);
 
     React.useEffect(() => {
-      if (!api) {
-        return;
-      }
+      if (!api) return;
+
+      if (!!stiff)
+        api.on('scroll', emblaApi => {
+          const {
+            target,
+            index,
+            indexPrevious,
+            location,
+            scrollTo,
+            translate,
+            scrollBody,
+          } = emblaApi.internalEngine();
+          const direction =
+            index.get() > indexPrevious.get() ? 'right' : 'left';
+          let edge: number | null = null;
+
+          if (direction === 'left' && location.get() >= target.get())
+            edge = target.get();
+          if (direction === 'right' && location.get() <= target.get())
+            edge = target.get();
+
+          if (edge !== null) {
+            location.set(edge);
+            target.set(edge);
+            translate.to(edge);
+            translate.toggleActive(false);
+            scrollBody.useDuration(0).useFriction(0);
+            scrollTo.distance(0, false);
+          } else {
+            console.log('active');
+            translate.toggleActive(true);
+          }
+        });
 
       onSelect(api);
       api.on('reInit', onSelect);
@@ -155,7 +188,7 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden">
+    <div ref={carouselRef} className="overflow-hidden h-full">
       <div
         ref={ref}
         className={cn(

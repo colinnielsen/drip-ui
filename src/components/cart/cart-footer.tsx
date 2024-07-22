@@ -1,16 +1,13 @@
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { Order, OrderItem } from '@/data-model/order/OrderType';
+import { Order } from '@/data-model/order/OrderType';
 import { cn } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
-import { useFarmer } from '@/queries/FarmerQuery';
 import { useCart } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
-import { useActiveUser } from '@/queries/UserQuery';
 import { ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { Headline, Label2 } from '../ui/typography';
-import { Overview } from './overview';
-import { CheckoutSlides } from './checkout-slides';
+import CheckoutSlides from './checkout-slides';
 
 export const CartDrawer = ({
   cart,
@@ -56,9 +53,9 @@ export const CartDrawer = ({
         className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
         aria-describedby="cart-footer"
       >
-        <div className="w-full flex flex-col overflow-y-auto h-full">
-          {drawerOpen && <CheckoutSlides {...{ shop, cart }} />}
-        </div>
+        {/* <div className="w-full flex flex-col overflow-y-auto h-full"> */}
+        {drawerOpen && <CheckoutSlides {...{ shop, cart }} />}
+        {/* </div> */}
       </DrawerContent>
     </>
   );

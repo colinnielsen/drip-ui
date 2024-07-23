@@ -3,7 +3,7 @@ import { Item, ItemCategory } from '@/data-model/item/ItemType';
 import { cn } from '@/lib/utils';
 import { useActiveUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
-import { ItemWithSelector } from './item';
+import { ItemWithSelector } from './item-popup';
 
 export const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-5 w-full overflow-x-auto">

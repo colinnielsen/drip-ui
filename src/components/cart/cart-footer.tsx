@@ -1,11 +1,11 @@
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Order } from '@/data-model/order/OrderType';
-import { cn } from '@/lib/utils';
+import { cn, sleep } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
 import { useCart } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
 import { ShoppingCart } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Headline, Label2 } from '../ui/typography';
 import CheckoutSlides from './checkout-slides';
 
@@ -23,7 +23,7 @@ export const CartDrawer = ({
   return (
     <>
       <DrawerTrigger asChild>
-        <div className="flex justify-between px-6 py-4 items-center bg-secondary-pop">
+        <button className="flex justify-between px-6 py-4 items-center bg-secondary-pop w-full h-full text-left">
           <div className="flex flex-col gap-1">
             <Label2 className="text-light-gray">Pickup Store</Label2>
             <Headline className="flex items-center gap-2 text-light-gray">
@@ -45,7 +45,7 @@ export const CartDrawer = ({
               </div>
             </div>
           </div>
-        </div>
+        </button>
       </DrawerTrigger>
 
       <DrawerContent
@@ -64,16 +64,30 @@ export const CartDrawer = ({
 export default function () {
   const { data: cart } = useCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [ready, setIsReady] = useState(false);
+
+  useEffect(() => {
+    sleep(1000).then(() => setIsReady(true));
+  }, []);
 
   if (!cart) return null;
   return (
-    <Drawer
-      key={'drawer'}
-      open={drawerOpen}
-      onOpenChange={setDrawerOpen}
-      handleOnly
+    <div
+      className={cn(
+        'transition-all',
+        'transition-[600ms]',
+        'translate-y-20',
+        !!cart.orderItems.length && ready ? 'translate-y-0' : '',
+      )}
     >
-      <CartDrawer cart={cart} drawerOpen={drawerOpen} />
-    </Drawer>
+      <Drawer
+        key={'drawer'}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        handleOnly
+      >
+        <CartDrawer cart={cart} drawerOpen={drawerOpen} />
+      </Drawer>
+    </div>
   );
 }

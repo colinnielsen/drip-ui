@@ -70,8 +70,11 @@ export const AddButton = ({
 
   return (
     <button
-      className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:bg-neutral-300 active:scale-95"
-      onClick={() => mutate()}
+      className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:bg-neutral-300 active:scale-95 drop-shadow-md"
+      onClick={e => {
+        e.stopPropagation();
+        mutate();
+      }}
     >
       <PlusSvg />
     </button>
@@ -271,7 +274,7 @@ export function ItemWithSelector({
       <ItemPreviewTrigger item={item} shopId={shopId} />
 
       <DrawerContent>
-        <div className="min-h-[75vh] flex flex-col">
+        <div className="h-[75vh] flex flex-col overflow-scroll">
           <DrawerHeader className="p-0 rounded-t-xl">
             <div className="min-h-64 relative rounded-t-xl overflow-clip">
               <Image

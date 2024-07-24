@@ -81,6 +81,11 @@ export const mapSliceStoreToShop = (
 ): Shop => ({
   __entity: Entity.shop,
   __type: 'storefront',
+  __sourceConfig: {
+    type: 'slice',
+    id: getSliceStoreIdFromSliceId(sliceStore.id),
+    version: SLICE_VERSION,
+  },
   id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
   sliceStoreId: getSliceStoreIdFromSliceId(sliceStore.id),
   menu: {

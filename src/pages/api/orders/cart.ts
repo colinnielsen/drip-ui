@@ -1,5 +1,5 @@
-import { database } from '@/infras/database';
-import { never } from '@/lib/utils';
+import { sqlDatabase } from '@/infras/database';
+import { err } from '@/lib/utils';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -29,7 +29,7 @@ export default async function handler(
 
 async function handleGetCart(res: NextApiResponse, userId: UUID) {
   try {
-    const cart = await database.orders.getActiveUserOrder(userId);
+    const cart = await sqlDatabase.orders.getActiveUserOrder(userId);
     return res.status(200).json(cart);
   } catch (error) {
     console.error('Error fetching cart:', error);
@@ -48,27 +48,27 @@ async function handleUpdateCart(
   }
 
   try {
-    const maybeCart = await database.orders.getActiveUserOrder(userId);
+    const maybeCart = await sqlDatabase.orders.getActiveUserOrder(userId);
     if (action === 'add') {
       const { orderItems } = req.body;
       const updatedCart = maybeCart
-        ? await database.orders.update(maybeCart.id, [
+        ? await sqlDatabase.orders.update(maybeCart.id, [
             { __type: 'add', orderItem: orderItems },
           ])
-        : await database.orders.save(shopId, userId, orderItems);
+        : await sqlDatabase.orders.save(shopId, userId, orderItems);
       return res.status(200).json(updatedCart);
     }
     if (action === 'delete') {
       if (!maybeCart) return res.status(500).json({ error: 'Cart not found' });
 
       const { orderItemId } = req.body;
-      const updatedCart = await database.orders.update(maybeCart.id, [
+      const updatedCart = await sqlDatabase.orders.update(maybeCart.id, [
         { __type: 'delete', orderItemId },
       ]);
       return res.status(200).json(updatedCart);
     }
 
-    return never('Invalid action');
+    return err('Invalid action');
   } catch (error) {
     console.error('Error adding to cart:', error);
     return res.status(500).json({ error: 'Failed to add to cart' });
@@ -77,12 +77,12 @@ async function handleUpdateCart(
 
 async function handleClearCart(res: NextApiResponse, userId: UUID) {
   try {
-    const maybeCart = await database.orders.getActiveUserOrder(userId);
+    const maybeCart = await sqlDatabase.orders.getActiveUserOrder(userId);
     if (!maybeCart) {
       return res.status(404).json({ error: 'Cart not found' });
     }
 
-    const clearedCart = await database.orders.clear(maybeCart.id);
+    const clearedCart = await sqlDatabase.orders.clear(maybeCart.id);
     return res.status(200).json(clearedCart);
   } catch (error) {
     console.error('Error clearing cart:', error);

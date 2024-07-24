@@ -1,4 +1,4 @@
-import { database } from '@/infras/database';
+import { sqlDatabase } from '@/infras/database';
 import { ONBOARDED_SHOPS, STATIC_FARMER_DATA } from '@/lib/constants';
 import { SyncService } from '@/services/SyncService';
 import { sql } from '@vercel/postgres';
@@ -6,9 +6,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const _resetDB = async () => {
   console.debug('resetting database...');
-  await sql`
-    DROP TABLE IF EXISTS "users";
-  `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "users";
+  // `;
   await sql`
     DROP TABLE IF EXISTS "shops";
   `;
@@ -18,9 +18,9 @@ const _resetDB = async () => {
   await sql`
     DROP TABLE IF EXISTS "orders";
   `;
-  await sql`
-    DROP TABLE IF EXISTS "farmers";
-  `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "farmers";
+  // `;
   console.debug('database reset');
 };
 
@@ -41,6 +41,7 @@ export const bootstrapDB = async () => {
     CREATE TABLE IF NOT EXISTS "shops" (
       "id" UUID PRIMARY KEY,
       "__type" TEXT NOT NULL,
+      "__sourceConfig" JSONB,
       "sliceStoreId" TEXT NOT NULL,
       "label" TEXT NOT NULL,
       "backgroundImage" TEXT,
@@ -74,7 +75,9 @@ export const bootstrapDB = async () => {
       "user" UUID NOT NULL,
       "status" TEXT NOT NULL,
       "timestamp" TIMESTAMP NOT NULL,
-      "orderItems" JSONB
+      "orderItems" JSONB,
+      "tip" JSONB,
+      "transactionHash" TEXT
     );
   `;
   await sql`
@@ -90,7 +93,7 @@ export const bootstrapDB = async () => {
   console.debug('database bootstrapped');
 };
 
-const syncService = new SyncService(database);
+const syncService = new SyncService(sqlDatabase);
 
 export default async function handler(
   _req: NextApiRequest,

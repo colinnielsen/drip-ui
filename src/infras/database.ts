@@ -4,7 +4,7 @@ import { SQLUserRepository } from './repositories/SQLUserRepository';
 import { SQLShopRepository } from './repositories/SQLShopRepository';
 import { SQLItemRepository } from './repositories/SQLItemRepository';
 
-export const database = {
+export const sqlDatabase = {
   farmers: new SQLFarmerRepository(),
   shops: new SQLShopRepository(),
   items: new SQLItemRepository(),

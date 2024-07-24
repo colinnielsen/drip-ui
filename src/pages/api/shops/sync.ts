@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SyncService } from '@/services/SyncService';
 import { ONBOARDED_SHOPS } from '@/lib/constants';
-import { database } from '@/infras/database';
+import { sqlDatabase } from '@/infras/database';
 
-const syncService = new SyncService(database);
+const syncService = new SyncService(sqlDatabase);
 
 export default async function handler(
   _req: NextApiRequest,

@@ -1,7 +1,6 @@
 import { UUID } from 'crypto';
 import { Item, ItemMod } from '../item/ItemType';
-
-export type OrderStatus = 'pending' | 'in-progress' | 'complete';
+import { Address, Hex } from 'viem';
 
 export const DRIP_TIP_ITEM_NAME = '__drip-tip';
 
@@ -11,14 +10,30 @@ export type OrderItem = {
   mods: ItemMod[];
 };
 
-export type Order = {
+type _BaseOrder = {
   id: UUID;
-  status: OrderStatus;
   timestamp: string;
   /** The id of the shop */
   shop: UUID;
-  /** Id of the user who placed the order */
+  /** Id of the user who created the order */
   user: UUID;
   /** The items the user ordered */
   orderItems: OrderItem[];
+  tip: {
+    amount: number;
+    address: Address;
+  } | null;
 };
+
+export type Cart = _BaseOrder & {
+  status: 'pending';
+};
+
+export type PaidOrder = _BaseOrder & {
+  status: 'submitting' | 'in-progress' | 'complete';
+  transactionHash: Hex;
+};
+
+export type Order = Cart | PaidOrder;
+
+export type OrderStatus = Order['status'];

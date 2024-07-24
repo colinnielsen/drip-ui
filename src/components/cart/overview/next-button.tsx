@@ -1,11 +1,16 @@
-import { CTAButton } from '@/components/ui/button';
-import { useCarousel } from '@/components/ui/carousel';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CTAButton, LoadingCTAButton } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { useCheckoutContext } from '../checkout-context';
-
-const LoadingButton = () => (
-  <Skeleton className="h-14 w-full rounded-[50px] bg-secondary-pop" />
-);
+import { PayButton } from '../payment';
+import { WelcomeScreen, shouldGoToWelcomeSlide } from '../welcome';
 
 // export const NextButton = dynamic(() => import('../checkout'), {
 //   ssr: false,
@@ -16,16 +21,25 @@ const LoadingButton = () => (
 
 export const NextButton = () => {
   const { step } = useCheckoutContext();
-  const { scrollNext } = useCarousel();
 
   return (
     <div className="px-6 pb-6 w-full min-h-20">
       {step === 'initializing' ? (
-        <LoadingButton />
+        <LoadingCTAButton />
+      ) : shouldGoToWelcomeSlide(step) ? (
+        <Dialog>
+          <DialogTrigger asChild>
+            <CTAButton>Next</CTAButton>
+          </DialogTrigger>
+          <DialogContent className={cn(CSS_FONT_CLASS_CONFIG, 'max-w-90vw')}>
+            <VisuallyHidden.Root>
+              <DialogTitle>Welcome </DialogTitle>
+            </VisuallyHidden.Root>
+            <WelcomeScreen />
+          </DialogContent>
+        </Dialog>
       ) : (
-        <CTAButton onClick={() => scrollNext()}>
-          {step === 'pay' ? 'Checkout' : 'Next'}
-        </CTAButton>
+        <PayButton />
       )}
     </div>
   );

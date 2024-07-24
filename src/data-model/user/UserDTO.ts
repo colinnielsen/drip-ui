@@ -1,10 +1,9 @@
+import { User as PrivyUser } from '@privy-io/server-auth';
+import { UUID } from 'crypto';
 import { v5, validate as validateUUID } from 'uuid';
 import { PrivyDID } from '../_external/privy';
-import { UUID } from 'crypto';
-import { User as PrivyUser, WalletWithMetadata } from '@privy-io/server-auth';
 import { SavedUser, SessionUser, User, WalletConnectorType } from './UserType';
-import { never } from '@/lib/utils';
-import { Unsaved } from '../_common/type/CommonType';
+import privy from '@/lib/privy';
 
 // A valid UUID to be used as a namespace
 const PRIVY_NAMESPACE = 'E34251C3-01F3-4788-8E93-CE0FBC50EA5D';
@@ -16,7 +15,7 @@ export const mapPrivyIdToUserId = (privyId: PrivyDID) => {
   return v5(privyId, PRIVY_NAMESPACE) as UUID;
 };
 
-export function mapToSessionUser(sessionId: UUID): SessionUser {
+export function createSessionUser(sessionId: UUID): SessionUser {
   return {
     __type: 'session',
     id: sessionId,
@@ -47,18 +46,29 @@ export function mapToSessionUser(sessionId: UUID): SessionUser {
 //   };
 // };
 
-export const mapUserToSavedUserViaPrivy = (
+/**
+ *
+ * @throws if privy user is not found
+ */
+export const mapUserToSavedUserViaPrivy = async (
   user: User,
-  privyUser: PrivyUser,
-): SavedUser => ({
-  ...user,
-  __type: 'user',
-  authServiceId: {
-    __type: 'privy',
-    id: privyUser.id as PrivyDID,
-  },
-  wallet: getWalletInfoFromPrivyUser(privyUser),
-});
+  _privyInfo: PrivyUser | PrivyDID,
+): Promise<SavedUser> => {
+  const privyInfo =
+    typeof _privyInfo === 'string'
+      ? await privy.getUser(_privyInfo)
+      : _privyInfo;
+
+  return {
+    ...user,
+    __type: 'user',
+    authServiceId: {
+      __type: 'privy',
+      id: privyInfo.id as PrivyDID,
+    },
+    wallet: getWalletInfoFromPrivyUser(privyInfo),
+  };
+};
 
 //
 //// UTILS

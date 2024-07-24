@@ -1,6 +1,5 @@
 import { Unsaved } from '@/data-model/_common/type/CommonType';
-import { PrivyDID } from '@/data-model/_external/privy';
-import { mapToSessionUser } from '@/data-model/user/UserDTO';
+import { createSessionUser } from '@/data-model/user/UserDTO';
 import { UserRepository } from '@/data-model/user/UserRepository';
 import { SavedUser, SessionUser, User } from '@/data-model/user/UserType';
 import { UUID } from 'crypto';
@@ -20,7 +19,7 @@ export class SQLUserRepository implements UserRepository {
         : User;
   }
 
-  async findByPrivyId(id: PrivyDID) {
+  async findByAuthServiceId(id: string) {
     const result =
       await sql`SELECT * FROM users WHERE "authServiceId"->>'id' = ${id}`;
     const maybeUser = result.rows[0];
@@ -31,7 +30,7 @@ export class SQLUserRepository implements UserRepository {
     const existingUser = await this.findById(sessionId);
 
     if (existingUser && existingUser.__type === 'session') return existingUser;
-    return this.save(mapToSessionUser(sessionId));
+    return this.save(createSessionUser(sessionId));
   }
 
   async save<T extends User>(user: T): Promise<T> {

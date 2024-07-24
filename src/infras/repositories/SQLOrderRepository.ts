@@ -8,6 +8,9 @@ import { UUID } from 'crypto';
 import { sql } from '@vercel/postgres';
 import { v4 } from 'uuid';
 import { isPending } from '@/data-model/order/OrderDTO';
+import { Hash } from 'viem';
+import { getTransactionReceipt } from 'viem/actions';
+import { BASE_CLIENT } from '@/lib/ethereum';
 
 export class SQLOrderRepository implements OrderRepository {
   async findById(id: UUID): Promise<Order | null> {
@@ -32,6 +35,7 @@ export class SQLOrderRepository implements OrderRepository {
       user: userId,
       status: 'pending',
       timestamp: new Date().toISOString(),
+      tip: null,
       orderItems,
     };
 
@@ -46,7 +50,7 @@ export class SQLOrderRepository implements OrderRepository {
   async update(
     orderId: UUID,
     operations: UpdateOrderOperation[],
-  ): Promise<Order> {
+  ): Promise<Order | null> {
     const result = await sql`SELECT * FROM orders WHERE id = ${orderId}`;
     const order = result.rows[0] as Order;
     if (!order) throw Error('Order not found');
@@ -78,19 +82,63 @@ export class SQLOrderRepository implements OrderRepository {
           if (orderItemId === -1) throw Error('bad order id');
           order.orderItems[orderItemId] = op.orderItem;
           break;
+        case 'tip':
+          order.tip = op.tip;
+          break;
         default:
           let _err: never;
           throw Error('bad impl');
       }
     }
 
+    if (order.orderItems.length === 0) {
+      await this.delete(orderId);
+      return null;
+    }
+
     await sql`
       UPDATE orders
-      SET "orderItems" = ${JSON.stringify(order.orderItems)}
+      SET
+      "orderItems" = ${JSON.stringify(order.orderItems)},
+      "tip" = ${order.tip ? JSON.stringify(order.tip) : null}
       WHERE id = ${orderId}
     `;
 
     return order;
+  }
+
+  async pay(orderId: UUID, transactionHash: Hash): Promise<Order> {
+    const result = await sql`UPDATE orders
+      SET
+      "transactionHash" = ${transactionHash},
+      "status" = 'in-progress'
+      WHERE id = ${orderId}`;
+    return result.rows[0] as Order;
+  }
+
+  async checkStatus(orderId: UUID): Promise<Order> {
+    const result = await sql`SELECT * FROM orders WHERE id = ${orderId}`;
+    const [order] = result.rows as [Order];
+    if (!order) throw Error('Order not found');
+
+    if (order.status !== 'in-progress') return order;
+
+    const isComplete = await getTransactionReceipt(BASE_CLIENT, {
+      hash: order.transactionHash,
+    })
+      .then(t => t.status === 'success')
+      .catch(() => false);
+
+    if (isComplete) {
+      const result =
+        await sql`UPDATE orders SET status = 'in-progress' WHERE id = ${orderId}`;
+      debugger;
+
+      return {
+        ...order,
+        status: 'complete',
+      };
+    } else return order;
   }
 
   async delete(id: UUID): Promise<void> {

@@ -1,5 +1,5 @@
 import { FarmerDetails, FarmerHeader } from '@/components/FarmerHeader';
-import { database } from '@/infras/database';
+import { sqlDatabase } from '@/infras/database';
 import { useFarmer } from '@/queries/FarmerQuery';
 import { UUID } from 'crypto';
 import { GetStaticPaths } from 'next';
@@ -14,7 +14,7 @@ import { GetStaticPaths } from 'next';
 //
 
 export const getStaticPaths = (async () => {
-  const res = await database.farmers.findAll();
+  const res = await sqlDatabase.farmers.findAll();
   return {
     paths: res.map(farmer => ({
       params: { farmerId: farmer.id },

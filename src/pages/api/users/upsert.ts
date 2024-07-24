@@ -1,23 +1,22 @@
 import { PrivyDID } from '@/data-model/_external/privy';
-import {
-  mapPrivyIdToUserId,
-  mapUserToSavedUserViaPrivy,
-} from '@/data-model/user/UserDTO';
-import { database } from '@/infras/database';
+import { mapUserToSavedUserViaPrivy } from '@/data-model/user/UserDTO';
+import { sqlDatabase } from '@/infras/database';
+import { withErrorHandling } from '@/lib/next';
 import privy from '@/lib/privy';
-import { SESSION_COOKIE_NAME } from '@/lib/session';
+import { PRIVY_TOKEN_NAME, SESSION_COOKIE_NAME } from '@/lib/session';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function upsertUser(
+export default withErrorHandling(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
   if (req.method !== 'POST')
     return res.status(405).json({ error: 'Method not allowed' });
 
-  const privyToken = req.cookies['privy-token'];
+  const privyToken = req.cookies[PRIVY_TOKEN_NAME];
   const sessionToken = req.cookies[SESSION_COOKIE_NAME] as UUID | undefined;
+  debugger;
 
   if (!privyToken)
     return res.status(400).json({ error: 'privy-token not found in cookies' });
@@ -26,34 +25,32 @@ export default async function upsertUser(
       .status(400)
       .json({ error: 'session-token not found in cookies' });
 
-  try {
-    const verifiedClaims = await privy.verifyAuthToken(privyToken);
-    const privyId = verifiedClaims.userId as PrivyDID;
-    const userId = mapPrivyIdToUserId(privyId);
+  const verifiedClaims = await privy.verifyAuthToken(privyToken);
+  const privyId = verifiedClaims.userId as PrivyDID;
 
-    const maybeUser = await database.users.findById(userId);
-    if (maybeUser) return res.status(200).json(maybeUser);
+  // maybe the normal user exists, and we can try and find them by their signed privy id
+  const maybeUser = await sqlDatabase.users.findByAuthServiceId(privyId);
+  // if so, and they're already created, return it
+  if (
+    maybeUser &&
+    maybeUser.__type === 'user' &&
+    maybeUser.authServiceId?.id === privyId
+  )
+    return res.status(200).json(maybeUser);
 
-    const sessionUser = await database.users.findById(sessionToken);
-    if (!sessionUser)
-      return res
-        .status(404)
-        .json({ error: 'session token is not associated with a user' });
-
-    const privyUser = await privy.getUser(privyId).catch(e => {
-      console.error(e);
-      throw Error('privy-user not found: ' + e.message);
-    });
-
-    const unsavedUser = mapUserToSavedUserViaPrivy(sessionUser, privyUser);
-
-    const newlySavedUser = await database.users.save(unsavedUser);
-
-    return res.status(200).json(newlySavedUser);
-  } catch (error: any) {
-    console.error(error);
+  // otherwise find the session user by session token
+  const sessionUser = await sqlDatabase.users.findById(sessionToken);
+  if (!sessionUser)
     return res
-      .status(500)
-      .json({ error: 'Failed to upsert user: ' + error.message });
-  }
-}
+      .status(404)
+      .json({ error: 'session token is not associated with a user' });
+
+  const privyUser = await privy.getUser(privyId).catch(e => {
+    console.error(e);
+    throw Error('privy-user not found: ' + e.message);
+  });
+
+  return await mapUserToSavedUserViaPrivy(sessionUser, privyUser)
+    .then(u => sqlDatabase.users.save(u))
+    .then(savedUser => res.status(200).json(savedUser));
+}, 'Failed to upsert user');

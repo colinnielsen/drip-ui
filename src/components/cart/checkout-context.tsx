@@ -1,11 +1,9 @@
 import { getOrderSummary } from '@/data-model/order/OrderDTO';
-import { never } from '@/lib/utils';
 import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
 import { useCart } from '@/queries/OrderQuery';
 import { useActiveUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
-import { createContext, useCallback, useContext } from 'react';
-import { useScrollTo } from '../ui/carousel';
+import { createContext, useContext, useEffect } from 'react';
 
 // const SLIDE_MAP = {
 //   initializing: 1,
@@ -62,20 +60,18 @@ const useDetermineCheckoutStep = (): {
   } = useUSDCBalance();
   const { data: cart, isLoading: isCartLoading, error: cartError } = useCart();
 
-  //     console.table({
-  //       user,
-  //       privyReady,
-  //       wallets,
-  //       balance,
-  //       cart,
-  //       isBalanceLoading,
-  //       isCartLoading,
-  //       isUserLoading,
-  //       balanceError,
-  //       cartError,
-  //       userError,
-  //     });
-
+  // console.log({
+  //   user,
+  //   privyReady,
+  //   balance,
+  //   cart,
+  //   isBalanceLoading,
+  //   isCartLoading,
+  //   isUserLoading,
+  //   balanceError,
+  //   cartError,
+  //   userError,
+  // });
   // (shouldn't happen)
   if (!privyReady || isUserLoading || !user || !cart)
     return {
@@ -87,8 +83,7 @@ const useDetermineCheckoutStep = (): {
   if (user.__type === 'user' && !authenticated) return { step: 'login' };
 
   if (wallet === null) return { step: 'connect' };
-
-  if (isBalanceLoading || !balance)
+  if (isBalanceLoading || balance === undefined)
     return {
       step: 'initializing',
     };
@@ -105,6 +100,9 @@ export const CheckoutProvider = ({
   children: React.ReactNode;
 }) => {
   const { step } = useDetermineCheckoutStep();
+  useEffect(() => {
+    console.log({ step });
+  }, [step]);
 
   //   const nextSlide = useCallback(
   //     (() => {

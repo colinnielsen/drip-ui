@@ -4,6 +4,8 @@ import { Unsaved } from '../_common/type/CommonType';
 
 export type UserRepository = {
   findById: (userId: UUID) => Promise<User | null>;
+
+  findByAuthServiceId: (authServiceId: string) => Promise<User | null>;
   /**
    * @dev creates a new User
    */

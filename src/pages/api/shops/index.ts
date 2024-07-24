@@ -1,4 +1,4 @@
-import { database } from '@/infras/database';
+import { sqlDatabase } from '@/infras/database';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -8,6 +8,6 @@ export default async function handler(
   if (req.method !== 'GET')
     return res.status(405).json({ error: 'Method not allowed' });
 
-  const shops = await database.shops.findAll();
+  const shops = await sqlDatabase.shops.findAll();
   return res.status(200).json(shops);
 }

@@ -16,7 +16,7 @@ import { useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
 import { useCarousel } from '@/components/ui/carousel';
-import { ACTIVE_USER_QUERY_KEY } from '@/queries/UserQuery';
+import { ACTIVE_USER_QUERY_KEY, useActiveUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
 
 export function shouldGoToWelcomeSlide(step: string) {
@@ -28,6 +28,7 @@ const ConnectButton = () => {
   const { connectWallet } = usePrivy();
   const { current: initialStep } = useRef(step);
   const { scrollNext } = useCarousel();
+  const { data: user } = useActiveUser();
 
   const queryClient = useQueryClient();
 
@@ -40,22 +41,32 @@ const ConnectButton = () => {
 
   const action =
     initialStep === 'connect'
-      ? connectWallet
+      ? () =>
+          connectWallet({
+            suggestedAddress:
+              user?.__type === 'user' ? user.wallet.address : undefined,
+          })
       : initialStep === 'login' || initialStep === 'signup'
         ? loginOrCreateUser
         : 'ERROR';
 
   return (
-    <CTAButton onClick={action !== 'ERROR' ? action : () => {}}>
+    <CTAButton onClick={action !== 'ERROR' ? action : () => {}} type="submit">
       {action !== 'ERROR' ? 'Connect Wallet' : 'Login'}
     </CTAButton>
   );
 };
 
-const WelcomeSlide = () => {
+export const WelcomeScreen = () => {
   return (
     <div className="h-full bg-background flex flex-col items-center justify-center px-6 gap-4 py-6">
       <div className="flex-grow" />
+      {/* <div className="flex items-center justify-center gap-x-1 mb-10">
+        <Drip>Drip</Drip>
+        <Mono className="bg-slate-400 text-white px-2 py-1 rounded-md text-xs mt-2">
+          beta
+        </Mono>
+      </div> */}
       <Image src={grandma} alt="Grandma" width={200} height={200} />
       <Title2 as="p" className="text-center">
         One day, we want your grandma to be able to use{' '}
@@ -82,10 +93,7 @@ const WelcomeSlide = () => {
 export default function () {
   return (
     <AsCheckoutSlide>
-      <WelcomeSlide />
+      <WelcomeScreen />
     </AsCheckoutSlide>
   );
-}
-function useCheckout(): { step: any; setStep: any } {
-  throw new Error('Function not implemented.');
 }

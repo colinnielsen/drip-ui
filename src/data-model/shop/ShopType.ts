@@ -26,8 +26,15 @@ export type ManualStoreConfig = {
 //// TYPES
 ///
 
+export type ShopDataSource = 'slice';
+
 export type BaseShop = BaseEntity & {
   __entity: Entity.shop;
+  __sourceConfig: {
+    type: 'slice';
+    id: SliceStoreId;
+    version: number;
+  };
   sliceStoreId: SliceStoreId;
   label: string;
   backgroundImage: string;

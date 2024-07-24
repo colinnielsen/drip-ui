@@ -1,17 +1,14 @@
-import { Farmer, FarmerAllocation } from '@/data-model/farmer/FarmerType';
 import dripCup2 from '@/assets/drip-cup-2.png';
+import { Order } from '@/data-model/order/OrderType';
+import { useFarmerAllocationFromOrder } from '@/queries/OrderQuery';
 import Image from 'next/image';
-import { Label1, Title2 } from '../../ui/typography';
 import { Skeleton } from '../../ui/skeleton';
+import { Label1, Title2 } from '../../ui/typography';
 
-export const GrowerBanner = ({
-  farmer,
-  allocation,
-}: {
-  farmer?: Farmer;
-  allocation: FarmerAllocation;
-}) => {
-  const allocPercent = allocation.allocationBPS / 100;
+export const FarmerCard = ({ order }: { order: Order }) => {
+  const data = useFarmerAllocationFromOrder(order);
+  if (!data) return null;
+  const allocPercent = data.allocation.allocationBPS / 100;
 
   return (
     <div className="p-6">
@@ -19,9 +16,9 @@ export const GrowerBanner = ({
         <Image src={dripCup2} alt="drip-cup-2" width={80} height={80} />
         <div className="w-full flex flex-col gap-y-2">
           <Title2>{allocPercent}% for growers</Title2>
-          {farmer ? (
+          {data.farmer ? (
             <Label1 className="text-primary-gray">
-              {allocPercent}% of your order went to {farmer.name}'s farm.
+              {allocPercent}% of your order goes to {data.farmer.name}'s farm.
             </Label1>
           ) : (
             <Skeleton className="h-4 w-1/2" />

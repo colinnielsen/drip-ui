@@ -1,4 +1,3 @@
-import { privyWagmiConfig } from '@/components/providers.tsx/PrivyProvider';
 import {
   GetProductParams,
   GetStoreProductsParams,
@@ -11,19 +10,20 @@ import {
   payProducts,
 } from '@slicekit/core';
 import { axiosFetcher } from './utils';
+import { PRIVY_WAGMI_CONFIG } from './ethereum';
 
 export const sliceKit = {
-  wagmiConfig: privyWagmiConfig,
+  wagmiConfig: PRIVY_WAGMI_CONFIG,
   getStores: (params: GetStoresParams) => getStores(params),
   getStoreProducts: (params: GetStoreProductsParams) =>
-    getStoreProducts(privyWagmiConfig, params),
+    getStoreProducts(PRIVY_WAGMI_CONFIG, params),
   getStoreProducts_proxied: (params: GetStoreProductsParams) =>
     axiosFetcher<{ cartProducts: ProductCart[]; storeClosed: boolean }>(
       `/api/slice/get-store-products`,
       { data: params, method: 'POST' },
     ),
   getProduct: (params: GetProductParams) =>
-    getProduct(privyWagmiConfig, params),
+    getProduct(PRIVY_WAGMI_CONFIG, params),
   payProducts: async (
     // wallet: ConnectedWallet,
     params: PayProductsParams,
@@ -31,7 +31,7 @@ export const sliceKit = {
     // const provider = await wallet.getEthereumProvider();
 
     return payProducts(
-      privyWagmiConfig,
+      PRIVY_WAGMI_CONFIG,
       // createConfig({
       //   chains: BASE_RPC_CONFIG.chains,
 

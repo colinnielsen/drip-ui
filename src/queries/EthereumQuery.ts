@@ -1,5 +1,5 @@
-import { USDC_INSTANCE } from '@/lib/constants';
-import { never } from '@/lib/utils';
+import { USDC_INSTANCE } from '@/lib/ethereum';
+import { err } from '@/lib/utils';
 import { useWallets } from '@privy-io/react-auth';
 import { useQuery } from '@tanstack/react-query';
 import { Address } from 'viem';
@@ -24,7 +24,7 @@ export const useUSDCBalance = () => {
     queryFn: async () =>
       wallet
         ? await USDC_INSTANCE.read.balanceOf([wallet.address])
-        : never('Address is required'),
+        : err('Address is required'),
     enabled: !!wallet,
   });
 };

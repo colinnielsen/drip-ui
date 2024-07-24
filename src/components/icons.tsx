@@ -1,4 +1,3 @@
-import { formatUnits } from 'viem';
 import { Label2 } from './ui/typography';
 import { prettyFormatPrice } from '@/lib/utils';
 import { SupportedCurrency } from '@/data-model/_common/type/CommonType';

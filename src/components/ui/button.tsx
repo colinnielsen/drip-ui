@@ -3,6 +3,8 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { Mono } from './typography';
+import { Skeleton } from './skeleton';
+import { LoaderCircle } from 'lucide-react';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50',
@@ -52,10 +54,29 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = 'Button';
 
-const CTAButton = (props: ButtonProps) => (
-  <Button variant="cta" {...props} className="w-full">
-    <Mono className="text-white uppercase">{props.children}</Mono>
-  </Button>
+const CTAButton = React.forwardRef(
+  (
+    props: ButtonProps & { isLoading?: boolean },
+    ref: React.Ref<HTMLButtonElement>,
+  ) => (
+    <Button
+      variant="cta"
+      {...props}
+      className="w-full"
+      disabled={props.isLoading}
+      ref={ref}
+    >
+      {props.isLoading ? (
+        <LoaderCircle className="h-4 w-4 animate-spin" />
+      ) : (
+        <Mono className="text-white uppercase">{props.children}</Mono>
+      )}
+    </Button>
+  ),
 );
 
-export { Button, buttonVariants, CTAButton };
+const LoadingCTAButton = () => (
+  <Skeleton className="h-14 w-full rounded-[50px] bg-secondary-pop" />
+);
+
+export { Button, buttonVariants, CTAButton, LoadingCTAButton };

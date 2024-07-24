@@ -9,10 +9,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const isAddressEql = (a?: string, b?: string) => {
-  return a?.toLowerCase() === b?.toLowerCase();
-};
-
 export const prettyFormatPrice = (
   p: string | bigint,
   decimals: number,
@@ -73,6 +69,14 @@ export const generateUUID = (input?: string): UUID => {
   return input ? (uuidv5(input, NAMESPACE) as UUID) : (uuidv4() as UUID);
 };
 
-export const never = (msg: string): never => {
+export const err = (msg: string): never => {
   throw new Error(msg);
 };
+
+export const deleteCookie = (name: string) => {
+  if (typeof document !== 'undefined') {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  }
+};
+
+export const minutes = (minutes: number) => minutes * 60 * 1000;

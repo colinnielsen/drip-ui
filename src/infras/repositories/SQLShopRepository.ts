@@ -1,4 +1,4 @@
-import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
+import { Item, ItemMod } from '@/data-model/item/ItemType';
 import { ShopRepository } from '@/data-model/shop/ShopRepository';
 import { Shop } from '@/data-model/shop/ShopType';
 import { UUID } from 'crypto';
@@ -37,10 +37,11 @@ export class SQLShopRepository implements ShopRepository {
 
   async save(shop: Shop): Promise<Shop> {
     await sql`
-      INSERT INTO shops (id, __type, "sliceStoreId", label, "backgroundImage", logo, url, "farmerAllocations", menu, "bestSellers")
-      VALUES (${shop.id}, ${shop.__type}, ${shop.sliceStoreId}, ${shop.label}, ${shop.backgroundImage}, ${shop.logo}, ${shop.url}, ${JSON.stringify(shop.farmerAllocations)}, ${JSON.stringify(shop.menu)}, ${JSON.stringify(shop.bestSellers)})
+      INSERT INTO shops (id, __type, "sliceStoreId", label, "backgroundImage", logo, url, "farmerAllocations", menu, "bestSellers", "__sourceConfig")
+      VALUES (${shop.id}, ${shop.__type}, ${shop.sliceStoreId}, ${shop.label}, ${shop.backgroundImage}, ${shop.logo}, ${shop.url}, ${JSON.stringify(shop.farmerAllocations)}, ${JSON.stringify(shop.menu)}, ${JSON.stringify(shop.bestSellers)}, ${JSON.stringify(shop.__sourceConfig)})
       ON CONFLICT (id) DO UPDATE SET
         __type = EXCLUDED.__type,
+        "__sourceConfig" = EXCLUDED."__sourceConfig",
         "sliceStoreId" = EXCLUDED."sliceStoreId",
         label = EXCLUDED.label,
         "backgroundImage" = EXCLUDED."backgroundImage",

@@ -4,8 +4,10 @@ import { useState } from 'react';
 
 export const ReactQueryClientProvider = ({
   children,
+  useDevTools = false,
 }: {
   children: React.ReactNode;
+  useDevTools?: boolean;
 }) => {
   const [queryClient] = useState(
     () =>
@@ -22,7 +24,7 @@ export const ReactQueryClientProvider = ({
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} />
+      {useDevTools && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );
 };

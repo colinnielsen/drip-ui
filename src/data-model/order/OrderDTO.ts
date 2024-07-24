@@ -1,6 +1,25 @@
 import { prettyFormatPrice } from '@/lib/utils';
 import { DRIP_TIP_ITEM_NAME, Order, OrderItem } from './OrderType';
 
+/**
+ * @dev if a cart item has the same id and the same mods, then it can be squashed with a quantity
+ */
+export function collapseDuplicateItems(orderItems: OrderItem[]) {
+  const itemMap = new Map<string, [OrderItem, number]>();
+
+  orderItems.forEach(orderItem => {
+    const allIds = [
+      orderItem.item.id,
+      ...orderItem.mods.map(mod => mod.id),
+    ].sort();
+    const key = allIds.join('-');
+    if (itemMap.has(key)) itemMap.get(key)![1] += 1;
+    else itemMap.set(key, [orderItem, 1]);
+  });
+
+  return Array.from(itemMap.values());
+}
+
 export const getOrderSummary = (o: Order) => {
   const total_noTip = o.orderItems.reduce(
     (acc, orderItem) =>

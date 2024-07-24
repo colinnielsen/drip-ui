@@ -43,9 +43,15 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.1.0
         version: 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-visually-hidden':
+        specifier: ^1.1.0
+        version: 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@slicekit/core':
-        specifier: ^0.3.82
-        version: 0.3.82(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+        specifier: ^0.3.85
+        version: 0.3.85(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+      '@slicekit/react':
+        specifier: ^0.2.68
+        version: 0.2.68(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       '@tanstack/react-query':
         specifier: ^5.51.1
         version: 5.51.1(react@18.3.1)
@@ -2941,6 +2947,22 @@ packages:
       '@types/react':
         optional: true
 
+  '@radix-ui/react-visually-hidden@1.1.0':
+    resolution:
+      {
+        integrity: sha512-N8MDZqtgCgG5S3aV60INAB475osJousYpZ4cTJ2cFbMpdHS5Y6loLTH8LPtkj2QN0x93J30HT/M3qJXM0+lyeQ==,
+      }
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+
   '@react-native-community/cli-clean@13.6.9':
     resolution:
       {
@@ -3136,10 +3158,10 @@ packages:
         integrity: sha512-N5p/ulfnnA2Pi2M3YeWjULeWbjo7ei22JwU/IXnhoHzKq3pYCN6ynL9mJBOlvDVv892EgLPCWCOwQk/uBT2v0Q==,
       }
 
-  '@safe-global/safe-gateway-typescript-sdk@3.22.0':
+  '@safe-global/safe-gateway-typescript-sdk@3.22.1':
     resolution:
       {
-        integrity: sha512-QKgucFMloZ7S23X70U6OmFaRxfX2O52xBAZFIDeW9n+uiANG+JYUiJv6UC0/eVNto+CU/dOVnpqRDhr6/ElKDg==,
+        integrity: sha512-YApSpx+3h6uejrJVh8PSqXRRAwmsWz8PZERObMGJNC9NPoMhZG/Rvqb2UWmVLrjFh880rqutsB+GrTmJP351PA==,
       }
     engines: { node: '>=16' }
 
@@ -3215,15 +3237,26 @@ packages:
         integrity: sha512-kFFdI2DPAm8W8JwiPiizmsq4SYYADE1c7CN04xCSzLp+/mafrtM3s/Sdqq54vXsjHJZs9kmGEnTcdMoijP1I4w==,
       }
 
-  '@slicekit/core@0.3.82':
+  '@slicekit/core@0.3.85':
     resolution:
       {
-        integrity: sha512-stnyNtrdPDlgCJpQung4n9hMW0YXcSDNNdS+Ng0y0aVSHaNNCfLisCZE1hWe1+1UjUGiImOOXQKljHP21MLmfA==,
+        integrity: sha512-f2ctLAp0lka9jCS29R1YJGsPUUUK9yKUEep/nxHuAOtolqsmbPSLcTpuA6WYjXUMq2xLOmgLuYDVY6xo9qgdJA==,
       }
     peerDependencies:
       '@wagmi/core': ^2.10.9
       ethers: ^5.7.2
       merkletreejs: 0.4.0
+      viem: ^2.17.0
+
+  '@slicekit/react@0.2.68':
+    resolution:
+      {
+        integrity: sha512-iIkfKsgPkeWEY05YcgVUK5ikYn/rF6kC9KpK8qaO3h232K0r9PU0FGaGiscZbsoSIDbDOkdwW/Rk1rdTfNEc4g==,
+      }
+    peerDependencies:
+      '@wagmi/core': ^2.10.9
+      react: ^18.2.0
+      react-dom: ^18.2.0
       viem: ^2.17.0
 
   '@socket.io/component-emitter@3.1.2':
@@ -3368,6 +3401,12 @@ packages:
     peerDependencies:
       eslint: ^8 || ^9
 
+  '@tanstack/query-core@5.17.19':
+    resolution:
+      {
+        integrity: sha512-Lzw8FUtnLCc9Jwz0sw9xOjZB+/mCCmJev38v2wHMUl/ioXNIhnNWeMxu0NKUjIhAd62IRB3eAtvxAGDJ55UkyA==,
+      }
+
   '@tanstack/query-core@5.51.1':
     resolution:
       {
@@ -3388,6 +3427,14 @@ packages:
     peerDependencies:
       '@tanstack/react-query': ^5.51.1
       react: ^18 || ^19
+
+  '@tanstack/react-query@5.17.19':
+    resolution:
+      {
+        integrity: sha512-qaQENB6/03Gj3dFZGvdmUoqeUGlGm7P1p0RmaR04Bf1Ib1T9lLGimcC9T3oCFbrx0b2ZF21ngjFZNjj9uPJMcg==,
+      }
+    peerDependencies:
+      react: ^18.0.0
 
   '@tanstack/react-query@5.51.1':
     resolution:
@@ -3506,6 +3553,12 @@ packages:
     resolution:
       {
         integrity: sha512-MdiXf+nDuMvY0gJKxyfZ7/6UFsETO7mGKF54MVD/ekJS6HdFtpZFBgrh6Pseu64XTb2MLyFPlbW6hj8HYRQNOQ==,
+      }
+
+  '@types/node@20.14.11':
+    resolution:
+      {
+        integrity: sha512-kprQpL8MMeszbz6ojB5/tU8PLN4kesnN8Gjzw349rDlNgsSzg90lAVj3llK99Dh7JON+t9AuscPPFW6mPbTnSA==,
       }
 
   '@types/pg@8.11.6':
@@ -5293,6 +5346,12 @@ packages:
     resolution:
       {
         integrity: sha512-iLhC6ULemrljPZb+QutR5TQGB+pdW6KGD5RSegS+8sorOZT+rdQFbsQFJgvN3eRqNALqJer4oQ16YvJHlU8hzQ==,
+      }
+
+  elliptic@6.5.6:
+    resolution:
+      {
+        integrity: sha512-mpzdtpeCLuS3BmE3pO3Cpp5bbjlOPY2Q0PgoF+Od1XZrHLYI28Xe3ossCmYCQt11FQKEYd9+PF8jymTvtWJSHQ==,
       }
 
   embla-carousel-react@8.1.6:
@@ -7419,6 +7478,13 @@ packages:
       }
     engines: { node: '>= 8' }
 
+  merkletreejs@0.3.11:
+    resolution:
+      {
+        integrity: sha512-LJKTl4iVNTndhL+3Uz/tfkjD0klIWsHlUzgtuNnNrsf7bAlXR30m+xYB7lHr5Z/l6e/yAIsr26Dabx6Buo4VGQ==,
+      }
+    engines: { node: '>= 7.6.0' }
+
   merkletreejs@0.4.0:
     resolution:
       {
@@ -7543,6 +7609,13 @@ packages:
     resolution:
       {
         integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==,
+      }
+    engines: { node: '>= 0.6' }
+
+  mime-db@1.53.0:
+    resolution:
+      {
+        integrity: sha512-oHlN/w+3MQ3rba9rqFr6V/ypF10LSkdwUysQL7GkXoTgIWeV+tcXGA852TBxH+gsh8UWoyhR1hKcoMJTuWflpg==,
       }
     engines: { node: '>= 0.6' }
 
@@ -9140,6 +9213,14 @@ packages:
     engines: { node: '>=10' }
     hasBin: true
 
+  semver@7.6.3:
+    resolution:
+      {
+        integrity: sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==,
+      }
+    engines: { node: '>=10' }
+    hasBin: true
+
   send@0.18.0:
     resolution:
       {
@@ -10241,6 +10322,17 @@ packages:
     peerDependencies:
       react: ^16.8 || ^17.0 || ^18.0
       react-dom: ^16.8 || ^17.0 || ^18.0
+
+  viem@2.17.10:
+    resolution:
+      {
+        integrity: sha512-nubTeRBI3wsmYGemlg9PsbhunTSJSYUlq8VjzIQkbowCSPSd1bqzVeUU0qEOXsGtgRiFfBzXkkxFknZtBOAx/Q==,
+      }
+    peerDependencies:
+      typescript: '>=5.0.4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   viem@2.17.4:
     resolution:
@@ -12097,14 +12189,14 @@ snapshots:
     dependencies:
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
       jest-mock: 29.7.0
 
   '@jest/fake-timers@29.7.0':
     dependencies:
       '@jest/types': 29.6.3
       '@sinonjs/fake-timers': 10.3.0
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
       jest-message-util: 29.7.0
       jest-mock: 29.7.0
       jest-util: 29.7.0
@@ -12117,7 +12209,7 @@ snapshots:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
       '@types/yargs': 15.0.19
       chalk: 4.1.2
 
@@ -12126,7 +12218,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
       '@types/yargs': 17.0.32
       chalk: 4.1.2
 
@@ -12341,7 +12433,7 @@ snapshots:
       '@types/debug': 4.1.12
       debug: 4.3.5(supports-color@5.5.0)
       pony-cause: 2.1.11
-      semver: 7.6.2
+      semver: 7.6.3
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -12355,7 +12447,7 @@ snapshots:
       '@types/debug': 4.1.12
       debug: 4.3.5(supports-color@5.5.0)
       pony-cause: 2.1.11
-      semver: 7.6.2
+      semver: 7.6.3
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -12914,6 +13006,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.3
 
+  '@radix-ui/react-visually-hidden@1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@radix-ui/react-primitive': 2.0.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.3
+      '@types/react-dom': 18.3.0
+
   '@react-native-community/cli-clean@13.6.9(encoding@0.1.13)':
     dependencies:
       '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
@@ -12955,7 +13056,7 @@ snapshots:
       hermes-profile-transformer: 0.0.6
       node-stream-zip: 1.15.0
       ora: 5.4.1
-      semver: 7.6.2
+      semver: 7.6.3
       strip-ansi: 5.2.0
       wcwidth: 1.0.1
       yaml: 2.4.5
@@ -13026,7 +13127,7 @@ snapshots:
       node-fetch: 2.7.0(encoding@0.1.13)
       open: 6.4.0
       ora: 5.4.1
-      semver: 7.6.2
+      semver: 7.6.3
       shell-quote: 1.8.1
       sudo-prompt: 9.2.1
     transitivePeerDependencies:
@@ -13054,7 +13155,7 @@ snapshots:
       fs-extra: 8.1.0
       graceful-fs: 4.2.11
       prompts: 2.4.2
-      semver: 7.6.2
+      semver: 7.6.3
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -13227,15 +13328,15 @@ snapshots:
 
   '@safe-global/safe-apps-sdk@9.1.0(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)':
     dependencies:
-      '@safe-global/safe-gateway-typescript-sdk': 3.22.0
-      viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)
+      '@safe-global/safe-gateway-typescript-sdk': 3.22.1
+      viem: 2.17.10(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)
     transitivePeerDependencies:
       - bufferutil
       - typescript
       - utf-8-validate
       - zod
 
-  '@safe-global/safe-gateway-typescript-sdk@3.22.0': {}
+  '@safe-global/safe-gateway-typescript-sdk@3.22.1': {}
 
   '@scure/base@1.1.7': {}
 
@@ -13276,13 +13377,36 @@ snapshots:
 
   '@slicekit/abi@0.0.11': {}
 
-  '@slicekit/core@0.3.82(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
+  '@slicekit/core@0.3.85(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
+    dependencies:
+      '@slicekit/abi': 0.0.11
+      '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      merkletreejs: 0.3.11
+      viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)
+
+  '@slicekit/core@0.3.85(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
     dependencies:
       '@slicekit/abi': 0.0.11
       '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       merkletreejs: 0.4.0
       viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)
+
+  '@slicekit/react@0.2.68(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
+    dependencies:
+      '@slicekit/abi': 0.0.11
+      '@slicekit/core': 0.3.85(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+      '@tanstack/react-query': 5.17.19(react@18.3.1)
+      '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      merkletreejs: 0.3.11
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@socket.io/component-emitter@3.1.2': {}
 
@@ -13389,6 +13513,8 @@ snapshots:
       - supports-color
       - typescript
 
+  '@tanstack/query-core@5.17.19': {}
+
   '@tanstack/query-core@5.51.1': {}
 
   '@tanstack/query-devtools@5.51.1': {}
@@ -13397,6 +13523,11 @@ snapshots:
     dependencies:
       '@tanstack/query-devtools': 5.51.1
       '@tanstack/react-query': 5.51.1(react@18.3.1)
+      react: 18.3.1
+
+  '@tanstack/react-query@5.17.19(react@18.3.1)':
+    dependencies:
+      '@tanstack/query-core': 5.17.19
       react: 18.3.1
 
   '@tanstack/react-query@5.51.1(react@18.3.1)':
@@ -13451,7 +13582,7 @@ snapshots:
 
   '@types/node-forge@1.3.11':
     dependencies:
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
 
   '@types/node@12.20.55': {}
 
@@ -13460,6 +13591,10 @@ snapshots:
       undici-types: 5.26.5
 
   '@types/node@20.14.10':
+    dependencies:
+      undici-types: 5.26.5
+
+  '@types/node@20.14.11':
     dependencies:
       undici-types: 5.26.5
 
@@ -13482,7 +13617,7 @@ snapshots:
 
   '@types/secp256k1@4.0.6':
     dependencies:
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
 
   '@types/stack-utils@2.0.3': {}
 
@@ -14633,7 +14768,7 @@ snapshots:
 
   chrome-launcher@0.15.2:
     dependencies:
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2
@@ -14745,7 +14880,7 @@ snapshots:
 
   compressible@2.0.18:
     dependencies:
-      mime-db: 1.52.0
+      mime-db: 1.53.0
 
   compression@1.7.4:
     dependencies:
@@ -14983,6 +15118,16 @@ snapshots:
   electron-to-chromium@1.4.825: {}
 
   elliptic@6.5.4:
+    dependencies:
+      bn.js: 4.12.0
+      brorand: 1.1.0
+      hash.js: 1.1.7
+      hmac-drbg: 1.0.1
+      inherits: 2.0.4
+      minimalistic-assert: 1.0.1
+      minimalistic-crypto-utils: 1.0.1
+
+  elliptic@6.5.6:
     dependencies:
       bn.js: 4.12.0
       brorand: 1.1.0
@@ -16116,7 +16261,7 @@ snapshots:
       '@jest/environment': 29.7.0
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
       jest-mock: 29.7.0
       jest-util: 29.7.0
 
@@ -16137,13 +16282,13 @@ snapshots:
   jest-mock@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
       jest-util: 29.7.0
 
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -16160,7 +16305,7 @@ snapshots:
 
   jest-worker@29.7.0:
     dependencies:
-      '@types/node': 20.14.10
+      '@types/node': 20.14.11
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -16451,6 +16596,14 @@ snapshots:
 
   merge2@1.4.1: {}
 
+  merkletreejs@0.3.11:
+    dependencies:
+      bignumber.js: 9.1.2
+      buffer-reverse: 1.0.1
+      crypto-js: 4.2.0
+      treeify: 1.1.0
+      web3-utils: 1.10.4
+
   merkletreejs@0.4.0:
     dependencies:
       bignumber.js: 9.1.2
@@ -16634,6 +16787,8 @@ snapshots:
       picomatch: 2.3.1
 
   mime-db@1.52.0: {}
+
+  mime-db@1.53.0: {}
 
   mime-types@2.1.35:
     dependencies:
@@ -17542,7 +17697,7 @@ snapshots:
 
   secp256k1@5.0.0:
     dependencies:
-      elliptic: 6.5.4
+      elliptic: 6.5.6
       node-addon-api: 5.1.0
       node-gyp-build: 4.8.1
 
@@ -17560,6 +17715,8 @@ snapshots:
   semver@6.3.1: {}
 
   semver@7.6.2: {}
+
+  semver@7.6.3: {}
 
   send@0.18.0:
     dependencies:
@@ -18233,6 +18390,23 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
       - '@types/react-dom'
+
+  viem@2.17.10(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8):
+    dependencies:
+      '@adraffy/ens-normalize': 1.10.0
+      '@noble/curves': 1.4.0
+      '@noble/hashes': 1.4.0
+      '@scure/bip32': 1.4.0
+      '@scure/bip39': 1.3.0
+      abitype: 1.0.5(typescript@5.5.3)(zod@3.23.8)
+      isows: 1.0.4(ws@8.17.1(bufferutil@4.0.8)(utf-8-validate@6.0.4))
+      ws: 8.17.1(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+    optionalDependencies:
+      typescript: 5.5.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
 
   viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8):
     dependencies:

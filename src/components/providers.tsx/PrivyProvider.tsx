@@ -1,14 +1,6 @@
-import { BASE_RPC_CONFIG, getPrivyAppId } from '@/lib/constants';
+import { getPrivyAppId } from '@/lib/constants';
 import { PrivyProvider as Privy } from '@privy-io/react-auth';
 import { useMemo } from 'react';
-import { createConfig } from '@privy-io/wagmi';
-
-export const privyWagmiConfig = createConfig({
-  chains: BASE_RPC_CONFIG.chains,
-  transports: {
-    '8453': BASE_RPC_CONFIG.transport,
-  },
-}) as any;
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
   const appId = useMemo(() => getPrivyAppId(), []);

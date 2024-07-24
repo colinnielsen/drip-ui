@@ -1,15 +1,3 @@
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
-import { useLoginOrCreateUser } from '@/lib/hooks/login';
-import { cn } from '@/lib/utils';
-import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
-import { useCart, useCartInSliceFormat } from '@/queries/OrderQuery';
-import { ACTIVE_USER_QUERY_KEY, useActiveUser } from '@/queries/UserQuery';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { useQueryClient } from '@tanstack/react-query';
-import { sliceKit } from '../../../lib/slice';
-import { Mono } from '../../ui/typography';
-import { CTAButton } from '@/components/ui/button';
-
 // export const PayButton = () => {
 //   const wallet = useConnectedWallet();
 

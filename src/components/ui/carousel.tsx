@@ -48,6 +48,12 @@ export const useScrollTo = () => {
   return api.scrollTo.bind(api);
 };
 
+export const useNextSlide = () => {
+  const { api } = useCarousel();
+  if (!api) throw new Error('useNextSlide must be used within a <Carousel />');
+  return api.scrollNext.bind(api);
+};
+
 export function usePreviousSlide() {
   const { api } = useCarousel();
   if (!api)

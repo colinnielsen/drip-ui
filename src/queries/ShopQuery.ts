@@ -1,7 +1,10 @@
 import { Shop } from '@/data-model/shop/ShopType';
-import { ItemCategory } from '@/data-model/item/ItemType';
 import { axiosFetcher } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
+import {
+  QueryObserverOptions,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { UUID } from 'crypto';
 
 export const useShops = () =>
@@ -10,14 +13,27 @@ export const useShops = () =>
     queryFn: () => axiosFetcher<Shop[]>('/api/shops'),
   });
 
-export const shopQuery = (id?: UUID) =>
+export const shopQuery = (
+  id?: UUID,
+  initialData?: Shop,
+): QueryObserverOptions<Shop> =>
   ({
     queryKey: ['shop', id],
     queryFn: () => axiosFetcher<Shop>(`/api/shops/${id}`),
+    initialData,
     enabled: !!id,
+    staleTime: 1000 * 60 * 5,
   }) as const;
 
-export const useShop = (id?: UUID) => useQuery(shopQuery(id));
+export const useShop = (id?: UUID, _initialData?: Shop) => {
+  const client = useQueryClient();
+  const initialData =
+    _initialData ??
+    client.getQueryData<Shop[]>(['shops'])?.find(shop => shop.id === id) ??
+    client.getQueryData<Shop>(['shop', id]);
+
+  return useQuery(shopQuery(id, initialData));
+};
 
 // export const useItemByName = (id: UUID, category: ItemCategory, name: string) =>
 //   useQuery({

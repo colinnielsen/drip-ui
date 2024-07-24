@@ -1,4 +1,4 @@
-import { database } from '@/infras/database';
+import { sqlDatabase } from '@/infras/database';
 import { isUUID } from '@/lib/utils';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -15,7 +15,7 @@ export default async function handler(
     return res.status(400).json({ error: 'Invalid farmerId' });
 
   try {
-    const farmer = await database.farmers.findById(id as UUID);
+    const farmer = await sqlDatabase.farmers.findById(id as UUID);
     if (!farmer) {
       return res.status(404).json({ error: `Farmer with id ${id} not found` });
     }

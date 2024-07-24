@@ -8,7 +8,14 @@ export type ItemCategory = 'espresso' | 'coffee' | 'tea' | 'food';
 //
 type BaseMod = {
   id: UUID;
-  sliceId: string;
+  __sourceConfig: {
+    type: 'slice';
+    /**
+     * the variant id in the slice store
+     */
+    id: string;
+    version: number;
+  };
   type: 'exclusive' | 'inclusive';
   category: ItemCategory | null;
   name: string;
@@ -42,7 +49,14 @@ export type ItemMod = BaseMod;
 ///
 export type Item = {
   id: UUID;
-  sliceId: string;
+  __sourceConfig: {
+    type: 'slice';
+    /**
+     * the product item id in the slice store
+     */
+    id: string;
+    version: number;
+  };
   name: string;
   /**
    * @dev wei formats

@@ -1,11 +1,14 @@
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { mapCartToSliceCart } from '@/data-model/_common/type/SliceDTO';
 import { Order, OrderItem } from '@/data-model/order/OrderType';
-import { axiosFetcher, never } from '@/lib/utils';
+import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
+import { axiosFetcher, err } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UUID } from 'crypto';
-import { Address } from 'viem';
+import { Address, Hash } from 'viem';
+import { useFarmer } from './FarmerQuery';
 import { useShop } from './ShopQuery';
+import { useSliceStoreProducts } from './SliceQuery';
 import { useActiveUser } from './UserQuery';
 
 //
@@ -20,7 +23,7 @@ export const useCart = () => {
   return useQuery({
     queryKey: [CART_QUERY_KEY, userId],
     queryFn: async () =>
-      axiosFetcher<Order>(`/api/orders/cart?userId=${userId}`),
+      axiosFetcher<Order | null>(`/api/orders/cart?userId=${userId}`),
     enabled: !!userId,
   });
 };
@@ -29,24 +32,46 @@ export const useCart = () => {
  * @dev the user's current cart, mapped to a usable slicekit cart
  */
 export const useCartInSliceFormat = ({
-  // shop,
-  buyerAddress,
+  buyerAddress: _buyer,
 }: {
-  // shop: Shop;
-  buyerAddress?: Address | null;
+  buyerAddress?: Address | null | undefined;
 }) => {
+  const buyerAddress = _buyer ?? undefined;
   const { data: cart } = useCart();
   const { data: shop } = useShop(cart?.shop);
 
-  return useQuery({
-    queryKey: [CART_QUERY_KEY, 'slice'],
-    queryFn: async () =>
-      cart && shop && buyerAddress
-        ? await mapCartToSliceCart(cart, shop, buyerAddress)
-        : never('cart | shop | buyerAddress is undefined!'),
-    enabled: !!cart && !!shop && !!buyerAddress,
+  const slicerId =
+    shop?.__sourceConfig.type === 'slice'
+      ? getSlicerIdFromSliceStoreId(shop?.__sourceConfig.id)
+      : undefined;
+
+  return useSliceStoreProducts({
+    slicerId,
+    buyer: buyerAddress,
+    select: cartProducts => mapCartToSliceCart(cart!, cartProducts),
+    enabled: !!cart && !!slicerId,
   });
 };
+
+// export const useSlicePrices = () => {
+//   const { data: cart } = useCart();
+//   const buyer = useConnectWallet();
+//   const { data: shop } = useShop(cart?.shop);
+//   const {
+//     checkout,
+//     balances,
+//     cart: test,
+//     prices,
+//   } = useCheckout(privyWagmiConfig, {
+//     buyer,
+//   });
+
+//   return useQuery({
+//     queryKey: [CART_QUERY_KEY, 'slice'],
+//   });
+// };
+
+// export const usePrivyCheckout =
 
 //
 //// MUTATIONS
@@ -97,6 +122,41 @@ export const useRemoveItemFromCart = ({
           'Content-Type': 'application/json',
         },
         data: { action: 'delete', orderItemId, shopId },
+        withCredentials: true,
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [CART_QUERY_KEY] }),
+  });
+};
+
+export const useFarmerAllocationFromOrder = (order: Order) => {
+  const { data: shop } = useShop(order.shop);
+  const allocation = shop?.farmerAllocations[0];
+
+  const { data: farmer } = useFarmer(allocation?.farmer);
+
+  if (!farmer || !allocation) return null;
+  return {
+    farmer,
+    allocation,
+  };
+};
+
+export const useAssocatePaymentToCart = () => {
+  const queryClient = useQueryClient();
+
+  const { data: cart } = useCart();
+
+  if (!cart) return err('No cart in useAssocatePaymentToCart');
+
+  return useMutation({
+    mutationFn: async (transactionHash: Hash) =>
+      axiosFetcher<Order>(`/api/orders/pay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: { transactionHash, orderId: cart.id },
         withCredentials: true,
       }),
     onSuccess: () =>

@@ -9,7 +9,7 @@ import {
 } from '../ui/carousel';
 import { CheckoutProvider, useCheckoutContext } from './checkout-context';
 import OverviewSlide from './overview';
-import WelcomeSlide, { shouldGoToWelcomeSlide } from './welcome';
+import PaymentSlide from './payment';
 
 /**
  * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
@@ -19,13 +19,12 @@ export const AsCheckoutSlide = ({
 }: {
   children: React.ReactNode;
 }) => (
-  <CarouselItem className="w-screen h-full overflow-y-scroll">
+  <CarouselItem className="flex flex-col w-screen h-screen overflow-y-scroll">
     {children}
   </CarouselItem>
 );
 
 function CheckoutSlides({ shop, cart }: { shop: Shop; cart: Order }) {
-  const { step } = useCheckoutContext();
   return (
     <Carousel
       className="h-full"
@@ -35,13 +34,7 @@ function CheckoutSlides({ shop, cart }: { shop: Shop; cart: Order }) {
       <CarouselContent className="h-full">
         <OverviewSlide cart={cart} shop={shop} />
 
-        {shouldGoToWelcomeSlide(step) ? (
-          <WelcomeSlide />
-        ) : (
-          <CarouselItem className="w-screen h-full bg-green-500">
-            ...
-          </CarouselItem>
-        )}
+        <PaymentSlide cart={cart} shop={shop} />
       </CarouselContent>
       <div className="absolute top-7 right-20">
         <CarouselPrevious />

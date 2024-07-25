@@ -111,7 +111,7 @@ export class SQLOrderRepository implements OrderRepository {
     const result = await sql`UPDATE orders
       SET
       "transactionHash" = ${transactionHash},
-      "status" = 'in-progress'
+      "status" = 'submitting'
       WHERE id = ${orderId}`;
     return result.rows[0] as Order;
   }
@@ -121,21 +121,21 @@ export class SQLOrderRepository implements OrderRepository {
     const [order] = result.rows as [Order];
     if (!order) throw Error('Order not found');
 
-    if (order.status !== 'in-progress') return order;
+    if (order.status === 'pending') return order;
 
-    const isComplete = await getTransactionReceipt(BASE_CLIENT, {
+    const txSettled = await getTransactionReceipt(BASE_CLIENT, {
       hash: order.transactionHash,
     })
       .then(t => t.status === 'success')
       .catch(() => false);
-    if (isComplete) {
+
+    if (txSettled) {
       const result =
         await sql`UPDATE orders SET status = 'in-progress' WHERE id = ${orderId}`;
-      // debugger;
 
       return {
         ...order,
-        status: 'complete',
+        status: 'in-progress',
       };
     } else return order;
   }
@@ -167,8 +167,10 @@ export class SQLOrderRepository implements OrderRepository {
 
   async getActiveUserOrder(userId: UUID): Promise<Order | null> {
     const orders = await this.getOrdersByUserId(userId);
-    return orders.sort((a, b) =>
+    const order = orders.sort((a, b) =>
       new Date(a.timestamp) < new Date(b.timestamp) ? -1 : 1,
     )[0];
+
+    return order || null;
   }
 }

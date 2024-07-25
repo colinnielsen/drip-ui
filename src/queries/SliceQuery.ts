@@ -7,6 +7,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Address } from 'viem';
 import { useConnectedWallet } from './EthereumQuery';
 import { useAssocatePaymentToCart } from './OrderQuery';
+import { useCheckoutContext } from '@/components/cart/checkout-context';
+import { useCallback } from 'react';
 
 /**
  * @returns the slice keyed by productId
@@ -39,19 +41,31 @@ export const usePayAndOrder = ({
 }: { onSuccess?: () => void } = {}) => {
   const wallet = useConnectedWallet();
   const { mutateAsync: associatePayment } = useAssocatePaymentToCart();
+  const { setPaymentStep } = useCheckoutContext();
 
   const { checkout } = useCheckout(PRIVY_WAGMI_CONFIG, {
     buyer: wallet?.address,
     onError: error => {
-      debugger;
-      console.error(error);
+      setPaymentStep('error');
+      throw error;
     },
     onSuccess: async ({ hash, orderId }) => {
+      setPaymentStep('success');
       await associatePayment(hash);
       onSuccess?.();
     },
   });
 
+  const payAndOrder = useCallback(async () => {
+    setPaymentStep('awaiting-confirmation');
+    await checkout().catch(error => {
+      setPaymentStep('error');
+      debugger;
+
+      console.error(error);
+    });
+  }, [checkout, setPaymentStep]);
+
   if (!wallet) throw new Error('No wallet connected');
-  else return checkout;
+  else return payAndOrder;
 };

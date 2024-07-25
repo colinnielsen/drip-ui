@@ -16,7 +16,6 @@ export default withErrorHandling(async function (
 
   const privyToken = req.cookies[PRIVY_TOKEN_NAME];
   const sessionToken = req.cookies[SESSION_COOKIE_NAME] as UUID | undefined;
-  debugger;
 
   if (!privyToken)
     return res.status(400).json({ error: 'privy-token not found in cookies' });

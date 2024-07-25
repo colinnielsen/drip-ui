@@ -41,7 +41,15 @@ export function useCarousel() {
   return context;
 }
 
-export const useScrollTo = () => {
+export const useSlideInView = () => {
+  const { api } = useCarousel();
+  if (!api) return null;
+
+  const [slideInView] = api.slidesInView();
+  return slideInView ?? null;
+};
+
+export const useGoToSlide = () => {
   const { api } = useCarousel();
   if (!api) return null;
 
@@ -161,7 +169,6 @@ const Carousel = React.forwardRef<
             scrollBody.useDuration(0).useFriction(0);
             scrollTo.distance(0, false);
           } else {
-            console.log('active');
             translate.toggleActive(true);
           }
         });

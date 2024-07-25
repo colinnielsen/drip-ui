@@ -10,6 +10,7 @@ import { Headline, Label2 } from '../ui/typography';
 import CheckoutSlides from './checkout-slides';
 import { Shop } from '@/data-model/shop/ShopType';
 import { EmptyBasket } from './basket/basket';
+import { AnimatedTimer } from '../icons';
 
 export const CartDrawer = ({
   cart,
@@ -52,13 +53,15 @@ export default function () {
   //   if (cart) setDrawerOpen(true);
   // }, [cart]);
 
+  console.log({ cart });
+
   return (
     <div
       className={cn(
         'transition-all',
         'transition-[600ms]',
         'translate-y-20',
-        !!cart?.orderItems.length && ready ? 'translate-y-0' : '',
+        !!cart?.orderItems?.length && ready ? 'translate-y-0' : '',
       )}
     >
       <Drawer key={'drawer'} handleOnly>
@@ -73,17 +76,23 @@ export default function () {
               </Headline>
             </div>
             <div className="relative flex justify-center items-center">
-              <ShoppingCart
-                height={40}
-                width={40}
-                color="white"
-                strokeWidth={1.5}
-              />
-              <div className="absolute top-1/2 right-1/2 transform translate-x-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center">
-                <div className="text-white text-xs leading-none font-bold font-libreFranklin ml-1">
-                  {cart?.orderItems.length}
-                </div>
-              </div>
+              {cart?.status === 'pending' ? (
+                <>
+                  <ShoppingCart
+                    height={40}
+                    width={40}
+                    color="white"
+                    strokeWidth={1.5}
+                  />
+                  <div className="absolute top-1/2 right-1/2 transform translate-x-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center">
+                    <div className="text-white text-xs leading-none font-bold font-libreFranklin ml-1">
+                      {cart?.orderItems?.length}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <AnimatedTimer />
+              )}
             </div>
           </button>
         </DrawerTrigger>

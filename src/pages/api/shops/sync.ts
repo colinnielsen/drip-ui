@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SyncService } from '@/services/SyncService';
-import { ONBOARDED_SHOPS } from '@/lib/constants';
+import { ONBOARDED_SHOPS } from '@/lib/static-data';
 import { sqlDatabase } from '@/infras/database';
 
 const syncService = new SyncService(sqlDatabase);

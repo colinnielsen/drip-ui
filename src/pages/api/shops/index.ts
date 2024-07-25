@@ -1,7 +1,8 @@
 import { sqlDatabase } from '@/infras/database';
+import { withErrorHandling } from '@/lib/next';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(
+export default withErrorHandling(async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -10,4 +11,4 @@ export default async function handler(
 
   const shops = await sqlDatabase.shops.findAll();
   return res.status(200).json(shops);
-}
+}, 'shops');

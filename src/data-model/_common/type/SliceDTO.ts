@@ -91,7 +91,7 @@ export const mapSliceProductCartToItem = (product: ProductCart): Item => {
       version: SLICE_VERSION,
     },
     description: product.description,
-    image: product.images[0],
+    image: product.images[0] || '/drip.png',
     name: product.name,
     price: product.basePrice,
     prettyPrice: formatUnits(BigInt(product.basePrice), 6),

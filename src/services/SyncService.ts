@@ -38,7 +38,9 @@ export class SyncService {
       const shop = mapSliceStoreToShop(store, storeConfig);
 
       items.forEach(item => {
-        shop.menu[item.category ?? 'other'].push(item);
+        const category = item.category ?? 'other';
+        if (!shop.menu[category]) shop.menu[category] = [];
+        shop.menu[category].push(item);
       });
 
       await this.database.shops.save(shop);

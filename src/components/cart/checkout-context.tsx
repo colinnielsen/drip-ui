@@ -3,7 +3,7 @@ import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
 import { useCart } from '@/queries/OrderQuery';
 import { useActiveUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
-import { createContext, useContext, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 // const SLIDE_MAP = {
 //   initializing: 1,
@@ -12,6 +12,8 @@ import { createContext, useContext, useEffect } from 'react';
 //   connect: 2,
 //   pay: 5,
 // };
+
+type PaymentStep = 'idle' | 'awaiting-confirmation' | 'success' | 'error';
 
 export type SliceCheckoutStep =
   | 'initializing'
@@ -23,11 +25,15 @@ export type SliceCheckoutStep =
 
 type CheckoutCtx = {
   step: SliceCheckoutStep;
+  paymentStep: PaymentStep;
+  setPaymentStep: (step: PaymentStep) => void;
   //   nextSlide: (() => void) | null;
 };
 
 const initial = {
   step: 'initializing' as const,
+  paymentStep: 'idle' as const,
+  setPaymentStep: () => {},
   //   nextSlide: null,
 };
 
@@ -100,6 +106,9 @@ export const CheckoutProvider = ({
   children: React.ReactNode;
 }) => {
   const { step } = useDetermineCheckoutStep();
+
+  const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
+
   useEffect(() => {
     console.log({ step });
   }, [step]);
@@ -118,7 +127,7 @@ export const CheckoutProvider = ({
   //   );
 
   return (
-    <CheckoutContext.Provider value={{ step }}>
+    <CheckoutContext.Provider value={{ step, paymentStep, setPaymentStep }}>
       {children}
     </CheckoutContext.Provider>
   );

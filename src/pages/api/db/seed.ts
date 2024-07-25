@@ -1,5 +1,5 @@
 import { sqlDatabase } from '@/infras/database';
-import { ONBOARDED_SHOPS, STATIC_FARMER_DATA } from '@/lib/constants';
+import { ONBOARDED_SHOPS, STATIC_FARMER_DATA } from '@/lib/static-data';
 import { SyncService } from '@/services/SyncService';
 import { sql } from '@vercel/postgres';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -48,7 +48,8 @@ export const bootstrapDB = async () => {
       "url" TEXT,
       "farmerAllocations" JSONB,
       "menu" JSONB,
-      "bestSellers" JSONB
+      "bestSellers" JSONB,
+      "location" JSONB
     );  
   `;
   await sql`

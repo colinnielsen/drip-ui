@@ -23,6 +23,20 @@ export const Drip = ({
   </Component>
 );
 
+export const DripSmall = ({
+  as: Component = 'div',
+  className,
+  children,
+  ...rest
+}: TypographyProps) => (
+  <Component
+    className={cn('font-drip text-lg text-secondary-pop', className)}
+    {...rest}
+  >
+    {children}
+  </Component>
+);
+
 export const Title1 = ({
   as: Component = 'h2',
   className,
@@ -82,7 +96,7 @@ export const Label2 = ({
 }: TypographyProps) => (
   <Component
     className={cn(
-      'text-[14px] leading-[17px] font-libreFranklin font-medium align-middle',
+      'text-[14px] leading-[17px] font-libreFranklin font-medium align-middle text-primary-gray',
       className,
     )}
     {...rest}

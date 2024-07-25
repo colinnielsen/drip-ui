@@ -3,6 +3,7 @@ import { ShopRepository } from '@/data-model/shop/ShopRepository';
 import { Shop } from '@/data-model/shop/ShopType';
 import { UUID } from 'crypto';
 import { sql } from '@vercel/postgres';
+import { isStorefront } from '@/data-model/shop/ShopDTO';
 
 export class SQLShopRepository implements ShopRepository {
   async findById(id: UUID): Promise<Shop | null> {
@@ -37,8 +38,8 @@ export class SQLShopRepository implements ShopRepository {
 
   async save(shop: Shop): Promise<Shop> {
     await sql`
-      INSERT INTO shops (id, __type, label, "backgroundImage", logo, url, "farmerAllocations", menu, "bestSellers", "__sourceConfig")
-      VALUES (${shop.id}, ${shop.__type}, ${shop.label}, ${shop.backgroundImage}, ${shop.logo}, ${shop.url}, ${JSON.stringify(shop.farmerAllocations)}, ${JSON.stringify(shop.menu)}, ${JSON.stringify(shop.bestSellers)}, ${JSON.stringify(shop.__sourceConfig)})
+      INSERT INTO shops (id, __type, label, "backgroundImage", logo, "farmerAllocations", menu, "bestSellers", "__sourceConfig", location)
+      VALUES (${shop.id}, ${shop.__type}, ${shop.label}, ${shop.backgroundImage}, ${shop.logo}, ${JSON.stringify(shop.farmerAllocations)}, ${JSON.stringify(shop.menu)}, ${JSON.stringify(shop.bestSellers)}, ${JSON.stringify(shop.__sourceConfig)}, ${isStorefront(shop) ? JSON.stringify(shop.location) : null})
       ON CONFLICT (id) DO UPDATE SET
         __type = EXCLUDED.__type,
         "__sourceConfig" = EXCLUDED."__sourceConfig",
@@ -48,7 +49,8 @@ export class SQLShopRepository implements ShopRepository {
         url = EXCLUDED.url,
         "farmerAllocations" = EXCLUDED."farmerAllocations",
         menu = EXCLUDED.menu,
-        "bestSellers" = EXCLUDED."bestSellers"
+        "bestSellers" = EXCLUDED."bestSellers",
+        location = EXCLUDED.location
     `;
     return shop;
   }

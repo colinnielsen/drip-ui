@@ -11,6 +11,7 @@ import { CheckoutProvider } from './checkout-context';
 import BasketSlide from './basket/basket';
 import PaymentSlide from './payment/payment';
 import { ConfirmationSlide } from './confirmation/confirmation';
+import { isPaidOrder } from '@/data-model/order/OrderDTO';
 
 /**
  * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
@@ -29,7 +30,12 @@ function CheckoutSlides({ shop, cart }: { shop: Shop; cart: Order }) {
   return (
     <Carousel
       className="h-full"
-      opts={{ duration: 12, watchDrag: false, align: 'center' }}
+      opts={{
+        duration: 12,
+        watchDrag: false,
+        align: 'center',
+        startIndex: isPaidOrder(cart) ? 2 : 0,
+      }}
       stiff
     >
       <CarouselContent className="h-full">

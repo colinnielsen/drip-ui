@@ -1,6 +1,8 @@
-import { Label2 } from './ui/typography';
-import { prettyFormatPrice } from '@/lib/utils';
 import { SupportedCurrency } from '@/data-model/_common/type/CommonType';
+import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
+import { prettyFormatPrice } from '@/lib/utils';
+import { Clock11, Clock2, Clock5, Clock8, LucideProps } from 'lucide-react';
+import { Label2 } from './ui/typography';
 
 export function Price({
   currency,
@@ -17,7 +19,7 @@ export function Price({
   return (
     <div className="flex items-center gap-1">
       {isUSDC && <UsdcSVG />}
-      <Label2 as="span" className="font-normal text-sm text-primary-gray">
+      <Label2 as="span" className="font-normal text-sm">
         {displayPrice}
       </Label2>
     </div>
@@ -179,4 +181,14 @@ export function PlusSvg() {
       />
     </svg>
   );
+}
+
+export function AnimatedTimer({ ...props }: LucideProps) {
+  const seconds = useSecondsSinceMount();
+  const pos = seconds % 4;
+
+  if (pos === 0) return <Clock11 color="white" {...props} />;
+  if (pos === 1) return <Clock2 color="white" {...props} />;
+  if (pos === 2) return <Clock5 color="white" {...props} />;
+  if (pos === 3) return <Clock8 color="white" {...props} />;
 }

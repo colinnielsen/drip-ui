@@ -1,4 +1,4 @@
-import emptyCart from '@/assets/empty-cart.jpg';
+import emptyCart from '@/assets/empty-cart.png';
 import { Divider } from '@/components/ui/divider';
 import { DrawerClose, DrawerFooter, DrawerTitle } from '@/components/ui/drawer';
 import { Drip, Label1, Title1 } from '@/components/ui/typography';

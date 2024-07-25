@@ -5,7 +5,7 @@ import { SLICE_VERSION } from '@/data-model/_common/type/SliceDTO';
 import { ItemCategory } from '@/data-model/item/ItemType';
 import { deriveShopIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
-import { ONBOARDED_SHOPS } from '@/lib/constants';
+import { ONBOARDED_SHOPS } from '@/lib/static-data';
 import { farmerQuery } from '@/queries/FarmerQuery';
 import { shopQuery, useShop } from '@/queries/ShopQuery';
 import {
@@ -94,10 +94,7 @@ function DynamicShopPage(staticShop: StaticPageData) {
           isLoading={isLoading}
         />
       ) : null}
-      {/* <ItemCarousel
-            data={allocations}
-            renderFn={(f, i) => }
-          /> */}
+
       {shop && items.length === 0 && (
         <div className="text-center text-gray-500">
           No items available at this time

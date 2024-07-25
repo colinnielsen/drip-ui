@@ -32,7 +32,7 @@ export const FarmerCard = ({
   );
 
   const info = (
-    <div className="w-full flex flex-col gap-y-2">
+    <div className={'w-full flex flex-col gap-y-2'}>
       <Title2>{allocPercent}% for growers</Title2>
       {data.farmer ? (
         <Label1 className="text-primary-gray">

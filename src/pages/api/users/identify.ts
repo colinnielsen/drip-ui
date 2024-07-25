@@ -54,4 +54,4 @@ export default withErrorHandling(async function identify(
       .then(u => sqlDatabase.users.save(u))
       // then return the user
       .then(u => res.status(200).json(u));
-}, 'Failed to identify user');
+}, 'identify user');

@@ -62,5 +62,4 @@ export const isInProgress = (o: Order) => o.status === 'in-progress';
 
 export const isComplete = (o: Order) => o.status === 'complete';
 
-export const isPaidOrder = (o: Order): o is PaidOrder =>
-  o.status !== 'pending' && o.status !== 'submitting';
+export const isPaidOrder = (o: Order): o is PaidOrder => o.status !== 'pending';

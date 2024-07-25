@@ -35,7 +35,6 @@ export type BaseShop = BaseEntity & {
     id: SliceStoreId;
     version: number;
   };
-  sliceStoreId: SliceStoreId;
   label: string;
   backgroundImage: string;
   logo: string;

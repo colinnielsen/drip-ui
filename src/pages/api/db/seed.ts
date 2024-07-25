@@ -9,15 +9,15 @@ const _resetDB = async () => {
   // await sql`
   //   DROP TABLE IF EXISTS "users";
   // `;
-  await sql`
-    DROP TABLE IF EXISTS "shops";
-  `;
-  await sql`
-    DROP TABLE IF EXISTS "items";
-  `;
-  await sql`
-    DROP TABLE IF EXISTS "orders";
-  `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "shops";
+  // `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "items";
+  // `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "orders";
+  // `;
   // await sql`
   //   DROP TABLE IF EXISTS "farmers";
   // `;
@@ -42,7 +42,6 @@ export const bootstrapDB = async () => {
       "id" UUID PRIMARY KEY,
       "__type" TEXT NOT NULL,
       "__sourceConfig" JSONB,
-      "sliceStoreId" TEXT NOT NULL,
       "label" TEXT NOT NULL,
       "backgroundImage" TEXT,
       "logo" TEXT,
@@ -55,7 +54,7 @@ export const bootstrapDB = async () => {
   await sql`
     CREATE TABLE IF NOT EXISTS "items" (
       "id" UUID PRIMARY KEY,
-      "sliceId" TEXT NOT NULL,
+      "__sourceConfig" JSONB,
       "name" TEXT NOT NULL,
       "price" TEXT NOT NULL,
       "prettyPrice" TEXT NOT NULL,

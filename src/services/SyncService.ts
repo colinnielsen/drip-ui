@@ -1,6 +1,6 @@
+import { mapSliceProductCartToItem } from '@/data-model/_common/type/SliceDTO';
 import { FarmerRepository } from '@/data-model/farmer/FarmerRepository';
 import { Farmer } from '@/data-model/farmer/FarmerType';
-import { mapSliceProductCartToItem } from '@/data-model/item/ItemDTO';
 import { ItemRepository } from '@/data-model/item/ItemRepository';
 import { mapSliceStoreToShop } from '@/data-model/shop/ShopDTO';
 import { ShopRepository } from '@/data-model/shop/ShopRepository';

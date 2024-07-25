@@ -58,21 +58,24 @@ const CTAButton = React.forwardRef(
   (
     props: ButtonProps & { isLoading?: boolean },
     ref: React.Ref<HTMLButtonElement>,
-  ) => (
-    <Button
-      variant="cta"
-      {...props}
-      className="w-full"
-      disabled={props.isLoading}
-      ref={ref}
-    >
-      {props.isLoading ? (
-        <LoaderCircle className="h-4 w-4 animate-spin" />
-      ) : (
-        <Mono className="text-white uppercase">{props.children}</Mono>
-      )}
-    </Button>
-  ),
+  ) => {
+    const { isLoading, children, ...rest } = props;
+    return (
+      <Button
+        variant="cta"
+        {...rest}
+        className="w-full"
+        disabled={isLoading}
+        ref={ref}
+      >
+        {isLoading ? (
+          <LoaderCircle className="h-4 w-4 animate-spin stroke-white" />
+        ) : (
+          <Mono className="text-white uppercase">{children}</Mono>
+        )}
+      </Button>
+    );
+  },
 );
 
 const LoadingCTAButton = () => (

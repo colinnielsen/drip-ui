@@ -19,10 +19,9 @@ export class SQLItemRepository implements ItemRepository {
   async save(item: Unsaved<Item>): Promise<Item> {
     const id = v4() as UUID;
     await sql`
-      INSERT INTO items (id, "sliceId", name, price, "prettyPrice", "currencyDecimals", currency, description, image, availability, category, mods)
-      VALUES (${id}, ${item.sliceId}, ${item.name}, ${item.price}, ${item.prettyPrice}, ${item.currencyDecimals}, ${item.currency}, ${item.description}, ${item.image}, ${item.availability}, ${item.category}, ${JSON.stringify(item.mods)})
+      INSERT INTO items (id, name, price, "prettyPrice", "currencyDecimals", currency, description, image, availability, category, mods, "__sourceConfig")
+      VALUES (${id}, ${item.name}, ${item.price}, ${item.prettyPrice}, ${item.currencyDecimals}, ${item.currency}, ${item.description}, ${item.image}, ${item.availability}, ${item.category}, ${JSON.stringify(item.mods)}, ${JSON.stringify(item.__sourceConfig)})
       ON CONFLICT (id) DO UPDATE SET
-        "sliceId" = EXCLUDED."sliceId",
         name = EXCLUDED.name,
         price = EXCLUDED.price,
         "prettyPrice" = EXCLUDED."prettyPrice",
@@ -32,7 +31,8 @@ export class SQLItemRepository implements ItemRepository {
         image = EXCLUDED.image,
         availability = EXCLUDED.availability,
         category = EXCLUDED.category,
-        mods = EXCLUDED.mods
+        mods = EXCLUDED.mods,
+        "__sourceConfig" = EXCLUDED."__sourceConfig"
     `;
     return { ...item, id } as Item;
   }

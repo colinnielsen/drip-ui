@@ -1,5 +1,5 @@
 import { prettyFormatPrice } from '@/lib/utils';
-import { DRIP_TIP_ITEM_NAME, Order, OrderItem } from './OrderType';
+import { DRIP_TIP_ITEM_NAME, Order, OrderItem, PaidOrder } from './OrderType';
 
 /**
  * @dev if a cart item has the same id and the same mods, then it can be squashed with a quantity
@@ -61,3 +61,6 @@ export const isPending = (o: Order) => o.status === 'pending';
 export const isInProgress = (o: Order) => o.status === 'in-progress';
 
 export const isComplete = (o: Order) => o.status === 'complete';
+
+export const isPaidOrder = (o: Order): o is PaidOrder =>
+  o.status !== 'pending' && o.status !== 'submitting';

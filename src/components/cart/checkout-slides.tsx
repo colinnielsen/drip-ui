@@ -7,9 +7,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '../ui/carousel';
-import { CheckoutProvider, useCheckoutContext } from './checkout-context';
-import OverviewSlide from './overview';
-import PaymentSlide from './payment';
+import { CheckoutProvider } from './checkout-context';
+import BasketSlide from './basket/basket';
+import PaymentSlide from './payment/payment';
+import { ConfirmationSlide } from './confirmation/confirmation';
 
 /**
  * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
@@ -32,9 +33,9 @@ function CheckoutSlides({ shop, cart }: { shop: Shop; cart: Order }) {
       stiff
     >
       <CarouselContent className="h-full">
-        <OverviewSlide cart={cart} shop={shop} />
-
+        <BasketSlide cart={cart} shop={shop} />
         <PaymentSlide cart={cart} shop={shop} />
+        <ConfirmationSlide cart={cart} shop={shop} />
       </CarouselContent>
       <div className="absolute top-7 right-20">
         <CarouselPrevious />

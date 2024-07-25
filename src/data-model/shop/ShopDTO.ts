@@ -87,7 +87,6 @@ export const mapSliceStoreToShop = (
     version: SLICE_VERSION,
   },
   id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
-  sliceStoreId: getSliceStoreIdFromSliceId(sliceStore.id),
   menu: {
     espresso: [],
     coffee: [],

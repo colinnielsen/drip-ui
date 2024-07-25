@@ -128,11 +128,10 @@ export class SQLOrderRepository implements OrderRepository {
     })
       .then(t => t.status === 'success')
       .catch(() => false);
-
     if (isComplete) {
       const result =
         await sql`UPDATE orders SET status = 'in-progress' WHERE id = ${orderId}`;
-      debugger;
+      // debugger;
 
       return {
         ...order,
@@ -168,12 +167,8 @@ export class SQLOrderRepository implements OrderRepository {
 
   async getActiveUserOrder(userId: UUID): Promise<Order | null> {
     const orders = await this.getOrdersByUserId(userId);
-    return (
-      orders
-        .sort((a, b) =>
-          new Date(a.timestamp) < new Date(b.timestamp) ? -1 : 1,
-        )
-        .find(o => o.status === 'pending') ?? null
-    );
+    return orders.sort((a, b) =>
+      new Date(a.timestamp) < new Date(b.timestamp) ? -1 : 1,
+    )[0];
   }
 }

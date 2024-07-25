@@ -84,7 +84,7 @@ export const mapSliceProductCartToItem = (product: ProductCart): Item => {
     __sourceConfig: {
       type: 'slice',
       id:
-        product.externalProduct?.id.toString() ||
+        product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString() ||
         err(
           `no external product on store ${product.slicerId} - product ${product.dbId}`,
         ),
@@ -107,15 +107,28 @@ export function mapCartToSliceCart(
   cart: Order,
   sliceProducts: ProductCart[],
 ): ProductCart[] {
-  const cartParams = collapseDuplicateItems(cart.orderItems).map(
-    ([orderItem, quantity]) => ({
-      // map the source id
-      productId: orderItem.item.__sourceConfig.id,
-      // take the quantity
-      quantity: quantity.toString(),
-      // and optionally include a variant
-      variant: orderItem.mods?.[0]?.__sourceConfig.id ?? undefined,
-    }),
+  const sliceCart = collapseDuplicateItems(cart.orderItems).reduce(
+    (acc, [orderItem, quantity]) => {
+      const sliceProduct = sliceProducts.find(
+        product =>
+          product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString() ===
+          orderItem.item.__sourceConfig.id,
+      );
+
+      if (!sliceProduct) err('slice product not found');
+      const variant = orderItem.mods?.[0]?.__sourceConfig.id;
+      return [
+        ...acc,
+        {
+          ...sliceProduct!,
+          quantity,
+          variant,
+        },
+      ];
+    },
+    [] as ProductCart[],
   );
-  return generateCart({ cartParams, allProducts: sliceProducts });
+  // const sliceCart = generateCart({ cartParams, allProducts: sliceProducts });
+
+  return sliceCart;
 }

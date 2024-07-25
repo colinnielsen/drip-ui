@@ -1,6 +1,6 @@
 import { Footer } from '@/components/Footer';
 import { ReactQueryClientProvider } from '@/components/providers.tsx/ReactQueryClientProvider';
-import { cn } from '@/lib/utils';
+import { cn, isDev } from '@/lib/utils';
 import { AppProps } from 'next/app';
 import { EB_Garamond, Libre_Franklin, Roboto_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
@@ -43,7 +43,7 @@ export const CSS_FONT_CLASS_CONFIG = cn(
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <PrivyProvider>
-      <ReactQueryClientProvider>
+      <ReactQueryClientProvider useDevTools={isDev()}>
         <WagmiProvider config={PRIVY_WAGMI_CONFIG}>
           <div
             className={cn(

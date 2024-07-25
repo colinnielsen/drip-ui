@@ -7,10 +7,11 @@ import { zeroAddress } from 'viem';
 export const STATIC_FARMER_DATA: Farmer[] = [
   createFarmer({
     id: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
-    name: 'Gilgamesh',
-    image: '/farmer1.jpg',
-    shortDescription: 'The oldest farmer in the world',
-    infoUrl: 'https://gilgamesh.com',
+    name: 'Marco Oviedo',
+    image:
+      'https://images.squarespace-cdn.com/content/v1/5a8cebefe9bfdf59a2d406ff/1519999467027-LWGK5HC14VTJU60J4LZM/FarmersProject_Sircof_Marco.jpg?format=1000w',
+    shortDescription: 'The dopest farmer in town',
+    infoUrl: 'https://www.farmersproject-cr.com/sircof',
     ethAddress: zeroAddress,
   }),
   createFarmer({
@@ -82,6 +83,26 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
       coords: [50.8443, 4.3563],
     },
     name: 'Base Cafe',
+    logo: 'https://raw.githubusercontent.com/base-org/brand-kit/8984fe6e08be3058fd7cf5cd0b201f8b92b5a70e/logo/in-product/Base_Network_Logo.svg',
+    backgroundImage:
+      'https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/805/main_6j25kd0y.png',
+    farmerAllocation: [
+      {
+        allocationBPS: 300,
+        farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
+        id: crypto.randomUUID() as UUID,
+      },
+    ],
+  },
+  {
+    sliceId: 769,
+    sliceVersion: 1,
+    location: {
+      label: 'Denver, CO',
+      address: "Colin's office",
+      coords: [50.8443, 4.3563],
+    },
+    name: 'The Dev Cafe',
     logo: 'https://raw.githubusercontent.com/base-org/brand-kit/8984fe6e08be3058fd7cf5cd0b201f8b92b5a70e/logo/in-product/Base_Network_Logo.svg',
     backgroundImage:
       'https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/805/main_6j25kd0y.png',

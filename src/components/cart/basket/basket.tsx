@@ -20,7 +20,7 @@ import { FooterTotal } from './footer-total';
 import { NextButton } from './next-button';
 import { OrderSummary } from './summary';
 
-export const EmptyOverview = () => {
+export const EmptyBasket = () => {
   return (
     <>
       <div className="flex justify-start w-full items-center px-6 py-4">
@@ -50,7 +50,7 @@ export const EmptyOverview = () => {
   );
 };
 
-const Overview = ({ cart, shop }: { cart: Order; shop: Shop }) => {
+const Basket = ({ cart, shop }: { cart: Order; shop: Shop }) => {
   const { data: user } = useActiveUser();
 
   if (!user) return null;
@@ -94,7 +94,9 @@ const Overview = ({ cart, shop }: { cart: Order; shop: Shop }) => {
 
       <Divider />
 
-      <FarmerCard {...{ order: cart }} />
+      <div className="p-6">
+        <FarmerCard {...{ order: cart, className: 'h-28' }} />
+      </div>
 
       <DrawerFooter className="p-0 w-full">
         <FooterTotal cart={cart} />
@@ -127,7 +129,7 @@ export default function ({ cart, shop }: { cart: Order; shop: Shop }) {
     <SliceProvider>
       <SliceCartListener>
         <AsCheckoutSlide>
-          <Overview cart={cart} shop={shop} />
+          <Basket cart={cart} shop={shop} />
         </AsCheckoutSlide>
       </SliceCartListener>
     </SliceProvider>

@@ -34,7 +34,9 @@ export const useSliceStoreProducts = <TData = ProductCart[]>({
     select: data => select?.(data.cartProducts) ?? data.cartProducts,
   });
 
-export const usePayAndOrder = ({ onSuccess }: { onSuccess: () => void }) => {
+export const usePayAndOrder = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) => {
   const wallet = useConnectedWallet();
   const { mutateAsync: associatePayment } = useAssocatePaymentToCart();
 
@@ -46,7 +48,7 @@ export const usePayAndOrder = ({ onSuccess }: { onSuccess: () => void }) => {
     },
     onSuccess: async ({ hash, orderId }) => {
       await associatePayment(hash);
-      onSuccess();
+      onSuccess?.();
     },
   });
 

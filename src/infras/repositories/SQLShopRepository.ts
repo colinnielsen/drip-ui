@@ -37,13 +37,12 @@ export class SQLShopRepository implements ShopRepository {
 
   async save(shop: Shop): Promise<Shop> {
     await sql`
-      INSERT INTO shops (id, __type, "sliceStoreId", label, "backgroundImage", logo, url, "farmerAllocations", menu, "bestSellers", "__sourceConfig")
-      VALUES (${shop.id}, ${shop.__type}, ${shop.sliceStoreId}, ${shop.label}, ${shop.backgroundImage}, ${shop.logo}, ${shop.url}, ${JSON.stringify(shop.farmerAllocations)}, ${JSON.stringify(shop.menu)}, ${JSON.stringify(shop.bestSellers)}, ${JSON.stringify(shop.__sourceConfig)})
+      INSERT INTO shops (id, __type, label, "backgroundImage", logo, url, "farmerAllocations", menu, "bestSellers", "__sourceConfig")
+      VALUES (${shop.id}, ${shop.__type}, ${shop.label}, ${shop.backgroundImage}, ${shop.logo}, ${shop.url}, ${JSON.stringify(shop.farmerAllocations)}, ${JSON.stringify(shop.menu)}, ${JSON.stringify(shop.bestSellers)}, ${JSON.stringify(shop.__sourceConfig)})
       ON CONFLICT (id) DO UPDATE SET
         __type = EXCLUDED.__type,
         "__sourceConfig" = EXCLUDED."__sourceConfig",
-        "sliceStoreId" = EXCLUDED."sliceStoreId",
-        label = EXCLUDED.label,
+         label = EXCLUDED.label,
         "backgroundImage" = EXCLUDED."backgroundImage",
         logo = EXCLUDED.logo,
         url = EXCLUDED.url,

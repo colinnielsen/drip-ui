@@ -164,6 +164,23 @@ export const useAssocatePaymentToCart = () => {
   });
 };
 
+export const useCheckOrderStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orderId: UUID) =>
+      axiosFetcher<Order>(`/api/orders/status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: { orderId },
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [CART_QUERY_KEY] }),
+  });
+};
+
 // export const useClearCart = (userId: UUID) => {
 //   const queryClient = useQueryClient();
 

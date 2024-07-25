@@ -21,6 +21,12 @@ const nextConfig = {
         port: '',
         pathname: '/_next/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.squarespace-cdn.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   // webpack: (config, { isServer }) => {

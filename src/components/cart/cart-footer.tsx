@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { Headline, Label2 } from '../ui/typography';
 import CheckoutSlides from './checkout-slides';
 import { Shop } from '@/data-model/shop/ShopType';
-import { EmptyOverview } from './overview';
+import { EmptyBasket } from './basket/basket';
 
 export const CartDrawer = ({
   cart,
@@ -27,7 +27,7 @@ export const CartDrawer = ({
       >
         {/* <div className="w-full flex flex-col overflow-y-auto h-full"> */}
         {!shop || !cart ? (
-          <EmptyOverview />
+          <EmptyBasket />
         ) : (
           <CheckoutSlides {...{ shop, cart }} />
         )}

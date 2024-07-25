@@ -1,11 +1,11 @@
-import * as React from 'react';
 import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from 'embla-carousel-react';
+import * as React from 'react';
 
-import { cn, isSSR } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -43,21 +43,22 @@ export function useCarousel() {
 
 export const useScrollTo = () => {
   const { api } = useCarousel();
-  if (!api) throw new Error('useScrollTo must be used within a <Carousel />');
+  if (!api) return null;
 
   return api.scrollTo.bind(api);
 };
 
 export const useNextSlide = () => {
   const { api } = useCarousel();
-  if (!api) throw new Error('useNextSlide must be used within a <Carousel />');
+  if (!api) return null;
+
   return api.scrollNext.bind(api);
 };
 
 export function usePreviousSlide() {
   const { api } = useCarousel();
-  if (!api)
-    throw new Error('usePreviousSlide must be used within a <Carousel />');
+  if (!api) return null;
+
   return api.scrollPrev.bind(api);
 }
 
@@ -307,10 +308,10 @@ const CarouselNext = React.forwardRef<
 CarouselNext.displayName = 'CarouselNext';
 
 export {
-  type CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselPrevious,
   CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
 };

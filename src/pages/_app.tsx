@@ -43,7 +43,7 @@ export const CSS_FONT_CLASS_CONFIG = cn(
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <PrivyProvider>
-      <ReactQueryClientProvider useDevTools={isDev()}>
+      <ReactQueryClientProvider>
         <WagmiProvider config={PRIVY_WAGMI_CONFIG}>
           <div
             className={cn(

@@ -9,7 +9,7 @@ export function FarmerHeader({ image, name }: Farmer) {
   const router = useRouter();
   return (
     <header className="relative h-1/3">
-      <img src={image} alt="backdrop" />
+      <Image src={image} alt="backdrop" fill />
       <button onClick={() => router.back()}>
         <BackSvg />
       </button>

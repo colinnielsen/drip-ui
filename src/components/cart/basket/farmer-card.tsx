@@ -36,7 +36,7 @@ export const FarmerCard = ({
       <Title2>{allocPercent}% for growers</Title2>
       {data.farmer ? (
         <Label1 className="text-primary-gray">
-          {allocPercent}% of your order goes to {data.farmer.name}'s farm.
+          {allocPercent}% of your order goes to {data.farmer.name}&apos;s farm.
         </Label1>
       ) : (
         <Skeleton className="h-4 w-1/2" />

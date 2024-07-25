@@ -182,7 +182,7 @@ const PaymentSlide = ({ cart, shop }: { cart: Order; shop: Shop }) => {
         <div className="flex flex-col items-center justify-center gap-4 w-full">
           <DripSmall>oops</DripSmall>
           <Label1 className="text-primary-gray">
-            something went wrong, let's try again
+            something went wrong, let&apos;s try again
           </Label1>
           <PayButton />
         </div>

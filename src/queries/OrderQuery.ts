@@ -147,18 +147,20 @@ export const useAssocatePaymentToCart = () => {
 
   const { data: cart } = useCart();
 
-  if (!cart) return err('No cart in useAssocatePaymentToCart');
-
   return useMutation({
-    mutationFn: async (transactionHash: Hash) =>
-      axiosFetcher<Order>(`/api/orders/pay`, {
+    mutationFn: async (transactionHash: Hash) => {
+      return axiosFetcher<Order>(`/api/orders/pay`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        data: { transactionHash, orderId: cart.id },
+        data: {
+          transactionHash,
+          orderId: cart?.id || err('No cart in useAssocatePaymentToCart'),
+        },
         withCredentials: true,
-      }),
+      });
+    },
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: [CART_QUERY_KEY] }),
   });

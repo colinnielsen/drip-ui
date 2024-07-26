@@ -47,7 +47,6 @@ export const usePayAndOrder = ({
     buyer: wallet?.address,
     onError: error => {
       setPaymentStep('error');
-      throw error;
     },
     onSuccess: async ({ hash, orderId }) => {
       setPaymentStep('success');
@@ -59,9 +58,7 @@ export const usePayAndOrder = ({
   const payAndOrder = useCallback(async () => {
     setPaymentStep('awaiting-confirmation');
     await checkout().catch(error => {
-      setPaymentStep('error');
       debugger;
-
       console.error(error);
     });
   }, [checkout, setPaymentStep]);

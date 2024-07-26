@@ -1,7 +1,7 @@
 import { User } from '@/data-model/user/UserType';
 import { PRIVY_TOKEN_NAME, SESSION_COOKIE_NAME } from '@/lib/session';
 import { axiosFetcher, deleteCookie, err } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 export const ACTIVE_USER_QUERY_KEY = 'user';
@@ -21,3 +21,15 @@ export const useActiveUser = () =>
         } else throw e;
       }),
   });
+
+export const useResetUser = () => {
+  return useMutation({
+    mutationFn: () =>
+      axiosFetcher('/api/reset').then(() => {
+        deleteCookie(PRIVY_TOKEN_NAME);
+        deleteCookie(SESSION_COOKIE_NAME);
+
+        if (typeof window !== 'undefined') window.location.reload();
+      }),
+  });
+};

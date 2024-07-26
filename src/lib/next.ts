@@ -12,6 +12,7 @@ export const withErrorHandling = (
       return response;
     } catch (error) {
       const predicate = handlerPrefix ? ` ${handlerPrefix}: ` : '';
+      console.error(predicate, error);
       debugger;
       return res
         .status(500)

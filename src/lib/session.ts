@@ -11,7 +11,7 @@ export const retreiveOrGenerateSessionId = (
 ): UUID => {
   let sessionId = req.cookies[SESSION_COOKIE_NAME] as UUID | undefined;
 
-  if (sessionId) return sessionId;
+  if (sessionId && sessionId !== ('null' as any)) return sessionId;
 
   sessionId = generateUUID();
   const isProduction = isProd();

@@ -1,4 +1,5 @@
 import { Input } from '@/components/ui/input';
+import { useResetUser } from '@/queries/UserQuery';
 import { Search as SearchIcon } from 'lucide-react';
 import { useState } from 'react';
 
@@ -19,10 +20,14 @@ export function Search() {
 }
 
 export function HomePageHeader() {
+  const { mutate: reset, isPending } = useResetUser();
   return (
     <header className="flex flex-col p-6 pb-2 gap-6">
-      <h1 className="font-semibold font-drip text-4xl text-secondary-pop">
-        Drip
+      <h1
+        className="font-semibold font-drip text-4xl text-secondary-pop"
+        onDoubleClick={() => reset()}
+      >
+        {isPending ? '...' : 'Drip'}
       </h1>
       <Search />
     </header>

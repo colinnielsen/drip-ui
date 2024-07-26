@@ -28,6 +28,7 @@ export const useResetUser = () => {
       axiosFetcher('/api/reset').then(() => {
         deleteCookie(PRIVY_TOKEN_NAME);
         deleteCookie(SESSION_COOKIE_NAME);
+        localStorage.clear();
 
         if (typeof window !== 'undefined') window.location.reload();
       }),

@@ -44,5 +44,5 @@ export const FarmerCard = ({
     </div>
   );
 
-  return <InfoCard left={left} info={info} />;
+  return <InfoCard left={left} info={info} className={className} />;
 };

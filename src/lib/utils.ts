@@ -80,3 +80,11 @@ export const deleteCookie = (name: string) => {
 };
 
 export const minutes = (minutes: number) => minutes * 60 * 1000;
+
+export const isIOSSafari = () => {
+  return (
+    typeof navigator !== 'undefined' &&
+    navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
+    navigator.userAgent.match(/AppleWebKit/)
+  );
+};

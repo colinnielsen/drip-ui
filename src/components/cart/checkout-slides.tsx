@@ -12,6 +12,7 @@ import BasketSlide from './basket/basket';
 import PaymentSlide from './payment/payment';
 import { ConfirmationSlide } from './confirmation/confirmation';
 import { isPaidOrder } from '@/data-model/order/OrderDTO';
+import { cn, isIOSSafari } from '@/lib/utils';
 
 /**
  * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
@@ -21,7 +22,11 @@ export const AsCheckoutSlide = ({
 }: {
   children: React.ReactNode;
 }) => (
-  <CarouselItem className="flex flex-col w-screen h-screen overflow-y-scroll">
+  <CarouselItem
+    className={cn('flex flex-col w-screen h-screen overflow-y-scroll', {
+      'pb-20': isIOSSafari(),
+    })}
+  >
     {children}
   </CarouselItem>
 );

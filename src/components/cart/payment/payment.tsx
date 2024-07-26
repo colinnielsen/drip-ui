@@ -116,9 +116,7 @@ const StatusListener = ({ order }: { order: Order }) => {
 
 const PaymentSlide = ({ cart, shop }: { cart: Order; shop: Shop }) => {
   const { paymentStep } = useCheckoutContext();
-  // const data = useFarmerAllocationFromOrder(cart);
 
-  // lol
   const MAX_DOTS = 4;
   const seconds = useSecondsSinceMount();
 
@@ -175,7 +173,7 @@ const PaymentSlide = ({ cart, shop }: { cart: Order; shop: Shop }) => {
         {...{
           order: cart,
           showPics: true,
-          className: !isPaying || seconds <= 2 ? 'opacity-0' : 'opacity-1',
+          className: !isPaying ? 'opacity-0' : 'opacity-1',
         }}
       />
       {paymentStep === 'error' && (

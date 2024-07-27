@@ -37,7 +37,8 @@ export default withErrorHandling(async function identify(
     });
 
   // make sure it verifies
-  if (!verifResponse) return res.status(401).json({ error: 'Unauthorized' });
+  if (!verifResponse)
+    return res.status(401).json({ error: 'External Auth failed' });
   const privyId = verifResponse.userId as PrivyDID;
   // try and find the user by their privy id
   const maybeUserFromPrivyId =

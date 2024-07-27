@@ -11,11 +11,11 @@ import { AsCheckoutSlide } from '../checkout-slides';
 import grandma from '@/assets/grandma.png';
 import Image from 'next/image';
 import { CTAButton } from '@/components/ui/button';
-import { useCheckoutContext } from '../checkout-context';
+import { useCheckoutContext } from '../context';
 import { useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
-import { useCarousel } from '@/components/ui/carousel';
+import { useCarousel, useGoToSlide } from '@/components/ui/carousel';
 import { ACTIVE_USER_QUERY_KEY, useActiveUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
 
@@ -27,15 +27,13 @@ const ConnectButton = () => {
   const { step } = useCheckoutContext();
   const { connectWallet } = usePrivy();
   const { current: initialStep } = useRef(step);
-  const { scrollNext } = useCarousel();
   const { data: user } = useActiveUser();
 
   const queryClient = useQueryClient();
 
   const loginOrCreateUser = useLoginOrCreateUser({
-    onLogin: () => {
-      queryClient.invalidateQueries({ queryKey: [ACTIVE_USER_QUERY_KEY] });
-      scrollNext();
+    onLogin: data => {
+      queryClient.setQueryData([ACTIVE_USER_QUERY_KEY], data);
     },
   });
 
@@ -57,7 +55,7 @@ const ConnectButton = () => {
   );
 };
 
-export const WelcomeScreen = () => {
+export default function WelcomeScreen() {
   return (
     <div className="h-full bg-background flex flex-col items-center justify-center px-6 gap-4 py-6">
       <div className="flex-grow" />
@@ -87,13 +85,5 @@ export const WelcomeScreen = () => {
 
       <ConnectButton />
     </div>
-  );
-};
-
-export default function () {
-  return (
-    <AsCheckoutSlide>
-      <WelcomeScreen />
-    </AsCheckoutSlide>
   );
 }

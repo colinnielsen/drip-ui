@@ -7,14 +7,7 @@ export const getTotalAllocationBPS = (
   return allocations?.reduce((acc, curr) => curr.allocationBPS + acc, 0) ?? 0;
 };
 
-export const createFarmer = (data: {
-  id: UUID;
-  name: string;
-  image: string;
-  shortDescription: string;
-  infoUrl: string;
-  ethAddress: `0x${string}`;
-}): Farmer => {
+export const createFarmer = (data: Farmer): Farmer => {
   return {
     ...data,
   };

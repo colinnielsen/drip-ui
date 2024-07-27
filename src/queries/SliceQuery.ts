@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Address } from 'viem';
 import { useConnectedWallet } from './EthereumQuery';
 import { useAssocatePaymentToCart } from './OrderQuery';
-import { useCheckoutContext } from '@/components/cart/checkout-context';
+import { useCheckoutContext } from '@/components/cart/context';
 import { useCallback } from 'react';
 
 /**
@@ -43,17 +43,22 @@ export const usePayAndOrder = ({
   const { mutateAsync: associatePayment } = useAssocatePaymentToCart();
   const { setPaymentStep } = useCheckoutContext();
 
-  const { checkout } = useCheckout(PRIVY_WAGMI_CONFIG, {
-    buyer: wallet?.address,
-    onError: error => {
-      setPaymentStep('error');
+  const { checkout, cart, balances, errorState, errors, prices } = useCheckout(
+    PRIVY_WAGMI_CONFIG,
+    {
+      buyer: wallet?.address,
+      onError: error => {
+        console.log('yo', error);
+        setPaymentStep('error');
+      },
+      onSuccess: async ({ hash, orderId }) => {
+        setPaymentStep('success');
+        await associatePayment(hash);
+        onSuccess?.();
+      },
     },
-    onSuccess: async ({ hash, orderId }) => {
-      setPaymentStep('success');
-      await associatePayment(hash);
-      onSuccess?.();
-    },
-  });
+  );
+  console.log({ cart, balances, errorState, errors, prices });
 
   const payAndOrder = useCallback(async () => {
     setPaymentStep('awaiting-confirmation');

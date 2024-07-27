@@ -1,7 +1,7 @@
 import { getOrderSummary } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import { Headline } from '../../ui/typography';
-import { Price } from '../../icons';
+import { Price } from '../../ui/icons';
 import { Divider } from '../../ui/divider';
 
 export const FooterTotal = ({ cart }: { cart: Order }) => {

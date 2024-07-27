@@ -6,9 +6,10 @@ export const withErrorHandling = (
 ) => {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-      console.time(`\x1b[33m${handlerPrefix} time\x1b[0m`);
+      const timePrefix = `\x1b[33m${handlerPrefix} time\x1b[0m`;
+      console.time(timePrefix);
       const response = await handler(req, res);
-      console.timeEnd(`\x1b[33m${handlerPrefix} time\x1b[0m`);
+      console.timeEnd(timePrefix);
       return response;
     } catch (error) {
       const predicate = handlerPrefix ? ` ${handlerPrefix}: ` : '';

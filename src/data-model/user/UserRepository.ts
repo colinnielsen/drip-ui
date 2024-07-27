@@ -1,10 +1,12 @@
 import { UUID } from 'crypto';
-import { User } from './UserType';
+import { SavedUser, User } from './UserType';
 import { Unsaved } from '../_common/type/CommonType';
 
 export type UserRepository = {
   findById: (userId: UUID) => Promise<User | null>;
-
+  /**
+   * @dev finds a User by whatever external auth service is linked to their account
+   */
   findByAuthServiceId: (authServiceId: string) => Promise<User | null>;
   /**
    * @dev creates a new User
@@ -19,4 +21,8 @@ export type UserRepository = {
    * @throws if User is not `pending`
    */
   delete: (userId: UUID) => Promise<void>;
+  /**
+   * @dev migrates a user from one device to another
+   */
+  migrate: ({ prevId, newId }: { prevId: UUID; newId: UUID }) => Promise<User>;
 };

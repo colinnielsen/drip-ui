@@ -20,4 +20,4 @@ export default withErrorHandling(async function (
         .status(500)
         .json({ error: 'Internal server error: ' + error.message }),
     );
-}, 'Order Status');
+}, 'orders/status');

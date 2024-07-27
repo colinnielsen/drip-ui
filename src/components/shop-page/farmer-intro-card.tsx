@@ -25,29 +25,29 @@ function FarmerIntroCard({
   if (!farmer) return <div>Farmer not found</div>;
 
   return (
-    <div className="grid grid-cols-3 w-full justify-center items-center rounded-3xl bg-secondary-background overflow-clip h-32">
-      <div className="relative bg-red col-span-1 w-full h-full">
-        <Link href={`/farmer/${farmer.id}`}>
+    <Link href={`/farmer/${farmer.id}`}>
+      <div className="grid grid-cols-3 w-full justify-center items-center rounded-3xl bg-secondary-background overflow-clip h-32">
+        <div className="relative bg-red col-span-1 w-full h-full">
           <Image
             src={farmer.image}
             alt={farmer.name}
             fill
             className="object-cover"
           />
-        </Link>
-      </div>
+        </div>
 
-      <div className="col-span-2 py-4 px-4 flex flex-col gap-y-2">
-        <h2>{allocationBPS / 100}% for growers</h2>
-        <p className="text-gray-500 leading-5">
-          {allocationBPS / 100}% of your order today goes to {farmer.name}
-        </p>
-        <div className="flex gap-x-1 items-center">
-          <MapPin />
-          {'Costa Rica'}
+        <div className="col-span-2 py-4 px-4 flex flex-col gap-y-2">
+          <h2>{allocationBPS / 100}% for growers</h2>
+          <p className="text-gray-500 leading-5">
+            {allocationBPS / 100}% of your order today goes to {farmer.name}
+          </p>
+          <div className="flex gap-x-1 items-center">
+            <MapPin />
+            {'Costa Rica'}
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

@@ -11,6 +11,12 @@ import {
 } from '@slicekit/core';
 import { axiosFetcher } from './utils';
 import { PRIVY_WAGMI_CONFIG } from './ethereum';
+import { ReactNode, useEffect } from 'react';
+import { useCart as useSliceCart } from '@slicekit/react';
+import { useConnectedWallet } from '@/queries/EthereumQuery';
+import { useCart, useCartInSliceFormat } from '@/queries/OrderQuery';
+
+export const SLICE_CART_LOCAL_STORAGE_KEY = 'cart';
 
 export const sliceKit = {
   wagmiConfig: PRIVY_WAGMI_CONFIG,
@@ -51,4 +57,22 @@ export const sliceKit = {
       params,
     );
   },
+};
+
+export const SliceCartListener = ({ children }: { children: ReactNode }) => {
+  const wallet = useConnectedWallet();
+  const { data: sliceCart } = useCartInSliceFormat({
+    buyerAddress: wallet?.address,
+  });
+  const { updateCart } = useSliceCart();
+  const cartHash = sliceCart
+    ?.map(i => i.slicerId + i.dbId + i.name + i.quantity + i.externalVariantId)
+    .join('');
+
+  useEffect(() => {
+    console.debug('hydrating cart', { cartHash });
+    updateCart(sliceCart || []);
+  }, [cartHash]);
+
+  return <>{children}</>;
 };

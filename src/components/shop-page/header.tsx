@@ -1,4 +1,4 @@
-import { BackSvg } from '@/components/icons';
+import { BackSvg } from '@/components/ui/icons';
 import { StaticPageData } from '@/pages/shop/[shopId]';
 import { CarSimple } from '@phosphor-icons/react/dist/ssr';
 import Image from 'next/image';

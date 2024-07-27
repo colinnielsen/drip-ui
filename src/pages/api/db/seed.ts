@@ -19,6 +19,12 @@ const _resetDB = async () => {
   //   DROP TABLE IF EXISTS "orders";
   // `;
   // await sql`
+  //   DROP TABLE IF EXISTS "farmerposts";
+  // `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "farmermessages";
+  // `;
+  // await sql`
   //   DROP TABLE IF EXISTS "farmers";
   // `;
   console.debug('database reset');
@@ -85,9 +91,35 @@ export const bootstrapDB = async () => {
       "id" UUID PRIMARY KEY,
       "name" TEXT NOT NULL,
       "image" TEXT NOT NULL,
+      "pfp" TEXT,
+      "campaigns" JSONB,
       "shortDescription" TEXT NOT NULL,
+      "bio" TEXT,
+      "bioImages" JSONB,
       "infoUrl" TEXT NOT NULL,
       "ethAddress" TEXT NOT NULL
+    );
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS "farmerposts" (
+      "id" UUID PRIMARY KEY,
+      "farmer" UUID NOT NULL,
+      "title" TEXT NOT NULL,
+      "image" TEXT NOT NULL,
+      "content" TEXT NOT NULL,
+      "createdAt" TIMESTAMP NOT NULL,
+      FOREIGN KEY ("farmer") REFERENCES "farmers" ("id") ON DELETE CASCADE
+    );
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS "farmermessages" (
+      "id" UUID PRIMARY KEY,
+      "farmer" UUID NOT NULL,
+      "sendingUser" UUID NOT NULL,
+      "message" TEXT NOT NULL,
+      "createdAt" TIMESTAMP NOT NULL,
+      FOREIGN KEY ("farmer") REFERENCES "farmers" ("id"),
+      FOREIGN KEY ("sendingUser") REFERENCES "users" ("id")
     );
   `;
   console.debug('database bootstrapped');

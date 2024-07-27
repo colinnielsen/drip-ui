@@ -1,9 +1,11 @@
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
+import { getOrderSummary, isPaidOrder } from '@/data-model/order/OrderDTO';
 import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
-import { useCart } from '@/queries/OrderQuery';
+import { useCart, useCheckOrderStatus } from '@/queries/OrderQuery';
 import { useActiveUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useGoToSlide, useSlideInView } from '../ui/carousel';
+import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 
 // const SLIDE_MAP = {
 //   initializing: 1,
@@ -13,8 +15,6 @@ import { createContext, useContext, useEffect, useState } from 'react';
 //   pay: 5,
 // };
 
-type PaymentStep = 'idle' | 'awaiting-confirmation' | 'success' | 'error';
-
 export type SliceCheckoutStep =
   | 'initializing'
   | 'signup'
@@ -23,18 +23,18 @@ export type SliceCheckoutStep =
   | 'get-usdc'
   | 'pay';
 
+type PaymentStep = 'idle' | 'awaiting-confirmation' | 'success' | 'error';
+
 type CheckoutCtx = {
   step: SliceCheckoutStep;
   paymentStep: PaymentStep;
   setPaymentStep: (step: PaymentStep) => void;
-  //   nextSlide: (() => void) | null;
 };
 
 const initial = {
   step: 'initializing' as const,
   paymentStep: 'idle' as const,
   setPaymentStep: () => {},
-  //   nextSlide: null,
 };
 
 export const CheckoutContext = createContext<CheckoutCtx>(initial);
@@ -83,7 +83,7 @@ const useDetermineCheckoutStep = (): {
     return {
       step: 'initializing',
     };
-
+  console.log({ user });
   if (user.__type === 'session') return { step: 'signup' };
 
   if (user.__type === 'user' && !authenticated) return { step: 'login' };
@@ -100,18 +100,84 @@ const useDetermineCheckoutStep = (): {
   else return { step: 'get-usdc' };
 };
 
+// const StatusListener = ({ order }: { order: Order }) => {
+//   const slideInView = useSlideInView();
+//   const seconds = useSecondsSinceMount();
+//   const isInView = slideInView === 1;
+
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       checkStatus(order.id).then(newOrder => {
+//         if (isPaidOrder(newOrder)) {
+//           setComplete(true);
+//           clearInterval(interval);
+//         }
+//       });
+//     }, 3000);
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   useEffect(() => {
+//     if (seconds > 7 && complete && !hasScrolled && isInView) {
+//       goToSlide?.(2);
+//       setHasScrolled(true);
+//     }
+//   }, [seconds, complete, hasScrolled, isInView]);
+
+//   return null;
+// };
+
+const useListenForStatus = (
+  checkoutStep: SliceCheckoutStep,
+  paymentStep: PaymentStep,
+) => {
+  const { data: cart } = useCart();
+  const cartId = cart?.id;
+  const slideInView = useSlideInView();
+  const { mutateAsync: checkStatus } = useCheckOrderStatus();
+  const isPaid = cart && isPaidOrder(cart);
+  const goToSlide = useGoToSlide();
+  const secondsSinceMount = useSecondsSinceMount();
+  const [secondsWhenPaid, setSecondsWhenPaid] = useState(0);
+  const waitforatleastseconds = 4;
+
+  console.log(!cartId || slideInView !== 1 || !isPaid);
+  useEffect(() => {
+    if (checkoutStep !== 'pay' || paymentStep !== 'success') return;
+    if (!cartId || slideInView !== 1 || !isPaid) return;
+
+    if (secondsWhenPaid === 0) setSecondsWhenPaid(secondsSinceMount);
+
+    const interval = setInterval(() => {
+      checkStatus(cartId).then(newOrder => {
+        if (isPaidOrder(newOrder)) {
+          clearInterval(interval);
+          if (secondsWhenPaid + waitforatleastseconds > secondsSinceMount)
+            goToSlide?.(2);
+        }
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [cartId, checkoutStep, paymentStep, slideInView, isPaid]);
+};
+
 export const CheckoutProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
   const { step } = useDetermineCheckoutStep();
-
   const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
 
+  useListenForStatus(step, paymentStep);
+
   useEffect(() => {
-    console.log({ step });
+    console.log({ checkoutStep: step });
   }, [step]);
+
+  useEffect(() => {
+    console.log({ paymentStep });
+  }, [paymentStep]);
 
   //   const nextSlide = useCallback(
   //     (() => {

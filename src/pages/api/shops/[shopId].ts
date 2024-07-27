@@ -1,8 +1,9 @@
 import { sqlDatabase } from '@/infras/database';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { UUID } from 'crypto';
+import { withErrorHandling } from '@/lib/next';
 
-export default async function handler(
+export default withErrorHandling(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -19,4 +20,4 @@ export default async function handler(
     return res.status(404).json({ error: `Shop with id ${shopId} not found` });
 
   return res.status(200).json(shop);
-}
+}, 'shops/[shopId]');

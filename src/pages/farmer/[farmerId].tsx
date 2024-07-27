@@ -1,13 +1,18 @@
-import { FarmerDetails, FarmerHeader } from '@/components/FarmerHeader';
+import { FarmerActivity } from '@/components/farmer-page.tsx/activity';
+import { FarmerBio } from '@/components/farmer-page.tsx/bio';
+import { FarmerCampaigns } from '@/components/farmer-page.tsx/campaigns';
+import {
+  FarmerHeader,
+  FarmerNavigation,
+} from '@/components/farmer-page.tsx/header';
+import { FarmerMessageBoard } from '@/components/farmer-page.tsx/message-board';
+import { FarmerPosts } from '@/components/farmer-page.tsx/posts';
+import { FarmerSection } from '@/components/farmer-page.tsx/section';
+import { Divider } from '@/components/ui/divider';
 import { sqlDatabase } from '@/infras/database';
 import { useFarmer } from '@/queries/FarmerQuery';
 import { UUID } from 'crypto';
 import { GetStaticPaths } from 'next';
-
-// Things left to do here:
-// TODO Add tip panel
-// TODO Add messages (probably worth using an external service for this)
-// TODO Add activity log data
 
 //
 //// STATIC SITE GENERATION
@@ -44,19 +49,51 @@ export async function getStaticProps({
 //// DYNAMIC RENDERING
 //
 export default function FarmerPage({ farmerId }: { farmerId: string }) {
-  const { isLoading, data: farmer, error } = useFarmer(farmerId as UUID);
+  const { data: farmer, error } = useFarmer(farmerId as UUID);
 
-  if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
-  if (!farmer) return <div>Farmer not found</div>;
+  if (farmer === null) return <div>Farmer not found</div>;
 
   return (
-    <main className="flex flex-col min-h-screen mb-32">
-      <FarmerHeader {...farmer} />
-      <div className="p-5 px-6 flex flex-col gap-5">
-        <FarmerDetails {...farmer} />
-        <div className="py-12 w-full flex justify-center items-center bg-neutral-500 rounded-3xl"></div>
-      </div>
-    </main>
+    <div className="flex flex-col min-h-screen pb-32">
+      <FarmerNavigation />
+      <FarmerHeader {...{ farmer: farmer || 'loading' }} />
+      <div className="h-8" />
+
+      {farmer?.campaigns && (
+        <>
+          <FarmerSection title="Campaigns">
+            <FarmerCampaigns {...{ farmer }} />
+          </FarmerSection>
+          <Divider />
+        </>
+      )}
+
+      {/* {farmer?.posts && (
+        <>
+          <FarmerSection title="Updates">
+            <FarmerPosts {...{ farmer }} />
+          </FarmerSection>
+          <Divider />
+        </>
+      )} */}
+
+      <FarmerSection title="About the farm">
+        <FarmerBio {...{ farmer: farmer || 'loading' }} />
+      </FarmerSection>
+      <Divider />
+
+      {farmer && (
+        <FarmerSection title="Message board">
+          <FarmerMessageBoard {...{ farmer }} />
+        </FarmerSection>
+      )}
+
+      {/* {farmer && (
+        <FarmerSection title="Activity">
+          <FarmerActivity {...{ farmer }} />
+        </FarmerSection>
+      )} */}
+    </div>
   );
 }

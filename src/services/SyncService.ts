@@ -48,6 +48,9 @@ export class SyncService {
   }
 
   async syncFarmers(farmers: Farmer[]) {
-    for (const farmer of farmers) await this.database.farmers.save(farmer);
+    for (const farmer of farmers) {
+      await this.database.farmers.save(farmer);
+      await this.database.farmers.savePosts(farmer.posts);
+    }
   }
 }

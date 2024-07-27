@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import CartFooter from './cart/cart-footer';
-import { HomeSvg, MapSvg, ProfileSvg } from './icons';
+import CartFooter from './cart/footer';
+import { HomeSvg, MapSvg, ProfileSvg } from './ui/icons';
 
 export function Footer() {
   return (
-    <footer className="fixed bottom-0 w-full shadow-lg flex flex-col">
+    <footer className="fixed h-fit bottom-0 w-full flex flex-col">
       <CartFooter />
       <div className="flex justify-between bg-background py-4 w-full z-10">
         <Link href="/" className="flex justify-center w-1/3">

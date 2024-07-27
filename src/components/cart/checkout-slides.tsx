@@ -7,12 +7,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '../ui/carousel';
-import { CheckoutProvider } from './checkout-context';
-import BasketSlide from './basket/basket';
+import { CheckoutProvider } from './context';
+import BasketSlide, {
+  EmptyBasetSlide,
+  EmptyBasket,
+  LoadingBasketSlide,
+} from './basket/basket';
 import PaymentSlide from './payment/payment';
 import { ConfirmationSlide } from './confirmation/confirmation';
 import { isPaidOrder } from '@/data-model/order/OrderDTO';
 import { cn, isIOSSafari } from '@/lib/utils';
+import { SliceProvider } from '@slicekit/react';
+import { SliceCartListener } from '@/lib/slice';
 
 /**
  * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
@@ -31,7 +37,17 @@ export const AsCheckoutSlide = ({
   </CarouselItem>
 );
 
-function CheckoutSlides({ shop, cart }: { shop: Shop; cart: Order }) {
+export default function CheckoutSlides({
+  shop,
+  cart,
+}: {
+  shop?: Shop;
+  cart?: Order | null;
+}) {
+  if (cart === null) return <EmptyBasket />;
+  if (cart === undefined) return <LoadingBasketSlide />;
+  if (!shop) return "no shop (this shouldn't happen";
+
   return (
     <Carousel
       className="h-full"
@@ -39,27 +55,27 @@ function CheckoutSlides({ shop, cart }: { shop: Shop; cart: Order }) {
         duration: 12,
         watchDrag: false,
         align: 'center',
-        startIndex: isPaidOrder(cart) ? 2 : 0,
+        startIndex: cart && isPaidOrder(cart) ? 2 : 0,
       }}
       stiff
     >
       <CarouselContent className="h-full">
-        <BasketSlide cart={cart} shop={shop} />
-        <PaymentSlide cart={cart} shop={shop} />
-        <ConfirmationSlide cart={cart} shop={shop} />
+        <SliceProvider>
+          <SliceCartListener>
+            <CheckoutProvider>
+              <BasketSlide cart={cart} shop={shop} />
+
+              <PaymentSlide cart={cart} shop={shop} />
+
+              <ConfirmationSlide cart={cart} shop={shop} />
+            </CheckoutProvider>
+          </SliceCartListener>
+        </SliceProvider>
       </CarouselContent>
       <div className="absolute top-7 right-20">
         <CarouselPrevious />
         <CarouselNext />
       </div>
     </Carousel>
-  );
-}
-
-export default function ({ shop, cart }: { shop: Shop; cart: Order }) {
-  return (
-    <CheckoutProvider>
-      <CheckoutSlides shop={shop} cart={cart} />
-    </CheckoutProvider>
   );
 }

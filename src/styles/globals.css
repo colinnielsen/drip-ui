@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* #privy-dialog-title {
+  font-size: 1.5rem;
+  overflow-wrap: normal;
+  font-family: 'drip';
+  font-family: var(--font-diary-notes)
+} */
+
+.tsqd-parent-container {
+  z-index: 10000000000000;
+  pointer-events: all;
+}

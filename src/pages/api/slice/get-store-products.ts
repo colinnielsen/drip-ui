@@ -1,3 +1,4 @@
+import { withErrorHandling } from '@/lib/next';
 import { sliceKit } from '@/lib/slice';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -17,4 +18,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 };
 
-export default handler;
+export default withErrorHandling(handler, 'get-store-products');

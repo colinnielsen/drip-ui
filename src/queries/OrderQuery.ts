@@ -9,7 +9,7 @@ import { Address, Hash } from 'viem';
 import { useFarmer } from './FarmerQuery';
 import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
-import { useActiveUser } from './UserQuery';
+import { useActiveUser, useUserId } from './UserQuery';
 
 //
 //// QUERIES
@@ -17,8 +17,7 @@ import { useActiveUser } from './UserQuery';
 const CART_QUERY_KEY = 'cart';
 
 export const useCart = () => {
-  const { data: user } = useActiveUser();
-  const userId = user?.id;
+  const { data: userId } = useUserId();
 
   return useQuery({
     queryKey: [CART_QUERY_KEY, userId],
@@ -48,8 +47,9 @@ export const useCartInSliceFormat = ({
   return useSliceStoreProducts({
     slicerId,
     buyer: buyerAddress,
-    select: cartProducts => mapCartToSliceCart(cart!, cartProducts),
-    enabled: !!cart && !!slicerId,
+    select: cartProducts => {
+      return !cart ? [] : mapCartToSliceCart(cart, cartProducts);
+    },
   });
 };
 
@@ -98,8 +98,7 @@ export const useAddToCart = ({
         data: { action: 'add', shopId, orderItems: itemArray },
         withCredentials: true,
       }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [CART_QUERY_KEY] }),
+    onSuccess: data => queryClient.setQueryData([CART_QUERY_KEY, userId], data),
   });
 };
 
@@ -124,8 +123,7 @@ export const useRemoveItemFromCart = ({
         data: { action: 'delete', orderItemId, shopId },
         withCredentials: true,
       }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [CART_QUERY_KEY] }),
+    onSuccess: data => queryClient.setQueryData([CART_QUERY_KEY, userId], data),
   });
 };
 
@@ -178,8 +176,8 @@ export const useCheckOrderStatus = () => {
         },
         data: { orderId },
       }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [CART_QUERY_KEY] }),
+    onSuccess: data =>
+      queryClient.setQueryData([CART_QUERY_KEY, data.user], data),
   });
 };
 

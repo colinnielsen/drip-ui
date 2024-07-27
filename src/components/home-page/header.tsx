@@ -2,6 +2,8 @@ import { Input } from '@/components/ui/input';
 import { useResetUser } from '@/queries/UserQuery';
 import { Search as SearchIcon } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '../ui/button';
+import { isDev } from '@/lib/utils';
 
 export function Search() {
   const [search, setSearch] = useState<string>('');
@@ -23,12 +25,20 @@ export function HomePageHeader() {
   const { mutate: reset, isPending } = useResetUser();
   return (
     <header className="flex flex-col p-6 pb-2 gap-6">
-      <h1
-        className="font-semibold font-drip text-4xl text-secondary-pop"
-        onDoubleClick={() => reset()}
-      >
-        {isPending ? '...' : 'Drip'}
-      </h1>
+      <div className="flex flex-row items-center justify-between">
+        <h1
+          className="font-semibold font-drip text-4xl text-secondary-pop"
+          onDoubleClick={() => reset()}
+        >
+          {isPending ? '...' : 'Drip'}
+        </h1>
+        {isDev() && (
+          <div className="text-xs text-secondary-pop" onClick={() => reset()}>
+            Reset
+          </div>
+        )}
+      </div>
+
       <Search />
     </header>
   );

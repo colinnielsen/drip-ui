@@ -20,7 +20,7 @@ export const useUSDCBalance = () => {
   const wallet = useConnectedWallet();
 
   return useQuery({
-    queryKey: ['usdc-balance', wallet],
+    queryKey: ['usdc-balance', wallet?.address],
     queryFn: async () =>
       wallet
         ? await USDC_INSTANCE.read.balanceOf([wallet.address])

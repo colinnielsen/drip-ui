@@ -11,6 +11,7 @@ import { isPending } from '@/data-model/order/OrderDTO';
 import { Hash } from 'viem';
 import { getTransactionReceipt } from 'viem/actions';
 import { BASE_CLIENT } from '@/lib/ethereum';
+import { sortDateAsc } from '@/lib/utils';
 
 export class SQLOrderRepository implements OrderRepository {
   async findById(id: UUID): Promise<Order | null> {
@@ -108,15 +109,18 @@ export class SQLOrderRepository implements OrderRepository {
   }
 
   async pay(orderId: UUID, transactionHash: Hash): Promise<Order> {
+    console.log('pay', orderId, transactionHash);
     const result = await sql`UPDATE orders
-      SET
-      "transactionHash" = ${transactionHash},
-      "status" = 'submitting'
-      WHERE id = ${orderId}`;
-    return result.rows[0] as Order;
+    SET
+    "transactionHash" = ${transactionHash},
+    "status" = 'submitting'
+    WHERE id = ${orderId}`;
+    const o = result.rows[0];
+    return o as Order;
   }
 
   async checkStatus(orderId: UUID): Promise<Order> {
+    console.log('checkStatus', orderId);
     const result = await sql`SELECT * FROM orders WHERE id = ${orderId}`;
     const [order] = result.rows as [Order];
     if (!order) throw Error('Order not found');
@@ -167,10 +171,23 @@ export class SQLOrderRepository implements OrderRepository {
 
   async getActiveUserOrder(userId: UUID): Promise<Order | null> {
     const orders = await this.getOrdersByUserId(userId);
-    const order = orders.sort((a, b) =>
-      new Date(a.timestamp) < new Date(b.timestamp) ? -1 : 1,
-    )[0];
-
+    const [order] = orders.sort((a, b) =>
+      sortDateAsc(a.timestamp, b.timestamp),
+    );
     return order || null;
+  }
+
+  async migrate({
+    prevUserId,
+    newUserId,
+  }: {
+    prevUserId: UUID;
+    newUserId: UUID;
+  }): Promise<Order[]> {
+    const result = await sql`
+      UPDATE orders
+      SET "user" = ${newUserId}
+      WHERE "user" = ${prevUserId}`;
+    return result.rows as Order[];
   }
 }

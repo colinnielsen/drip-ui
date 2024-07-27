@@ -3,33 +3,34 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
+import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
 
 export function ItemCarousel<T>({
   data,
   renderFn,
+  className,
 }: {
   data: Array<T>;
   renderFn: (data: T, index: number) => ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="w-full py-2">
-      <div className="flex flex-col gap-2">
-        <Carousel
-          opts={{
-            align: 'start',
-          }}
-          className="w-full max-w-sm"
-        >
-          <CarouselContent>
-            {data.map((item, index) => (
-              <CarouselItem key={index} className=" basis-5/12">
-                {renderFn(item, index)}
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+    <div className={cn('w-full py-2 flex flex-col', className)}>
+      <Carousel
+        opts={{
+          align: 'start',
+        }}
+        className="w-full max-w-sm"
+      >
+        <CarouselContent>
+          {data.map((item, index) => (
+            <CarouselItem key={index} className="basis-3/7 ">
+              {renderFn(item, index)}
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </div>
   );
 }

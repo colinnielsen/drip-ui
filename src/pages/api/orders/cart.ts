@@ -1,17 +1,17 @@
 import { sqlDatabase } from '@/infras/database';
+import { withErrorHandling } from '@/lib/next';
 import { err } from '@/lib/utils';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(
+export default withErrorHandling(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
   const { userId } = req.query;
 
-  if (typeof userId !== 'string') {
+  if (typeof userId !== 'string')
     return res.status(400).json({ error: 'Invalid userId' });
-  }
 
   const userUUID = userId as UUID;
 
@@ -25,7 +25,7 @@ export default async function handler(
     default:
       return res.status(405).json({ error: 'Method not allowed' });
   }
-}
+}, 'orders/cart');
 
 async function handleGetCart(res: NextApiResponse, userId: UUID) {
   try {
@@ -33,7 +33,7 @@ async function handleGetCart(res: NextApiResponse, userId: UUID) {
     return res.status(200).json(cart);
   } catch (error) {
     console.error('Error fetching cart:', error);
-    return res.status(500).json({ error: 'Failed to fetch cart' });
+    return res.status(500).json({ error: 'Failed to fetch cart: ' + error });
   }
 }
 
@@ -71,7 +71,7 @@ async function handleUpdateCart(
     return err('Invalid action');
   } catch (error) {
     console.error('Error adding to cart:', error);
-    return res.status(500).json({ error: 'Failed to add to cart' });
+    return res.status(500).json({ error: 'Failed to add to cart: ' + error });
   }
 }
 
@@ -86,6 +86,6 @@ async function handleClearCart(res: NextApiResponse, userId: UUID) {
     return res.status(200).json(clearedCart);
   } catch (error) {
     console.error('Error clearing cart:', error);
-    return res.status(500).json({ error: 'Failed to clear cart' });
+    return res.status(500).json({ error: 'Failed to clear cart: ' + error });
   }
 }

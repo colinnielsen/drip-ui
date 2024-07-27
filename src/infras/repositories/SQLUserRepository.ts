@@ -60,4 +60,19 @@ export class SQLUserRepository implements UserRepository {
     const result = await sql`DELETE FROM users WHERE id = ${id}`;
     if (result.rowCount === 0) throw Error('could not delete');
   }
+
+  async migrate({
+    prevId,
+    newId,
+  }: {
+    prevId: UUID;
+    newId: UUID;
+  }): Promise<User> {
+    const prevUser = await this.findById(prevId);
+    if (!prevUser) throw Error('not found');
+
+    const user = await this.save({ ...prevUser, id: newId });
+    await this.delete(prevId);
+    return user;
+  }
 }

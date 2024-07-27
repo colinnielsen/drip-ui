@@ -1,35 +1,35 @@
 import { createFarmer } from '@/data-model/farmer/FarmerDTO';
 import { Farmer } from '@/data-model/farmer/FarmerType';
 import { ManualStoreConfig } from '@/data-model/shop/ShopType';
-import { UUID, randomBytes } from 'crypto';
+import { UUID } from 'crypto';
 import { zeroAddress } from 'viem';
+import { generateUUID } from './utils';
 
 export const STATIC_FARMER_DATA: Farmer[] = [
   createFarmer({
     id: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
     name: 'Marco Oviedo',
+    pfp: '/marco-pfp.png',
+    shortDescription:
+      'My wife and I run a farm in the beautiful Costa region of Costa Rica',
     image:
       'https://images.squarespace-cdn.com/content/v1/5a8cebefe9bfdf59a2d406ff/1519999467027-LWGK5HC14VTJU60J4LZM/FarmersProject_Sircof_Marco.jpg?format=1000w',
-    shortDescription: 'The dopest farmer in town',
     infoUrl: 'https://www.farmersproject-cr.com/sircof',
+    campaigns: [],
+    posts: [
+      {
+        id: generateUUID(),
+        image: '/base-cafe.png',
+        title: 'EthCC 2024',
+        content:
+          'Base Cafe at EthCC was a huge success 🎉🎉🎉 I received over $600 USDC from this event and I am excited for the future. Thank you to everyone who bought and enjoyed coffees with USDC and the incredible barista team',
+        createdAt: new Date(),
+        farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
+      },
+    ],
+    bio: "My wife and I run a farm in the beautiful Costa region of Costa Rica. Our family coffee farm has been running the past two generations. My wife and I decided to build a micro mill, giving us more control over processing and production. We're using innovative technologies to save our family farm.",
+    bioImages: ['/marco-1.jpg', '/marco-2.jpg', '/marco-3.jpg'],
     ethAddress: zeroAddress,
-  }),
-  createFarmer({
-    id: 'A1EA7B69-C1D9-463E-BCDB-E3F511B9AE4E',
-    name: 'Richard Stallman',
-    image: '/farmer2.jpg',
-    shortDescription: 'The most free and open source farmer in the world',
-    infoUrl: 'https://fsf.org',
-    ethAddress: `0x${randomBytes(20).toString('hex')}` as `0x${string}`,
-  }),
-  createFarmer({
-    id: 'FE56D758-8379-4565-A192-B87DDF316013',
-    name: 'Stichard Rallman',
-    image: '/farmer3.jpg',
-    shortDescription:
-      'The least free and open source farmer in the world. Hates freedom.',
-    infoUrl: 'https://fsf.org',
-    ethAddress: `0x${randomBytes(20).toString('hex')}` as `0x${string}`,
   }),
 ];
 

@@ -12,11 +12,11 @@ import { convertItemPriceToBigInt } from '@/data-model/item/ItemDTO';
 import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { OrderItem } from '@/data-model/order/OrderType';
 import { useAddToCart } from '@/queries/OrderQuery';
-import { useActiveUser } from '@/queries/UserQuery';
+import { useActiveUser, useUserId } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
-import { PlusSvg, Price } from '../icons';
+import { PlusSvg, Price } from '../ui/icons';
 import { Checkbox } from '../ui/checkbox';
 import { Divider } from '../ui/divider';
 import { NumberInput } from '../ui/number-input';
@@ -88,7 +88,7 @@ export function ItemPreviewTrigger({
   shopId: UUID;
   item: Item;
 }) {
-  const { data: user } = useActiveUser();
+  const { data: userId } = useUserId();
 
   const { image, name } = item;
 
@@ -97,8 +97,8 @@ export function ItemPreviewTrigger({
       <div className="flex flex-col gap-2">
         <div className="relative overflow-hidden rounded-xl h-36 w-36">
           <Image src={image} alt={name} fill />
-          {user?.id ? (
-            <AddButton {...{ shopId, userId: user.id, item }} />
+          {userId ? (
+            <AddButton {...{ shopId, userId, item }} />
           ) : (
             <Skeleton className="h-7 w-7 rounded-full" />
           )}
@@ -255,7 +255,7 @@ export function ItemWithSelector({
     setSelectedOptions({});
   };
 
-  const { data: user } = useActiveUser();
+  const { data: userId } = useUserId();
 
   const orderItem: Unsaved<OrderItem> = {
     item,
@@ -323,9 +323,7 @@ export function ItemWithSelector({
 
           <div className="flex-grow" />
 
-          {user?.id && (
-            <AddToBasketButton {...{ userId: user.id, shopId, orderItem }} />
-          )}
+          {userId && <AddToBasketButton {...{ userId, shopId, orderItem }} />}
         </div>
       </DrawerContent>
     </Drawer>

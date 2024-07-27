@@ -47,11 +47,11 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@slicekit/core':
-        specifier: ^0.3.85
-        version: 0.3.85(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+        specifier: ^0.3.87
+        version: 0.3.87(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       '@slicekit/react':
-        specifier: ^0.2.68
-        version: 0.2.68(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+        specifier: ^0.2.70
+        version: 0.2.70(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       '@tanstack/react-query':
         specifier: ^5.51.1
         version: 5.51.1(react@18.3.1)
@@ -70,6 +70,9 @@ importers:
       axios:
         specifier: ^1.7.2
         version: 1.7.2
+      boring-avatars:
+        specifier: ^1.10.2
+        version: 1.10.2
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -3237,10 +3240,10 @@ packages:
         integrity: sha512-kFFdI2DPAm8W8JwiPiizmsq4SYYADE1c7CN04xCSzLp+/mafrtM3s/Sdqq54vXsjHJZs9kmGEnTcdMoijP1I4w==,
       }
 
-  '@slicekit/core@0.3.85':
+  '@slicekit/core@0.3.87':
     resolution:
       {
-        integrity: sha512-f2ctLAp0lka9jCS29R1YJGsPUUUK9yKUEep/nxHuAOtolqsmbPSLcTpuA6WYjXUMq2xLOmgLuYDVY6xo9qgdJA==,
+        integrity: sha512-5tw+KqXIFcIu6bXVzvUJeQinm48vLUMFZtA+qDfUlyXsNEJC7GcGA28HjVYOdvVn+RVbI0oUWuka4ejoc0PobQ==,
       }
     peerDependencies:
       '@wagmi/core': ^2.10.9
@@ -3248,10 +3251,10 @@ packages:
       merkletreejs: 0.4.0
       viem: ^2.17.0
 
-  '@slicekit/react@0.2.68':
+  '@slicekit/react@0.2.70':
     resolution:
       {
-        integrity: sha512-iIkfKsgPkeWEY05YcgVUK5ikYn/rF6kC9KpK8qaO3h232K0r9PU0FGaGiscZbsoSIDbDOkdwW/Rk1rdTfNEc4g==,
+        integrity: sha512-aSmyzo2h6Dr580g/TrjgeX8ZWobLskfpCLo77CSKeVPneo7IB4Zsd3tOaPgkPSU9mzxVaug3NuPDSQzbfiZ5fQ==,
       }
     peerDependencies:
       '@wagmi/core': ^2.10.9
@@ -4492,6 +4495,12 @@ packages:
     resolution:
       {
         integrity: sha512-eXRvHzWyYPBuB4NBy0cmYQjGitUrtqwbvlzP3G6VFnNRbsZQIxQ10PbKKHt8gZ/HW/D/747aDl+QkDqg3KQLMQ==,
+      }
+
+  boring-avatars@1.10.2:
+    resolution:
+      {
+        integrity: sha512-uQyvmNeW6loz4Yytj7aDo0IhhuByW/YyOHtqwb3kQ/x48hum22hROA2Wn3qzrLR5JsoZ+FHjPO6z6LrXrWjegg==,
       }
 
   bowser@2.11.0:
@@ -13377,7 +13386,7 @@ snapshots:
 
   '@slicekit/abi@0.0.11': {}
 
-  '@slicekit/core@0.3.85(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
+  '@slicekit/core@0.3.87(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
     dependencies:
       '@slicekit/abi': 0.0.11
       '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
@@ -13385,7 +13394,7 @@ snapshots:
       merkletreejs: 0.3.11
       viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)
 
-  '@slicekit/core@0.3.85(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
+  '@slicekit/core@0.3.87(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
     dependencies:
       '@slicekit/abi': 0.0.11
       '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
@@ -13393,10 +13402,10 @@ snapshots:
       merkletreejs: 0.4.0
       viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)
 
-  '@slicekit/react@0.2.68(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
+  '@slicekit/react@0.2.70(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
     dependencies:
       '@slicekit/abi': 0.0.11
-      '@slicekit/core': 0.3.85(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+      '@slicekit/core': 0.3.87(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       '@tanstack/react-query': 5.17.19(react@18.3.1)
       '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
@@ -14656,6 +14665,8 @@ snapshots:
   bn.js@4.12.0: {}
 
   bn.js@5.2.1: {}
+
+  boring-avatars@1.10.2: {}
 
   bowser@2.11.0: {}
 

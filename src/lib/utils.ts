@@ -42,8 +42,11 @@ export const axiosFetcher = async <T>(
 
 export const isSSR = () => {
   const is = typeof window === 'undefined';
-  console.log({ isSSR: is });
   return is;
+};
+
+export const logIsSSR = () => {
+  console.log({ isSSR: isSSR() });
 };
 
 export function isProd() {
@@ -87,4 +90,8 @@ export const isIOSSafari = () => {
     navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
     navigator.userAgent.match(/AppleWebKit/)
   );
+};
+
+export const sortDateAsc = (a: Date | string, b: Date | string) => {
+  return new Date(b).getTime() - new Date(a).getTime();
 };

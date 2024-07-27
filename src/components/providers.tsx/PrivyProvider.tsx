@@ -17,7 +17,12 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
           //   '...but in the meantime, help us beta test by connecting your web3 wallet 👇',
           // accentColor: '#446144',
           // logo: '/grandma.png',
-          walletList: ['coinbase_wallet', 'rainbow', 'detected_wallets'],
+          walletList: [
+            'coinbase_wallet',
+            'wallet_connect',
+            'rainbow',
+            'detected_wallets',
+          ],
         },
         // Create embedded wallets for users who don't have a wallet
         embeddedWallets: {

@@ -1,8 +1,8 @@
 import { SupportedCurrency } from '@/data-model/_common/type/CommonType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
-import { prettyFormatPrice } from '@/lib/utils';
+import { cn, prettyFormatPrice } from '@/lib/utils';
 import { Clock11, Clock2, Clock5, Clock8, LucideProps } from 'lucide-react';
-import { Label2 } from './ui/typography';
+import { Label2 } from './typography';
 
 export function Price({
   currency,
@@ -140,10 +140,10 @@ export function CarIcon() {
   );
 }
 
-export function UsdcSVG() {
+export function UsdcSVG({ className }: { className?: string }) {
   return (
     <svg
-      className="w-4 h-4"
+      className={cn('h-4 w-4', className)}
       data-name="86977684-12db-4850-8f30-233a7c267d11"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 2000 2000"

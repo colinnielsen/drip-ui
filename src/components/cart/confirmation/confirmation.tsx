@@ -23,16 +23,15 @@ import { Newspaper, Timer, X } from 'lucide-react';
 import Image from 'next/image';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { Fragment } from 'react';
-import { CartItem, OrderItemDisplay } from '../basket/cart-item';
-import { useActiveUser } from '@/queries/UserQuery';
+import { OrderItemDisplay } from '../basket/cart-item';
 import { OrderSummary } from '../basket/summary';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { CTAButton } from '@/components/ui/button';
+import Link from 'next/link';
 
 export function ConfirmationSlide({ cart, shop }: { cart: Order; shop: Shop }) {
   const farmer = useFarmerAllocationFromOrder(cart);
   const summary = getOrderSummary(cart);
-  const { data: user } = useActiveUser();
 
   return (
     <AsCheckoutSlide>
@@ -52,42 +51,47 @@ export function ConfirmationSlide({ cart, shop }: { cart: Order; shop: Shop }) {
             <Drip className="text-2xl text-center py-2">
               nice! order confirmed
             </Drip>
-            <InfoCard
-              className="h-32"
-              left={
-                farmer && (
-                  <Image
-                    src={farmer.farmer.image}
-                    alt={'farmer-image'}
-                    fill
-                    className="object-cover"
-                  />
-                )
-              }
-              info={
-                <div className="flex flex-col gap-2 py-4">
-                  <Title2>Thank you</Title2>
-                  <Label1 className="text-primary-gray">
-                    {farmer?.farmer.name} just received{' '}
-                    <span>
-                      $
-                      {(
-                        (+summary.total.formatted *
-                          (farmer?.allocation.allocationBPS ?? 0)) /
-                        10000
-                      ).toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </span>{' '}
-                    from your purchase
-                  </Label1>
-                  <Label2>
-                    Learn more about {farmer?.farmer.name.split(' ')[0]}
-                  </Label2>
-                </div>
-              }
-            />
+            <DrawerClose asChild>
+              <Link href={`/farmer/${farmer?.farmer.id}`}>
+                <InfoCard
+                  className="h-32"
+                  left={
+                    farmer && (
+                      <Image
+                        src={farmer.farmer.image}
+                        alt={'farmer-image'}
+                        fill
+                        className="object-cover"
+                      />
+                    )
+                  }
+                  info={
+                    <div className="flex flex-col gap-2 py-4 text-left">
+                      <Title2>Thank you</Title2>
+                      <Label1 className="text-primary-gray">
+                        {farmer?.farmer.name} just received{' '}
+                        <span>
+                          $
+                          {(
+                            (+summary.total.formatted *
+                              (farmer?.allocation.allocationBPS ?? 0)) /
+                            10000
+                          ).toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>{' '}
+                        from your purchase
+                      </Label1>
+
+                      <Label2 className="underline">
+                        Learn more about {farmer?.farmer.name.split(' ')[0]}
+                      </Label2>
+                    </div>
+                  }
+                />
+              </Link>
+            </DrawerClose>
           </div>
 
           <Divider />
@@ -137,28 +141,27 @@ export function ConfirmationSlide({ cart, shop }: { cart: Order; shop: Shop }) {
           <div className="flex flex-col w-full gap-3.5 items-start">
             <Headline className="px-6">Order summary</Headline>
             <div className="flex flex-col gap-6 w-full">
-              {user?.id &&
-                collapseDuplicateItems(cart.orderItems).map(
-                  ([orderItem, quantity], index) => (
-                    <Fragment key={index}>
-                      <OrderItemDisplay
-                        orderItem={orderItem}
-                        rightSide={
-                          <div
-                            className={
-                              'flex items-center gap-2 px-4 py-2 font-normal text-sm bg-light-gray rounded-2xl justify-between'
-                            }
-                          >
-                            <div className="flex items-center justify-center grow">
-                              <Label2 className="text-black">{quantity}</Label2>
-                            </div>
+              {collapseDuplicateItems(cart.orderItems).map(
+                ([orderItem, quantity], index) => (
+                  <Fragment key={index}>
+                    <OrderItemDisplay
+                      orderItem={orderItem}
+                      rightSide={
+                        <div
+                          className={
+                            'flex items-center gap-2 px-4 py-2 font-normal text-sm bg-light-gray rounded-2xl justify-between'
+                          }
+                        >
+                          <div className="flex items-center justify-center grow">
+                            <Label2 className="text-black">{quantity}</Label2>
                           </div>
-                        }
-                      />
-                      <Divider />
-                    </Fragment>
-                  ),
-                )}
+                        </div>
+                      }
+                    />
+                    <Divider />
+                  </Fragment>
+                ),
+              )}
             </div>
           </div>
 

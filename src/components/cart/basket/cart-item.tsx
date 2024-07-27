@@ -1,11 +1,37 @@
 import { OrderItem } from '@/data-model/order/OrderType';
 import Image from 'next/image';
-import { Price } from '../../icons';
+import { Price } from '../../ui/icons';
 import { Headline, Label2 } from '../../ui/typography';
 import { NumberInput } from '../../ui/number-input';
 import { useAddToCart, useRemoveItemFromCart } from '@/queries/OrderQuery';
 import { UUID } from 'crypto';
 import { ReactNode } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+
+export function LoadingCartItem() {
+  return (
+    <div className="flex items-start gap-4 w-full px-6">
+      <Skeleton className="rounded-2xl overflow-hidden h-24 w-24 relative aspect-square" />
+
+      <div className="flex flex-col gap-y-1">
+        <Skeleton>
+          <Headline>loading...</Headline>
+        </Skeleton>
+        <div className="flex gap-y-1">
+          {new Array(3).fill(null).map((_, index) => (
+            <Skeleton key={index}>
+              <Label2>loading...</Label2>
+            </Skeleton>
+          ))}
+        </div>
+        <Skeleton>
+          <Price currency="usdc" currencyDecimals={6} price={'4'} />
+        </Skeleton>
+      </div>
+      <div className="flex-grow" />
+    </div>
+  );
+}
 
 export function OrderItemDisplay({
   orderItem,

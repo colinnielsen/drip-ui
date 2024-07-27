@@ -17,12 +17,17 @@ const buttonVariants = cva(
         icon: 'h-9 w-9',
       },
       variant: {
-        cta: 'flex-grow bg-secondary-pop rounded-[50px] h-14 max-h-14 flex flex-col justify-center',
+        cta: 'flex-grow bg-secondary-pop rounded-[50px] h-14 max-h-14 flex flex-col justify-center text-white',
+        'cta-small':
+          'flex-grow bg-secondary-pop rounded-[50px] h-10 max-h-10 flex flex-col justify-center text-white text-[14px]',
         default: 'bg-gray-900 text-gray-50 shadow hover:bg-gray-900/90',
         destructive: 'bg-red-500 text-gray-50 shadow-sm hover:bg-red-500/90',
         outline:
           'border border-gray-200 bg-white shadow-sm hover:bg-gray-100 hover:text-gray-900',
-        secondary: 'bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-100/80',
+        secondary:
+          'flex-grow bg-light-gray rounded-[50px] h-14 max-h-14 flex flex-col justify-center',
+        'secondary-small':
+          'flex-grow bg-light-gray rounded-[50px] h-10 max-h-10 flex flex-col justify-center text-[14px]',
         ghost: 'hover:bg-gray-100 hover:text-gray-900',
         link: 'text-gray-900 underline-offset-4 hover:underline',
       },
@@ -56,13 +61,14 @@ Button.displayName = 'Button';
 
 const CTAButton = React.forwardRef(
   (
-    props: ButtonProps & { isLoading?: boolean },
+    props: ButtonProps & { isLoading?: boolean; variant?: 'cta' | 'cta-small' },
     ref: React.Ref<HTMLButtonElement>,
   ) => {
     const { isLoading, children, ...rest } = props;
+    const isSmall = props.variant === 'cta-small';
     return (
       <Button
-        variant="cta"
+        variant={props.variant || 'cta'}
         {...rest}
         className="w-full"
         disabled={isLoading}
@@ -71,7 +77,9 @@ const CTAButton = React.forwardRef(
         {isLoading ? (
           <LoaderCircle className="h-4 w-4 animate-spin stroke-white" />
         ) : (
-          <Mono className="text-white uppercase">{children}</Mono>
+          <Mono className={`uppercase ${isSmall ? 'text-[14px]' : ''}`}>
+            {children}
+          </Mono>
         )}
       </Button>
     );
@@ -82,4 +90,45 @@ const LoadingCTAButton = () => (
   <Skeleton className="h-14 w-full rounded-[50px] bg-secondary-pop" />
 );
 
-export { Button, buttonVariants, CTAButton, LoadingCTAButton };
+const SecondaryButton = React.forwardRef(
+  (
+    props: ButtonProps & {
+      isLoading?: boolean;
+      variant?: 'secondary' | 'secondary-small';
+    },
+    ref: React.Ref<HTMLButtonElement>,
+  ) => {
+    const { isLoading, children, ...rest } = props;
+    const isSmall = props.variant === 'secondary-small';
+    return (
+      <Button
+        variant={props.variant || 'secondary'}
+        {...rest}
+        className="w-full"
+        disabled={isLoading}
+        ref={ref}
+      >
+        {isLoading ? (
+          <LoaderCircle className="h-4 w-4 animate-spin stroke-white" />
+        ) : (
+          <Mono className={`uppercase ${isSmall ? 'text-[14px]' : ''}`}>
+            {children}
+          </Mono>
+        )}
+      </Button>
+    );
+  },
+);
+
+const LoadingSecondaryButton = () => (
+  <Skeleton className="h-14 w-full rounded-[50px] bg-light-gray" />
+);
+
+export {
+  Button,
+  buttonVariants,
+  CTAButton,
+  LoadingCTAButton,
+  SecondaryButton,
+  LoadingSecondaryButton,
+};

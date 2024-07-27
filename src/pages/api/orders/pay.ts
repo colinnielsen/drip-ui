@@ -1,9 +1,10 @@
 import { sqlDatabase } from '@/infras/database';
+import { withErrorHandling } from '@/lib/next';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, isHex } from 'viem';
 
-export default async function handler(
+export default withErrorHandling(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -28,4 +29,4 @@ export default async function handler(
         .status(500)
         .json({ error: 'Internal server error: ' + error.message });
     });
-}
+}, 'orders/pay');

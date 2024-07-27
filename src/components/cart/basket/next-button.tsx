@@ -8,9 +8,9 @@ import {
 import { cn } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
-import { useCheckoutContext } from '../checkout-context';
+import { useCheckoutContext } from '../context';
 import { PayButton } from '../payment/payment';
-import { WelcomeScreen, shouldGoToWelcomeSlide } from '../welcome';
+import WelcomeScreen, { shouldGoToWelcomeSlide } from '../welcome';
 import { GetUSDCButton } from '../onboard/onboard';
 
 // export const NextButton = dynamic(() => import('../checkout'), {

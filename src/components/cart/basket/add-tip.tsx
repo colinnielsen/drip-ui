@@ -1,7 +1,6 @@
 import { Order } from '@/data-model/order/OrderType';
 import { useShop } from '@/queries/ShopQuery';
 import { Headline, Label3 } from '../../ui/typography';
-import { useActiveUser } from '@/queries/UserQuery';
 import { cn } from '@/lib/utils';
 import { UUID } from 'crypto';
 
@@ -41,10 +40,9 @@ export const AddTipSection = ({
   shopId: UUID;
   userId: UUID;
 }) => {
-  const { data: user } = useActiveUser();
   const { data: shop } = useShop(shopId);
 
-  if (!shop || !user) return null;
+  if (!shop) return null;
 
   const selectedOptionIdx = 1;
 

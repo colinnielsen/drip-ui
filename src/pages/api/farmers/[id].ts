@@ -1,9 +1,9 @@
 import { sqlDatabase } from '@/infras/database';
-import { isUUID } from '@/lib/utils';
+import { withErrorHandling } from '@/lib/next';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(
+export default withErrorHandling(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -23,4 +23,4 @@ export default async function handler(
   } catch (error: any) {
     return res.status(500).json({ error: error?.message });
   }
-}
+}, 'farmers/[id]');

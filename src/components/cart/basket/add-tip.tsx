@@ -34,11 +34,9 @@ export const TIP_OPTIONS = [
 export const AddTipSection = ({
   cart,
   shopId,
-  userId,
 }: {
   cart: Order;
   shopId: UUID;
-  userId: UUID;
 }) => {
   const { data: shop } = useShop(shopId);
 

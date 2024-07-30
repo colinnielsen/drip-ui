@@ -1,5 +1,28 @@
-import { prettyFormatPrice } from '@/lib/utils';
-import { DRIP_TIP_ITEM_NAME, Order, OrderItem, PaidOrder } from './OrderType';
+import { err, prettyFormatPrice } from '@/lib/utils';
+import {
+  Cart,
+  DRIP_TIP_ITEM_NAME,
+  ExternalOrderInfo,
+  Order,
+  OrderItem,
+  PaidOrder,
+} from './OrderType';
+import { Shop } from '../shop/ShopType';
+
+export const createExternalOrderInfo = (
+  sourceConfig: Shop['__sourceConfig'],
+  data: any,
+): ExternalOrderInfo => {
+  const externalOrderInfo: ExternalOrderInfo =
+    sourceConfig.type === 'slice'
+      ? {
+          __type: 'slice',
+          orderId: data.orderId ?? err('orderId is required'),
+        }
+      : err('sourceConfig type is not supported');
+
+  return externalOrderInfo;
+};
 
 /**
  * @dev if a cart item has the same id and the same mods, then it can be squashed with a quantity
@@ -56,10 +79,13 @@ export const getOrderSummary = (o: Order) => {
 
 export const isDripTip = (o: OrderItem) => o.item.name === DRIP_TIP_ITEM_NAME;
 
-export const isPending = (o: Order) => o.status === 'pending';
+export const isPending = (o: Order): o is Cart => o.status === 'pending';
 
 export const isInProgress = (o: Order) => o.status === 'in-progress';
 
 export const isComplete = (o: Order) => o.status === 'complete';
 
 export const isPaidOrder = (o: Order): o is PaidOrder => o.status !== 'pending';
+
+export const hasPaymentConfirmed = (o: Order) =>
+  o.status === 'in-progress' || o.status === 'complete';

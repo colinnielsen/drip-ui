@@ -60,9 +60,10 @@ export function isDev() {
 export const sleep = async (ms?: number) =>
   await new Promise(r => setTimeout(() => r(null), ms));
 
-export function isUUID(id: string): id is UUID {
-  return /^[0-9a-fA-F]-[0-9a-fA-F]-[0-9a-fA-F]-[0-9a-fA-F]-[0-9a-fA-F]$/.test(
-    id,
+export function isUUID(id: unknown): id is UUID {
+  return (
+    typeof id === 'string' &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   );
 }
 
@@ -73,6 +74,7 @@ export const generateUUID = (input?: string): UUID => {
 };
 
 export const err = (msg: string): never => {
+  debugger;
   throw new Error(msg);
 };
 

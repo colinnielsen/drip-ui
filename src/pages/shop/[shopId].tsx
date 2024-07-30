@@ -87,13 +87,11 @@ function DynamicShopPage(staticShop: StaticPageData) {
 
   return (
     <>
-      {shop?.farmerAllocations?.length ? (
-        <FarmerCard
-          farmer={shop?.farmerAllocations[0]?.farmer}
-          allocationBPS={shop?.farmerAllocations[0]?.allocationBPS}
-          isLoading={isLoading}
-        />
-      ) : null}
+      <FarmerCard
+        farmer={shop?.farmerAllocations[0]?.farmer}
+        allocationBPS={shop?.farmerAllocations[0]?.allocationBPS}
+        isLoading={isLoading}
+      />
 
       {shop && items.length === 0 && (
         <div className="text-center text-gray-500">

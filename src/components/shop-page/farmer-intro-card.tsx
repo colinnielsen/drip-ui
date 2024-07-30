@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 function FarmerLoadingCard() {
   return (
-    <Skeleton className="w-full justify-center rounded-3xl overflow-clip min-h-[134px]" />
+    <Skeleton className="w-full justify-center rounded-3xl overflow-clip min-h-32" />
   );
 }
 

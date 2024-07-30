@@ -5,7 +5,6 @@ import { Drip, Label1, Title1 } from '@/components/ui/typography';
 import { collapseDuplicateItems } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
-import { useUserId } from '@/queries/UserQuery';
 import { X } from 'lucide-react';
 import Image from 'next/image';
 import { Fragment } from 'react';
@@ -84,10 +83,6 @@ export const LoadingBasketSlide = () => {
 };
 
 export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
-  const { data: userId } = useUserId();
-
-  if (!userId) return null;
-
   const orderItems = collapseDuplicateItems(cart.orderItems);
 
   return (
@@ -108,12 +103,14 @@ export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
       <div className="flex flex-col gap-6 pt-4">
         {orderItems.map(([orderItem, quantity], index) => (
           <Fragment key={index}>
-            <CartItem {...{ orderItem, quantity, shopId: shop.id, userId }} />
+            <CartItem
+              {...{ orderItem, quantity, shopId: shop.id, orderId: cart.id }}
+            />
             <Divider />
           </Fragment>
         ))}
       </div>
-      <AddTipSection cart={cart} shopId={shop.id} userId={userId} />
+      <AddTipSection cart={cart} shopId={shop.id} />
       <Divider />
       <OrderSummary cart={cart} />
       <Divider />

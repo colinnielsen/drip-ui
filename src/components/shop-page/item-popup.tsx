@@ -11,33 +11,32 @@ import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { convertItemPriceToBigInt } from '@/data-model/item/ItemDTO';
 import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { OrderItem } from '@/data-model/order/OrderType';
-import { useAddToCart } from '@/queries/OrderQuery';
-import { useActiveUser, useUserId } from '@/queries/UserQuery';
+import { useAddToCart, useCart } from '@/queries/OrderQuery';
 import { UUID } from 'crypto';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
-import { PlusSvg, Price } from '../ui/icons';
 import { Checkbox } from '../ui/checkbox';
 import { Divider } from '../ui/divider';
+import { PlusSvg, Price } from '../ui/icons';
 import { NumberInput } from '../ui/number-input';
 import { Skeleton } from '../ui/skeleton';
-import { Body, Headline, Label2, Title1 } from '../ui/typography';
+import { Body, Headline, Title1 } from '../ui/typography';
 
 type CategorySections = ItemCategory | '__misc__';
 type ModSection = { [key in CategorySections]: ItemMod[] };
 
 function AddToBasketButton({
-  userId,
+  orderId,
   shopId,
   orderItem,
 }: {
-  userId: UUID;
+  orderId?: UUID;
   shopId: UUID;
   orderItem: Unsaved<OrderItem>;
 }) {
   const { mutate } = useAddToCart({
     shopId,
-    userId,
+    orderId,
     orderItem,
   });
 
@@ -52,16 +51,16 @@ function AddToBasketButton({
 
 export const AddButton = ({
   shopId,
-  userId,
+  orderId,
   item,
 }: {
   shopId: UUID;
-  userId: UUID;
+  orderId?: UUID;
   item: Item;
 }) => {
   const { mutate } = useAddToCart({
     shopId,
-    userId,
+    orderId,
     orderItem: {
       item,
       mods: [],
@@ -88,7 +87,7 @@ export function ItemPreviewTrigger({
   shopId: UUID;
   item: Item;
 }) {
-  const { data: userId } = useUserId();
+  const { data: cart } = useCart();
 
   const { image, name } = item;
 
@@ -96,9 +95,9 @@ export function ItemPreviewTrigger({
     <DrawerTrigger asChild>
       <div className="flex flex-col gap-2">
         <div className="relative overflow-hidden rounded-xl h-36 w-36">
-          <Image src={image} alt={name} fill />
-          {userId ? (
-            <AddButton {...{ shopId, userId, item }} />
+          <Image src={image} alt={name} fill className="object-cover" />
+          {cart !== undefined ? (
+            <AddButton {...{ shopId, orderId: cart?.id, item }} />
           ) : (
             <Skeleton className="h-7 w-7 rounded-full" />
           )}
@@ -255,7 +254,7 @@ export function ItemWithSelector({
     setSelectedOptions({});
   };
 
-  const { data: userId } = useUserId();
+  const { data: cart } = useCart();
 
   const orderItem: Unsaved<OrderItem> = {
     item,
@@ -323,7 +322,9 @@ export function ItemWithSelector({
 
           <div className="flex-grow" />
 
-          {userId && <AddToBasketButton {...{ userId, shopId, orderItem }} />}
+          {cart !== undefined && (
+            <AddToBasketButton {...{ orderId: cart?.id, shopId, orderItem }} />
+          )}
         </div>
       </DrawerContent>
     </Drawer>

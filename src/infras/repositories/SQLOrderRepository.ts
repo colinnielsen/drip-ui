@@ -3,15 +3,23 @@ import {
   OrderRepository,
   UpdateOrderOperation,
 } from '@/data-model/order/OrderRepository';
-import { Order, OrderItem } from '@/data-model/order/OrderType';
+import {
+  ExternalOrderInfo,
+  Order,
+  OrderItem,
+} from '@/data-model/order/OrderType';
 import { UUID } from 'crypto';
 import { sql } from '@vercel/postgres';
 import { v4 } from 'uuid';
-import { isPending } from '@/data-model/order/OrderDTO';
+import {
+  createExternalOrderInfo,
+  isPending,
+} from '@/data-model/order/OrderDTO';
 import { Hash } from 'viem';
 import { getTransactionReceipt } from 'viem/actions';
 import { BASE_CLIENT } from '@/lib/ethereum';
 import { sortDateAsc } from '@/lib/utils';
+import { Shop } from '@/data-model/shop/ShopType';
 
 export class SQLOrderRepository implements OrderRepository {
   async findById(id: UUID): Promise<Order | null> {
@@ -109,18 +117,48 @@ export class SQLOrderRepository implements OrderRepository {
   }
 
   async pay(orderId: UUID, transactionHash: Hash): Promise<Order> {
-    console.log('pay', orderId, transactionHash);
     const result = await sql`UPDATE orders
     SET
     "transactionHash" = ${transactionHash},
     "status" = 'submitting'
-    WHERE id = ${orderId}`;
+    WHERE id = ${orderId}
+    RETURNING *
+    `;
+    const o = result.rows[0];
+    return o as Order;
+  }
+
+  async addExternalOrderInfo(orderId: UUID, data: any): Promise<Order> {
+    debugger;
+    const query = await sql`
+      SELECT orders.*, shops."__sourceConfig"
+      FROM orders
+      JOIN shops ON orders.shop = shops.id
+      WHERE orders.id = ${orderId}
+    `;
+
+    const order = query.rows[0] as Order & {
+      __sourceConfig: Shop['__sourceConfig'];
+    };
+
+    if (!order || isPending(order)) throw Error('Order not found');
+
+    const externalOrderInfo = createExternalOrderInfo(
+      order.__sourceConfig,
+      data,
+    );
+
+    const result = await sql`UPDATE orders
+    SET
+    "externalOrderInfo" = ${JSON.stringify(externalOrderInfo)}
+    WHERE id = ${orderId}
+    RETURNING *
+    `;
     const o = result.rows[0];
     return o as Order;
   }
 
   async checkStatus(orderId: UUID): Promise<Order> {
-    console.log('checkStatus', orderId);
     const result = await sql`SELECT * FROM orders WHERE id = ${orderId}`;
     const [order] = result.rows as [Order];
     if (!order) throw Error('Order not found');
@@ -135,12 +173,9 @@ export class SQLOrderRepository implements OrderRepository {
 
     if (txSettled) {
       const result =
-        await sql`UPDATE orders SET status = 'in-progress' WHERE id = ${orderId}`;
+        await sql`UPDATE orders SET status = 'in-progress' WHERE id = ${orderId} RETURNING *`;
 
-      return {
-        ...order,
-        status: 'in-progress',
-      };
+      return result.rows[0] as Order;
     } else return order;
   }
 
@@ -169,7 +204,7 @@ export class SQLOrderRepository implements OrderRepository {
     return result.rows as Order[];
   }
 
-  async getActiveUserOrder(userId: UUID): Promise<Order | null> {
+  async getRecentUserOrdre(userId: UUID): Promise<Order | null> {
     const orders = await this.getOrdersByUserId(userId);
     const [order] = orders.sort((a, b) =>
       sortDateAsc(a.timestamp, b.timestamp),

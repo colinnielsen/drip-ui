@@ -8,6 +8,8 @@ import '../styles/globals.css';
 import { PrivyProvider } from '@/components/providers.tsx/PrivyProvider';
 import { WagmiProvider } from '@privy-io/wagmi';
 import { PRIVY_WAGMI_CONFIG } from '@/lib/ethereum';
+import { SliceCartListener } from '@/lib/slice';
+import { SliceProvider } from '@slicekit/react';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -43,19 +45,23 @@ export const CSS_FONT_CLASS_CONFIG = cn(
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <PrivyProvider>
-      <ReactQueryClientProvider>
+      <ReactQueryClientProvider useDevTools>
         <WagmiProvider config={PRIVY_WAGMI_CONFIG}>
-          <div
-            className={cn(
-              CSS_FONT_CLASS_CONFIG,
-              'bg-background',
-              'min-h-screen',
-              // 'prose',
-            )}
-          >
-            <Component {...pageProps} />
-            <Footer />
-          </div>
+          <SliceProvider>
+            <SliceCartListener>
+              <div
+                className={cn(
+                  CSS_FONT_CLASS_CONFIG,
+                  'bg-background',
+                  'min-h-screen',
+                  // 'prose',
+                )}
+              >
+                <Component {...pageProps} />
+                <Footer />
+              </div>
+            </SliceCartListener>
+          </SliceProvider>
         </WagmiProvider>
       </ReactQueryClientProvider>
     </PrivyProvider>

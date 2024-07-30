@@ -1,6 +1,10 @@
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { mapCartToSliceCart } from '@/data-model/_common/type/SliceDTO';
-import { Order, OrderItem } from '@/data-model/order/OrderType';
+import {
+  ExternalOrderInfo,
+  Order,
+  OrderItem,
+} from '@/data-model/order/OrderType';
 import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
 import { axiosFetcher, err } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -15,16 +19,40 @@ import { useActiveUser, useUserId } from './UserQuery';
 //// QUERIES
 //
 const CART_QUERY_KEY = 'cart';
+export const ORDERS_QUERY_KEY = 'orders';
+
+function orderQuery<T = Order[]>(
+  userId: string | undefined,
+  select?: (orders: Order[]) => T,
+) {
+  return {
+    queryKey: [ORDERS_QUERY_KEY, userId],
+    queryFn: async () => axiosFetcher<Order[]>(`/api/orders/order`),
+    select,
+    enabled: !!userId,
+  };
+}
+
+export const useOrders = () => {
+  const { data: userId } = useUserId();
+
+  return useQuery(orderQuery(userId));
+};
 
 export const useCart = () => {
   const { data: userId } = useUserId();
 
-  return useQuery({
-    queryKey: [CART_QUERY_KEY, userId],
-    queryFn: async () =>
-      axiosFetcher<Order | null>(`/api/orders/cart?userId=${userId}`),
-    enabled: !!userId,
-  });
+  return useQuery(
+    orderQuery(
+      userId,
+      orders => orders.find(o => o.status !== 'pending') ?? null,
+    ),
+  );
+};
+
+export const useCartId = () => {
+  const { data: cart } = useCart();
+  return cart?.id;
 };
 
 /**
@@ -78,11 +106,11 @@ export const useCartInSliceFormat = ({
 //
 export const useAddToCart = ({
   shopId,
-  userId,
+  orderId,
   orderItem,
 }: {
   shopId: UUID;
-  userId: UUID;
+  orderId?: UUID;
   orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[];
 }) => {
   const queryClient = useQueryClient();
@@ -90,32 +118,42 @@ export const useAddToCart = ({
 
   return useMutation({
     mutationFn: async () =>
-      axiosFetcher<Order>(`/api/orders/cart?userId=${userId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      axiosFetcher<Order>(
+        `/api/orders/order${orderId ? `?orderId=${orderId}` : ''}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: { action: 'add', shopId, orderItems: itemArray },
+          withCredentials: true,
         },
-        data: { action: 'add', shopId, orderItems: itemArray },
-        withCredentials: true,
-      }),
-    onSuccess: data => queryClient.setQueryData([CART_QUERY_KEY, userId], data),
+      ),
+    onSuccess: data => {
+      if (!data) debugger;
+      return queryClient.setQueryData(
+        [ORDERS_QUERY_KEY, data.user],
+        (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
+      );
+    },
   });
 };
 
 export const useRemoveItemFromCart = ({
   orderItemId,
-  userId,
+  orderId,
   shopId,
 }: {
   orderItemId: UUID;
-  userId: UUID;
+  orderId: UUID;
   shopId: UUID;
 }) => {
   const queryClient = useQueryClient();
+  const { data: userId } = useUserId();
 
   return useMutation({
     mutationFn: async () =>
-      axiosFetcher<Order>(`/api/orders/cart?userId=${userId}`, {
+      axiosFetcher<Order | null>(`/api/orders/order?orderId=${orderId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +161,15 @@ export const useRemoveItemFromCart = ({
         data: { action: 'delete', orderItemId, shopId },
         withCredentials: true,
       }),
-    onSuccess: data => queryClient.setQueryData([CART_QUERY_KEY, userId], data),
+    onSuccess: data => {
+      return queryClient.setQueryData(
+        [ORDERS_QUERY_KEY, userId, CART_QUERY_KEY],
+        (orders: Order[]) =>
+          !data
+            ? orders.filter(o => o.id !== orderId)
+            : orders.map(o => (o.id === data.id ? data : o)),
+      );
+    },
   });
 };
 
@@ -159,8 +205,41 @@ export const useAssocatePaymentToCart = () => {
         withCredentials: true,
       });
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [CART_QUERY_KEY] }),
+    onSuccess: data => {
+      return queryClient.setQueryData(
+        [ORDERS_QUERY_KEY, data.user ?? err('expected userId')],
+        (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
+      );
+    },
+  });
+};
+
+export const useAssocateExternalOrderInfoToCart = () => {
+  const queryClient = useQueryClient();
+
+  const { data: cart } = useCart();
+
+  return useMutation({
+    mutationFn: async (externalOrderInfo: ExternalOrderInfo) => {
+      return axiosFetcher<Order>(`/api/orders/add-external-order-info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          externalOrderInfo,
+          orderId:
+            cart?.id || err('No cart in useAssocateExternalOrderInfoToCart'),
+        },
+        withCredentials: true,
+      });
+    },
+    onSuccess: data => {
+      return queryClient.setQueryData(
+        [ORDERS_QUERY_KEY, data.user ?? err('expected userId')],
+        (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
+      );
+    },
   });
 };
 
@@ -177,21 +256,9 @@ export const useCheckOrderStatus = () => {
         data: { orderId },
       }),
     onSuccess: data =>
-      queryClient.setQueryData([CART_QUERY_KEY, data.user], data),
+      queryClient.setQueryData(
+        [ORDERS_QUERY_KEY, data.user],
+        (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
+      ),
   });
 };
-
-// export const useClearCart = (userId: UUID) => {
-//   const queryClient = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: async () => {
-//       return axiosFetcher(`/api/orders/cart?userId=${userId}`, {
-//         method: 'DELETE',
-//         withCredentials: true,
-//       });
-//     },
-//     onSuccess: () =>
-//       queryClient.invalidateQueries({ queryKey: [CART_QUERY_KEY] }),
-//   });
-// };

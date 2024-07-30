@@ -1,11 +1,15 @@
-import { getOrderSummary, isPaidOrder } from '@/data-model/order/OrderDTO';
+import {
+  getOrderSummary,
+  hasPaymentConfirmed,
+  isPaidOrder,
+} from '@/data-model/order/OrderDTO';
+import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
-import { useCart, useCheckOrderStatus } from '@/queries/OrderQuery';
+import { useCart, useCartId, useCheckOrderStatus } from '@/queries/OrderQuery';
 import { useActiveUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useGoToSlide, useSlideInView } from '../ui/carousel';
-import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
+import { useNextSlide, useSlideInView } from '../ui/carousel';
 
 // const SLIDE_MAP = {
 //   initializing: 1,
@@ -83,7 +87,7 @@ const useDetermineCheckoutStep = (): {
     return {
       step: 'initializing',
     };
-  console.log({ user });
+
   if (user.__type === 'session') return { step: 'signup' };
 
   if (user.__type === 'user' && !authenticated) return { step: 'login' };
@@ -127,38 +131,42 @@ const useDetermineCheckoutStep = (): {
 //   return null;
 // };
 
-const useListenForStatus = (
+const useShouldPollForCartStatus = (
   checkoutStep: SliceCheckoutStep,
   paymentStep: PaymentStep,
 ) => {
   const { data: cart } = useCart();
   const cartId = cart?.id;
   const slideInView = useSlideInView();
-  const { mutateAsync: checkStatus } = useCheckOrderStatus();
-  const isPaid = cart && isPaidOrder(cart);
-  const goToSlide = useGoToSlide();
+  const isPaid = !!cart && isPaidOrder(cart);
   const secondsSinceMount = useSecondsSinceMount();
   const [secondsWhenPaid, setSecondsWhenPaid] = useState(0);
   const waitforatleastseconds = 4;
 
-  console.log(!cartId || slideInView !== 1 || !isPaid);
+  const shouldPoll =
+    checkoutStep === 'pay' &&
+    paymentStep === 'success' &&
+    cartId &&
+    slideInView === 1 &&
+    isPaid &&
+    secondsWhenPaid + waitforatleastseconds < secondsSinceMount;
+
   useEffect(() => {
     if (checkoutStep !== 'pay' || paymentStep !== 'success') return;
     if (!cartId || slideInView !== 1 || !isPaid) return;
 
     if (secondsWhenPaid === 0) setSecondsWhenPaid(secondsSinceMount);
+  }, [
+    cartId,
+    checkoutStep,
+    paymentStep,
+    slideInView,
+    isPaid,
+    secondsWhenPaid,
+    secondsSinceMount,
+  ]);
 
-    const interval = setInterval(() => {
-      checkStatus(cartId).then(newOrder => {
-        if (isPaidOrder(newOrder)) {
-          clearInterval(interval);
-          if (secondsWhenPaid + waitforatleastseconds > secondsSinceMount)
-            goToSlide?.(2);
-        }
-      });
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [cartId, checkoutStep, paymentStep, slideInView, isPaid]);
+  return shouldPoll;
 };
 
 export const CheckoutProvider = ({
@@ -168,8 +176,23 @@ export const CheckoutProvider = ({
 }) => {
   const { step } = useDetermineCheckoutStep();
   const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
+  const cartId = useCartId();
+  const nextSlide = useNextSlide();
 
-  useListenForStatus(step, paymentStep);
+  const shouldPoll = useShouldPollForCartStatus(step, paymentStep);
+  const { mutateAsync: checkStatus } = useCheckOrderStatus();
+
+  useEffect(() => {
+    console.log({ shouldPoll });
+    if (shouldPoll && cartId) {
+      const interval = setInterval(() => {
+        checkStatus(cartId).then(newOrder => {
+          if (hasPaymentConfirmed(newOrder)) nextSlide?.();
+        });
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [shouldPoll, cartId]);
 
   useEffect(() => {
     console.log({ checkoutStep: step });

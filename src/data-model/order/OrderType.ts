@@ -10,6 +10,13 @@ export type OrderItem = {
   mods: ItemMod[];
 };
 
+export type SliceOrderInfo = {
+  __type: 'slice';
+  orderId: string;
+};
+
+export type ExternalOrderInfo = SliceOrderInfo;
+
 type _BaseOrder = {
   id: UUID;
   timestamp: string;
@@ -40,6 +47,7 @@ export type PaidOrder = _BaseOrder & {
    */
   status: 'submitting' | 'in-progress' | 'complete';
   transactionHash: Hex;
+  externalOrderInfo?: ExternalOrderInfo;
 };
 
 export type Order = Cart | PaidOrder;

@@ -55,7 +55,7 @@ export default function () {
           className={cn(
             'shadow-[4px_0px_60px_0px_rgba(0,0,0,0.40)]',
             'relative',
-            'flex justify-between px-6 py-4 items-center bg-secondary-pop w-full h-full text-left ',
+            'flex justify-between px-6 py-4 items-center bg-secondary-pop w-full text-left ',
             'transition-all',
             'transition-[600ms]',
             'top-[100px]',

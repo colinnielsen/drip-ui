@@ -6,7 +6,10 @@ import { useCheckout } from '@slicekit/react';
 import { useQuery } from '@tanstack/react-query';
 import { Address } from 'viem';
 import { useConnectedWallet } from './EthereumQuery';
-import { useAssocatePaymentToCart } from './OrderQuery';
+import {
+  useAssocateExternalOrderInfoToCart,
+  useAssocatePaymentToCart,
+} from './OrderQuery';
 import { useCheckoutContext } from '@/components/cart/context';
 import { useCallback } from 'react';
 
@@ -41,6 +44,8 @@ export const usePayAndOrder = ({
 }: { onSuccess?: () => void } = {}) => {
   const wallet = useConnectedWallet();
   const { mutateAsync: associatePayment } = useAssocatePaymentToCart();
+  const { mutateAsync: associateExternalOrderInfo } =
+    useAssocateExternalOrderInfoToCart();
   const { setPaymentStep } = useCheckoutContext();
 
   const { checkout, cart, balances, errorState, errors, prices } = useCheckout(
@@ -54,6 +59,10 @@ export const usePayAndOrder = ({
       onSuccess: async ({ hash, orderId }) => {
         setPaymentStep('success');
         await associatePayment(hash);
+        await associateExternalOrderInfo({
+          __type: 'slice',
+          orderId,
+        });
         onSuccess?.();
       },
     },

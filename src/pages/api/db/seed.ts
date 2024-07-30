@@ -6,27 +6,27 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const _resetDB = async () => {
   console.debug('resetting database...');
+  await sql`
+    DROP TABLE IF EXISTS "orders";
+  `;
+  await sql`
+  DROP TABLE IF EXISTS "shops";
+  `;
   // await sql`
   //   DROP TABLE IF EXISTS "users";
   // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "shops";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "items";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "orders";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "farmerposts";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "farmermessages";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "farmers";
-  // `;
+  await sql`
+    DROP TABLE IF EXISTS "items";
+  `;
+  await sql`
+    DROP TABLE IF EXISTS "farmerposts";
+  `;
+  await sql`
+    DROP TABLE IF EXISTS "farmermessages";
+  `;
+  await sql`
+    DROP TABLE IF EXISTS "farmers";
+  `;
   console.debug('database reset');
 };
 
@@ -83,7 +83,10 @@ export const bootstrapDB = async () => {
       "timestamp" TIMESTAMP NOT NULL,
       "orderItems" JSONB,
       "tip" JSONB,
-      "transactionHash" TEXT
+      "transactionHash" TEXT,
+      "externalOrderInfo" JSONB,
+      FOREIGN KEY ("shop") REFERENCES "shops" ("id"),
+      FOREIGN KEY ("user") REFERENCES "users" ("id")
     );
   `;
   await sql`

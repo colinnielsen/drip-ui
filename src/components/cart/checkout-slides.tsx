@@ -60,17 +60,13 @@ export default function CheckoutSlides({
       stiff
     >
       <CarouselContent className="h-full">
-        <SliceProvider>
-          <SliceCartListener>
-            <CheckoutProvider>
-              <BasketSlide cart={cart} shop={shop} />
+        <CheckoutProvider>
+          <BasketSlide cart={cart} shop={shop} />
 
-              <PaymentSlide cart={cart} shop={shop} />
+          <PaymentSlide cart={cart} shop={shop} />
 
-              <ConfirmationSlide cart={cart} shop={shop} />
-            </CheckoutProvider>
-          </SliceCartListener>
-        </SliceProvider>
+          <ConfirmationSlide cart={cart} shop={shop} />
+        </CheckoutProvider>
       </CarouselContent>
       <div className="absolute top-7 right-20">
         <CarouselPrevious />

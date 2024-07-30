@@ -1,23 +1,14 @@
-import {
-  Body,
-  Drip,
-  Label1,
-  Label2,
-  Label3,
-  Mono,
-  Title2,
-} from '@/components/ui/typography';
-import { AsCheckoutSlide } from '../checkout-slides';
 import grandma from '@/assets/grandma.png';
-import Image from 'next/image';
 import { CTAButton } from '@/components/ui/button';
-import { useCheckoutContext } from '../context';
-import { useRef } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { Drip, Mono, Title2 } from '@/components/ui/typography';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
-import { useCarousel, useGoToSlide } from '@/components/ui/carousel';
+import { ORDERS_QUERY_KEY } from '@/queries/OrderQuery';
 import { ACTIVE_USER_QUERY_KEY, useActiveUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
+import { useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
+import { useRef } from 'react';
+import { useCheckoutContext } from '../context';
 
 export function shouldGoToWelcomeSlide(step: string) {
   return step === 'login' || step === 'signup' || step === 'connect';
@@ -34,6 +25,9 @@ const ConnectButton = () => {
   const loginOrCreateUser = useLoginOrCreateUser({
     onLogin: data => {
       queryClient.setQueryData([ACTIVE_USER_QUERY_KEY], data);
+      queryClient.invalidateQueries({
+        queryKey: [ORDERS_QUERY_KEY, data.id],
+      });
     },
   });
 

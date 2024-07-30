@@ -69,23 +69,23 @@ export function OrderItemDisplay({
 export function CartItem({
   orderItem,
   quantity,
-  userId,
+  orderId,
   shopId,
 }: {
   orderItem: OrderItem;
   quantity: number;
-  userId: UUID;
+  orderId: UUID;
   shopId: UUID;
 }) {
   const { id, ...orderItemWithoutId } = orderItem;
   const { mutate: addAnother } = useAddToCart({
     shopId,
-    userId,
+    orderId,
     orderItem: orderItemWithoutId,
   });
   const { mutate: removeItem } = useRemoveItemFromCart({
     orderItemId: orderItem.id,
-    userId,
+    orderId,
     shopId,
   });
 

@@ -8,6 +8,8 @@ import {
   getStoreProducts,
   getStores,
   payProducts,
+  getOrder,
+  GetOrderParams,
 } from '@slicekit/core';
 import { axiosFetcher } from './utils';
 import { PRIVY_WAGMI_CONFIG } from './ethereum';
@@ -30,6 +32,7 @@ export const sliceKit = {
     ),
   getProduct: (params: GetProductParams) =>
     getProduct(PRIVY_WAGMI_CONFIG, params),
+  getOrder: (params: GetOrderParams) => getOrder(params),
   payProducts: async (
     // wallet: ConnectedWallet,
     params: PayProductsParams,

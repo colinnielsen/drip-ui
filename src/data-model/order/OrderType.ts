@@ -42,7 +42,7 @@ export type Cart = _BaseOrder & {
 export type PaidOrder = _BaseOrder & {
   /**
    * submitting: the order has been paid for and the tx is yet to confirm
-   * in-progress: the order has been paid for and the tx has been confirmed - the shop has received the order
+   * in-progress: the order has been paid for and the tx has been confirmed - the external service has received the order
    * complete: the order has been processed
    */
   status: 'submitting' | 'in-progress' | 'complete';

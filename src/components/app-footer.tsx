@@ -2,10 +2,15 @@ import Link from 'next/link';
 import { HomeSvg, MapSvg, ProfileSvg } from './ui/icons';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
+import { useOrders, useCart } from '@/queries/OrderQuery';
 
 const LazyCartFooter = dynamic(() => import('./cart/footer'), { ssr: false });
 
 export function Footer() {
+  const { data: orders } = useOrders();
+  const { data: cart } = useCart();
+  console.log({ orders, cart });
+
   return (
     <footer className="fixed h-fit bottom-0 w-full flex flex-col">
       <LazyCartFooter />
@@ -22,7 +27,9 @@ export function Footer() {
           <MapSvg />
         </div>
         <div className="flex justify-center w-1/3">
-          <ProfileSvg />
+          <Link href="/me">
+            <ProfileSvg />
+          </Link>
         </div>
       </div>
     </footer>

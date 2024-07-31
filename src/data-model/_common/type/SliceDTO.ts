@@ -115,7 +115,7 @@ export function mapCartToSliceCart(
           orderItem.item.__sourceConfig.id,
       );
 
-      if (!sliceProduct) err('slice product not found');
+      if (!sliceProduct) throw Error('slice product not found');
       const variant = orderItem.mods?.[0]?.__sourceConfig.id;
       return [
         ...acc,

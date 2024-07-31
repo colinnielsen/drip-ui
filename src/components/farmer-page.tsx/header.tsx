@@ -1,22 +1,9 @@
 import { Farmer } from '@/data-model/farmer/FarmerType';
-import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { Skeleton } from '../ui/skeleton';
 import { Label1, Title1 } from '../ui/typography';
 import { DonationButton } from './donation-button';
 import { SendMessageButton } from './message-button';
-
-export const FarmerNavigation = () => {
-  const router = useRouter();
-  return (
-    <div className="flex items-center py-4 px-6">
-      <button onClick={() => router.back()}>
-        <ArrowLeft height={24} width={24} strokeWidth={2.4} />
-      </button>
-    </div>
-  );
-};
 
 export function FarmerHeader({ farmer }: { farmer: Farmer | 'loading' }) {
   const isLoading = farmer === 'loading';

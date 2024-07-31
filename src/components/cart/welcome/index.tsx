@@ -3,7 +3,7 @@ import { CTAButton } from '@/components/ui/button';
 import { Drip, Mono, Title2 } from '@/components/ui/typography';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
 import { ORDERS_QUERY_KEY } from '@/queries/OrderQuery';
-import { ACTIVE_USER_QUERY_KEY, useActiveUser } from '@/queries/UserQuery';
+import { ACTIVE_USER_QUERY_KEY, useUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
 import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
@@ -18,14 +18,14 @@ const ConnectButton = () => {
   const { step } = useCheckoutContext();
   const { connectWallet } = usePrivy();
   const { current: initialStep } = useRef(step);
-  const { data: user } = useActiveUser();
+  const { data: user } = useUser();
 
   const queryClient = useQueryClient();
 
   const loginOrCreateUser = useLoginOrCreateUser({
     onLogin: data => {
       queryClient.setQueryData([ACTIVE_USER_QUERY_KEY], data);
-      queryClient.invalidateQueries({
+      queryClient.refetchQueries({
         queryKey: [ORDERS_QUERY_KEY, data.id],
       });
     },
@@ -43,7 +43,18 @@ const ConnectButton = () => {
         : 'ERROR';
 
   return (
-    <CTAButton onClick={action !== 'ERROR' ? action : () => {}} type="submit">
+    <CTAButton
+      onClick={
+        action !== 'ERROR'
+          ? e => {
+              e.stopPropagation();
+              e.preventDefault();
+              action();
+            }
+          : () => {}
+      }
+      type="submit"
+    >
       {action !== 'ERROR' ? 'Connect Wallet' : 'Login'}
     </CTAButton>
   );

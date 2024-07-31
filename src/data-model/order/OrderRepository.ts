@@ -43,7 +43,7 @@ export type OrderRepository = {
   /**
    * @dev find a users order
    */
-  getRecentUserOrdre: (userId: UUID) => Promise<Order | null>;
+  getRecentUserOrder: (userId: UUID) => Promise<Order | null>;
   /**
    * @dev migrates all orders to a new user
    */

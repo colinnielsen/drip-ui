@@ -1,24 +1,30 @@
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { mapCartToSliceCart } from '@/data-model/_common/type/SliceDTO';
 import {
+  Cart,
   ExternalOrderInfo,
   Order,
   OrderItem,
 } from '@/data-model/order/OrderType';
 import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
-import { axiosFetcher, err } from '@/lib/utils';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { axiosFetcher, err, generateUUID, sortDateAsc } from '@/lib/utils';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { UUID } from 'crypto';
 import { Address, Hash } from 'viem';
 import { useFarmer } from './FarmerQuery';
 import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
-import { useActiveUser, useUserId } from './UserQuery';
+import { useUser, useUserId } from './UserQuery';
 
 //
 //// QUERIES
 //
-const CART_QUERY_KEY = 'cart';
+// const CART_QUERY_KEY = 'cart';
 export const ORDERS_QUERY_KEY = 'orders';
 
 function orderQuery<T = Order[]>(
@@ -27,9 +33,13 @@ function orderQuery<T = Order[]>(
 ) {
   return {
     queryKey: [ORDERS_QUERY_KEY, userId],
-    queryFn: async () => axiosFetcher<Order[]>(`/api/orders/order`),
+    queryFn: async () =>
+      (await axiosFetcher<Order[]>(`/api/orders/order`)).sort((a, b) =>
+        sortDateAsc(a.timestamp, b.timestamp),
+      ),
     select,
     enabled: !!userId,
+    placeholderData: keepPreviousData,
   };
 }
 
@@ -39,15 +49,25 @@ export const useOrders = () => {
   return useQuery(orderQuery(userId));
 };
 
-export const useCart = () => {
+export const useIncompleteOrders = () => {
   const { data: userId } = useUserId();
 
   return useQuery(
-    orderQuery(
-      userId,
-      orders => orders.find(o => o.status !== 'pending') ?? null,
-    ),
+    orderQuery(userId, orders => orders.filter(o => o.status !== 'complete')),
   );
+};
+
+const cartSelector = (orders: Order[]) =>
+  orders
+    .sort((a, b) => sortDateAsc(a.timestamp, b.timestamp))
+    .find(o => o.status !== 'complete') ?? null;
+
+export const useCart = () => {
+  const { data: userId } = useUserId();
+
+  return useQuery({
+    ...orderQuery(userId, cartSelector),
+  });
 };
 
 export const useCartId = () => {
@@ -114,9 +134,12 @@ export const useAddToCart = ({
   orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[];
 }) => {
   const queryClient = useQueryClient();
+  const { data: userId } = useUserId();
+  const { data: cart } = useCart();
   const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
 
   return useMutation({
+    scope: { id: 'cart' },
     mutationFn: async () =>
       axiosFetcher<Order>(
         `/api/orders/order${orderId ? `?orderId=${orderId}` : ''}`,
@@ -129,12 +152,45 @@ export const useAddToCart = ({
           withCredentials: true,
         },
       ),
-    onSuccess: data => {
+    onMutate() {
+      const optimisticCart: Cart = {
+        id: cart?.id || generateUUID(),
+        orderItems: [
+          ...(cart?.orderItems || []),
+          ...itemArray.map(i => ({ id: generateUUID(), ...i })),
+        ],
+        user: userId!,
+        shop: shopId,
+        status: 'pending',
+        timestamp: cart?.timestamp || new Date().toISOString(),
+        tip: cart?.tip || null,
+      };
+
+      queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
+        // replace the cart if it already exists
+        if (!!cart)
+          return prev.map(o =>
+            o.id === optimisticCart.id ? optimisticCart : o,
+          );
+        // otherwise, unshift the cart on the front of the array
+        return [optimisticCart, ...prev];
+      });
+
+      return { optimisticCart, initialCart: cart };
+    },
+    onSuccess: (data, _) => {
       if (!data) debugger;
       return queryClient.setQueryData(
-        [ORDERS_QUERY_KEY, data.user],
-        (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
+        [ORDERS_QUERY_KEY, userId!],
+        (prev: Order[]) => [data, ...prev.slice(1)],
       );
+    },
+    onError: (_error, _, context) => {
+      queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
+        if (context && context.initialCart)
+          return [context.initialCart, ...prev.slice(1)];
+        return prev.slice(1);
+      });
     },
   });
 };
@@ -150,8 +206,10 @@ export const useRemoveItemFromCart = ({
 }) => {
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
+  const { data: cart } = useCart();
 
   return useMutation({
+    scope: { id: 'cart' },
     mutationFn: async () =>
       axiosFetcher<Order | null>(`/api/orders/order?orderId=${orderId}`, {
         method: 'POST',
@@ -161,14 +219,49 @@ export const useRemoveItemFromCart = ({
         data: { action: 'delete', orderItemId, shopId },
         withCredentials: true,
       }),
-    onSuccess: data => {
+    onMutate() {
+      if (!cart || cart.status !== 'pending') throw Error('cart not pending');
+      const willEraseCart =
+        cart?.orderItems.length === 1 && cart.orderItems[0].id === orderItemId;
+
+      const optimisticCart: Cart | null = willEraseCart
+        ? null
+        : {
+            ...cart,
+            orderItems: cart.orderItems.filter(o => o.id !== orderItemId),
+          };
+
+      queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
+        if (willEraseCart || !optimisticCart)
+          return prev.filter(o => o.id !== cart.id);
+        return prev.map(o => (o.id === optimisticCart.id ? optimisticCart : o));
+      });
+
+      return { optimisticCart, prevCart: cart };
+    },
+    onSuccess: (result, _vars, { optimisticCart }) => {
+      // if the item is removed we're successful
+      if (!result || !optimisticCart) return;
+
+      // otherwise sync the orders with the result by replacing the optimistic cart with the result from the backend
       return queryClient.setQueryData(
-        [ORDERS_QUERY_KEY, userId, CART_QUERY_KEY],
-        (orders: Order[]) =>
-          !data
-            ? orders.filter(o => o.id !== orderId)
-            : orders.map(o => (o.id === data.id ? data : o)),
+        [ORDERS_QUERY_KEY, userId],
+        (prev: Order[]) =>
+          prev.map(o => (o.id === optimisticCart.id ? result : o)),
       );
+    },
+    onError: (_error, _variables, context) => {
+      if (!context) return;
+
+      queryClient.setQueryData([ORDERS_QUERY_KEY, userId], (old: Order[]) => {
+        const wasDeleteOperation = context.optimisticCart === null;
+        // put the cart back if it was deleted
+        if (wasDeleteOperation) return [context.prevCart, ...old];
+        // otherwise, put the prev cart back in place
+        return old.map(o =>
+          o.id === context.optimisticCart!.id ? context.prevCart : o,
+        );
+      });
     },
   });
 };
@@ -192,6 +285,7 @@ export const useAssocatePaymentToCart = () => {
   const { data: cart } = useCart();
 
   return useMutation({
+    scope: { id: 'cart' },
     mutationFn: async (transactionHash: Hash) => {
       return axiosFetcher<Order>(`/api/orders/pay`, {
         method: 'POST',
@@ -220,6 +314,7 @@ export const useAssocateExternalOrderInfoToCart = () => {
   const { data: cart } = useCart();
 
   return useMutation({
+    scope: { id: 'cart' },
     mutationFn: async (externalOrderInfo: ExternalOrderInfo) => {
       return axiosFetcher<Order>(`/api/orders/add-external-order-info`, {
         method: 'POST',
@@ -247,6 +342,7 @@ export const useCheckOrderStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    scope: { id: 'cart' },
     mutationFn: async (orderId: UUID) =>
       axiosFetcher<Order>(`/api/orders/status`, {
         method: 'POST',
@@ -260,5 +356,38 @@ export const useCheckOrderStatus = () => {
         [ORDERS_QUERY_KEY, data.user],
         (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
       ),
+  });
+};
+
+export const usePollExternalServiceForOrderCompletion = (
+  incompleteOrders: Order[],
+) => {
+  const pendingOrders = incompleteOrders.filter(
+    o => o.status === 'in-progress',
+  );
+  const queryClient = useQueryClient();
+  const { data: userId } = useUserId();
+
+  return useQuery({
+    queryKey: [
+      ORDERS_QUERY_KEY,
+      ...pendingOrders.map(o => o.id),
+      'status-check',
+    ],
+    queryFn: async () =>
+      axiosFetcher<Order[]>(`/api/orders/sync-with-external-service`, {
+        method: 'POST',
+        data: { orderIds: pendingOrders.map(o => o.id) },
+      }).then(result => {
+        const remainingPending = result.filter(o => o.status !== 'complete');
+        if (remainingPending.length < incompleteOrders.length)
+          queryClient.refetchQueries({
+            queryKey: [ORDERS_QUERY_KEY, userId],
+          });
+
+        return result;
+      }),
+    refetchInterval: 10_000,
+    enabled: pendingOrders.length > 0,
   });
 };

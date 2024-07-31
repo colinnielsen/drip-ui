@@ -40,15 +40,15 @@ export default withErrorHandling(async function (
     // this means they are now on a new device
     if (user.id !== sessionToken) {
       // we need to:
-      // 1. migrate their old account to their new one (pull old data to new)
-      const migratedUser = await sqlDatabase.users.migrate({
-        prevId: user.id,
-        newId: sessionToken,
-      });
-      // 2. then migrate their old orders to their new account
+      // 1. then migrate their old orders to their new account
       await sqlDatabase.orders.migrate({
         prevUserId: user.id,
         newUserId: sessionToken,
+      });
+      // 2. migrate their old account to their new one (pull old data to new)
+      const migratedUser = await sqlDatabase.users.migrate({
+        prevId: user.id,
+        newId: sessionToken,
       });
       if (migratedUser.id !== sessionToken) {
         debugger;

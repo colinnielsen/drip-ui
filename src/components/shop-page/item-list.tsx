@@ -1,7 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Item, ItemCategory } from '@/data-model/item/ItemType';
 import { cn } from '@/lib/utils';
-import { useActiveUser } from '@/queries/UserQuery';
+import { useUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import { ItemWithSelector } from './item-popup';
 
@@ -30,7 +30,7 @@ export function ItemList({
   shopId?: UUID;
   items?: Item[];
 }) {
-  const { isLoading: userIsLoading } = useActiveUser();
+  const { isLoading: userIsLoading } = useUser();
   const isLoading = !shopId || !items || userIsLoading;
 
   if (isLoading) {

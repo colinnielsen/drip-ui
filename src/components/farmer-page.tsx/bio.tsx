@@ -1,5 +1,5 @@
 import { Farmer } from '@/data-model/farmer/FarmerType';
-import { ItemCarousel } from '../ItemCarousel';
+import { ItemCarousel } from '../ui/item-carousel';
 import Image from 'next/image';
 import { Label1 } from '../ui/typography';
 import { Skeleton } from '../ui/skeleton';

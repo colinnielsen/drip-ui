@@ -1,14 +1,11 @@
-import { FarmerActivity } from '@/components/farmer-page.tsx/activity';
 import { FarmerBio } from '@/components/farmer-page.tsx/bio';
 import { FarmerCampaigns } from '@/components/farmer-page.tsx/campaigns';
-import {
-  FarmerHeader,
-  FarmerNavigation,
-} from '@/components/farmer-page.tsx/header';
+import { FarmerHeader } from '@/components/farmer-page.tsx/header';
 import { FarmerMessageBoard } from '@/components/farmer-page.tsx/message-board';
-import { FarmerPosts } from '@/components/farmer-page.tsx/posts';
 import { FarmerSection } from '@/components/farmer-page.tsx/section';
 import { Divider } from '@/components/ui/divider';
+import { PageHeader } from '@/components/ui/page-header';
+import { PageWrapper } from '@/components/ui/page-wrapper';
 import { sqlDatabase } from '@/infras/database';
 import { useFarmer } from '@/queries/FarmerQuery';
 import { UUID } from 'crypto';
@@ -55,8 +52,8 @@ export default function FarmerPage({ farmerId }: { farmerId: string }) {
   if (farmer === null) return <div>Farmer not found</div>;
 
   return (
-    <div className="flex flex-col min-h-screen pb-32">
-      <FarmerNavigation />
+    <PageWrapper>
+      <PageHeader />
       <FarmerHeader {...{ farmer: farmer || 'loading' }} />
       <div className="h-8" />
 
@@ -94,6 +91,6 @@ export default function FarmerPage({ farmerId }: { farmerId: string }) {
           <FarmerActivity {...{ farmer }} />
         </FarmerSection>
       )} */}
-    </div>
+    </PageWrapper>
   );
 }

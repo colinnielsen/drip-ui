@@ -6,7 +6,7 @@ import {
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
 import { useCart, useCartId, useCheckOrderStatus } from '@/queries/OrderQuery';
-import { useActiveUser } from '@/queries/UserQuery';
+import { useUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNextSlide, useSlideInView } from '../ui/carousel';
@@ -58,11 +58,7 @@ const useDetermineCheckoutStep = (): {
 } => {
   const { authenticated, ready: privyReady } = usePrivy();
   const wallet = useConnectedWallet();
-  const {
-    data: user,
-    isLoading: isUserLoading,
-    error: userError,
-  } = useActiveUser();
+  const { data: user, isLoading: isUserLoading, error: userError } = useUser();
   const {
     data: balance,
     isLoading: isBalanceLoading,

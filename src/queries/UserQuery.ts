@@ -24,7 +24,7 @@ const userQuery = <TData = User>(opts?: {
   ...opts,
 });
 
-export const useActiveUser = () => useQuery(userQuery());
+export const useUser = () => useQuery(userQuery());
 
 export const useUserId = () =>
   useQuery(userQuery({ select: user => user?.id }));

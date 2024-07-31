@@ -7,6 +7,7 @@ import {
   ExternalOrderInfo,
   Order,
   OrderItem,
+  PaidOrder,
 } from '@/data-model/order/OrderType';
 import { UUID } from 'crypto';
 import { sql } from '@vercel/postgres';
@@ -20,6 +21,7 @@ import { getTransactionReceipt } from 'viem/actions';
 import { BASE_CLIENT } from '@/lib/ethereum';
 import { sortDateAsc } from '@/lib/utils';
 import { Shop } from '@/data-model/shop/ShopType';
+import { sliceKit } from '@/lib/slice';
 
 export class SQLOrderRepository implements OrderRepository {
   async findById(id: UUID): Promise<Order | null> {
@@ -129,7 +131,6 @@ export class SQLOrderRepository implements OrderRepository {
   }
 
   async addExternalOrderInfo(orderId: UUID, data: any): Promise<Order> {
-    debugger;
     const query = await sql`
       SELECT orders.*, shops."__sourceConfig"
       FROM orders
@@ -156,6 +157,43 @@ export class SQLOrderRepository implements OrderRepository {
     `;
     const o = result.rows[0];
     return o as Order;
+  }
+
+  async syncWithExternalService(orderIds: UUID[]): Promise<Order[]> {
+    const result = await sql.query(
+      `SELECT * FROM orders WHERE id IN (${orderIds.map(
+        (_, i) => `$${i + 1}`,
+      )})`,
+      orderIds,
+    );
+
+    const orders = result.rows.filter(
+      o => 'externalOrderInfo' in o && o.status === 'in-progress',
+    ) as PaidOrder[];
+    if (!orders.length) return result.rows as Order[];
+
+    const updatedOrders = await Promise.all(
+      orders.map(async o => {
+        if (o.externalOrderInfo?.__type === 'slice')
+          return this.syncOrderWithExternalService(o);
+        return o;
+      }),
+    );
+
+    return updatedOrders;
+  }
+
+  private async syncOrderWithExternalService(
+    order: PaidOrder,
+  ): Promise<PaidOrder> {
+    if (!order.externalOrderInfo) throw Error('externalOrderInfo not found');
+    if (order.externalOrderInfo.__type === 'slice') {
+      const sliceOrder = await sliceKit.getOrder({
+        transactionHash: order.transactionHash,
+      });
+      debugger;
+    }
+    return order;
   }
 
   async checkStatus(orderId: UUID): Promise<Order> {
@@ -204,7 +242,7 @@ export class SQLOrderRepository implements OrderRepository {
     return result.rows as Order[];
   }
 
-  async getRecentUserOrdre(userId: UUID): Promise<Order | null> {
+  async getRecentUserOrder(userId: UUID): Promise<Order | null> {
     const orders = await this.getOrdersByUserId(userId);
     const [order] = orders.sort((a, b) =>
       sortDateAsc(a.timestamp, b.timestamp),

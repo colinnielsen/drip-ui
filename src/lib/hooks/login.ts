@@ -1,5 +1,5 @@
 import { useLogin, useLogout } from '@privy-io/react-auth';
-import { axiosFetcher } from '../utils';
+import { axiosFetcher, sleep } from '../utils';
 import { SavedUser } from '@/data-model/user/UserType';
 
 export const useLoginOrCreateUser = ({
@@ -8,6 +8,7 @@ export const useLoginOrCreateUser = ({
   onLogin?: (data: SavedUser) => void;
 }) => {
   const { logout } = useLogout();
+
   const { login } = useLogin({
     onError(error) {
       console.log('loginError', { loginError: error });
@@ -19,5 +20,8 @@ export const useLoginOrCreateUser = ({
       }).then(onLogin),
   });
 
-  return () => logout().finally(() => login());
+  return () =>
+    logout()
+      .then(() => sleep(1000))
+      .then(() => login());
 };

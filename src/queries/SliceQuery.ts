@@ -67,7 +67,6 @@ export const usePayAndOrder = ({
       },
     },
   );
-  console.log({ cart, balances, errorState, errors, prices });
 
   const payAndOrder = useCallback(async () => {
     setPaymentStep('awaiting-confirmation');

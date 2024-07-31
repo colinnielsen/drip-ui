@@ -1,15 +1,18 @@
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { Order } from '@/data-model/order/OrderType';
+import { Shop } from '@/data-model/shop/ShopType';
+import { useLoginOrCreateUser } from '@/lib/hooks/login';
 import { cn, sleep } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
-import { useCart } from '@/queries/OrderQuery';
+import { ORDERS_QUERY_KEY, useCart } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
+import { ACTIVE_USER_QUERY_KEY } from '@/queries/UserQuery';
+import { useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { AnimatedTimer } from '../ui/icons';
 import { Headline, Label2 } from '../ui/typography';
 import CheckoutSlides from './checkout-slides';
-import { Shop } from '@/data-model/shop/ShopType';
-import { AnimatedTimer } from '../ui/icons';
 
 export const CartDrawer = ({
   cart,
@@ -18,6 +21,16 @@ export const CartDrawer = ({
   cart: Order | null | undefined;
   shop: Shop | undefined;
 }) => {
+  const queryClient = useQueryClient();
+  useLoginOrCreateUser({
+    onLogin: data => {
+      queryClient.setQueryData([ACTIVE_USER_QUERY_KEY], data);
+      queryClient.refetchQueries({
+        queryKey: [ORDERS_QUERY_KEY, data.id],
+      });
+    },
+  });
+
   return (
     <>
       <DrawerContent
@@ -34,7 +47,6 @@ export const CartDrawer = ({
 export default function () {
   const { data: cart } = useCart();
   const { data: shop } = useShop(cart?.shop);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [ready, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -53,7 +65,7 @@ export default function () {
       <DrawerTrigger asChild>
         <button
           className={cn(
-            'shadow-[4px_0px_60px_0px_rgba(0,0,0,0.40)]',
+            'shadow-[4px_0px_60px_0px_rgba(0,0,0,0.20)]',
             'relative',
             'flex justify-between px-6 py-4 items-center bg-secondary-pop w-full text-left ',
             'transition-all',
@@ -91,7 +103,8 @@ export default function () {
           </div>
         </button>
       </DrawerTrigger>
-      <CartDrawer cart={cart} shop={shop} />
+
+      <CartDrawer cart={cart} shop={shop} key={cart?.id} />
     </Drawer>
   );
 }

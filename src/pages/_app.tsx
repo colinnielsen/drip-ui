@@ -1,4 +1,3 @@
-import { Footer } from '@/components/Footer';
 import { ReactQueryClientProvider } from '@/components/providers.tsx/ReactQueryClientProvider';
 import { cn, isDev } from '@/lib/utils';
 import { AppProps } from 'next/app';
@@ -10,6 +9,8 @@ import { WagmiProvider } from '@privy-io/wagmi';
 import { PRIVY_WAGMI_CONFIG } from '@/lib/ethereum';
 import { SliceCartListener } from '@/lib/slice';
 import { SliceProvider } from '@slicekit/react';
+import { GlobalListeners } from '@/components/global-listeners';
+import { Footer } from '@/components/app-footer';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -59,6 +60,7 @@ export default function App({ Component, pageProps }: AppProps) {
               >
                 <Component {...pageProps} />
                 <Footer />
+                <GlobalListeners />
               </div>
             </SliceCartListener>
           </SliceProvider>

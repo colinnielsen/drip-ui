@@ -7,14 +7,14 @@ import { ACTIVE_USER_QUERY_KEY, useUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
 import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useCheckoutContext } from '../context';
 
 export function shouldGoToWelcomeSlide(step: string) {
   return step === 'login' || step === 'signup' || step === 'connect';
 }
 
-const ConnectButton = () => {
+const ConnectButton = ({ onClose }: { onClose: () => void }) => {
   const { step } = useCheckoutContext();
   const { connectWallet } = usePrivy();
   const { current: initialStep } = useRef(step);
@@ -28,6 +28,7 @@ const ConnectButton = () => {
       queryClient.refetchQueries({
         queryKey: [ORDERS_QUERY_KEY, data.id],
       });
+      onClose();
     },
   });
 
@@ -60,7 +61,7 @@ const ConnectButton = () => {
   );
 };
 
-export default function WelcomeScreen() {
+export default function WelcomeScreen({ onClose }: { onClose: () => void }) {
   return (
     <div className="h-full bg-background flex flex-col items-center justify-center px-6 gap-4 py-6">
       <div className="flex-grow" />
@@ -81,14 +82,11 @@ export default function WelcomeScreen() {
         <br />
         ...but in the meantime
       </Title2>
-
       <div className="flex-grow" />
-
       <Mono className="text-center">
         connect your web3 wallet to continue 👇
       </Mono>
-
-      <ConnectButton />
+      <ConnectButton onClose={onClose} />
     </div>
   );
 }

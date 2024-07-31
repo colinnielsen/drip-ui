@@ -1,4 +1,3 @@
-import { isPaidOrder } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { cn, isIOSSafari } from '@/lib/utils';

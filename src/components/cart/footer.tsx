@@ -1,19 +1,14 @@
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { Order } from '@/data-model/order/OrderType';
-import { Shop } from '@/data-model/shop/ShopType';
-import { useLoginOrCreateUser } from '@/lib/hooks/login';
+import { isPaidOrder } from '@/data-model/order/OrderDTO';
 import { cn, sleep } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
-import { ORDERS_QUERY_KEY, useCart } from '@/queries/OrderQuery';
+import { useCart } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
-import { ACTIVE_USER_QUERY_KEY } from '@/queries/UserQuery';
-import { useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatedTimer } from '../ui/icons';
 import { Headline, Label2 } from '../ui/typography';
 import CheckoutSlides from './checkout-slides';
-import { isPaidOrder } from '@/data-model/order/OrderDTO';
 
 // export const CartDrawer = ({
 //   cart,

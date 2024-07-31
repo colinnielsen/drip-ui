@@ -32,11 +32,13 @@ export const useUserId = () =>
 export const useResetUser = () => {
   return useMutation({
     mutationFn: () =>
-      axiosFetcher('/api/reset').then(() => {
+      axiosFetcher('/api/reset').then(async () => {
+        // await axios('https://auth.privy.io/api/v1/sessions/logout', {
+        //   withCredentials: true,
+        // });
         deleteCookie(PRIVY_TOKEN_NAME);
         deleteCookie(SESSION_COOKIE_NAME);
         localStorage.clear();
-        // await fetch('/api/reset');
 
         if (typeof window !== 'undefined') window.location.assign('/');
       }),

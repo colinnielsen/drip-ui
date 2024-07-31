@@ -1,7 +1,7 @@
 import coffeeGif from '@/assets/coffee-dive.gif';
 import coffeeStill from '@/assets/coffee-still.png';
 import { CTAButton, LoadingCTAButton } from '@/components/ui/button';
-import { useGoToSlide, useNextSlide } from '@/components/ui/carousel';
+import { useGoToSlide } from '@/components/ui/carousel';
 import { Drip, DripSmall, Label1, Mono } from '@/components/ui/typography';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
@@ -38,7 +38,7 @@ export const PayButton = () => {
     });
   const { isFetching: cartIsLoading } = useCart();
   const { paymentStep } = useCheckoutContext();
-  const nextSlide = useNextSlide();
+  const goToSlide = useGoToSlide();
   const payAndOrder = usePayAndOrder();
 
   if (!sliceCart || sliceCartIsLoading || cartIsLoading || !wallet)
@@ -49,7 +49,7 @@ export const PayButton = () => {
       onClick={async () => {
         if (!payAndOrder) return;
 
-        nextSlide?.();
+        goToSlide?.(1);
         await payAndOrder();
       }}
       isLoading={paymentStep === 'awaiting-confirmation'}

@@ -6,14 +6,25 @@ import { v4 } from 'uuid';
 
 export class SQLFarmerRepository implements FarmerRepository {
   async findById(id: UUID): Promise<Farmer | null> {
-    const result = await sql`SELECT
-      farmers.*,
-      farmerposts.*
-      FROM farmers
-      JOIN farmerposts on farmerposts."farmer" = farmers.id
-      WHERE farmers.id = ${id}`;
-    console.log(result.rows);
-    return result.rows[0] as Farmer | null;
+    const result = await sql`
+      SELECT 
+        f.*,
+        (
+          SELECT json_agg(fp.*)
+          FROM farmerposts fp
+          WHERE fp.farmer = f.id
+        ) AS posts
+      FROM farmers f
+      WHERE f.id = ${id}
+    `;
+
+    if (result.rows.length === 0) return null;
+
+    const farmerData = result.rows[0];
+    return {
+      ...farmerData,
+      posts: farmerData.posts || [],
+    } as Farmer;
   }
 
   async findAll(): Promise<Farmer[]> {

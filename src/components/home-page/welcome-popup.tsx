@@ -63,11 +63,12 @@ export function WelcomeDialog({
   );
 }
 
-export function CloseIcon() {
+export function CloseIcon({ onClick }: { onClick?: () => void }) {
   return (
     <DialogClose
       className="absolute top-6 right-3 font-semibold text-xl"
       asChild
+      onClick={onClick}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

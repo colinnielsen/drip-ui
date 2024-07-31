@@ -30,12 +30,18 @@ import { CTAButton } from '@/components/ui/button';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export function ConfirmationSlide({ cart, shop }: { cart: Order; shop: Shop }) {
+export const OrderConfirmation = ({
+  cart,
+  shop,
+}: {
+  cart: Order;
+  shop: Shop;
+}) => {
   const farmer = useFarmerAllocationFromOrder(cart);
   const summary = getOrderSummary(cart);
 
   return (
-    <AsCheckoutSlide>
+    <>
       <div className="flex justify-start w-full items-center px-6 py-4">
         <DrawerClose asChild>
           <button>
@@ -184,6 +190,14 @@ export function ConfirmationSlide({ cart, shop }: { cart: Order; shop: Shop }) {
           </DialogFooter>
         </div>
       )}
+    </>
+  );
+};
+
+export function ConfirmationSlide({ cart, shop }: { cart: Order; shop: Shop }) {
+  return (
+    <AsCheckoutSlide>
+      <OrderConfirmation cart={cart} shop={shop} />
     </AsCheckoutSlide>
   );
 }

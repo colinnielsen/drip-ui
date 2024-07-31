@@ -22,9 +22,12 @@ export const AsCheckoutSlide = ({
   children: React.ReactNode;
 }) => (
   <CarouselItem
-    className={cn('flex flex-col w-screen h-screen overflow-y-scroll', {
-      'pb-20': isIOSSafari(),
-    })}
+    className={cn(
+      'flex flex-col w-screen h-screen overflow-y-scroll overflow-x-clip',
+      {
+        'pb-20': isIOSSafari(),
+      },
+    )}
   >
     {children}
   </CarouselItem>
@@ -33,11 +36,9 @@ export const AsCheckoutSlide = ({
 export default function CheckoutSlides({
   shop,
   cart,
-  startOnRecipt = false,
 }: {
   shop?: Shop;
   cart?: Order | null;
-  startOnRecipt?: boolean;
 }) {
   if (cart === null) return <EmptyBasket />;
   if (cart === undefined) return <LoadingBasketSlide />;
@@ -49,9 +50,9 @@ export default function CheckoutSlides({
       opts={{
         duration: 12,
         watchDrag: false,
-        watchSlides: true,
+        watchSlides: false,
         align: 'center',
-        startIndex: startOnRecipt ? 2 : 0,
+        // startIndex: startOnRecipt ? 2 : 0,
       }}
       stiff
     >
@@ -64,10 +65,10 @@ export default function CheckoutSlides({
           <ConfirmationSlide cart={cart} shop={shop} />
         </CheckoutProvider>
       </CarouselContent>
-      <div className="absolute top-7 right-20">
+      {/* <div className="absolute top-7 right-20">
         <CarouselPrevious />
         <CarouselNext />
-      </div>
+      </div> */}
     </Carousel>
   );
 }

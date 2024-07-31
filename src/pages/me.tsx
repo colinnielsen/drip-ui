@@ -1,6 +1,6 @@
-import { Button, CTAButton } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Divider } from '@/components/ui/divider';
-import { DrawerTrigger } from '@/components/ui/drawer';
+import { AnimatedTimer } from '@/components/ui/icons';
 import { PageHeader } from '@/components/ui/page-header';
 import { PageWrapper } from '@/components/ui/page-wrapper';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,11 +26,14 @@ import {
   useResetUser,
   useUser,
 } from '@/queries/UserQuery';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Avatar from 'boring-avatars';
 import { LogOut } from 'lucide-react';
 import Image from 'next/image';
 import { useMemo } from 'react';
+import { createClient, http } from 'viem';
+import { getEnsName } from 'viem/actions';
+import { mainnet } from 'viem/chains';
 
 const SkeletonLineItem = () => {
   return (
@@ -63,7 +66,7 @@ const OrderLineItem = ({ order, shop }: { order: Order; shop: Shop }) => {
   return (
     <div
       key={order.id}
-      className="flex w-full min-h-[82px] gap-6 items-start justify-evenly"
+      className="flex w-full min-h-[82px] gap-6 items-start justify-evenly h-auto transition-all duration-300"
     >
       <div className="overflow-hidden h-20 min-w-20 relative border border-light-gray rounded-full">
         <Image
@@ -83,7 +86,10 @@ const OrderLineItem = ({ order, shop }: { order: Order; shop: Shop }) => {
         <Label2>{order.orderItems.length} items</Label2>
         <Label2>${orderSummary.subTotal.formatted}</Label2>
         {order.status !== 'complete' && (
-          <Label2>{mapStatusToStatusLabel(order.status)}</Label2>
+          <Label2 className="flex items-center">
+            {mapStatusToStatusLabel(order.status)}
+            <AnimatedTimer height={14} className="inline stroke-primary-gray" />
+          </Label2>
         )}
       </div>
 
@@ -111,14 +117,30 @@ const Me = () => {
       });
     },
   });
+
+  const { data: name, isLoading: nameLoading } = useQuery({
+    queryKey: ['user', 'username'],
+    queryFn: () =>
+      user?.__type === 'user'
+        ? getEnsName(createClient({ chain: mainnet, transport: http() }), {
+            address: user?.wallet?.address!,
+          }).then(n => (n === null ? 'You' : n))
+        : Promise.resolve(user?.id),
+
+    enabled: !!user?.wallet?.address,
+  });
   return (
     <PageWrapper>
       <PageHeader title="Profile" />
       <div className="flex justify-between items-center px-6">
         <div className="flex flex-col">
-          <Title2 className="text-2xl font-bold">
-            {user?.__type === 'user' ? 'You' : '#1 Guest'}
-          </Title2>
+          {nameLoading ? (
+            <Skeleton>
+              <Title2 className="text-2xl font-bold invisible w-10">..</Title2>
+            </Skeleton>
+          ) : (
+            <Title2 className="text-2xl font-bold">{name}</Title2>
+          )}
 
           {user?.createdAt ? (
             <Body className="text-primary-gray">
@@ -134,7 +156,11 @@ const Me = () => {
           <Skeleton className="h-20 w-20 rounded-full" />
         ) : (
           <button onClick={() => login()}>
-            <Avatar variant="beam" name={user?.id} size={80} />
+            <Avatar
+              variant="beam"
+              name={user?.wallet?.address || user?.id}
+              size={80}
+            />
           </button>
         )}
       </div>

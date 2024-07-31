@@ -348,27 +348,6 @@ export const useAssocateExternalOrderInfoToCart = () => {
   });
 };
 
-export const useCheckOrderStatus = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    scope: { id: 'cart' },
-    mutationFn: async (orderId: UUID) =>
-      axiosFetcher<Order>(`/api/orders/status`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: { orderId },
-      }),
-    onSuccess: data =>
-      queryClient.setQueryData(
-        [ORDERS_QUERY_KEY, data.user],
-        (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
-      ),
-  });
-};
-
 export const usePollExternalServiceForOrderCompletion = (
   incompleteOrders: Order[],
 ) => {

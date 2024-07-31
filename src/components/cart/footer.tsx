@@ -24,19 +24,13 @@ export default function () {
   const { data: cart } = useCart();
   const { data: shop } = useShop(cart?.shop);
   const [ready, setIsReady] = useState(false);
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     sleep(1000).then(() => setIsReady(true));
   }, []);
 
-  const startOnRecipt = useMemo(() => {
-    const startOn = !!cart && isPaidOrder(cart) && !open;
-    return startOn;
-  }, [cart?.id, cart?.status, open]);
-
   return (
-    <Drawer key={'drawer'} open={open} onOpenChange={setOpen}>
+    <Drawer>
       <DrawerTrigger asChild>
         <button
           className={cn(
@@ -52,8 +46,8 @@ export default function () {
             <Label2 className="text-light-gray">Pickup Store</Label2>
             <Headline className="flex items-center gap-2 text-light-gray">
               <p>{shop?.label}</p>
-              <div className="rounded-full h-1 w-1 bg-white"></div>
-              <p> 0.7mi</p>
+              {/* <div className="rounded-full h-1 w-1 bg-white"></div>
+              <p> 0.7mi</p> */}
             </Headline>
           </div>
           <div className="relative flex justify-center items-center">
@@ -83,7 +77,7 @@ export default function () {
         className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
         aria-describedby="cart-footer"
       >
-        <CheckoutSlides {...{ shop, cart, startOnRecipt }} />
+        <CheckoutSlides {...{ shop, cart }} />
       </DrawerContent>
     </Drawer>
   );

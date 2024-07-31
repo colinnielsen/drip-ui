@@ -1,15 +1,14 @@
-import {
-  getOrderSummary,
-  hasPaymentConfirmed,
-  isPaidOrder,
-} from '@/data-model/order/OrderDTO';
+import { getOrderSummary } from '@/data-model/order/OrderDTO';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
-import { useCart, useCartId, useCheckOrderStatus } from '@/queries/OrderQuery';
+import { ORDERS_QUERY_KEY, useCart, useCartId } from '@/queries/OrderQuery';
 import { useUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
+import { skipToken, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useGoToSlide, useSlideInView } from '../ui/carousel';
+import { axiosFetcher } from '@/lib/utils';
+import { Order } from '@/data-model/order/OrderType';
 
 // const SLIDE_MAP = {
 //   initializing: 1,
@@ -109,7 +108,7 @@ const useShouldPollForCartStatus = (
   const slideInView = useSlideInView();
   const secondsSinceMount = useSecondsSinceMount();
   const [secondsWhenPaid, setSecondsWhenPaid] = useState(0);
-  const waitforatleastseconds = 7;
+  const waitforatleastseconds = 4;
 
   const shouldPoll =
     cartId &&
@@ -143,22 +142,33 @@ export const CheckoutProvider = ({
   const { step } = useDetermineCheckoutStep();
   const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
   const cartId = useCartId();
+  const queryClient = useQueryClient();
   const goToSlide = useGoToSlide();
 
   const shouldPoll = useShouldPollForCartStatus(step, paymentStep);
-  const { mutateAsync: checkStatus } = useCheckOrderStatus();
 
-  useEffect(() => {
-    console.log({ shouldPoll });
-    if (shouldPoll && cartId) {
-      const interval = setInterval(() => {
-        checkStatus(cartId).then(newOrder => {
-          if (hasPaymentConfirmed(newOrder)) goToSlide?.(2);
-        });
-      }, 3000);
-      return () => clearInterval(interval);
-    }
-  }, [shouldPoll, cartId]);
+  useQuery({
+    queryKey: ['cart-status', cartId],
+    queryFn: cartId
+      ? () =>
+          axiosFetcher<Order>(`/api/orders/status`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: { orderId: cartId },
+          }).then(data => {
+            if (data.status === 'in-progress') goToSlide?.(2);
+            return queryClient.setQueryData(
+              [ORDERS_QUERY_KEY, data.user],
+              (orders: Order[]) =>
+                orders.map(o => (o.id === data.id ? data : o)),
+            );
+          })
+      : skipToken,
+    enabled: shouldPoll && !!cartId,
+    refetchInterval: 3000,
+  });
 
   useEffect(() => {
     console.log({ checkoutStep: step });

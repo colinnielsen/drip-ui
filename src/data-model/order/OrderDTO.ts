@@ -11,13 +11,18 @@ import { Shop } from '../shop/ShopType';
 
 export const createExternalOrderInfo = (
   sourceConfig: Shop['__sourceConfig'],
-  data: any,
+  data: Partial<ExternalOrderInfo>,
 ): ExternalOrderInfo => {
   const externalOrderInfo: ExternalOrderInfo =
     sourceConfig.type === 'slice'
       ? {
           __type: 'slice',
-          orderId: data.orderId ?? err('orderId is required'),
+          ...data,
+          orderId:
+            data.orderId ??
+            (() => {
+              throw new Error('orderId is required');
+            })(),
         }
       : err('sourceConfig type is not supported');
 
@@ -75,6 +80,20 @@ export const getOrderSummary = (o: Order) => {
       raw: total_withTip,
     },
   };
+};
+
+export const mapStatusToStatusLabel = (status: Order['status']) => {
+  switch (status) {
+    case 'pending':
+    case 'submitting':
+      return 'Pending';
+    case 'in-progress':
+      return 'In Progress';
+    case 'complete':
+      return 'Complete';
+    case 'cancelled':
+      return 'Cancelled';
+  }
 };
 
 export const isDripTip = (o: OrderItem) => o.item.name === DRIP_TIP_ITEM_NAME;

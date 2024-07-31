@@ -10,9 +10,9 @@ export const PageWrapper = ({
   return (
     <div
       className={cn(
-        'flex flex-col min-h-screen',
+        'flex flex-col min-h-screen pb-32',
         {
-          'pb-32': !isIOSSafari(),
+          'pb-52': !isIOSSafari(),
         },
         className,
       )}

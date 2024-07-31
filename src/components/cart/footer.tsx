@@ -9,69 +9,48 @@ import { useShop } from '@/queries/ShopQuery';
 import { ACTIVE_USER_QUERY_KEY } from '@/queries/UserQuery';
 import { useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatedTimer } from '../ui/icons';
 import { Headline, Label2 } from '../ui/typography';
 import CheckoutSlides from './checkout-slides';
+import { isPaidOrder } from '@/data-model/order/OrderDTO';
 
-export const CartDrawer = ({
-  cart,
-  shop,
-}: {
-  cart: Order | null | undefined;
-  shop: Shop | undefined;
-}) => {
-  const queryClient = useQueryClient();
-  useLoginOrCreateUser({
-    onLogin: data => {
-      queryClient.setQueryData([ACTIVE_USER_QUERY_KEY], data);
-      queryClient.refetchQueries({
-        queryKey: [ORDERS_QUERY_KEY, data.id],
-      });
-    },
-  });
-
-  return (
-    <>
-      <DrawerContent
-        full
-        className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
-        aria-describedby="cart-footer"
-      >
-        <CheckoutSlides {...{ shop, cart }} />
-      </DrawerContent>
-    </>
-  );
-};
+// export const CartDrawer = ({
+//   cart,
+//   shop,
+// }: {
+//   cart: Order | null | undefined;
+//   shop: Shop | undefined;
+// }) => {
+//   return <></>;
+// };
 
 export default function () {
   const { data: cart } = useCart();
   const { data: shop } = useShop(cart?.shop);
   const [ready, setIsReady] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     sleep(1000).then(() => setIsReady(true));
   }, []);
 
-  // useEffect(() => {
-  //   if (!cart) setDrawerOpen(false);
-  //   if (cart) setDrawerOpen(true);
-  // }, [cart]);
-
-  // console.log({ cart });
+  const startOnRecipt = useMemo(() => {
+    const startOn = !!cart && isPaidOrder(cart) && !open;
+    return startOn;
+  }, [cart?.id, cart?.status, open]);
 
   return (
-    <Drawer key={'drawer'} handleOnly>
+    <Drawer key={'drawer'} open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <button
           className={cn(
             'shadow-[4px_0px_60px_0px_rgba(0,0,0,0.20)]',
             'relative',
-            'flex justify-between px-6 py-4 items-center bg-secondary-pop w-full text-left ',
+            'flex justify-between px-6 py-4 items-center bg-secondary-pop w-full text-left',
             'transition-all',
             'transition-[600ms]',
-            'top-[100px]',
-            !!cart?.orderItems?.length && ready ? 'top-0' : '',
+            !!cart?.orderItems?.length && ready ? 'top-0' : 'top-[100px]',
           )}
         >
           <div className="flex flex-col gap-1">
@@ -104,7 +83,13 @@ export default function () {
         </button>
       </DrawerTrigger>
 
-      <CartDrawer cart={cart} shop={shop} key={cart?.id} />
+      <DrawerContent
+        full
+        className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
+        aria-describedby="cart-footer"
+      >
+        <CheckoutSlides {...{ shop, cart, startOnRecipt }} />
+      </DrawerContent>
     </Drawer>
   );
 }

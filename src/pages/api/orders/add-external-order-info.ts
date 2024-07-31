@@ -12,6 +12,9 @@ export default withErrorHandling(async function (
   if (!orderId || req.method !== 'POST')
     return res.status(400).json({ error: 'Bad request' });
 
+  if (!req.body.externalOrderInfo || !req.body.externalOrderInfo.orderId)
+    return res.status(400).json({ error: 'Bad request' });
+
   await sqlDatabase.orders
     .addExternalOrderInfo(orderId, req.body.externalOrderInfo)
     .then(order => res.status(200).json(order))

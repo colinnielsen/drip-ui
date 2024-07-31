@@ -6,9 +6,14 @@ import { v4 } from 'uuid';
 
 export class SQLFarmerRepository implements FarmerRepository {
   async findById(id: UUID): Promise<Farmer | null> {
-    const result = await sql`SELECT * FROM farmers WHERE id = ${id}`;
-    const posts = await sql`SELECT * FROM farmerposts WHERE "farmer" = ${id}`;
-    return { ...result.rows[0], posts: posts.rows } as Farmer | null;
+    const result = await sql`SELECT
+      farmers.*,
+      farmerposts.*
+      FROM farmers
+      JOIN farmerposts on farmerposts."farmer" = farmers.id
+      WHERE farmers.id = ${id}`;
+    console.log(result.rows);
+    return result.rows[0] as Farmer | null;
   }
 
   async findAll(): Promise<Farmer[]> {

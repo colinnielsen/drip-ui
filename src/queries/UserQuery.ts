@@ -36,8 +36,9 @@ export const useResetUser = () => {
         deleteCookie(PRIVY_TOKEN_NAME);
         deleteCookie(SESSION_COOKIE_NAME);
         localStorage.clear();
+        // await fetch('/api/reset');
 
-        if (typeof window !== 'undefined') window.location.reload();
+        if (typeof window !== 'undefined') window.location.assign('/');
       }),
   });
 };

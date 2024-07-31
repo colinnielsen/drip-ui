@@ -4,7 +4,9 @@ import { User } from '@/data-model/user/UserType';
 import { sqlDatabase } from '@/infras/database';
 import { withErrorHandling } from '@/lib/next';
 import privy from '@/lib/privy';
-import { retreiveOrGenerateSessionId } from '@/lib/session';
+import { SESSION_COOKIE_NAME, setSessionId } from '@/lib/session';
+import { generateUUID, isUUID } from '@/lib/utils';
+import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 /**
@@ -19,40 +21,64 @@ export default withErrorHandling(async function identify(
     return res.status(405).json({ error: 'Method not allowed' });
 
   const privyLoginToken = req.cookies['privy-token'];
-  const sessionId = retreiveOrGenerateSessionId(req, res);
+  const incomingSessionId = req.cookies[SESSION_COOKIE_NAME] as
+    | UUID
+    | 'null'
+    | undefined;
 
-  // if they have never used the app or cleared their cookies
-  //    and they have no privy login tokens in their browser
-  if (!privyLoginToken)
+  // if there is a privy token
+  if (privyLoginToken) {
+    const verifResponse = await privy
+      .verifyAuthToken(privyLoginToken)
+      .catch(() => {
+        return null;
+      });
+    // make sure it verifies
+    if (!verifResponse)
+      return res.status(401).json({ error: 'External Auth failed' });
+
+    const privyId = verifResponse.userId as PrivyDID;
+
+    // try and find the user by their privy id
+    const maybeUserFromPrivyId =
+      await sqlDatabase.users.findByAuthServiceId(privyId);
+
+    // if the user exists, return the user
+    if (maybeUserFromPrivyId) {
+      // if the session id is not the same as the user's id, set the session id
+      if (
+        !isUUID(incomingSessionId) ||
+        maybeUserFromPrivyId.id !== incomingSessionId
+      )
+        setSessionId(maybeUserFromPrivyId.id, res);
+
+      return res.status(200).json(maybeUserFromPrivyId);
+    } else {
+      const newUserId = generateUUID();
+      if (!isUUID(incomingSessionId)) setSessionId(newUserId, res);
+      // otherwise, create a new session user for them
+      return await sqlDatabase.users
+        // otherwise, create a new session user for them
+        .getOrCreateSessionUser(newUserId)
+        // then map the user to a saved user via privy
+        .then(u => mapUserToSavedUserViaPrivy(u, privyId))
+        // then save the user
+        .then(u => sqlDatabase.users.save(u))
+        // then return the user
+        .then(u => res.status(200).json(u));
+    }
+  }
+  // otherwise, if they have no privy login token, create a new session user
+  else {
+    const sessionId = !isUUID(incomingSessionId)
+      ? generateUUID()
+      : incomingSessionId;
+
+    setSessionId(sessionId, res);
+
     return await sqlDatabase.users
       // we create a new session user for them
       .getOrCreateSessionUser(sessionId)
       .then(u => res.status(200).json(u));
-
-  // if there is a privy token
-  const verifResponse = await privy
-    .verifyAuthToken(privyLoginToken)
-    .catch(() => {
-      return null;
-    });
-
-  // make sure it verifies
-  if (!verifResponse)
-    return res.status(401).json({ error: 'External Auth failed' });
-  const privyId = verifResponse.userId as PrivyDID;
-  // try and find the user by their privy id
-  const maybeUserFromPrivyId =
-    await sqlDatabase.users.findByAuthServiceId(privyId);
-
-  if (maybeUserFromPrivyId) return res.status(200).json(maybeUserFromPrivyId);
-  else
-    return await sqlDatabase.users
-      // otherwise, create a new session user for them
-      .getOrCreateSessionUser(sessionId)
-      // then map the user to a saved user via privy
-      .then(u => mapUserToSavedUserViaPrivy(u, privyId))
-      // then save the user
-      .then(u => sqlDatabase.users.save(u))
-      // then return the user
-      .then(u => res.status(200).json(u));
+  }
 }, 'identify user');

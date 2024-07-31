@@ -28,6 +28,7 @@ import { OrderSummary } from '../basket/summary';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { CTAButton } from '@/components/ui/button';
 import Link from 'next/link';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function ConfirmationSlide({ cart, shop }: { cart: Order; shop: Shop }) {
   const farmer = useFarmerAllocationFromOrder(cart);
@@ -100,7 +101,16 @@ export function ConfirmationSlide({ cart, shop }: { cart: Order; shop: Shop }) {
             <Headline>Pick up details</Headline>
             <div className="flex  items-center justify-center gap-2">
               <Newspaper className="w-4 h-4" />
-              <Label2 className="text-primary-gray">Order number: #4</Label2>
+              <Label2 className="text-primary-gray flex gap-x-1 items-center">
+                Order number:
+                <span>
+                  {cart?.externalOrderInfo?.orderNumber ? (
+                    `#${cart.externalOrderInfo.orderNumber}`
+                  ) : (
+                    <Skeleton className="w-7 h-4" />
+                  )}
+                </span>
+              </Label2>
             </div>
             <div className="flex  items-center justify-center gap-2">
               <Timer className="w-4 h-4" />

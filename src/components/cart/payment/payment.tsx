@@ -41,18 +41,17 @@ export const PayButton = () => {
   const nextSlide = useNextSlide();
   const payAndOrder = usePayAndOrder();
 
-  const purchase = async () => {
-    if (!payAndOrder) return;
-
-    nextSlide?.();
-    await payAndOrder();
-  };
-
   if (!sliceCart || sliceCartIsLoading || cartIsLoading || !wallet)
     return <LoadingCTAButton />;
+
   return (
     <CTAButton
-      onClick={purchase}
+      onClick={async () => {
+        if (!payAndOrder) return;
+
+        nextSlide?.();
+        await payAndOrder();
+      }}
       isLoading={paymentStep === 'awaiting-confirmation'}
     >
       pay

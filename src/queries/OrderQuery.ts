@@ -7,7 +7,13 @@ import {
   OrderItem,
 } from '@/data-model/order/OrderType';
 import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
-import { axiosFetcher, err, generateUUID, sortDateAsc } from '@/lib/utils';
+import {
+  axiosFetcher,
+  err,
+  generateUUID,
+  sortDateAsc,
+  uniqBy,
+} from '@/lib/utils';
 import {
   keepPreviousData,
   useMutation,
@@ -53,14 +59,16 @@ export const useIncompleteOrders = () => {
   const { data: userId } = useUserId();
 
   return useQuery(
-    orderQuery(userId, orders => orders.filter(o => o.status !== 'complete')),
+    orderQuery(userId, orders =>
+      orders.filter(o => o.status === 'in-progress'),
+    ),
   );
 };
 
 const cartSelector = (orders: Order[]) =>
   orders
     .sort((a, b) => sortDateAsc(a.timestamp, b.timestamp))
-    .find(o => o.status !== 'complete') ?? null;
+    .find(o => o.status !== 'complete' && o.status !== 'cancelled') ?? null;
 
 export const useCart = () => {
   const { data: userId } = useUserId();
@@ -305,6 +313,7 @@ export const useAssocatePaymentToCart = () => {
         (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
       );
     },
+    retry: 3,
   });
 };
 
@@ -322,9 +331,9 @@ export const useAssocateExternalOrderInfoToCart = () => {
           'Content-Type': 'application/json',
         },
         data: {
-          externalOrderInfo,
           orderId:
             cart?.id || err('No cart in useAssocateExternalOrderInfoToCart'),
+          externalOrderInfo,
         },
         withCredentials: true,
       });
@@ -335,6 +344,7 @@ export const useAssocateExternalOrderInfoToCart = () => {
         (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
       );
     },
+    retry: 3,
   });
 };
 
@@ -362,9 +372,7 @@ export const useCheckOrderStatus = () => {
 export const usePollExternalServiceForOrderCompletion = (
   incompleteOrders: Order[],
 ) => {
-  const pendingOrders = incompleteOrders.filter(
-    o => o.status === 'in-progress',
-  );
+  const pendingOrders = incompleteOrders.filter(o => o.status !== 'complete');
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
 
@@ -379,11 +387,16 @@ export const usePollExternalServiceForOrderCompletion = (
         method: 'POST',
         data: { orderIds: pendingOrders.map(o => o.id) },
       }).then(result => {
-        const remainingPending = result.filter(o => o.status !== 'complete');
-        if (remainingPending.length < incompleteOrders.length)
+        const remainingInProgress = result.filter(o => o.status !== 'complete');
+        queryClient.setQueryData(
+          [ORDERS_QUERY_KEY, userId],
+          (oldOrders: Order[]) => uniqBy([...oldOrders, ...result], 'id'),
+        );
+        if (remainingInProgress.length < incompleteOrders.length) {
           queryClient.refetchQueries({
             queryKey: [ORDERS_QUERY_KEY, userId],
           });
+        }
 
         return result;
       }),

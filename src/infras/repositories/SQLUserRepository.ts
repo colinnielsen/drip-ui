@@ -57,7 +57,7 @@ export class SQLUserRepository implements UserRepository {
   }
 
   async delete(id: UUID): Promise<void> {
-    const result = await sql`DELETE FROM users WHERE id = ${id}`;
+    const result = await sql`DELETE FROM users WHERE id = ${id} RETURNING *`;
     if (result.rowCount === 0) throw Error('could not delete');
   }
 
@@ -72,7 +72,7 @@ export class SQLUserRepository implements UserRepository {
     if (!prevUser) throw Error('not found');
 
     const user = await this.save({ ...prevUser, id: newId });
-    await this.delete(prevId);
+    await this.delete(prevId).catch(() => {});
     return user;
   }
 }

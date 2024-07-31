@@ -13,6 +13,8 @@ export type OrderItem = {
 export type SliceOrderInfo = {
   __type: 'slice';
   orderId: string;
+  orderNumber?: string;
+  status?: OrderStatus;
 };
 
 export type ExternalOrderInfo = SliceOrderInfo;
@@ -50,6 +52,10 @@ export type PaidOrder = _BaseOrder & {
   externalOrderInfo?: ExternalOrderInfo;
 };
 
-export type Order = Cart | PaidOrder;
+export type CancelledOrder = Omit<PaidOrder, 'status'> & {
+  status: 'cancelled';
+};
+
+export type Order = Cart | PaidOrder | CancelledOrder;
 
 export type OrderStatus = Order['status'];

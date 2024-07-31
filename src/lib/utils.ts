@@ -97,3 +97,15 @@ export const isIOSSafari = () => {
 export const sortDateAsc = (a: Date | string, b: Date | string) => {
   return new Date(b).getTime() - new Date(a).getTime();
 };
+
+export const uniqBy = <T extends Record<string, any>>(
+  arr: T[],
+  key: keyof T,
+) => {
+  return Object.values(
+    arr.reduce(
+      (acc, item) => ({ ...acc, [item[key]]: item }),
+      {} as Record<keyof T, T>,
+    ),
+  );
+};

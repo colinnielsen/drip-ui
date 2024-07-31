@@ -60,7 +60,9 @@ export const useNextSlide = () => {
   const { api } = useCarousel();
   if (!api) return null;
 
-  return api.scrollNext.bind(api);
+  return () => {
+    api.scrollNext.call(api);
+  };
 };
 
 export function usePreviousSlide() {

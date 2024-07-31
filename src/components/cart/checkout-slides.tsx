@@ -1,5 +1,7 @@
+import { isPaidOrder } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
+import { cn, isIOSSafari } from '@/lib/utils';
 import {
   Carousel,
   CarouselContent,
@@ -7,18 +9,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '../ui/carousel';
-import { CheckoutProvider } from './context';
-import BasketSlide, {
-  EmptyBasetSlide,
-  EmptyBasket,
-  LoadingBasketSlide,
-} from './basket/basket';
-import PaymentSlide from './payment/payment';
+import BasketSlide, { EmptyBasket, LoadingBasketSlide } from './basket/basket';
 import { ConfirmationSlide } from './confirmation/confirmation';
-import { isPaidOrder } from '@/data-model/order/OrderDTO';
-import { cn, isIOSSafari } from '@/lib/utils';
-import { SliceProvider } from '@slicekit/react';
-import { SliceCartListener } from '@/lib/slice';
+import { CheckoutProvider } from './context';
+import PaymentSlide from './payment/payment';
 
 /**
  * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
@@ -40,9 +34,11 @@ export const AsCheckoutSlide = ({
 export default function CheckoutSlides({
   shop,
   cart,
+  startOnRecipt = false,
 }: {
   shop?: Shop;
   cart?: Order | null;
+  startOnRecipt?: boolean;
 }) {
   if (cart === null) return <EmptyBasket />;
   if (cart === undefined) return <LoadingBasketSlide />;
@@ -54,8 +50,9 @@ export default function CheckoutSlides({
       opts={{
         duration: 12,
         watchDrag: false,
+        watchSlides: true,
         align: 'center',
-        startIndex: cart && isPaidOrder(cart) ? 2 : 0,
+        startIndex: startOnRecipt ? 2 : 0,
       }}
       stiff
     >

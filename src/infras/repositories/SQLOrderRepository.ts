@@ -22,6 +22,7 @@ import { BASE_CLIENT } from '@/lib/ethereum';
 import { sortDateAsc } from '@/lib/utils';
 import { Shop } from '@/data-model/shop/ShopType';
 import { sliceKit } from '@/lib/slice';
+import { OrderStatus as SliceOrderStatus } from '@slicekit/core';
 
 export class SQLOrderRepository implements OrderRepository {
   async findById(id: UUID): Promise<Order | null> {
@@ -130,7 +131,10 @@ export class SQLOrderRepository implements OrderRepository {
     return o as Order;
   }
 
-  async addExternalOrderInfo(orderId: UUID, data: any): Promise<Order> {
+  async addExternalOrderInfo(
+    orderId: UUID,
+    data: ExternalOrderInfo,
+  ): Promise<Order> {
     const query = await sql`
       SELECT orders.*, shops."__sourceConfig"
       FROM orders
@@ -144,10 +148,10 @@ export class SQLOrderRepository implements OrderRepository {
 
     if (!order || isPending(order)) throw Error('Order not found');
 
-    const externalOrderInfo = createExternalOrderInfo(
-      order.__sourceConfig,
-      data,
-    );
+    const externalOrderInfo = createExternalOrderInfo(order.__sourceConfig, {
+      ...order.externalOrderInfo,
+      ...data,
+    });
 
     const result = await sql`UPDATE orders
     SET
@@ -173,11 +177,7 @@ export class SQLOrderRepository implements OrderRepository {
     if (!orders.length) return result.rows as Order[];
 
     const updatedOrders = await Promise.all(
-      orders.map(async o => {
-        if (o.externalOrderInfo?.__type === 'slice')
-          return this.syncOrderWithExternalService(o);
-        return o;
-      }),
+      orders.map(async o => this.syncOrderWithExternalService(o)),
     );
 
     return updatedOrders;
@@ -188,12 +188,38 @@ export class SQLOrderRepository implements OrderRepository {
   ): Promise<PaidOrder> {
     if (!order.externalOrderInfo) throw Error('externalOrderInfo not found');
     if (order.externalOrderInfo.__type === 'slice') {
-      const sliceOrder = await sliceKit.getOrder({
-        transactionHash: order.transactionHash,
-      });
-      debugger;
-    }
-    return order;
+      const sliceOrders = await sliceKit
+        .getOrder({
+          transactionHash: order.transactionHash,
+        })
+        .then(o => o.order.slicerOrders)
+        .catch(e => {
+          throw Error(`Error fetching order from slice: ${e}`);
+        });
+      if (!sliceOrders.length) throw Error('slice order not found');
+      const [sliceOrder] = sliceOrders;
+      const orderNumber = sliceOrder.refOrderId;
+      const status: SliceOrderStatus = sliceOrder.status;
+      const newOrderStatus: Order['status'] =
+        status === 'Completed'
+          ? 'complete'
+          : status === 'Canceled'
+            ? 'cancelled'
+            : order.status;
+
+      const result = await sql`UPDATE
+          orders
+          SET "externalOrderInfo" = ${JSON.stringify({
+            ...order.externalOrderInfo!,
+            orderNumber,
+            status: newOrderStatus,
+          })},
+        "status" = ${newOrderStatus}
+        WHERE id = ${order.id}
+        RETURNING *`;
+
+      return result.rows[0] as PaidOrder;
+    } else throw Error('order type not implemented');
   }
 
   async checkStatus(orderId: UUID): Promise<Order> {

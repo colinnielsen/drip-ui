@@ -32,11 +32,6 @@ export function HomePageHeader() {
         >
           {isPending ? '...' : 'Drip'}
         </h1>
-        {isDev() && (
-          <div className="text-xs text-secondary-pop" onClick={() => reset()}>
-            Reset
-          </div>
-        )}
       </div>
 
       <Search />

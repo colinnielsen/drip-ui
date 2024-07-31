@@ -152,13 +152,17 @@ const Me = () => {
                     const shop = shops?.find(shop => shop.id === order.shop);
                     if (!shop)
                       return (
-                        <div className="text-red-500 px-6">Shop not found</div>
+                        <div className="text-red-500 px-6" key={order.id}>
+                          Shop not found
+                        </div>
                       );
                     return (
                       <OrderLineItem key={order.id} order={order} shop={shop} />
                     );
                   })
-                : Array.from({ length: 2 }, () => <SkeletonLineItem />)}
+                : Array.from({ length: 2 }, (_, i) => (
+                    <SkeletonLineItem key={i} />
+                  ))}
             </div>
           </div>
         </>

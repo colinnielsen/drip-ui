@@ -11,9 +11,10 @@ import {
 } from '../ui/drawer';
 import { Title1 } from '../ui/typography';
 import { USDCInput } from '../ui/usdc-input';
+import { USDC } from '@/data-model/_common/currency/USDC';
 
 const FarmerTipAmount = ({ farmer }: { farmer: Farmer }) => {
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState(USDC.ZERO);
   return <USDCInput amount={amount} setAmount={setAmount} />;
 };
 

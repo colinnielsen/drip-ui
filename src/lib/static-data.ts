@@ -102,6 +102,11 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
       address: "Colin's office",
       coords: [50.8443, 4.3563],
     },
+    tipConfig: {
+      __type: 'single-recipient',
+      address: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
+      enabled: true,
+    },
     name: 'The Dev Cafe',
     logo: '/drip.png',
     backgroundImage: '/mountains.webp',

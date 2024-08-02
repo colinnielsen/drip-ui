@@ -1,3 +1,4 @@
+import { USDC } from '@/data-model/_common/currency/USDC';
 import axios, { AxiosRequestConfig } from 'axios';
 import { clsx, type ClassValue } from 'clsx';
 import { UUID } from 'crypto';
@@ -16,9 +17,25 @@ export const prettyFormatPrice = (
 ) => {
   const price = typeof p === 'string' ? BigInt(p) : p;
   const priceString = formatUnits(price, decimals);
-  const displayPrice = !isUSD ? priceString : Number(priceString).toFixed(2);
+  const displayPrice = !isUSD
+    ? priceString
+    : Number(priceString).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
   return displayPrice;
 };
+
+export function rehydrateData<T>(data: any): T {
+  if (typeof data !== 'object' || data === null) return data;
+  if (Array.isArray(data)) return data.map(rehydrateData) as T;
+  if (data.__dripType === 'USDC') return USDC.fromJSON(data) as T;
+  const result: any = {};
+  for (const [key, value] of Object.entries(data))
+    result[key] = rehydrateData(value);
+
+  return result as T;
+}
 
 export const axiosFetcher = async <T>(
   url: string,
@@ -27,6 +44,12 @@ export const axiosFetcher = async <T>(
   try {
     const response = await axios<T>(url, {
       withCredentials: true,
+      transformResponse: (data: string) => {
+        if (typeof data === 'string') {
+          const parsed = JSON.parse(data);
+          return rehydrateData(parsed);
+        } else return data;
+      },
       ...options,
     });
     return response.data;

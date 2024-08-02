@@ -3,13 +3,27 @@ import { FarmerAllocation } from '../farmer/FarmerType';
 import { Item, ItemCategory } from '../item/ItemType';
 import { Location } from '@/data-model/_common/type/LocationType';
 import { SliceStoreId } from '../_common/type/SliceDTO';
+import { Address } from 'viem';
 
+///
+//// TYPES
+///
 export type Menu = {
   [category in ItemCategory | 'other']: Item[];
 };
 
-// export type CategoryOptions = Record<ItemCategory, ItemCategory[]>;
-// export type Options = Record<ItemCategory, ItemMod[]>;
+export type SingleRecipientTipConfig =
+  | {
+      __type: 'single-recipient';
+      enabled: false;
+    }
+  | {
+      __type: 'single-recipient';
+      enabled: true;
+      address: Address;
+    };
+
+export type TipConfig = SingleRecipientTipConfig;
 
 export type ManualStoreConfig = {
   sliceId: number;
@@ -20,11 +34,8 @@ export type ManualStoreConfig = {
   backgroundImage?: string;
   url?: string;
   farmerAllocation?: [FarmerAllocation];
+  tipConfig?: TipConfig;
 };
-
-///
-//// TYPES
-///
 
 export type ShopDataSource = 'slice';
 
@@ -39,6 +50,7 @@ export type BaseShop = BaseEntity & {
   backgroundImage: string;
   logo: string;
   url?: string;
+  tipConfig: TipConfig;
   farmerAllocations: FarmerAllocation[];
   menu: Menu;
   // // NOTE This is a mapping from itemCategory -> ItemCategory[]

@@ -1,26 +1,18 @@
-import { SupportedCurrency } from '@/data-model/_common/type/CommonType';
+import { USDC } from '@/data-model/_common/currency/USDC';
+import { Currency } from '@/data-model/_common/type/CommonType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
-import { cn, prettyFormatPrice } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Clock11, Clock2, Clock5, Clock8, LucideProps } from 'lucide-react';
 import { Label2 } from './typography';
 
-export function Price({
-  currency,
-  price,
-  currencyDecimals,
-}: {
-  currency: SupportedCurrency;
-  price: string | bigint;
-  currencyDecimals: number;
-}) {
-  const isUSDC = currency === 'usdc';
-  const displayPrice = prettyFormatPrice(price, currencyDecimals, isUSDC);
+export function Price({ price }: { price: Currency }) {
+  const isUSDC = price instanceof USDC;
 
   return (
     <div className="flex items-center gap-1">
       {isUSDC && <UsdcSVG />}
       <Label2 as="span" className="font-normal text-sm">
-        {displayPrice}
+        ${price.prettyFormat()}
       </Label2>
     </div>
   );

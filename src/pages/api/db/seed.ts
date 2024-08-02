@@ -6,27 +6,27 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const _resetDB = async () => {
   console.debug('resetting database...');
-  await sql`
-    DROP TABLE IF EXISTS "orders";
-  `;
-  await sql`
-  DROP TABLE IF EXISTS "shops";
-  `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "orders";
+  // `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "shops";
+  // `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "items";
+  // `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "farmerposts";
+  // `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "farmermessages";
+  // `;
+  // await sql`
+  //   DROP TABLE IF EXISTS "farmers";
+  // `;
   // await sql`
   //   DROP TABLE IF EXISTS "users";
   // `;
-  await sql`
-    DROP TABLE IF EXISTS "items";
-  `;
-  await sql`
-    DROP TABLE IF EXISTS "farmerposts";
-  `;
-  await sql`
-    DROP TABLE IF EXISTS "farmermessages";
-  `;
-  await sql`
-    DROP TABLE IF EXISTS "farmers";
-  `;
   console.debug('database reset');
 };
 
@@ -55,7 +55,8 @@ export const bootstrapDB = async () => {
       "farmerAllocations" JSONB,
       "menu" JSONB,
       "bestSellers" JSONB,
-      "location" JSONB
+      "location" JSONB,
+      "tipConfig" JSONB
     );  
   `;
   await sql`
@@ -63,9 +64,7 @@ export const bootstrapDB = async () => {
       "id" UUID PRIMARY KEY,
       "__sourceConfig" JSONB,
       "name" TEXT NOT NULL,
-      "price" TEXT NOT NULL,
-      "prettyPrice" TEXT NOT NULL,
-      "currencyDecimals" INTEGER NOT NULL,
+      "price" JSONB NOT NULL,
       "currency" TEXT NOT NULL,
       "description" TEXT NOT NULL,
       "image" TEXT NOT NULL,

@@ -1,6 +1,7 @@
 import { UUID } from 'crypto';
 import { Item, ItemMod } from '../item/ItemType';
 import { Address, Hex } from 'viem';
+import { USDC } from '../_common/currency/USDC';
 
 export const DRIP_TIP_ITEM_NAME = '__drip-tip';
 
@@ -29,7 +30,7 @@ type _BaseOrder = {
   /** The items the user ordered */
   orderItems: OrderItem[];
   tip: {
-    amount: number;
+    amount: USDC;
     address: Address;
   } | null;
 };

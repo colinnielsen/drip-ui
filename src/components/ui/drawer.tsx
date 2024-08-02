@@ -15,6 +15,8 @@ const Drawer = ({
 );
 Drawer.displayName = 'Drawer';
 
+const NestedDrawer = DrawerPrimitive.NestedRoot;
+
 const DrawerTrigger = DrawerPrimitive.Trigger;
 
 const DrawerPortal = DrawerPrimitive.Portal;
@@ -111,6 +113,7 @@ DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
   Drawer,
+  NestedDrawer,
   DrawerPortal,
   DrawerOverlay,
   DrawerTrigger,

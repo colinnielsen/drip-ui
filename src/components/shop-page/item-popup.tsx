@@ -8,7 +8,6 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
-import { convertItemPriceToBigInt } from '@/data-model/item/ItemDTO';
 import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { OrderItem } from '@/data-model/order/OrderType';
 import { useAddToCart, useCart } from '@/queries/OrderQuery';
@@ -201,7 +200,7 @@ export const ItemOption = ({
             )} */}
           </div>
         </div>
-        {convertItemPriceToBigInt(mod) > 0 ? <Price {...mod} /> : null}
+        {mod.price.wei > 0n ? <Price {...mod} /> : null}
       </div>
     </>
   );

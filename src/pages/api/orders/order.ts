@@ -1,3 +1,4 @@
+import { USDC } from '@/data-model/_common/currency/USDC';
 import { sqlDatabase } from '@/infras/database';
 import { withErrorHandling } from '@/lib/next';
 import { SESSION_COOKIE_NAME } from '@/lib/session';
@@ -61,9 +62,8 @@ async function handleUpdateOrder(
   userId: UUID,
   orderId?: UUID,
 ) {
-  const { action, shopId } = req.body;
-  if (!shopId || !action)
-    return res.status(400).json({ error: 'Missing shopId or action' });
+  const { action } = req.body;
+  if (!action) return res.status(400).json({ error: 'Missing action' });
 
   const maybeOrder = orderId
     ? await sqlDatabase.orders.findById(orderId)
@@ -83,7 +83,11 @@ async function handleUpdateOrder(
           { __type: 'add', orderItem: orderItems },
         ])
       : // if the order does not exist, create a new one
-        await sqlDatabase.orders.save(shopId, userId, orderItems);
+        await sqlDatabase.orders.save(
+          req.body.shopId || err('Missing shopId'),
+          userId,
+          orderItems,
+        );
     return res.status(200).json(updatedOrder);
   }
 
@@ -94,6 +98,20 @@ async function handleUpdateOrder(
     const updatedOrder = await sqlDatabase.orders.update(maybeOrder.id, [
       { __type: 'delete', orderItemId },
     ]);
+    return res.status(200).json(updatedOrder);
+  }
+
+  if (action === 'tip') {
+    if (!maybeOrder) return res.status(400).json({ error: 'Order not found' });
+
+    const { tip } = req.body;
+    if (typeof tip === 'number' && tip < 0)
+      return res.status(400).json({ error: 'Invalid tip amount' });
+
+    const updatedOrder = await sqlDatabase.orders.update(maybeOrder.id, [
+      { __type: 'tip', tip: tip ? { amount: USDC.fromUSD(tip) } : null },
+    ]);
+
     return res.status(200).json(updatedOrder);
   }
 

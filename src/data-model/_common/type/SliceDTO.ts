@@ -1,11 +1,12 @@
 import { Item, ItemMod } from '@/data-model/item/ItemType';
 import { collapseDuplicateItems } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
-import { USDC_ADDRESS_BASE } from '@/lib/ethereum';
+import { USDC_ADDRESS_BASE, isAddressEql } from '@/lib/ethereum';
 import { err, generateUUID } from '@/lib/utils';
-import { isAddressEql } from '@/lib/ethereum';
-import { ProductCart, Variant, generateCart } from '@slicekit/core';
-import { formatUnits } from 'viem';
+import { ProductCart, Variant } from '@slicekit/core';
+import { USDC } from '../currency/USDC';
+import { zeroAddress } from 'viem';
+import { ETH } from '../currency/ETH';
 
 export const SLICE_VERSION = 1;
 
@@ -32,10 +33,8 @@ export function mapSliceVariantsToMods(variants: Variant[]): ItemMod[] {
       },
       name,
       type: 'exclusive',
-      price: '0',
-      prettyPrice: '0',
+      price: USDC.ZERO,
       currency: 'usdc',
-      currencyDecimals: 6,
       isOptional: true,
       category: null,
     };
@@ -74,7 +73,23 @@ export const mapSliceProductCartToItem = (product: ProductCart): Item => {
     product[SLICE_PRODUCT_ID_TO_DERIVE_FROM].toString(),
   );
 
-  const isUSDC = isAddressEql(product.currency, USDC_ADDRESS_BASE);
+  const currency: 'eth' | 'usdc' = isAddressEql(
+    product.currency,
+    USDC_ADDRESS_BASE,
+  )
+    ? 'usdc'
+    : isAddressEql(product.currency, zeroAddress)
+      ? 'eth'
+      : (() => {
+          throw new Error('Unknown currency');
+        })();
+
+  const price =
+    currency === 'eth'
+      ? ETH.fromWei(product.basePrice)
+      : currency === 'usdc'
+        ? USDC.fromWei(product.basePrice)
+        : err('never');
 
   const variants = product.externalProduct?.providerVariants ?? [];
   const hasVariants = variants.length > 0;
@@ -93,10 +108,8 @@ export const mapSliceProductCartToItem = (product: ProductCart): Item => {
     description: product.description,
     image: product.images[0] || '/drip.png',
     name: product.name,
-    price: product.basePrice,
-    prettyPrice: formatUnits(BigInt(product.basePrice), 6),
-    currency: isUSDC ? 'usdc' : 'eth',
-    currencyDecimals: isUSDC ? 6 : 18,
+    price,
+    currency,
     availability: determineAvailability(product),
     category: determineCategory(product),
     mods: hasVariants ? mapSliceVariantsToMods(variants) : [],
@@ -128,7 +141,6 @@ export function mapCartToSliceCart(
     },
     [] as ProductCart[],
   );
-  // const sliceCart = generateCart({ cartParams, allProducts: sliceProducts });
 
   return sliceCart;
 }

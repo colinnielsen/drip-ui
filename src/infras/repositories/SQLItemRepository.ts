@@ -19,13 +19,11 @@ export class SQLItemRepository implements ItemRepository {
   async save(item: Unsaved<Item>): Promise<Item> {
     const id = v4() as UUID;
     await sql`
-      INSERT INTO items (id, name, price, "prettyPrice", "currencyDecimals", currency, description, image, availability, category, mods, "__sourceConfig")
-      VALUES (${id}, ${item.name}, ${item.price}, ${item.prettyPrice}, ${item.currencyDecimals}, ${item.currency}, ${item.description}, ${item.image}, ${item.availability}, ${item.category}, ${JSON.stringify(item.mods)}, ${JSON.stringify(item.__sourceConfig)})
+      INSERT INTO items (id, name, price, currency, description, image, availability, category, mods, "__sourceConfig")
+      VALUES (${id}, ${item.name}, ${JSON.stringify(item.price)}, ${item.currency}, ${item.description}, ${item.image}, ${item.availability}, ${item.category}, ${JSON.stringify(item.mods)}, ${JSON.stringify(item.__sourceConfig)})
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
         price = EXCLUDED.price,
-        "prettyPrice" = EXCLUDED."prettyPrice",
-        "currencyDecimals" = EXCLUDED."currencyDecimals",
         currency = EXCLUDED.currency,
         description = EXCLUDED.description,
         image = EXCLUDED.image,

@@ -16,19 +16,6 @@ import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
 
-/**
- * NOTE:
- * getExternalAllowances
- * 1.signAuthorization
- * 2. payWithAuthorization
- */
-
-/**
- * calc discounts
- * 1. usePriceRecap?
- * 2. getTotalPrices?
- */
-
 export const PayButton = () => {
   const wallet = useConnectedWallet();
 

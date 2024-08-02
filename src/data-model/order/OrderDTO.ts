@@ -1,13 +1,13 @@
-import { err, prettyFormatPrice } from '@/lib/utils';
+import { err } from '@/lib/utils';
+import { isUSDC, USDC } from '../_common/currency/USDC';
+import { Shop } from '../shop/ShopType';
 import {
   Cart,
-  DRIP_TIP_ITEM_NAME,
   ExternalOrderInfo,
   Order,
   OrderItem,
   PaidOrder,
 } from './OrderType';
-import { Shop } from '../shop/ShopType';
 
 export const createExternalOrderInfo = (
   sourceConfig: Shop['__sourceConfig'],
@@ -48,35 +48,46 @@ export function collapseDuplicateItems(orderItems: OrderItem[]) {
   return Array.from(itemMap.values());
 }
 
-export const getOrderSummary = (o: Order) => {
-  const total_noTip = o.orderItems.reduce(
+export const getCostSummary = (o: Order) => {
+  const total_noTip: USDC = o.orderItems.reduce<USDC>(
     (acc, orderItem) =>
-      isDripTip(orderItem)
-        ? acc
-        : acc +
-          BigInt(orderItem.item.price) +
-          orderItem.mods.reduce((acc, mod) => acc + BigInt(mod.price), 0n),
-    0n,
+      acc
+        .add(
+          isUSDC(orderItem.item.price)
+            ? orderItem.item.price
+            : orderItem.item.price.toUSDC(),
+        )
+        .add(
+          orderItem.mods.reduce(
+            (acc, mod) =>
+              acc.add(isUSDC(mod.price) ? mod.price : mod.price.toUSDC()),
+            USDC.ZERO,
+          ),
+        ),
+    USDC.ZERO,
   );
 
-  const dripTip = o.orderItems.find(isDripTip);
-  const total_withTip = dripTip
-    ? total_noTip + BigInt(dripTip.item.price)
-    : total_noTip;
+  const total_withTip = total_noTip.add(o.tip?.amount ?? USDC.ZERO);
 
   return {
+    /**
+     * @dev subTotal is the total without the tip
+     */
     subTotal: {
-      formatted: prettyFormatPrice(total_noTip, 6, true),
-      raw: total_noTip,
+      formatted: total_noTip.prettyFormat(),
+      usdc: total_noTip,
     },
-    tip: dripTip
+    tip: o.tip
       ? {
-          formatted: prettyFormatPrice(BigInt(dripTip.item.price), 6, true),
-          raw: BigInt(dripTip.item.price),
+          formatted: o.tip.amount.prettyFormat(),
+          usdc: o.tip.amount,
         }
       : null,
+    /**
+     * @dev total is the subtotal + tip
+     */
     total: {
-      formatted: prettyFormatPrice(total_withTip, 6, true),
+      formatted: total_withTip.prettyFormat(),
       raw: total_withTip,
     },
   };
@@ -95,8 +106,6 @@ export const mapStatusToStatusLabel = (status: Order['status']) => {
       return 'Cancelled';
   }
 };
-
-export const isDripTip = (o: OrderItem) => o.item.name === DRIP_TIP_ITEM_NAME;
 
 export const isPending = (o: Order): o is Cart => o.status === 'pending';
 

@@ -1,5 +1,5 @@
 import { UUID } from 'crypto';
-import { SupportedCurrency } from '../_common/type/CommonType';
+import { Currency, SupportedCurrency } from '../_common/type/CommonType';
 
 export type ItemCategory = 'espresso' | 'coffee' | 'tea' | 'food';
 
@@ -19,17 +19,7 @@ type BaseMod = {
   type: 'exclusive' | 'inclusive';
   category: ItemCategory | null;
   name: string;
-  /**
-   * @dev wei formats
-   * @example "123000000000000000"
-   */
-  price: string;
-  /**
-   * @dev in string format w/ decimal places
-   * @example "1.23"
-   */
-  prettyPrice: string;
-  currencyDecimals: number;
+  price: Currency;
   currency: SupportedCurrency;
   isOptional: boolean;
 };
@@ -58,18 +48,8 @@ export type Item = {
     version: number;
   };
   name: string;
-  /**
-   * @dev wei formats
-   * @example "123000000000000000"
-   */
-  price: string;
-  /**
-   * @dev in string format w/ decimal places
-   * @example "1.23"
-   */
-  prettyPrice: string;
-  currencyDecimals: number;
-  currency: 'eth' | 'usdc';
+  price: Currency;
+  currency: SupportedCurrency;
   description: string;
   image: string;
   availability: 'onsite-only' | 'online-only' | 'delivery';

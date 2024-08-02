@@ -1,3 +1,4 @@
+import { USDC } from '@/data-model/_common/currency/USDC';
 import { USDC_INSTANCE } from '@/lib/ethereum';
 import { err } from '@/lib/utils';
 import { useWallets } from '@privy-io/react-auth';
@@ -23,7 +24,9 @@ export const useUSDCBalance = () => {
     queryKey: ['usdc-balance', wallet?.address],
     queryFn: async () =>
       wallet
-        ? await USDC_INSTANCE.read.balanceOf([wallet.address])
+        ? await USDC_INSTANCE.read
+            .balanceOf([wallet.address])
+            .then(balance => USDC.fromWei(balance))
         : err('Address is required'),
     enabled: !!wallet,
   });

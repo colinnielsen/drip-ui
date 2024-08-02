@@ -16,16 +16,45 @@ import {
 } from '@/lib/utils';
 import {
   keepPreviousData,
+  QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
 import { UUID } from 'crypto';
-import { Address, Hash } from 'viem';
+import { Address, Hash, zeroAddress } from 'viem';
 import { useFarmer } from './FarmerQuery';
 import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
-import { useUser, useUserId } from './UserQuery';
+import { useUserId } from './UserQuery';
+import { OrderRepository } from '@/data-model/order/OrderRepository';
+import { USDC } from '@/data-model/_common/currency/USDC';
+
+//
+//// HELPERS
+//
+
+export const updateOrderInPlace = (queryClient: QueryClient, order: Order) => {
+  queryClient.setQueryData([ORDERS_QUERY_KEY, order.user], (prev: Order[]) =>
+    prev.map(o => (o.id === order.id ? order : o)),
+  );
+};
+
+export const removeOrder = (queryClient: QueryClient, order: Order) => {
+  queryClient.setQueryData([ORDERS_QUERY_KEY, order.user], (prev: Order[]) =>
+    prev.filter(o => o.id !== order.id),
+  );
+};
+
+export const rollbackOrderUpdate = (
+  queryClient: QueryClient,
+  prevOrder: Order,
+) => {
+  queryClient.setQueryData(
+    [ORDERS_QUERY_KEY, prevOrder.user],
+    (prev: Order[]) => prev.map(o => (o.id === prevOrder.id ? prevOrder : o)),
+  );
+};
 
 //
 //// QUERIES
@@ -39,11 +68,14 @@ function orderQuery<T = Order[]>(
 ) {
   return {
     queryKey: [ORDERS_QUERY_KEY, userId],
-    queryFn: async () =>
-      (await axiosFetcher<Order[]>(`/api/orders/order`)).sort((a, b) =>
+    queryFn: async () => await axiosFetcher<Order[]>(`/api/orders/order`),
+    select: (orders: Order[]) => {
+      const sorted = orders.sort((a, b) =>
         sortDateAsc(a.timestamp, b.timestamp),
-      ),
-    select,
+      );
+      if (select) return select(sorted) as T;
+      return sorted as T;
+    },
     enabled: !!userId,
     placeholderData: keepPreviousData,
   };
@@ -127,8 +159,6 @@ export const useCartInSliceFormat = ({
 //   });
 // };
 
-// export const usePrivyCheckout =
-
 //
 //// MUTATIONS
 //
@@ -160,7 +190,7 @@ export const useAddToCart = ({
           withCredentials: true,
         },
       ),
-    onMutate() {
+    onMutate: async () => {
       const optimisticCart: Cart = {
         id: cart?.id || generateUUID(),
         orderItems: [
@@ -271,6 +301,54 @@ export const useRemoveItemFromCart = ({
         );
       });
     },
+  });
+};
+
+export const useTipMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    scope: { id: 'tip' },
+
+    mutationFn: async ({ order, tip }: { order: Order; tip: USDC | null }) =>
+      await axiosFetcher<ReturnType<OrderRepository['update']>>(
+        '/api/orders/order?orderId=' + order.id,
+        {
+          method: 'POST',
+          data: {
+            orderId: order.id,
+            action: 'tip',
+            tip: tip?.toUSD() ?? null,
+          },
+        },
+      ),
+    onMutate: async ({ order: originalOrder, tip }) => {
+      await queryClient.cancelQueries({
+        queryKey: [ORDERS_QUERY_KEY, originalOrder.user!],
+      });
+
+      const optimisticCart: Order = {
+        ...originalOrder,
+        tip: tip
+          ? {
+              amount: tip,
+              // set a dummy address
+              address: zeroAddress,
+            }
+          : null,
+      };
+      updateOrderInPlace(queryClient, optimisticCart);
+      return { originalOrder, optimisticCart };
+    },
+    onError(error, _, ctx) {
+      console.error(error);
+      if (!ctx) return;
+      rollbackOrderUpdate(queryClient, ctx.originalOrder);
+    },
+    // onSuccess: (result, { order }) => {
+    //   if (result === null) removeOrder(queryClient, order);
+    //   else updateOrderInPlace(queryClient, result);
+    // },
   });
 };
 

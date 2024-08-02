@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/typography';
 import {
   collapseDuplicateItems,
-  getOrderSummary,
+  getCostSummary,
   isPaidOrder,
 } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
@@ -38,7 +38,7 @@ export const OrderConfirmation = ({
   shop: Shop;
 }) => {
   const farmer = useFarmerAllocationFromOrder(cart);
-  const summary = getOrderSummary(cart);
+  const summary = getCostSummary(cart);
 
   return (
     <>

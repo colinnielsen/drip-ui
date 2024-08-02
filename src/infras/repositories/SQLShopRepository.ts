@@ -38,19 +38,44 @@ export class SQLShopRepository implements ShopRepository {
 
   async save(shop: Shop): Promise<Shop> {
     await sql`
-      INSERT INTO shops (id, __type, label, "backgroundImage", logo, "farmerAllocations", menu, "bestSellers", "__sourceConfig", location)
-      VALUES (${shop.id}, ${shop.__type}, ${shop.label}, ${shop.backgroundImage}, ${shop.logo}, ${JSON.stringify(shop.farmerAllocations)}, ${JSON.stringify(shop.menu)}, ${JSON.stringify(shop.bestSellers)}, ${JSON.stringify(shop.__sourceConfig)}, ${isStorefront(shop) ? JSON.stringify(shop.location) : null})
+      INSERT INTO shops (
+        id,
+        __type,
+        label,
+        "backgroundImage",
+        logo,
+        "farmerAllocations",
+        menu,
+        "bestSellers",
+        "__sourceConfig",
+        location,
+        "tipConfig"
+      )
+      VALUES (
+        ${shop.id},
+        ${shop.__type},
+        ${shop.label},
+        ${shop.backgroundImage},
+        ${shop.logo},
+        ${JSON.stringify(shop.farmerAllocations)},
+        ${JSON.stringify(shop.menu)},
+        ${JSON.stringify(shop.bestSellers)},
+        ${JSON.stringify(shop.__sourceConfig)},
+        ${isStorefront(shop) ? JSON.stringify(shop.location) : null},
+        ${JSON.stringify(shop.tipConfig)}
+      )
       ON CONFLICT (id) DO UPDATE SET
         __type = EXCLUDED.__type,
         "__sourceConfig" = EXCLUDED."__sourceConfig",
-         label = EXCLUDED.label,
+        label = EXCLUDED.label,
         "backgroundImage" = EXCLUDED."backgroundImage",
         logo = EXCLUDED.logo,
         url = EXCLUDED.url,
         "farmerAllocations" = EXCLUDED."farmerAllocations",
         menu = EXCLUDED.menu,
         "bestSellers" = EXCLUDED."bestSellers",
-        location = EXCLUDED.location
+        location = EXCLUDED.location,
+        "tipConfig" = EXCLUDED."tipConfig"
     `;
     return shop;
   }

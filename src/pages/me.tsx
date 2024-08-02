@@ -12,7 +12,7 @@ import {
   Title2,
 } from '@/components/ui/typography';
 import {
-  getOrderSummary,
+  getCostSummary,
   isPaidOrder,
   mapStatusToStatusLabel,
 } from '@/data-model/order/OrderDTO';
@@ -62,7 +62,7 @@ const SkeletonLineItem = () => {
 };
 
 const OrderLineItem = ({ order, shop }: { order: Order; shop: Shop }) => {
-  const orderSummary = useMemo(() => getOrderSummary(order), [order]);
+  const orderSummary = useMemo(() => getCostSummary(order), [order]);
   return (
     <div
       key={order.id}
@@ -84,7 +84,7 @@ const OrderLineItem = ({ order, shop }: { order: Order; shop: Shop }) => {
           <Label2>Order #{order.externalOrderInfo.orderNumber}</Label2>
         ) : null}
         <Label2>{order.orderItems.length} items</Label2>
-        <Label2>${orderSummary.subTotal.formatted}</Label2>
+        <Label2>${orderSummary.total.formatted}</Label2>
         {order.status !== 'complete' && (
           <Label2 className="flex items-center">
             {mapStatusToStatusLabel(order.status)}
@@ -124,10 +124,8 @@ const Me = () => {
       user?.__type === 'user'
         ? getEnsName(createClient({ chain: mainnet, transport: http() }), {
             address: user?.wallet?.address!,
-          }).then(n => (n === null ? 'You' : n))
-        : Promise.resolve(user?.id),
-
-    enabled: !!user?.wallet?.address,
+          }).then(n => (!n ? 'You' : n))
+        : Promise.resolve('Guest'),
   });
   return (
     <PageWrapper>
@@ -136,7 +134,9 @@ const Me = () => {
         <div className="flex flex-col">
           {nameLoading ? (
             <Skeleton>
-              <Title2 className="text-2xl font-bold invisible w-10">..</Title2>
+              <Title2 className="text-2xl font-bold invisible w-10">
+                loading
+              </Title2>
             </Skeleton>
           ) : (
             <Title2 className="text-2xl font-bold">{name}</Title2>

@@ -2,12 +2,36 @@ import { UUID } from 'crypto';
 import { Order, OrderItem } from './OrderType';
 import { Unsaved } from '../_common/type/CommonType';
 import { Hash } from 'viem';
+import { USDC } from '../_common/currency/USDC';
 
 export type UpdateOrderOperation =
   | { __type: 'add'; orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[] }
-  | { __type: 'tip'; tip: Order['tip'] }
+  | { __type: 'tip'; tip: ({ amount: USDC } & Partial<Order['tip']>) | null }
   | { __type: 'delete'; orderItemId: UUID }
   | { __type: 'update'; orderItemId: UUID; orderItem: OrderItem };
+
+// export const updateOrderSchema = z.discriminatedUnion('__type', [
+//   z.object({
+//     __type: z.literal('add'),
+//     orderItem: z.union([z.object({}), z.array(z.object({}))]),
+//   }),
+//   z.object({
+//     __type: z.literal('tip'),
+//     tip: z.object({
+//       amount: z.number().min(0),
+//       address: z.string().startsWith('0x'),
+//     }),
+//   }),
+//   z.object({
+//     __type: z.literal('delete'),
+//     orderItemId: z.string().uuid(),
+//   }),
+//   z.object({
+//     __type: z.literal('update'),
+//     orderItemId: z.string().uuid(),
+//     orderItem: z.object({}),
+//   }),
+// ]);
 
 export type OrderRepository = {
   findById: (orderId: UUID) => Promise<Order | null>;
@@ -17,7 +41,6 @@ export type OrderRepository = {
   save: (shopId: UUID, userId: UUID, items: OrderItem[]) => Promise<Order>;
   /**
    * @dev updates an order with the operations
-   * @throws if order is
    */
   update: (
     orderId: UUID,

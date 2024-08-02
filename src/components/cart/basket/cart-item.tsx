@@ -7,6 +7,7 @@ import { useAddToCart, useRemoveItemFromCart } from '@/queries/OrderQuery';
 import { UUID } from 'crypto';
 import { ReactNode } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { USDC } from '@/data-model/_common/currency/USDC';
 
 export function LoadingCartItem() {
   return (
@@ -25,7 +26,7 @@ export function LoadingCartItem() {
           ))}
         </div>
         <Skeleton>
-          <Price currency="usdc" currencyDecimals={6} price={'4'} />
+          <Price price={USDC.ONE} />
         </Skeleton>
       </div>
       <div className="flex-grow" />

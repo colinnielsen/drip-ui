@@ -1,13 +1,7 @@
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { cn, isIOSSafari } from '@/lib/utils';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '../ui/carousel';
+import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel';
 import BasketSlide, { EmptyBasket, LoadingBasketSlide } from './basket/basket';
 import { ConfirmationSlide } from './confirmation/confirmation';
 import { CheckoutProvider } from './context';
@@ -52,7 +46,6 @@ export default function CheckoutSlides({
         watchDrag: false,
         watchSlides: false,
         align: 'center',
-        // startIndex: startOnRecipt ? 2 : 0,
       }}
       stiff
     >

@@ -123,8 +123,12 @@ export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
               </Fragment>
             ))}
           </div>
-          <AddTipSection cart={cart} shopId={shop.id} />
-          <Divider />
+          {shop.tipConfig.enabled && (
+            <>
+              <AddTipSection cart={cart} shopId={shop.id} />
+              <Divider />
+            </>
+          )}
           <OrderSummary cart={cart} />
           <Divider />
           <div className="p-6">

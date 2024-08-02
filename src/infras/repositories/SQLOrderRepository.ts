@@ -63,10 +63,27 @@ export class SQLOrderRepository implements OrderRepository {
     orderId: UUID,
     operations: UpdateOrderOperation[],
   ): Promise<Order | null> {
-    const result = await sql`SELECT * FROM orders WHERE id = ${orderId}`;
-    const order = result.rows[0] as Order;
-    if (!order) throw Error('Order not found');
-    if (!isPending(order)) throw Error('Order is not pending');
+    const result = await sql`
+      SELECT
+      o.*,
+      (
+        SELECT json_agg(s.*)
+        FROM shops s
+        WHERE s.id = o.shop
+        LIMIT 1
+      ) AS relatedshop
+      FROM orders o
+      WHERE o.id = ${orderId}
+    `;
+    if (!result.rowCount) throw Error('Order not found');
+
+    const { relatedshop, ...order } = result.rows[0] as Order & {
+      relatedshop: Shop[];
+    };
+    const shop = relatedshop[0];
+
+    if (order.status !== 'pending')
+      throw Error('Cannot update an order that is not pending');
 
     for (const op of operations) {
       let orderItemId: number;
@@ -95,7 +112,15 @@ export class SQLOrderRepository implements OrderRepository {
           order.orderItems[orderItemId] = op.orderItem;
           break;
         case 'tip':
-          order.tip = op.tip;
+          if (shop.tipConfig.enabled === false)
+            throw Error('tipping is disabled');
+
+          order.tip = op.tip
+            ? {
+                ...op.tip,
+                address: shop.tipConfig.address,
+              }
+            : null;
           break;
         default:
           let _err: never;

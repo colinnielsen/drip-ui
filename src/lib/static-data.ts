@@ -86,6 +86,11 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     logo: 'https://raw.githubusercontent.com/base-org/brand-kit/8984fe6e08be3058fd7cf5cd0b201f8b92b5a70e/logo/in-product/Base_Network_Logo.svg',
     backgroundImage:
       'https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/805/main_6j25kd0y.png',
+    tipConfig: {
+      __type: 'single-recipient',
+      address: '0xcd3E2237f4e9275fEF664d7C9bFA81cD5613c95b',
+      enabled: true,
+    },
     farmerAllocation: [
       {
         allocationBPS: 300,

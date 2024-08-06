@@ -1,3 +1,4 @@
+import { ETH } from '@/data-model/_common/currency/ETH';
 import { USDC } from '@/data-model/_common/currency/USDC';
 import axios, { AxiosRequestConfig } from 'axios';
 import { clsx, type ClassValue } from 'clsx';
@@ -30,6 +31,7 @@ export function rehydrateData<T>(data: any): T {
   if (typeof data !== 'object' || data === null) return data;
   if (Array.isArray(data)) return data.map(rehydrateData) as T;
   if (data.__dripType === 'USDC') return USDC.fromJSON(data) as T;
+  if (data.__dripType === 'ETH') return ETH.fromJSON(data) as T;
   const result: any = {};
   for (const [key, value] of Object.entries(data))
     result[key] = rehydrateData(value);

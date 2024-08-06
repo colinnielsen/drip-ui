@@ -4,7 +4,7 @@ import { Farmer } from '@/data-model/farmer/FarmerType';
 import { ItemRepository } from '@/data-model/item/ItemRepository';
 import { mapSliceStoreToShop } from '@/data-model/shop/ShopDTO';
 import { ShopRepository } from '@/data-model/shop/ShopRepository';
-import { ManualStoreConfig } from '@/data-model/shop/ShopType';
+import { ManualStoreConfig, Menu } from '@/data-model/shop/ShopType';
 import { sliceKit } from '@/lib/slice';
 
 export class SyncService {
@@ -19,7 +19,6 @@ export class SyncService {
   private async fetchStoreData(storeId: number) {
     const [store] = await sliceKit.getStores({ slicerIds: [storeId] });
     const products = await sliceKit.getStoreProducts({ slicerId: storeId });
-
     return { store, products };
   }
 
@@ -37,13 +36,14 @@ export class SyncService {
       // and map the items to the menu
       const shop = mapSliceStoreToShop(store, storeConfig);
 
-      items.forEach(item => {
+      const menu = items.reduce<Menu>((acc, item) => {
         const category = item.category ?? 'other';
-        if (!shop.menu[category]) shop.menu[category] = [];
-        shop.menu[category].push(item);
-      });
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(item);
+        return acc;
+      }, {});
 
-      await this.database.shops.save(shop);
+      await this.database.shops.save({ ...shop, menu });
     }
   }
 

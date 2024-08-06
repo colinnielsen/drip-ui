@@ -46,7 +46,7 @@ export const includeDiscountsOnShop = async (
         ...acc,
         [category as ItemCategory]: items.map(item => ({
           ...item,
-          discountPrice: discountedItemById[item.id].price || undefined,
+          discountPrice: discountedItemById[item.id]?.price || undefined,
         })),
       }),
       EMPTY_MENU,

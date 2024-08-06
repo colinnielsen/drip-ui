@@ -4,16 +4,20 @@ import { Shop } from '@/data-model/shop/ShopType';
 import { UUID } from 'crypto';
 import { sql } from '@vercel/postgres';
 import { isStorefront } from '@/data-model/shop/ShopDTO';
+import { rehydrateData } from '@/lib/utils';
 
 export class SQLShopRepository implements ShopRepository {
   async findById(id: UUID): Promise<Shop | null> {
     const result = await sql`SELECT * FROM shops WHERE id = ${id}`;
-    return result.rows[0] as Shop | null;
+    const shop = result.rows[0] as Shop | null;
+
+    return shop ? this.rehydrateShop(shop) : null;
   }
 
   async findAll(): Promise<Shop[]> {
     const result = await sql`SELECT * FROM shops`;
-    return result.rows as Shop[];
+    const shops = result.rows as Shop[];
+    return shops.map(this.rehydrateShop);
   }
 
   async findItem(shopId: UUID, nameOrID: UUID | string): Promise<Item | null> {
@@ -83,5 +87,9 @@ export class SQLShopRepository implements ShopRepository {
   async delete(id: UUID): Promise<void> {
     const result = await sql`DELETE FROM shops WHERE id = ${id}`;
     if (result.rowCount === 0) throw Error('could not delete');
+  }
+
+  rehydrateShop(shop: Shop): Shop {
+    return rehydrateData(shop);
   }
 }

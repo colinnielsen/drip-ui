@@ -86,7 +86,6 @@ export function CartItem({
   const { id, ...orderItemWithoutId } = orderItem;
   const { mutate: addAnother } = useAddToCart({
     shopId,
-    orderId,
     orderItem: orderItemWithoutId,
   });
   const { mutate: removeItem } = useRemoveItemFromCart({
@@ -103,7 +102,7 @@ export function CartItem({
         <NumberInput
           value={quantity}
           useTrashForDelete
-          onPlus={addAnother}
+          onPlus={() => addAnother(orderId)}
           onMinus={removeItem}
         />
       }

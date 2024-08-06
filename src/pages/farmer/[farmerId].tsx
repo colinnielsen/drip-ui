@@ -2,6 +2,7 @@ import { FarmerBio } from '@/components/farmer-page.tsx/bio';
 import { FarmerCampaigns } from '@/components/farmer-page.tsx/campaigns';
 import { FarmerHeader } from '@/components/farmer-page.tsx/header';
 import { FarmerMessageBoard } from '@/components/farmer-page.tsx/message-board';
+import { FarmerPosts } from '@/components/farmer-page.tsx/posts';
 import { FarmerSection } from '@/components/farmer-page.tsx/section';
 import { Divider } from '@/components/ui/divider';
 import { PageHeader } from '@/components/ui/page-header';
@@ -14,7 +15,6 @@ import { GetStaticPaths } from 'next';
 //
 //// STATIC SITE GENERATION
 //
-
 export const getStaticPaths = (async () => {
   const res = await sqlDatabase.farmers.findAll();
   return {
@@ -66,14 +66,14 @@ export default function FarmerPage({ farmerId }: { farmerId: string }) {
         </>
       )}
 
-      {/* {farmer?.posts && (
+      {farmer?.posts && (
         <>
           <FarmerSection title="Updates">
             <FarmerPosts {...{ farmer }} />
           </FarmerSection>
           <Divider />
         </>
-      )} */}
+      )}
 
       <FarmerSection title="About the farm">
         <FarmerBio {...{ farmer: farmer || 'loading' }} />

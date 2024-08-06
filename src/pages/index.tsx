@@ -13,21 +13,22 @@ import {
 } from '@tanstack/react-query';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
+import { useMemo, useRef } from 'react';
 
 export const getStaticProps: GetStaticProps<{
   dehydratedState: DehydratedState;
 }> = async () => {
-  const shops = await sqlDatabase.shops.findAll().then(rehydrateData);
+  const shops = await sqlDatabase.shops.findAll();
 
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
     queryKey: ['shops'],
-    queryFn: () => shops,
+    queryFn: () => Promise.resolve(JSON.stringify(shops)),
   });
 
   return {
     props: {
-      shops,
+      shops: JSON.stringify(shops),
       dehydratedState: dehydrate(queryClient),
     },
   };
@@ -35,11 +36,23 @@ export const getStaticProps: GetStaticProps<{
 
 export default function Home({
   shops,
-  dehydratedState,
+  dehydratedState: _dehydratedState,
 }: {
-  shops: Shop[];
+  shops: string;
   dehydratedState: DehydratedState;
 }) {
+  const rehydratedShops = useMemo(() => {
+    return rehydrateData<Shop[]>(JSON.parse(shops));
+  }, [shops]);
+
+  const { current: dehydratedState } = useRef(() => {
+    debugger;
+    _dehydratedState.queries[0].state.data = rehydrateData(
+      JSON.parse(_dehydratedState.queries[0].state.data as string),
+    );
+    return _dehydratedState;
+  });
+
   return (
     <HydrationBoundary state={dehydratedState}>
       <div className="flex flex-col gap-5 pb-32">
@@ -62,7 +75,7 @@ export default function Home({
 
         <ShopList
           title="Participating shops"
-          shops={shops ?? []}
+          shops={rehydratedShops ?? []}
           isLoading={false}
         />
 

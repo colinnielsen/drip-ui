@@ -179,11 +179,9 @@ export const useCartInSliceFormat = ({
 //
 export const useAddToCart = ({
   shopId,
-  orderId,
   orderItem,
 }: {
   shopId: UUID;
-  orderId?: UUID;
   orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[];
 }) => {
   const queryClient = useQueryClient();
@@ -192,8 +190,7 @@ export const useAddToCart = ({
   const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
 
   return useMutation({
-    mutationFn: async () => {
-      debugger;
+    mutationFn: async (orderId?: UUID) => {
       return axiosFetcher<Order>(
         `/api/orders/order${orderId ? `?orderId=${orderId}` : ''}`,
         {

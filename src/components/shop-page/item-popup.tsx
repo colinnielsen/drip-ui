@@ -36,14 +36,13 @@ function AddToBasketButton({
 }) {
   const { mutate } = useAddToCart({
     shopId,
-    orderId,
     orderItem,
   });
 
   return (
     <DrawerFooter>
       <DrawerClose asChild>
-        <CTAButton onClick={e => mutate()}>Add to Basket</CTAButton>
+        <CTAButton onClick={e => mutate(orderId)}>Add to Basket</CTAButton>
       </DrawerClose>
     </DrawerFooter>
   );
@@ -60,7 +59,6 @@ export const AddButton = ({
 }) => {
   const { mutate } = useAddToCart({
     shopId,
-    orderId,
     orderItem: {
       item,
       mods: [],
@@ -72,7 +70,7 @@ export const AddButton = ({
       className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:bg-neutral-300 active:scale-95 drop-shadow-md"
       onClick={e => {
         e.stopPropagation();
-        mutate();
+        mutate(orderId);
       }}
     >
       <PlusSvg />
@@ -333,7 +331,6 @@ export function ItemWithSelector({
             ))}
 
           <div className="flex-grow" />
-          {cart?.id}
           {cart !== undefined && (
             <AddToBasketButton
               orderItem={orderItem}

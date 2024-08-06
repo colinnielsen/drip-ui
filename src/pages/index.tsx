@@ -4,6 +4,7 @@ import { ShopList } from '@/components/home-page/shop-list';
 import { WelcomeDialog } from '@/components/home-page/welcome-popup';
 import { Shop } from '@/data-model/shop/ShopType';
 import { sqlDatabase } from '@/infras/database';
+import { rehydrateData } from '@/lib/utils';
 import {
   dehydrate,
   DehydratedState,
@@ -16,7 +17,7 @@ import Head from 'next/head';
 export const getStaticProps: GetStaticProps<{
   dehydratedState: DehydratedState;
 }> = async () => {
-  const shops = await sqlDatabase.shops.findAll();
+  const shops = await sqlDatabase.shops.findAll().then(rehydrateData);
 
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({

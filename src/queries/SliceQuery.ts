@@ -15,6 +15,7 @@ import {
   useCart,
 } from './OrderQuery';
 import { useShop } from './ShopQuery';
+import { base } from 'viem/chains';
 
 /**
  * @returns the slice keyed by productId
@@ -100,7 +101,7 @@ export const usePayAndOrder = ({
           currency: dripCart.tip.amount.address,
           amount: dripCart.tip.amount.toWei(),
           recipient: dripCart.tip.address,
-          description: 'tip',
+          description: 'Tip',
           slicerId: BigInt(
             getSlicerIdFromSliceStoreId(shop!.__sourceConfig.id),
           ),
@@ -128,6 +129,7 @@ export const usePayAndOrder = ({
 
   const payAndOrder = useCallback(async () => {
     setPaymentStep('awaiting-confirmation');
+    await wallet?.wallet.switchChain(base.id);
     await initiatePrivyCheckout().catch(error => {
       debugger;
       console.error(error);

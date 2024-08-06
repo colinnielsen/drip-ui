@@ -1,6 +1,7 @@
 import { getPrivyAppId } from '@/lib/constants';
 import { PrivyProvider as Privy } from '@privy-io/react-auth';
 import { useMemo } from 'react';
+import { base } from 'viem/chains';
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
   const appId = useMemo(() => getPrivyAppId(), []);
@@ -8,6 +9,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
     <Privy
       appId={appId}
       config={{
+        defaultChain: base,
         // Customize Privy's appearance in your app
         appearance: {
           showWalletLoginFirst: true,

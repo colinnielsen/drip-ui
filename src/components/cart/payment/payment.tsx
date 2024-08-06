@@ -15,6 +15,8 @@ import { useMemo } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
+import { getOrderSummary } from '@/data-model/order/OrderDTO';
+import { USDC } from '@/data-model/_common/currency/USDC';
 
 export const PayButton = () => {
   const wallet = useConnectedWallet();
@@ -23,13 +25,15 @@ export const PayButton = () => {
     useCartInSliceFormat({
       buyerAddress: wallet?.address,
     });
-  const { isFetching: cartIsLoading } = useCart();
+  const { isFetching: cartIsLoading, data: cart } = useCart();
   const { paymentStep } = useCheckoutContext();
   const goToSlide = useGoToSlide();
   const payAndOrder = usePayAndOrder();
 
-  if (!sliceCart || sliceCartIsLoading || cartIsLoading || !wallet)
+  if (!sliceCart || sliceCartIsLoading || cartIsLoading || !cart || !wallet)
     return <LoadingCTAButton />;
+
+  const cartTotal = getOrderSummary(cart.orderItems, cart.tip);
 
   return (
     <CTAButton
@@ -41,7 +45,7 @@ export const PayButton = () => {
       }}
       isLoading={paymentStep === 'awaiting-confirmation'}
     >
-      pay
+      {cartTotal.total.usdc.gt(USDC.ZERO) ? 'pay' : 'place order'}
     </CTAButton>
   );
 };

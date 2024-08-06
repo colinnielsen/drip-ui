@@ -100,7 +100,12 @@ export const useIncompleteOrders = () => {
 const cartSelector = (orders: Order[]) =>
   orders
     .sort((a, b) => sortDateAsc(a.timestamp, b.timestamp))
-    .find(o => o.status !== 'complete' && o.status !== 'cancelled') ?? null;
+    .find(
+      o =>
+        o.status !== 'complete' &&
+        o.status !== 'cancelled' &&
+        new Date(o.timestamp).getTime() > Date.now() - 4 * 60 * 60 * 1000,
+    ) ?? null;
 
 export const useCart = () => {
   const { data: userId } = useUserId();
@@ -187,9 +192,9 @@ export const useAddToCart = ({
   const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
 
   return useMutation({
-    scope: { id: 'cart' },
-    mutationFn: async () =>
-      axiosFetcher<Order>(
+    mutationFn: async () => {
+      debugger;
+      return axiosFetcher<Order>(
         `/api/orders/order${orderId ? `?orderId=${orderId}` : ''}`,
         {
           method: 'POST',
@@ -199,7 +204,8 @@ export const useAddToCart = ({
           data: { action: 'add', shopId, orderItems: itemArray },
           withCredentials: true,
         },
-      ),
+      );
+    },
     onMutate: async () => {
       const optimisticCart: Cart = {
         id: cart?.id || generateUUID(),

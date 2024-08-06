@@ -43,7 +43,7 @@ function AddToBasketButton({
   return (
     <DrawerFooter>
       <DrawerClose asChild>
-        <CTAButton onClick={() => mutate()}>Add to Basket</CTAButton>
+        <CTAButton onClick={e => mutate()}>Add to Basket</CTAButton>
       </DrawerClose>
     </DrawerFooter>
   );
@@ -261,7 +261,7 @@ export function ItemWithSelector({
   );
   const { data: cart } = useCart();
   const { isFetching } = useShop({ id: shopId });
-
+  console.log(cart);
   const reset = () => {
     setQuantity(1);
     setSelectedOptions({});
@@ -333,9 +333,13 @@ export function ItemWithSelector({
             ))}
 
           <div className="flex-grow" />
-
+          {cart?.id}
           {cart !== undefined && (
-            <AddToBasketButton {...{ orderId: cart?.id, shopId, orderItem }} />
+            <AddToBasketButton
+              orderItem={orderItem}
+              orderId={cart?.id}
+              shopId={shopId}
+            />
           )}
         </div>
       </DrawerContent>

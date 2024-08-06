@@ -141,11 +141,17 @@ export default async function handler(
     syncService.syncStores(ONBOARDED_SHOPS),
     syncService.syncFarmers(STATIC_FARMER_DATA),
   ])
-    .then(() => {
-      res.status(200).json({ message: 'Seeding complete' });
+    .then(async () => {
+      await res.revalidate('/');
+      await Promise.all(
+        STATIC_FARMER_DATA.map(farmer => {
+          res.revalidate(`/farmers/${farmer.id}`);
+        }),
+      );
+      return res.status(200).json({ message: 'Seeding complete' });
     })
     .catch(err => {
       console.error(err);
-      res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: err.message });
     });
 }

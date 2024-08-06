@@ -1,9 +1,12 @@
+import { useCheckoutContext } from '@/components/cart/context';
+import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
 import { PRIVY_WAGMI_CONFIG } from '@/lib/ethereum';
 import { sliceKit } from '@/lib/slice';
 import { minutes } from '@/lib/utils';
 import { ExtraCostParamsOptional, ProductCart } from '@slicekit/core';
 import { useCheckout } from '@slicekit/react';
 import { useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { Address } from 'viem';
 import { useConnectedWallet } from './EthereumQuery';
 import {
@@ -11,10 +14,7 @@ import {
   useAssocatePaymentToCart,
   useCart,
 } from './OrderQuery';
-import { useCheckoutContext } from '@/components/cart/context';
-import { useCallback } from 'react';
 import { useShop } from './ShopQuery';
-import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
 
 /**
  * @returns the slice keyed by productId
@@ -39,15 +39,56 @@ export const useSliceStoreProducts = <TData = ProductCart[]>({
       }),
     enabled: !!slicerId && enabled,
     staleTime: minutes(6),
-    select: data => select?.(data.cartProducts) ?? data.cartProducts,
+    select: select ? data => select(data.cartProducts) : undefined,
   });
+
+// export type PriceLookup = Record<
+//   UUID,
+//   {
+//     basePrice: Currency;
+//     discountedPrice: Currency;
+//     modPrices: { modId: UUID; price: Currency }[];
+//   }
+// >;
+// /**
+//  * @returns a map of {[dripItemId]: discountedPrice}
+//  * { [{@link deriveDripIdFromSliceProductId}]: {@link Currency} }
+//  */
+// export const useSlicePrices = (config: SliceDataSourceConfig | undefined) => {
+//   const wallet = useConnectedWallet();
+
+//   return useSliceStoreProducts({
+//     slicerId: config ? getSlicerIdFromSliceStoreId(config.id) : undefined,
+//     buyer: wallet?.address,
+//     enabled: config?.type === 'slice',
+//     select: data =>
+//       data.reduce<PriceLookup>(
+//         (acc, product) => ({
+//           ...acc,
+//           [deriveDripIdFromSliceProductId(product)]: {
+//             discountedPrice: getPriceFromSliceCart(
+//               product.currency,
+//               product.price,
+//             ).price,
+//             basePrice: getPriceFromSliceCart(
+//               product.currency,
+//               product.basePrice,
+//             ).price,
+//             // slice mods do not have additional costs
+//             modPrices: [],
+//           },
+//         }),
+//         {},
+//       ),
+//   });
+// };
 
 export const usePayAndOrder = ({
   onSuccess,
 }: { onSuccess?: () => void } = {}) => {
   const wallet = useConnectedWallet();
   const { data: dripCart } = useCart();
-  const { data: shop } = useShop(dripCart?.shop);
+  const { data: shop } = useShop({ id: dripCart?.shop });
   const { mutateAsync: associatePayment } = useAssocatePaymentToCart();
   const { mutateAsync: associateExternalOrderInfo } =
     useAssocateExternalOrderInfoToCart();

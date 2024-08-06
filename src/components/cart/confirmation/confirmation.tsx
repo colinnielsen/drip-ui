@@ -1,6 +1,6 @@
 import orderComplete from '@/assets/order-complete-2.png';
 import { Divider } from '@/components/ui/divider';
-import { DrawerClose } from '@/components/ui/drawer';
+import { DrawerClose, useNearestDrawer } from '@/components/ui/drawer';
 import { InfoCard } from '@/components/ui/info-card';
 import {
   Drip,
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/typography';
 import {
   collapseDuplicateItems,
-  getCostSummary,
+  getOrderSummary,
   isPaidOrder,
 } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
@@ -37,14 +37,15 @@ export const OrderConfirmation = ({
   cart: Order;
   shop: Shop;
 }) => {
+  const { setOpen } = useNearestDrawer();
   const farmer = useFarmerAllocationFromOrder(cart);
-  const summary = getCostSummary(cart);
+  const summary = getOrderSummary(cart.orderItems, cart.tip);
 
   return (
     <>
       <div className="flex justify-start w-full items-center px-6 py-4">
         <DrawerClose asChild>
-          <button>
+          <button onClick={() => setOpen(false)}>
             <X height={24} width={24} />
           </button>
         </DrawerClose>
@@ -59,7 +60,11 @@ export const OrderConfirmation = ({
               nice! order confirmed
             </Drip>
             <DrawerClose asChild>
-              <Link href={`/farmer/${farmer?.farmer.id}`}>
+              <Link
+                href={`/farmer/${farmer?.farmer.id}`}
+                prefetch
+                onClick={() => setOpen(false)}
+              >
                 <InfoCard
                   className="h-32"
                   left={
@@ -185,7 +190,7 @@ export const OrderConfirmation = ({
 
           <DialogFooter className="w-full px-6 pb-8">
             <DialogClose asChild>
-              <CTAButton>Close</CTAButton>
+              <CTAButton onClick={() => setOpen(false)}>Close</CTAButton>
             </DialogClose>
           </DialogFooter>
         </div>

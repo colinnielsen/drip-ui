@@ -10,6 +10,8 @@ import {
   payProducts,
   getOrder,
   GetOrderParams,
+  updateDynamicProducts,
+  UpdateDynamicProductsParams,
 } from '@slicekit/core';
 import { axiosFetcher } from './utils';
 import { PRIVY_WAGMI_CONFIG } from './ethereum';
@@ -30,6 +32,11 @@ export const sliceKit = {
       `/api/slice/get-store-products`,
       { data: params, method: 'POST' },
     ),
+  /**
+   * @returns all products that come from this query, both price and basePrice are the same
+   */
+  updateDynamicProducts: (params: UpdateDynamicProductsParams) =>
+    updateDynamicProducts(PRIVY_WAGMI_CONFIG, params),
   getProduct: (params: GetProductParams) =>
     getProduct(PRIVY_WAGMI_CONFIG, params),
   getOrder: (params: GetOrderParams) => getOrder(params),

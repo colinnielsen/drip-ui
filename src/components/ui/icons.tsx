@@ -1,3 +1,4 @@
+import { ETH } from '@/data-model/_common/currency/ETH';
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { Currency } from '@/data-model/_common/type/CommonType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
@@ -5,15 +6,42 @@ import { cn } from '@/lib/utils';
 import { Clock11, Clock2, Clock5, Clock8, LucideProps } from 'lucide-react';
 import { Label2 } from './typography';
 
-export function Price({ price }: { price: Currency }) {
-  const isUSDC = price instanceof USDC;
+export function Price<T extends Currency>(
+  data: Partial<{
+    price: T;
+    discountPrice: T;
+    isLoading: boolean;
+  }>,
+) {
+  const isLoading = !data.price || data.isLoading;
+  const isUSDC =
+    data.price instanceof USDC && data.discountPrice instanceof USDC;
+  const isDiscounted =
+    (data.discountPrice instanceof USDC &&
+      data.price instanceof USDC &&
+      data.discountPrice.lt(data.price)) ||
+    (data.discountPrice instanceof ETH &&
+      data.price instanceof ETH &&
+      data.discountPrice.lt(data.price));
 
   return (
     <div className="flex items-center gap-1">
       {isUSDC && <UsdcSVG />}
-      <Label2 as="span" className="font-normal text-sm">
-        ${price.prettyFormat()}
+      <Label2
+        as="span"
+        className={cn(
+          'font-normal text-sm',
+          isDiscounted ? 'line-through' : '',
+          isLoading && 'animate-pulse',
+        )}
+      >
+        ${data.price?.prettyFormat()}
       </Label2>
+      {isDiscounted && !!data.discountPrice && (
+        <Label2 as="span" className="text-sm text-green-500 font-medium">
+          {data.discountPrice.prettyFormat()}
+        </Label2>
+      )}
     </div>
   );
 }

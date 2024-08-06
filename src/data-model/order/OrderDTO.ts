@@ -1,11 +1,14 @@
 import { err } from '@/lib/utils';
+import { addCurrencies } from '../_common/currency/currencyDTO';
 import { isUSDC, USDC } from '../_common/currency/USDC';
+import { Currency, Unsaved } from '../_common/type/CommonType';
 import { Shop } from '../shop/ShopType';
 import {
   Cart,
   ExternalOrderInfo,
   Order,
   OrderItem,
+  OrderSummary,
   PaidOrder,
 } from './OrderType';
 
@@ -48,26 +51,38 @@ export function collapseDuplicateItems(orderItems: OrderItem[]) {
   return Array.from(itemMap.values());
 }
 
-export const getCostSummary = (o: Order) => {
-  const total_noTip: USDC = o.orderItems.reduce<USDC>(
-    (acc, orderItem) =>
-      acc
-        .add(
-          isUSDC(orderItem.item.price)
-            ? orderItem.item.price
-            : orderItem.item.price.toUSDC(),
-        )
-        .add(
-          orderItem.mods.reduce(
-            (acc, mod) =>
-              acc.add(isUSDC(mod.price) ? mod.price : mod.price.toUSDC()),
-            USDC.ZERO,
-          ),
-        ),
-    USDC.ZERO,
-  );
+export const getTotalItemCostBasedOnModSelection = (
+  orderItem: Unsaved<OrderItem>,
+) => {
+  return {
+    price: orderItem.mods.reduce<Currency>(
+      (acc, mod) => addCurrencies(acc, mod.price),
+      orderItem.item.price,
+    ),
+    discountPrice: orderItem.mods.reduce<Currency>(
+      (acc, mod) => addCurrencies(acc, mod.discountPrice ?? mod.price),
+      orderItem.item.discountPrice ?? orderItem.item.price,
+    ),
+  };
+};
 
-  const total_withTip = total_noTip.add(o.tip?.amount ?? USDC.ZERO);
+export const getOrderSummary = (
+  orderItems: OrderItem[],
+  tip: Order['tip'],
+): OrderSummary => {
+  const total_noTip: USDC = orderItems.reduce<USDC>((acc, orderItem) => {
+    const paidForPrice = orderItem.item.discountPrice ?? orderItem.item.price;
+    return acc
+      .add(isUSDC(paidForPrice) ? paidForPrice : paidForPrice.toUSDC())
+      .add(
+        orderItem.mods.reduce((acc, mod) => {
+          const modPrice = mod.discountPrice ?? mod.price;
+          return acc.add(isUSDC(modPrice) ? modPrice : modPrice.toUSDC());
+        }, USDC.ZERO),
+      );
+  }, USDC.ZERO);
+
+  const total_withTip = total_noTip.add(tip?.amount ?? USDC.ZERO);
 
   return {
     /**
@@ -77,10 +92,10 @@ export const getCostSummary = (o: Order) => {
       formatted: total_noTip.prettyFormat(),
       usdc: total_noTip,
     },
-    tip: o.tip
+    tip: tip
       ? {
-          formatted: o.tip.amount.prettyFormat(),
-          usdc: o.tip.amount,
+          formatted: tip.amount.prettyFormat(),
+          usdc: tip.amount,
         }
       : null,
     /**
@@ -88,7 +103,7 @@ export const getCostSummary = (o: Order) => {
      */
     total: {
       formatted: total_withTip.prettyFormat(),
-      raw: total_withTip,
+      usdc: total_withTip,
     },
   };
 };

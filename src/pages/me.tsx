@@ -12,7 +12,7 @@ import {
   Title2,
 } from '@/components/ui/typography';
 import {
-  getCostSummary,
+  getOrderSummary,
   isPaidOrder,
   mapStatusToStatusLabel,
 } from '@/data-model/order/OrderDTO';
@@ -62,7 +62,10 @@ const SkeletonLineItem = () => {
 };
 
 const OrderLineItem = ({ order, shop }: { order: Order; shop: Shop }) => {
-  const orderSummary = useMemo(() => getCostSummary(order), [order]);
+  const orderSummary = useMemo(
+    () => getOrderSummary(order.orderItems, order.tip),
+    [order],
+  );
   return (
     <div
       key={order.id}

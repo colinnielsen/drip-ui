@@ -4,6 +4,16 @@ import { Drawer as DrawerPrimitive } from 'vaul';
 import { cn } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
 
+export const DrawerContext = React.createContext<{
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}>({ open: false, setOpen: () => {} });
+
+export const useNearestDrawer = () => {
+  const { open, setOpen } = React.useContext(DrawerContext);
+  return { open, setOpen };
+};
+
 const Drawer = ({
   shouldScaleBackground = true,
   ...props

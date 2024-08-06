@@ -5,8 +5,9 @@ import { USDC_ADDRESS_BASE, isAddressEql } from '@/lib/ethereum';
 import { err, generateUUID } from '@/lib/utils';
 import { ProductCart, Variant } from '@slicekit/core';
 import { USDC } from '../currency/USDC';
-import { zeroAddress } from 'viem';
+import { Address } from 'viem';
 import { ETH } from '../currency/ETH';
+import { Currency } from './CommonType';
 
 export const SLICE_VERSION = 1;
 
@@ -68,28 +69,43 @@ function determineAvailability(product: ProductCart): Item['availability'] {
   );
 }
 
-export const mapSliceProductCartToItem = (product: ProductCart): Item => {
-  const uuid = generateUUID(
-    product[SLICE_PRODUCT_ID_TO_DERIVE_FROM].toString(),
-  );
+export function deriveDripIdFromSliceProductId(product: ProductCart) {
+  return generateUUID(product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString());
+}
 
-  const currency: 'eth' | 'usdc' = isAddressEql(
-    product.currency,
-    USDC_ADDRESS_BASE,
-  )
+export function getPriceFromSliceCart(
+  currencyAddress: Address | string,
+  priceString_wei: string,
+): {
+  currency: 'eth' | 'usdc';
+  price: Currency;
+} {
+  const currency = isAddressEql(currencyAddress, USDC_ADDRESS_BASE)
     ? 'usdc'
-    : isAddressEql(product.currency, zeroAddress)
-      ? 'eth'
-      : (() => {
-          throw new Error('Unknown currency');
-        })();
+    : 'eth';
 
   const price =
     currency === 'eth'
-      ? ETH.fromWei(product.basePrice)
+      ? ETH.fromWei(priceString_wei)
       : currency === 'usdc'
-        ? USDC.fromWei(product.basePrice)
-        : err('never');
+        ? USDC.fromWei(priceString_wei)
+        : (() => {
+            throw Error('Unknown currency');
+          })();
+
+  return {
+    currency,
+    price,
+  };
+}
+
+export const mapSliceProductCartToItem = (product: ProductCart): Item => {
+  const uuid = deriveDripIdFromSliceProductId(product);
+
+  const { currency, price } = getPriceFromSliceCart(
+    product.currency,
+    product.basePrice,
+  );
 
   const variants = product.externalProduct?.providerVariants ?? [];
   const hasVariants = variants.length > 0;

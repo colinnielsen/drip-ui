@@ -20,6 +20,7 @@ import { PlusSvg, Price } from '../ui/icons';
 import { NumberInput } from '../ui/number-input';
 import { Skeleton } from '../ui/skeleton';
 import { Body, Headline, Title1 } from '../ui/typography';
+import { useShop } from '@/queries/ShopQuery';
 
 type CategorySections = ItemCategory | '__misc__';
 type ModSection = { [key in CategorySections]: ItemMod[] };
@@ -87,8 +88,8 @@ export function ItemPreviewTrigger({
   item: Item;
 }) {
   const { data: cart } = useCart();
-
-  const { image, name } = item;
+  const { isFetching } = useShop({ id: shopId });
+  const { image, name, price, discountPrice } = item;
 
   return (
     <DrawerTrigger asChild>
@@ -103,7 +104,8 @@ export function ItemPreviewTrigger({
         </div>
         <div className="flex flex-col gap-1">
           <h3 className="font-medium">{name}</h3>
-          <Price {...item} />
+
+          <Price {...{ price, discountPrice, isLoading: isFetching }} />
         </div>
       </div>
     </DrawerTrigger>
@@ -114,6 +116,7 @@ export const ItemOption = ({
   mod,
   setSelectedOptions,
   selectedOptions,
+  isFetching,
 }: {
   mod: ItemMod;
   setSelectedOptions: Dispatch<
@@ -122,6 +125,7 @@ export const ItemOption = ({
     >
   >;
   selectedOptions: Record<UUID, ItemMod>;
+  isFetching: boolean;
 }) => {
   const checked = !!selectedOptions[mod.id];
   // const [quantity, setQuantity] = useState(0);
@@ -200,7 +204,13 @@ export const ItemOption = ({
             )} */}
           </div>
         </div>
-        {mod.price.wei > 0n ? <Price {...mod} /> : null}
+        {mod.price.wei > 0n ? (
+          <Price
+            price={mod.price}
+            discountPrice={mod.discountPrice}
+            isLoading={isFetching}
+          />
+        ) : null}
       </div>
     </>
   );
@@ -211,11 +221,13 @@ export function ModSection({
   category,
   setSelectedOptions,
   selectedOptions,
+  isFetching,
 }: {
   mods: ItemMod[];
   category: CategorySections;
   setSelectedOptions: Dispatch<SetStateAction<Record<UUID, ItemMod>>>;
   selectedOptions: Record<UUID, ItemMod>;
+  isFetching: boolean;
 }) {
   const label = category === '__misc__' ? 'Options' : category;
 
@@ -227,7 +239,7 @@ export function ModSection({
         {mods?.map((mod, i) => (
           <ItemOption
             key={i}
-            {...{ mod, setSelectedOptions, selectedOptions }}
+            {...{ mod, setSelectedOptions, selectedOptions, isFetching }}
           />
         ))}
       </div>
@@ -247,13 +259,13 @@ export function ItemWithSelector({
   const [selectedOptions, setSelectedOptions] = useState<Record<UUID, ItemMod>>(
     {},
   );
+  const { data: cart } = useCart();
+  const { isFetching } = useShop({ id: shopId });
 
   const reset = () => {
     setQuantity(1);
     setSelectedOptions({});
   };
-
-  const { data: cart } = useCart();
 
   const orderItem: Unsaved<OrderItem> = {
     item,
@@ -286,7 +298,7 @@ export function ItemWithSelector({
             <div className="flex flex-col px-6 py-4 gap-y-2">
               <Title1 className="text-left">{item.name}</Title1>
 
-              <Price {...item} />
+              <Price {...item} isLoading={isFetching} />
 
               <NumberInput
                 onPlus={() => setQuantity(quantity + 1)}
@@ -316,6 +328,7 @@ export function ItemWithSelector({
                 category={category as CategorySections}
                 selectedOptions={selectedOptions}
                 setSelectedOptions={setSelectedOptions}
+                isFetching={isFetching}
               />
             ))}
 

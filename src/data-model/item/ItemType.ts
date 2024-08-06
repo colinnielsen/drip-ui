@@ -3,6 +3,14 @@ import { Currency, SupportedCurrency } from '../_common/type/CommonType';
 
 export type ItemCategory = 'espresso' | 'coffee' | 'tea' | 'food';
 
+export type ItemPrice = {
+  itemId: UUID;
+  mods?: UUID[];
+  basePrice: Currency;
+  discountPrice?: Currency;
+  discountPercentage: number;
+};
+
 //
 //// OPTIONS
 //
@@ -20,6 +28,10 @@ type BaseMod = {
   category: ItemCategory | null;
   name: string;
   price: Currency;
+  /**
+   * @dev if the mod is onsale, this should be the price the user pays
+   */
+  discountPrice?: Currency;
   currency: SupportedCurrency;
   isOptional: boolean;
 };
@@ -49,6 +61,10 @@ export type Item = {
   };
   name: string;
   price: Currency;
+  /**
+   * @dev if the item is onsale, this should be the price the user pays
+   */
+  discountPrice?: Currency;
   currency: SupportedCurrency;
   description: string;
   image: string;

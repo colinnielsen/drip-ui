@@ -1,5 +1,7 @@
+import { USDC } from '@/data-model/_common/currency/USDC';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { mapCartToSliceCart } from '@/data-model/_common/type/SliceDTO';
+import { OrderRepository } from '@/data-model/order/OrderRepository';
 import {
   Cart,
   ExternalOrderInfo,
@@ -27,8 +29,6 @@ import { useFarmer } from './FarmerQuery';
 import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
-import { OrderRepository } from '@/data-model/order/OrderRepository';
-import { USDC } from '@/data-model/_common/currency/USDC';
 
 //
 //// HELPERS
@@ -59,7 +59,7 @@ export const rollbackOrderUpdate = (
 //
 //// QUERIES
 //
-// const CART_QUERY_KEY = 'cart';
+
 export const ORDERS_QUERY_KEY = 'orders';
 
 function orderQuery<T = Order[]>(
@@ -125,11 +125,11 @@ export const useCartInSliceFormat = ({
 }) => {
   const buyerAddress = _buyer ?? undefined;
   const { data: cart } = useCart();
-  const { data: shop } = useShop(cart?.shop);
+  const { data: shop } = useShop({ id: cart?.shop });
 
   const slicerId =
     shop?.__sourceConfig.type === 'slice'
-      ? getSlicerIdFromSliceStoreId(shop?.__sourceConfig.id)
+      ? getSlicerIdFromSliceStoreId(shop.__sourceConfig.id)
       : undefined;
 
   return useSliceStoreProducts({
@@ -140,24 +140,6 @@ export const useCartInSliceFormat = ({
     },
   });
 };
-
-// export const useSlicePrices = () => {
-//   const { data: cart } = useCart();
-//   const buyer = useConnectWallet();
-//   const { data: shop } = useShop(cart?.shop);
-//   const {
-//     checkout,
-//     balances,
-//     cart: test,
-//     prices,
-//   } = useCheckout(privyWagmiConfig, {
-//     buyer,
-//   });
-
-//   return useQuery({
-//     queryKey: [CART_QUERY_KEY, 'slice'],
-//   });
-// };
 
 //
 //// MUTATIONS
@@ -353,7 +335,7 @@ export const useTipMutation = () => {
 };
 
 export const useFarmerAllocationFromOrder = (order: Order) => {
-  const { data: shop } = useShop(order.shop);
+  const { data: shop } = useShop({ id: order.shop });
   const allocation = shop?.farmerAllocations[0];
 
   const { data: farmer } = useFarmer(allocation?.farmer);

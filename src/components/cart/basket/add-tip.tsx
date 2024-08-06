@@ -10,7 +10,7 @@ import {
   NestedDrawer,
 } from '@/components/ui/drawer';
 import { USDCInput } from '@/components/ui/usdc-input';
-import { getCostSummary } from '@/data-model/order/OrderDTO';
+import { getOrderSummary } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import { cn } from '@/lib/utils';
 import { useTipMutation } from '@/queries/OrderQuery';
@@ -60,7 +60,10 @@ const getTipAmountFromOption = (
 ): USDC => {
   if (opt.__type === 'fixed') return opt.value;
   if (opt.__type === 'percentage')
-    return getCostSummary(cart).subTotal.usdc.percentageOf({
+    return getOrderSummary(
+      cart.orderItems,
+      cart.tip,
+    ).subTotal.usdc.percentageOf({
       percent: opt.percent,
     });
 
@@ -192,7 +195,7 @@ export const AddTipSection = ({
   cart: Order;
   shopId: UUID;
 }) => {
-  const { data: shop } = useShop(shopId);
+  const { data: shop } = useShop({ id: shopId });
 
   const { tipOptions, setTip } = useTipButtons(cart);
 

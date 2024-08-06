@@ -1,6 +1,7 @@
 import { prettyFormatPrice } from '@/lib/utils';
 import { formatEther, formatUnits, parseUnits } from 'viem';
 import { USDC } from './USDC';
+import { Currency } from '../type/CommonType';
 
 /**
  * the ETH value in Wei
@@ -13,6 +14,7 @@ export class ETH {
   public static readonly decimals: number = 18;
   public readonly decimals: number = ETH.decimals;
   public static readonly UNIT: bigint = BigInt(10 ** ETH.decimals);
+  public readonly UNIT: bigint = ETH.UNIT;
   public static readonly ZERO: ETH = new ETH(0);
   public static readonly ONE: ETH = new ETH(1);
   public static readonly BPS_BASE: bigint = BigInt(1000);
@@ -214,7 +216,9 @@ export class ETH {
    * const eth2 = new ETH(1);
    * (eth1.eq(eth2)); // true
    */
-  eq(other: ETH): boolean {
+  eq(other: Currency): other is ETH {
+    if (!this.is(other)) return false;
+
     return this.wei === other.wei;
   }
 
@@ -244,5 +248,9 @@ export class ETH {
 
   lte(other: ETH): boolean {
     return this.wei <= other.wei;
+  }
+
+  is(other: Currency): other is ETH {
+    return this.__currencyType === other.__currencyType;
   }
 }

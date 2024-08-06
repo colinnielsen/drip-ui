@@ -1,6 +1,11 @@
 import emptyCart from '@/assets/empty-cart.png';
 import { Divider } from '@/components/ui/divider';
-import { DrawerClose, DrawerFooter, DrawerTitle } from '@/components/ui/drawer';
+import {
+  DrawerClose,
+  DrawerFooter,
+  DrawerTitle,
+  useNearestDrawer,
+} from '@/components/ui/drawer';
 import { Drip, Label1, Title1 } from '@/components/ui/typography';
 import {
   collapseDuplicateItems,
@@ -19,13 +24,15 @@ import { FooterTotal } from './footer-total';
 import { NextButton } from './next-button';
 import { OrderSummary } from './summary';
 import { OrderConfirmation } from '../confirmation/confirmation';
+import { useShop } from '@/queries/ShopQuery';
 
 export const EmptyBasket = () => {
+  const { setOpen } = useNearestDrawer();
   return (
     <>
       <div className="flex justify-start w-full items-center px-6 py-4">
         <DrawerClose asChild>
-          <button>
+          <button onClick={() => setOpen(false)}>
             <X height={24} width={24} />
           </button>
         </DrawerClose>
@@ -89,6 +96,8 @@ export const LoadingBasketSlide = () => {
 export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
   const orderItems = collapseDuplicateItems(cart.orderItems);
   const isPaid = isPaidOrder(cart);
+  const { setOpen } = useNearestDrawer();
+  const { isFetching } = useShop({ id: shop.id });
   return (
     <AsCheckoutSlide>
       {isPaid ? (
@@ -97,7 +106,7 @@ export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
         <>
           <div className="flex justify-start w-full items-center px-6 py-4">
             <DrawerClose asChild>
-              <button>
+              <button onClick={() => setOpen(false)}>
                 <X height={24} width={24} />
               </button>
             </DrawerClose>
@@ -117,6 +126,7 @@ export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
                     quantity,
                     shopId: shop.id,
                     orderId: cart.id,
+                    isLoading: isFetching,
                   }}
                 />
                 <Divider />
@@ -129,13 +139,13 @@ export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
               <Divider />
             </>
           )}
-          <OrderSummary cart={cart} />
+          <OrderSummary cart={cart} isLoading={isFetching} />
           <Divider />
           <div className="p-6">
             <FarmerCard {...{ order: cart, className: 'h-28' }} />
           </div>
           <DrawerFooter className="p-0 w-full">
-            <FooterTotal cart={cart} />
+            <FooterTotal cart={cart} isLoading={isFetching} />
             <NextButton />
           </DrawerFooter>
         </>

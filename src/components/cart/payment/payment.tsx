@@ -66,7 +66,7 @@ export default function PaymentSlide({
   }, [isPaying]);
 
   const subTitle = useMemo(() => {
-    if (!isPaying) return '(we will prompt your web3 wallet soon)';
+    if (!isPaying) return '(we will prompt your wallet soon)';
     return '(via onchain superpowers)';
   }, [isPaying]);
 

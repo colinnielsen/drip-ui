@@ -47,7 +47,7 @@ export const getStaticProps: GetStaticProps<{
   const shop = STATIC_PAGE_DATA.find(l => l.id === params.shopId)!;
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(shopQuery(params.shopId as UUID));
+  await queryClient.prefetchQuery(shopQuery({ id: params.shopId as UUID }));
   const data: Shop | undefined = queryClient.getQueryData([
     'shop',
     params.shopId as UUID,
@@ -71,7 +71,7 @@ export const getStaticProps: GetStaticProps<{
 /// DYNAMIC PAGE
 //
 function DynamicShopPage(staticShop: StaticPageData) {
-  const { data: shop, error, isLoading } = useShop(staticShop.id);
+  const { data: shop, error, isLoading } = useShop({ id: staticShop.id });
 
   if (error) return <div className="text-red-500">{error.message}</div>;
 

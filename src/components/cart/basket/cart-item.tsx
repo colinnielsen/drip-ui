@@ -1,13 +1,13 @@
+import { Skeleton } from '@/components/ui/skeleton';
+import { getTotalItemCostBasedOnModSelection } from '@/data-model/order/OrderDTO';
 import { OrderItem } from '@/data-model/order/OrderType';
-import Image from 'next/image';
-import { Price } from '../../ui/icons';
-import { Headline, Label2 } from '../../ui/typography';
-import { NumberInput } from '../../ui/number-input';
 import { useAddToCart, useRemoveItemFromCart } from '@/queries/OrderQuery';
 import { UUID } from 'crypto';
+import Image from 'next/image';
 import { ReactNode } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { USDC } from '@/data-model/_common/currency/USDC';
+import { Price } from '../../ui/icons';
+import { NumberInput } from '../../ui/number-input';
+import { Headline, Label2 } from '../../ui/typography';
 
 export function LoadingCartItem() {
   return (
@@ -25,9 +25,7 @@ export function LoadingCartItem() {
             </Skeleton>
           ))}
         </div>
-        <Skeleton>
-          <Price price={USDC.ONE} />
-        </Skeleton>
+        <Price />
       </div>
       <div className="flex-grow" />
     </div>
@@ -37,10 +35,14 @@ export function LoadingCartItem() {
 export function OrderItemDisplay({
   orderItem,
   rightSide,
+  isLoading,
 }: {
   orderItem: OrderItem;
   rightSide?: ReactNode;
+  isLoading?: boolean;
 }) {
+  const { price, discountPrice } =
+    getTotalItemCostBasedOnModSelection(orderItem);
   return (
     <div className="flex items-start gap-4 w-full px-6">
       <div className="rounded-2xl overflow-hidden h-24 w-24 relative aspect-square">
@@ -59,7 +61,8 @@ export function OrderItemDisplay({
             <Label2 key={m.id}>{m.name}</Label2>
           ))}
         </div>
-        <Price {...orderItem.item} />
+
+        <Price {...{ price, discountPrice, isLoading }} />
       </div>
       <div className="flex-grow" />
       {rightSide && <div className="flex-1 justify-end flex">{rightSide}</div>}
@@ -72,11 +75,13 @@ export function CartItem({
   quantity,
   orderId,
   shopId,
+  isLoading,
 }: {
   orderItem: OrderItem;
   quantity: number;
   orderId: UUID;
   shopId: UUID;
+  isLoading?: boolean;
 }) {
   const { id, ...orderItemWithoutId } = orderItem;
   const { mutate: addAnother } = useAddToCart({
@@ -93,6 +98,7 @@ export function CartItem({
   return (
     <OrderItemDisplay
       orderItem={orderItem}
+      isLoading={isLoading}
       rightSide={
         <NumberInput
           value={quantity}

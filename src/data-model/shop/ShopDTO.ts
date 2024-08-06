@@ -2,7 +2,13 @@ import { generateUUID } from '@/lib/utils';
 import { SlicerBasics } from '@slicekit/core';
 import { UUID } from 'crypto';
 import { Entity } from '../__global/entities';
-import { ManualStoreConfig, OnlineShop, Shop, Storefront } from './ShopType';
+import {
+  ManualStoreConfig,
+  Menu,
+  OnlineShop,
+  Shop,
+  Storefront,
+} from './ShopType';
 import { SLICE_VERSION, SliceStoreId } from '../_common/type/SliceDTO';
 
 export const isStorefront = (shop: Shop): shop is Storefront => {
@@ -30,6 +36,14 @@ export const getSlicerIdFromSliceStoreId = (
   return parseInt(sliceId);
 };
 
+export const EMPTY_MENU: Menu = {
+  espresso: [],
+  coffee: [],
+  tea: [],
+  food: [],
+  other: [],
+};
+
 export const mapSliceStoreToShop = (
   sliceStore: SlicerBasics,
   manualConfig: ManualStoreConfig,
@@ -46,13 +60,7 @@ export const mapSliceStoreToShop = (
     __type: 'single-recipient',
     enabled: false,
   },
-  menu: {
-    espresso: [],
-    coffee: [],
-    tea: [],
-    food: [],
-    other: [],
-  },
+  menu: EMPTY_MENU,
   label: sliceStore.name,
   location: manualConfig.location,
   backgroundImage: manualConfig.backgroundImage || sliceStore.image || '',

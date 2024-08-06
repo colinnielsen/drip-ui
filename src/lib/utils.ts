@@ -54,9 +54,14 @@ export const axiosFetcher = async <T>(
     });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      console.error(error.response.data);
-      throw error;
+    if (axios.isAxiosError(error)) {
+      if (error instanceof AggregateError) {
+        console.error(error.errors);
+        throw error;
+      } else if (error.response) {
+        console.error(error.response.data);
+        throw error;
+      }
     }
 
     throw new Error('An unexpected error occurred: ' + error);

@@ -1,6 +1,7 @@
 import { parseUnits, USDC_ADDRESS_BASE } from '@/lib/ethereum';
 import { prettyFormatPrice } from '@/lib/utils';
 import { Address } from 'viem';
+import { Currency } from '../type/CommonType';
 
 export const isUSDC = (value: unknown): value is USDC => {
   return value instanceof USDC;
@@ -19,6 +20,7 @@ export class USDC {
   public static readonly decimals: number = 6;
   public readonly decimals: number = USDC.decimals;
   public static readonly UNIT: bigint = BigInt(10 ** USDC.decimals);
+  public readonly UNIT: bigint = BigInt(10 ** USDC.decimals);
   public static readonly ZERO: USDC = new USDC(0);
   public static readonly ONE: USDC = new USDC(1);
   public static readonly BPS_BASE: bigint = BigInt(1000);
@@ -216,7 +218,9 @@ export class USDC {
    * const usdc2 = new USDC(1);
    * (usdc1.eq(usdc2)); // true
    */
-  eq(other: USDC): boolean {
+  eq(other: Currency): other is USDC {
+    if (!(other instanceof USDC)) return false;
+
     return this.wei === other.wei;
   }
 
@@ -246,6 +250,10 @@ export class USDC {
 
   lte(other: USDC): boolean {
     return this.wei <= other.wei;
+  }
+
+  is(other: Currency): other is USDC {
+    return this.__currencyType === other.__currencyType;
   }
 }
 

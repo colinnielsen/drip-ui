@@ -1,4 +1,4 @@
-import { getCostSummary } from '@/data-model/order/OrderDTO';
+import { getOrderSummary } from '@/data-model/order/OrderDTO';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
 import { ORDERS_QUERY_KEY, useCart, useCartId } from '@/queries/OrderQuery';
@@ -93,8 +93,8 @@ const useDetermineCheckoutStep = (): {
       step: 'initializing',
     };
 
-  const summary = getCostSummary(cart);
-  const hasSufficientFunds = balance.gte(summary.total.raw);
+  const summary = getOrderSummary(cart.orderItems, cart.tip);
+  const hasSufficientFunds = balance.gte(summary.total.usdc);
   if (hasSufficientFunds) return { step: 'pay' };
   else return { step: 'get-usdc' };
 };

@@ -14,7 +14,7 @@ export function shouldGoToWelcomeSlide(step: string) {
   return step === 'login' || step === 'signup' || step === 'connect';
 }
 
-const ConnectButton = ({ onClose }: { onClose: () => void }) => {
+export const ConnectButton = ({ onClose }: { onClose?: () => void }) => {
   const { step } = useCheckoutContext();
   const { connectWallet } = usePrivy();
   const { current: initialStep } = useRef(step);
@@ -28,7 +28,7 @@ const ConnectButton = ({ onClose }: { onClose: () => void }) => {
       queryClient.refetchQueries({
         queryKey: [ORDERS_QUERY_KEY, data.id],
       });
-      onClose();
+      onClose?.();
     },
   });
 

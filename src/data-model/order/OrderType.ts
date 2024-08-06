@@ -20,6 +20,21 @@ export type SliceOrderInfo = {
 
 export type ExternalOrderInfo = SliceOrderInfo;
 
+export type OrderSummary = {
+  subTotal: {
+    formatted: string;
+    usdc: USDC;
+  };
+  tip: {
+    formatted: string;
+    usdc: USDC;
+  } | null;
+  total: {
+    formatted: string;
+    usdc: USDC;
+  };
+};
+
 type _BaseOrder = {
   id: UUID;
   timestamp: string;
@@ -51,6 +66,7 @@ export type PaidOrder = _BaseOrder & {
   status: 'submitting' | 'in-progress' | 'complete';
   transactionHash: Hex;
   externalOrderInfo?: ExternalOrderInfo;
+  orderSummary?: OrderSummary;
 };
 
 export type CancelledOrder = Omit<PaidOrder, 'status'> & {

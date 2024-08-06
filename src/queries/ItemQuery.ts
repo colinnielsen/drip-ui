@@ -1,5 +1,29 @@
 // import { PriceLookup, useSlicePrices } from './SliceQuery';
 
+import { Unsaved } from '@/data-model/_common/type/CommonType';
+import { OrderItem } from '@/data-model/order/OrderType';
+import { UUID } from 'crypto';
+import { useShop } from './ShopQuery';
+
+export const useItemPriceWithDiscount = (
+  shopId: UUID,
+  orderItem: Unsaved<OrderItem>,
+) => {
+  return useShop({
+    id: shopId,
+    select(data) {
+      const item = [...Object.values(data.menu).flat()].find(
+        i => i.id === orderItem.item.id,
+      );
+      return {
+        item,
+        price: item?.price,
+        discountPrice: item?.discountPrice,
+      };
+    },
+  });
+};
+
 // const getItemPriceFromPriceLookup = (
 //   item: Item,
 //   priceLookup: PriceLookup,

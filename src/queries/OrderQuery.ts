@@ -29,7 +29,7 @@ import { useFarmer } from './FarmerQuery';
 import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
-
+import { Item } from '@/data-model/item/ItemType';
 //
 //// HELPERS
 //
@@ -104,10 +104,38 @@ const cartSelector = (orders: Order[]) =>
 
 export const useCart = () => {
   const { data: userId } = useUserId();
-
-  return useQuery({
+  const cartQuery = useQuery({
     ...orderQuery(userId, cartSelector),
   });
+  const { data: shop } = useShop({ id: cartQuery.data?.shop });
+
+  if (!shop) return cartQuery;
+
+  const allShopItems = Object.values(shop?.menu ?? {})
+    .flat()
+    .reduce<Record<UUID, Item>>(
+      (acc, item) => ({
+        ...acc,
+        [item.id]: item,
+      }),
+      {},
+    );
+
+  return {
+    isLoading: false,
+    error: null,
+    isFetching: false,
+    data: {
+      ...cartQuery.data!,
+      orderItems: cartQuery.data!.orderItems.map(o => ({
+        ...o,
+        item: {
+          ...o.item,
+          discountPrice: allShopItems[o.item.id]?.discountPrice,
+        },
+      })),
+    },
+  };
 };
 
 export const useCartId = () => {

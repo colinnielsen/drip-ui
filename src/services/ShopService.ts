@@ -18,7 +18,7 @@ export const includeDiscountsOnShop = async (
 ): Promise<Shop> => {
   // no op for other store types
   if (shop.__sourceConfig.type !== 'slice') return shop;
-  debugger;
+
   const slicerId = getSlicerIdFromSliceStoreId(shop.__sourceConfig.id);
   const { cartProducts } = await sliceKit
     .getStoreProducts({

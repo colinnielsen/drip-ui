@@ -2,7 +2,7 @@ import { Order } from '@/data-model/order/OrderType';
 import { Headline } from '../../ui/typography';
 import { Price } from '../../ui/icons';
 import { Divider } from '../../ui/divider';
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
+import { useCartSummary } from '@/queries/OrderQuery';
 
 export const FooterTotal = ({
   cart,
@@ -11,7 +11,7 @@ export const FooterTotal = ({
   cart: Order;
   isLoading?: boolean;
 }) => {
-  const summary = getOrderSummary(cart.orderItems, cart.tip);
+  const cartSummary = useCartSummary();
 
   return (
     <>
@@ -19,7 +19,10 @@ export const FooterTotal = ({
       <div className="p-4">
         <div className="flex justify-between">
           <Headline>Total</Headline>
-          <Price price={summary?.total.usdc} isLoading={isLoading} />
+          <Price
+            price={cartSummary?.total.usdc}
+            isLoading={isLoading || !cartSummary}
+          />
         </div>
       </div>
     </>

@@ -9,7 +9,7 @@ import { Address } from 'viem';
 //// TYPES
 ///
 export type Menu = {
-  [category in ItemCategory | 'other']: Item[];
+  [category in ItemCategory | 'other' | string]: Item[];
 };
 
 export type SingleRecipientTipConfig =

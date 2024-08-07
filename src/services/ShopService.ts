@@ -57,6 +57,7 @@ export const includeDiscountsOnShop = async (
 //
 //// SERVICE OBJECT
 ///
-export default {
+const shopService = {
   includeDiscountsOnShop,
 };
+export default shopService;

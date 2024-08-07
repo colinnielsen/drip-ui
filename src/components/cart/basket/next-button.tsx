@@ -17,6 +17,7 @@ export const NextButton = () => {
       ) : shouldGoToWelcomeSlide(step) ? (
         <ConnectButton />
       ) : step === 'pay' ? (
+        // null
         <PayButton />
       ) : (
         'ERR: unexpected state'

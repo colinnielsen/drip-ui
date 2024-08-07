@@ -1,14 +1,18 @@
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
+import { Order } from '@/data-model/order/OrderType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
-import { useConnectedWallet, useUSDCBalance } from '@/queries/EthereumQuery';
-import { ORDERS_QUERY_KEY, useCart, useCartId } from '@/queries/OrderQuery';
+import { axiosFetcher } from '@/lib/utils';
+import { useUSDCBalance, useWalletAddress } from '@/queries/EthereumQuery';
+import {
+  ORDERS_QUERY_KEY,
+  useCart,
+  useCartId,
+  useCartSummary,
+} from '@/queries/OrderQuery';
 import { useUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
 import { skipToken, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useGoToSlide, useSlideInView } from '../ui/carousel';
-import { axiosFetcher } from '@/lib/utils';
-import { Order } from '@/data-model/order/OrderType';
 
 // const SLIDE_MAP = {
 //   initializing: 1,
@@ -56,7 +60,7 @@ const useDetermineCheckoutStep = (): {
   //   button: JSX.Element | null;
 } => {
   const { authenticated, ready: privyReady } = usePrivy();
-  const wallet = useConnectedWallet();
+  const wallet = useWalletAddress();
   const { data: user, isLoading: isUserLoading, error: userError } = useUser();
   const {
     data: balance,
@@ -64,6 +68,8 @@ const useDetermineCheckoutStep = (): {
     error: balanceError,
   } = useUSDCBalance();
   const { data: cart, isLoading: isCartLoading, error: cartError } = useCart();
+
+  const cartSummary = useCartSummary();
 
   // console.log({
   //   user,
@@ -78,7 +84,7 @@ const useDetermineCheckoutStep = (): {
   //   userError,
   // });
   // (shouldn't happen)
-  if (!privyReady || isUserLoading || !user || !cart)
+  if (!privyReady || isUserLoading || !user || !cart || !cartSummary)
     return {
       step: 'initializing',
     };
@@ -93,8 +99,7 @@ const useDetermineCheckoutStep = (): {
       step: 'initializing',
     };
 
-  const summary = getOrderSummary(cart.orderItems, cart.tip);
-  const hasSufficientFunds = balance.gte(summary.total.usdc);
+  const hasSufficientFunds = balance.gte(cartSummary.total.usdc);
   if (hasSufficientFunds) return { step: 'pay' };
   else return { step: 'get-usdc' };
 };

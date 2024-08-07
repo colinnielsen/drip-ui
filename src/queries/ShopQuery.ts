@@ -1,67 +1,51 @@
 import { Shop } from '@/data-model/shop/ShopType';
-import { axiosFetcher } from '@/lib/utils';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { axiosFetcher, minutes } from '@/lib/utils';
+import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
-import { useConnectedWallet } from './EthereumQuery';
+import { useWalletAddress } from './EthereumQuery';
 import { useUserId } from './UserQuery';
 
 export const useShops = () =>
   useQuery({
-    queryKey: ['shops'],
+    queryKey: ['shop'],
     queryFn: () => axiosFetcher<Shop[]>('/api/shops'),
+    staleTime: minutes(5),
   });
 
-export const shopQuery = <TData = Shop>({
+export const useShop = <TData = Shop>({
   id,
-  initialData,
-  userId,
-  connectedWallet,
   select,
-}: {
-  id?: UUID;
-  initialData?: Shop;
-  userId?: UUID;
-  connectedWallet?: Address;
-  select?: (data: Shop) => TData;
-} = {}) => {
+}: { id?: UUID; select?: (data: Shop) => TData } = {}) => {
+  const client = useQueryClient();
+  const { data: userId } = useUserId();
+  const connectedWallet = useWalletAddress();
+
+  const initialData =
+    client.getQueryData<Shop[]>(['shop'])?.find(shop => shop.id === id) ??
+    client.getQueryData<Shop>(['shop', id]);
+
   const includeDiscounts = !!(userId || connectedWallet);
   const queryParams = includeDiscounts
     ? `?includeDiscounts=true${userId ? `&userId=${userId}` : ''}${connectedWallet ? `&walletAddress=${connectedWallet}` : ''}`
     : '';
 
-  return {
-    queryKey: ['shop', id, { userId, connectedWallet }],
+  const shopQueryKey = [
+    'shop',
+    id,
+    ...(includeDiscounts
+      ? [{ userId, connectedWallet: connectedWallet ?? undefined }]
+      : []),
+  ];
+  console.log('shopQueryKey', shopQueryKey);
+  return useQuery({
+    queryKey: shopQueryKey,
     queryFn: () => axiosFetcher<Shop>(`/api/shops/${id}${queryParams}`),
-    initialData,
     enabled: !!id,
-    // staleTime: 1000 * 60 * 5,
     select,
-  };
-};
-
-export const useShop = <TData = Shop>({
-  id,
-  _initialData,
-  select,
-}: { id?: UUID; _initialData?: Shop; select?: (data: Shop) => TData } = {}) => {
-  const client = useQueryClient();
-  const { data: userId } = useUserId();
-  const wallet = useConnectedWallet();
-  const initialData =
-    _initialData ??
-    client.getQueryData<Shop[]>(['shops'])?.find(shop => shop.id === id) ??
-    client.getQueryData<Shop>(['shop', id]);
-
-  return useQuery(
-    shopQuery({
-      id,
-      initialData,
-      userId,
-      connectedWallet: wallet?.address,
-      select,
-    }),
-  );
+    initialData,
+    staleTime: 0,
+  });
 };
 
 // export const useListenForDiscountRetching = () => {

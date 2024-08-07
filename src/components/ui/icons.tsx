@@ -35,11 +35,11 @@ export function Price<T extends Currency>(
           isLoading && 'animate-pulse',
         )}
       >
-        ${data.price?.prettyFormat()}
+        ${data.price?.prettyFormat?.()}
       </Label2>
       {isDiscounted && !!data.discountPrice && (
         <Label2 as="span" className="text-sm text-green-500 font-medium">
-          {data.discountPrice.prettyFormat()}
+          {data.discountPrice.prettyFormat?.()}
         </Label2>
       )}
     </div>

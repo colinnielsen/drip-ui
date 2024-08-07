@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useUser } from '@/queries/UserQuery';
 import { UUID } from 'crypto';
 import { ItemWithSelector } from './item-popup';
+import { ClientOnly } from '../ui/client-only';
 
 export const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-5 w-full overflow-x-auto">
@@ -30,8 +31,7 @@ export function ItemList({
   shopId?: UUID;
   items?: Item[];
 }) {
-  const { isLoading: userIsLoading } = useUser();
-  const isLoading = !shopId || !items || userIsLoading;
+  const isLoading = !shopId || !items;
 
   if (isLoading) {
     return (
@@ -55,9 +55,11 @@ export function ItemList({
           horizontal ? 'flex-row' : 'flex-col',
         )}
       >
-        {items.map((item, index) => (
-          <ItemWithSelector key={index} item={item} shopId={shopId} />
-        ))}
+        <ClientOnly>
+          {items.map((item, index) => (
+            <ItemWithSelector key={index} item={item} shopId={shopId} />
+          ))}
+        </ClientOnly>
       </div>
     </div>
   );

@@ -47,24 +47,18 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <PrivyProvider>
       <ReactQueryClientProvider useDevTools>
-        <WagmiProvider config={PRIVY_WAGMI_CONFIG}>
-          <SliceProvider>
-            <SliceCartListener>
-              <div
-                className={cn(
-                  CSS_FONT_CLASS_CONFIG,
-                  'bg-background',
-                  'min-h-screen',
-                  // 'prose',
-                )}
-              >
-                <Component {...pageProps} />
-                <Footer />
-                <GlobalListeners />
-              </div>
-            </SliceCartListener>
-          </SliceProvider>
-        </WagmiProvider>
+        <div
+          className={cn(
+            CSS_FONT_CLASS_CONFIG,
+            'bg-background',
+            'min-h-screen',
+            // 'prose',
+          )}
+        >
+          <Component {...pageProps} />
+          <Footer />
+          <GlobalListeners />
+        </div>
       </ReactQueryClientProvider>
     </PrivyProvider>
   );

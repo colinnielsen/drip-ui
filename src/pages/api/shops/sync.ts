@@ -10,10 +10,19 @@ export default withErrorHandling(async function (
   _req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  const previousShopIds = await sqlDatabase.shops
+    .findAll()
+    .then(shops => shops.map(shop => shop.id));
+
   await syncService
     .syncStores(ONBOARDED_SHOPS)
     .then(async () => {
       await res.revalidate('/');
+      await Promise.all(
+        previousShopIds.map(id => {
+          res.revalidate(`/shops/${id}`).catch(err => console.error(err));
+        }),
+      );
       return res.status(200).json({ message: 'Sync completed' });
     })
     .catch(err => {

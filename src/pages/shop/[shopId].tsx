@@ -2,12 +2,13 @@ import FarmerCard from '@/components/shop-page/farmer-intro-card';
 import { ShopHeader, ShopHeaderDetails } from '@/components/shop-page/header';
 import { ItemList } from '@/components/shop-page/item-list';
 import { SLICE_VERSION } from '@/data-model/_common/type/SliceDTO';
-import { ItemCategory } from '@/data-model/item/ItemType';
 import { deriveShopIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
+import { sqlDatabase } from '@/infras/database';
 import { ONBOARDED_SHOPS } from '@/lib/static-data';
+import { rehydrateData } from '@/lib/utils';
 import { farmerQuery } from '@/queries/FarmerQuery';
-import { shopQuery, useShop } from '@/queries/ShopQuery';
+import { useShop } from '@/queries/ShopQuery';
 import {
   DehydratedState,
   HydrationBoundary,
@@ -16,6 +17,7 @@ import {
 } from '@tanstack/react-query';
 import { UUID } from 'crypto';
 import { GetStaticPaths, GetStaticProps } from 'next/types';
+import { useMemo } from 'react';
 
 ///
 ///// STATIC SITE GENERATION
@@ -40,31 +42,41 @@ export const getStaticPaths: GetStaticPaths<{ shopId: UUID }> = () => {
 };
 
 export const getStaticProps: GetStaticProps<{
+  staticShop: StaticPageData;
   dehydratedState: DehydratedState;
 }> = async ({ params }) => {
   if (!params?.shopId) throw Error('cannot find params');
 
-  const shop = STATIC_PAGE_DATA.find(l => l.id === params.shopId)!;
+  const staticShop = STATIC_PAGE_DATA.find(l => l.id === params.shopId)!;
+  if (!staticShop) return { notFound: true };
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(shopQuery({ id: params.shopId as UUID }));
-  const data: Shop | undefined = queryClient.getQueryData([
-    'shop',
-    params.shopId as UUID,
-  ]);
+
+  await queryClient.prefetchQuery({
+    queryKey: ['shop', staticShop.id],
+    queryFn: () =>
+      sqlDatabase.shops
+        .findById(staticShop.id, { rehydrate: false })
+        .then(s => s!),
+    staleTime: 0,
+  });
+
+  const data: Shop = queryClient.getQueryData([
+    'shop' as const,
+    staticShop.id,
+  ])!;
 
   const [selectedFarmer] = data?.farmerAllocations || [null];
   if (selectedFarmer)
     await queryClient.prefetchQuery(farmerQuery(selectedFarmer.farmer));
+  const dehydratedState = dehydrate(queryClient);
 
-  if (!shop) return { notFound: true };
-  else
-    return {
-      props: {
-        ...shop,
-        dehydratedState: dehydrate(queryClient),
-      },
-    };
+  return {
+    props: {
+      staticShop,
+      dehydratedState,
+    },
+  };
 };
 
 //
@@ -81,9 +93,9 @@ function DynamicShopPage(staticShop: StaticPageData) {
     other: [],
   };
 
-  const items = Object.entries(shop?.menu || emptyMenu).filter(([_, items]) =>
-    isLoading ? true : items.length > 0,
-  );
+  const items = Object.entries(shop?.menu || emptyMenu)
+    .filter(([_, items]) => (isLoading ? true : items.length > 0))
+    .sort((a, b) => a[0].localeCompare(b[0]));
 
   return (
     <>
@@ -114,10 +126,18 @@ function DynamicShopPage(staticShop: StaticPageData) {
 //
 /// STATIC PAGE
 //
-export default function StaticShopPage(
-  staticShop: StaticPageData,
-  ...dehydratedState: DehydratedState[]
-) {
+export default function StaticShopPage({
+  staticShop,
+  dehydratedState: _dehydratedState,
+}: {
+  staticShop: StaticPageData;
+  dehydratedState: DehydratedState;
+}) {
+  const dehydratedState = useMemo(
+    () => rehydrateData(_dehydratedState),
+    [_dehydratedState],
+  );
+
   return (
     <main className="flex flex-col pb-40">
       <HydrationBoundary state={dehydratedState}>

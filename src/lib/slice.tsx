@@ -1,24 +1,24 @@
+import { useWalletAddress } from '@/queries/EthereumQuery';
+import { useCartInSliceFormat } from '@/queries/OrderQuery';
 import {
-  GetProductParams,
-  GetStoreProductsParams,
-  GetStoresParams,
-  PayProductsParams,
-  ProductCart,
-  getProduct,
-  getStoreProducts,
-  getStores,
-  payProducts,
   getOrder,
   GetOrderParams,
+  getProduct,
+  GetProductParams,
+  getStoreProducts,
+  GetStoreProductsParams,
+  getStores,
+  GetStoresParams,
+  payProducts,
+  PayProductsParams,
+  ProductCart,
   updateDynamicProducts,
   UpdateDynamicProductsParams,
 } from '@slicekit/core';
-import { axiosFetcher } from './utils';
-import { PRIVY_WAGMI_CONFIG } from './ethereum';
-import { ReactNode, useEffect } from 'react';
 import { useCart as useSliceCart } from '@slicekit/react';
-import { useConnectedWallet } from '@/queries/EthereumQuery';
-import { useCart, useCartInSliceFormat } from '@/queries/OrderQuery';
+import { ReactNode, useEffect } from 'react';
+import { PRIVY_WAGMI_CONFIG } from './ethereum';
+import { axiosFetcher } from './utils';
 
 export const SLICE_CART_LOCAL_STORAGE_KEY = 'cart';
 
@@ -70,9 +70,9 @@ export const sliceKit = {
 };
 
 export const SliceCartListener = ({ children }: { children: ReactNode }) => {
-  const wallet = useConnectedWallet();
+  const walletAddress = useWalletAddress();
   const { data: sliceCart } = useCartInSliceFormat({
-    buyerAddress: wallet?.address,
+    buyerAddress: walletAddress,
   });
   const { updateCart } = useSliceCart();
   const cartHash = sliceCart

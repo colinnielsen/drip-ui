@@ -18,17 +18,14 @@ import { useMemo, useRef } from 'react';
 export const getStaticProps: GetStaticProps<{
   dehydratedState: DehydratedState;
 }> = async () => {
-  const shops = await sqlDatabase.shops.findAll();
+  const shops = await sqlDatabase.shops.findAll({ rehydrate: false });
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: ['shops'],
-    queryFn: () => Promise.resolve(JSON.stringify(shops)),
-  });
+  await queryClient.setQueryData(['shop'], shops);
 
   return {
     props: {
-      shops: JSON.stringify(shops),
+      shops,
       dehydratedState: dehydrate(queryClient),
     },
   };
@@ -38,20 +35,15 @@ export default function Home({
   shops,
   dehydratedState: _dehydratedState,
 }: {
-  shops: string;
+  shops: Shop[];
   dehydratedState: DehydratedState;
 }) {
-  const rehydratedShops = useMemo(() => {
-    return rehydrateData<Shop[]>(JSON.parse(shops));
-  }, [shops]);
+  const rehydratedShops = useMemo(() => rehydrateData<Shop[]>(shops), [shops]);
 
-  const { current: dehydratedState } = useRef(() => {
-    debugger;
-    _dehydratedState.queries[0].state.data = rehydrateData(
-      JSON.parse(_dehydratedState.queries[0].state.data as string),
-    );
-    return _dehydratedState;
-  });
+  const dehydratedState = useMemo(
+    () => rehydrateData(_dehydratedState),
+    [_dehydratedState],
+  );
 
   return (
     <HydrationBoundary state={dehydratedState}>
@@ -75,7 +67,7 @@ export default function Home({
 
         <ShopList
           title="Participating shops"
-          shops={rehydratedShops ?? []}
+          shops={rehydratedShops}
           isLoading={false}
         />
 

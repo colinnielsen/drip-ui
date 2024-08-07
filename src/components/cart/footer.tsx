@@ -13,18 +13,12 @@ import { useEffect, useState } from 'react';
 import { AnimatedTimer } from '../ui/icons';
 import { Headline, Label2 } from '../ui/typography';
 import CheckoutSlides from './checkout-slides';
+import { PRIVY_WAGMI_CONFIG } from '@/lib/ethereum';
+import { WagmiProvider } from '@privy-io/wagmi';
+import { SliceProvider } from '@slicekit/react';
+import { SliceCartListener } from '@/lib/slice';
 
-// export const CartDrawer = ({
-//   cart,
-//   shop,
-// }: {
-//   cart: Order | null | undefined;
-//   shop: Shop | undefined;
-// }) => {
-//   return <></>;
-// };
-
-export default function () {
+export default function CartFooter() {
   const { data: cart } = useCart();
   const { data: shop } = useShop({ id: cart?.shop });
   const [ready, setIsReady] = useState(false);
@@ -84,7 +78,13 @@ export default function () {
           className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
           aria-describedby="cart-footer"
         >
-          <CheckoutSlides {...{ shop, cart }} />
+          <WagmiProvider config={PRIVY_WAGMI_CONFIG}>
+            <SliceProvider>
+              <SliceCartListener>
+                <CheckoutSlides {...{ shop, cart }} />
+              </SliceCartListener>
+            </SliceProvider>
+          </WagmiProvider>
         </DrawerContent>
       </Drawer>
     </DrawerContext.Provider>

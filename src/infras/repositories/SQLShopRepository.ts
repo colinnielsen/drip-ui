@@ -7,17 +7,17 @@ import { isStorefront } from '@/data-model/shop/ShopDTO';
 import { rehydrateData } from '@/lib/utils';
 
 export class SQLShopRepository implements ShopRepository {
-  async findById(id: UUID): Promise<Shop | null> {
+  async findById(id: UUID, { rehydrate = true } = {}): Promise<Shop | null> {
     const result = await sql`SELECT * FROM shops WHERE id = ${id}`;
     const shop = result.rows[0] as Shop | null;
 
-    return shop ? this.rehydrateShop(shop) : null;
+    return shop ? (rehydrate ? this.rehydrateShop(shop) : shop) : null;
   }
 
-  async findAll(): Promise<Shop[]> {
+  async findAll({ rehydrate = true } = {}): Promise<Shop[]> {
     const result = await sql`SELECT * FROM shops`;
     const shops = result.rows as Shop[];
-    return shops.map(this.rehydrateShop);
+    return rehydrate ? shops.map(this.rehydrateShop) : shops;
   }
 
   async findItem(shopId: UUID, nameOrID: UUID | string): Promise<Item | null> {
@@ -89,7 +89,7 @@ export class SQLShopRepository implements ShopRepository {
     if (result.rowCount === 0) throw Error('could not delete');
   }
 
-  rehydrateShop(shop: Shop): Shop {
+  private rehydrateShop(shop: Shop): Shop {
     return rehydrateData(shop);
   }
 }

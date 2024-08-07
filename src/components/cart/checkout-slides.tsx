@@ -6,6 +6,9 @@ import BasketSlide, { EmptyBasket, LoadingBasketSlide } from './basket/basket';
 import { ConfirmationSlide } from './confirmation/confirmation';
 import { CheckoutProvider } from './context';
 import PaymentSlide from './payment/payment';
+import { usePrevious } from '@/lib/hooks/utility-hooks';
+import { useEffect } from 'react';
+import { useNearestDrawer } from '../ui/drawer';
 
 /**
  * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
@@ -34,6 +37,14 @@ export default function CheckoutSlides({
   shop?: Shop;
   cart?: Order | null;
 }) {
+  const prevCart = usePrevious(cart);
+  const { setOpen } = useNearestDrawer();
+
+  useEffect(() => {
+    if (prevCart && cart === null) setOpen(false);
+    if (prevCart?.id && cart?.id && prevCart.id !== cart.id) setOpen(false);
+  }, [cart, prevCart]);
+
   if (cart === null) return <EmptyBasket />;
   if (cart === undefined) return <LoadingBasketSlide />;
   if (!shop) return "no shop (this shouldn't happen";

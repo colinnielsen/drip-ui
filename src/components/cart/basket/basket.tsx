@@ -45,9 +45,9 @@ export const EmptyBasket = () => {
       </DrawerTitle>
 
       <div className="flex-grow flex justify-center items-center flex-col gap-4">
-        <Image src={emptyCart} alt="empty cart" />
+        {/* <Image src={emptyCart} alt="empty cart" />
         <Drip className="text-lg">Your cart is empty</Drip>
-        <Label1>Go get some ☕️</Label1>
+        <Label1>Go get some ☕️</Label1> */}
       </div>
 
       <DrawerFooter className="p-0 w-full">

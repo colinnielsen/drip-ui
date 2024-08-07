@@ -3,38 +3,47 @@ import coffeeStill from '@/assets/coffee-still.png';
 import { CTAButton, LoadingCTAButton } from '@/components/ui/button';
 import { useGoToSlide } from '@/components/ui/carousel';
 import { Drip, DripSmall, Label1, Mono } from '@/components/ui/typography';
+import { USDC } from '@/data-model/_common/currency/USDC';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { isDev } from '@/lib/utils';
-import { useConnectedWallet } from '@/queries/EthereumQuery';
-import { useCart, useCartInSliceFormat } from '@/queries/OrderQuery';
+import { useWalletAddress } from '@/queries/EthereumQuery';
+import {
+  useCart,
+  useCartInSliceFormat,
+  useCartSummary,
+} from '@/queries/OrderQuery';
 import { usePayAndOrder } from '@/queries/SliceQuery';
 import Image from 'next/image';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
-import { USDC } from '@/data-model/_common/currency/USDC';
 
-export const PayButton = () => {
-  const wallet = useConnectedWallet();
+export const PayButton = memo(() => {
+  const buyerAddress = useWalletAddress();
 
   const { data: sliceCart, isFetching: sliceCartIsLoading } =
     useCartInSliceFormat({
-      buyerAddress: wallet?.address,
+      buyerAddress,
     });
   const { isFetching: cartIsLoading, data: cart } = useCart();
   const { paymentStep } = useCheckoutContext();
   const goToSlide = useGoToSlide();
   const payAndOrder = usePayAndOrder();
+  const cartSummary = useCartSummary();
 
-  if (!sliceCart || sliceCartIsLoading || cartIsLoading || !cart || !wallet)
+  if (
+    !sliceCart ||
+    sliceCartIsLoading ||
+    cartIsLoading ||
+    !cart ||
+    !buyerAddress
+  )
     return <LoadingCTAButton />;
 
-  const cartTotal = getOrderSummary(cart.orderItems, cart.tip);
-
+  const isLoading = paymentStep === 'awaiting-confirmation';
   return (
     <CTAButton
       onClick={async () => {
@@ -43,12 +52,16 @@ export const PayButton = () => {
         goToSlide?.(1);
         await payAndOrder();
       }}
-      isLoading={paymentStep === 'awaiting-confirmation'}
+      isLoading={isLoading}
     >
-      {cartTotal.total.usdc.gt(USDC.ZERO) ? 'pay' : 'place order'}
+      {!cartSummary || isLoading
+        ? ''
+        : cartSummary?.total.usdc.gt(USDC.ZERO)
+          ? 'pay'
+          : 'place order'}
     </CTAButton>
   );
-};
+});
 
 export default function PaymentSlide({
   cart,

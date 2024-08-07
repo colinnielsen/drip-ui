@@ -5,6 +5,7 @@ import {
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
+  DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
@@ -78,7 +79,7 @@ export const AddButton = ({
   );
 };
 
-export function ItemPreviewTrigger({
+export function QuickAddItemCard({
   shopId,
   item,
 }: {
@@ -97,7 +98,7 @@ export function ItemPreviewTrigger({
           {cart !== undefined ? (
             <AddButton {...{ shopId, orderId: cart?.id, item }} />
           ) : (
-            <Skeleton className="h-7 w-7 rounded-full" />
+            <Skeleton className="bg-gray-200 rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:bg-neutral-300 active:scale-95 drop-shadow-md" />
           )}
         </div>
         <div className="flex flex-col gap-1">
@@ -259,7 +260,7 @@ export function ItemWithSelector({
   );
   const { data: cart } = useCart();
   const { isFetching } = useShop({ id: shopId });
-  console.log(cart);
+
   const reset = () => {
     setQuantity(1);
     setSelectedOptions({});
@@ -279,22 +280,24 @@ export function ItemWithSelector({
 
   return (
     <Drawer onClose={reset}>
-      <ItemPreviewTrigger item={item} shopId={shopId} />
+      <QuickAddItemCard item={item} shopId={shopId} />
 
       <DrawerContent>
         <div className="h-[75vh] flex flex-col overflow-scroll">
-          <DrawerHeader className="p-0 rounded-t-xl">
-            <div className="min-h-64 relative rounded-t-xl overflow-clip">
+          <DrawerHeader className="p-0 rounded-t-xl overflow-clip">
+            <div className="min-h-64 relative">
               <Image
                 src={item.image}
                 alt={item.name}
                 fill
                 className="object-cover"
-                quality={100}
+                quality={30}
               />
             </div>
             <div className="flex flex-col px-6 py-4 gap-y-2">
-              <Title1 className="text-left">{item.name}</Title1>
+              <DrawerTitle asChild>
+                <Title1 className="text-left">{item.name}</Title1>
+              </DrawerTitle>
 
               <Price {...item} isLoading={isFetching} />
 

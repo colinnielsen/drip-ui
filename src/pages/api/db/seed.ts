@@ -133,6 +133,10 @@ export default async function handler(
   _req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  const previousShopIds = await sqlDatabase.shops
+    .findAll()
+    .then(shops => shops.map(shop => shop.id));
+
   if (_req.query.reset) await _resetDB();
 
   await bootstrapDB();
@@ -144,8 +148,15 @@ export default async function handler(
     .then(async () => {
       await res.revalidate('/');
       await Promise.all(
+        previousShopIds.map(id => {
+          res.revalidate(`/shops/${id}`).catch(err => console.error(err));
+        }),
+      );
+      await Promise.all(
         STATIC_FARMER_DATA.map(farmer => {
-          res.revalidate(`/farmers/${farmer.id}`);
+          res
+            .revalidate(`/farmers/${farmer.id}`)
+            .catch(err => console.error(err));
         }),
       );
       return res.status(200).json({ message: 'Seeding complete' });

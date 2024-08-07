@@ -1,7 +1,6 @@
 import { CTAButton } from '@/components/ui/button';
 import { Divider } from '@/components/ui/divider';
 import {
-  Drawer,
   DrawerClose,
   DrawerContent,
   DrawerFooter,
@@ -10,15 +9,14 @@ import {
   NestedDrawer,
 } from '@/components/ui/drawer';
 import { USDCInput } from '@/components/ui/usdc-input';
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
-import { Order } from '@/data-model/order/OrderType';
+import { USDC } from '@/data-model/_common/currency/USDC';
+import { Order, OrderSummary } from '@/data-model/order/OrderType';
 import { cn } from '@/lib/utils';
-import { useTipMutation } from '@/queries/OrderQuery';
+import { useCartSummary, useTipMutation } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
 import { UUID } from 'crypto';
 import { useCallback, useMemo, useState } from 'react';
 import { Headline, Label3, Title1 } from '../../ui/typography';
-import { USDC } from '@/data-model/_common/currency/USDC';
 
 //
 //// UTILS
@@ -55,36 +53,36 @@ const CUSTOM_OPTION = {
 export const TIP_OPTIONS = [...KNOWN_TIP_OPTIONS, CUSTOM_OPTION];
 
 const getTipAmountFromOption = (
-  cart: Order,
+  orderSummary: OrderSummary,
   opt: (typeof KNOWN_TIP_OPTIONS)[number],
 ): USDC => {
   if (opt.__type === 'fixed') return opt.value;
   if (opt.__type === 'percentage')
-    return getOrderSummary(
-      cart.orderItems,
-      cart.tip,
-    ).subTotal.usdc.percentageOf({
+    return orderSummary.subTotal.usdc.percentageOf({
       percent: opt.percent,
     });
 
   throw new Error('Invalid tip option');
 };
 
-const getOptionFromTipAmount = (cart: Order) => {
+const getOptionFromTipAmount = (orderSummary: OrderSummary) => {
   // if there's no tip or the tip amount is 0, return null
-  if (cart.tip?.amount === undefined || cart.tip.amount.eq(USDC.ZERO))
+  if (orderSummary.tip === null || orderSummary.tip.usdc.eq(USDC.ZERO))
     return null;
 
   const [, fixedOption] =
     KNOWN_TIP_OPTIONS.map(
-      opt => [getTipAmountFromOption(cart, opt), opt] as const,
-    ).find(([amount]) => amount.eq(cart.tip!.amount)) || [];
+      opt => [getTipAmountFromOption(orderSummary, opt), opt] as const,
+    ).find(([amount]) => amount.eq(orderSummary.tip!.usdc)) || [];
 
   if (!fixedOption) return CUSTOM_OPTION;
   return fixedOption;
 };
 
-const useTipButtons = (cart: Order) => {
+const useTipButtons = (
+  cart: Order,
+  cartSummary: OrderSummary | null | undefined,
+) => {
   const mutation = useTipMutation();
 
   const setTip = useCallback(
@@ -93,13 +91,19 @@ const useTipButtons = (cart: Order) => {
 
       await mutation.mutateAsync({
         order: cart,
-        tip: option ? getTipAmountFromOption(cart, option) : null,
+        tip:
+          option && cartSummary
+            ? getTipAmountFromOption(cartSummary, option)
+            : null,
       });
     },
-    [mutation],
+    [mutation, cartSummary, cart],
   );
 
-  const selectedTip = useMemo(() => getOptionFromTipAmount(cart), [cart]);
+  const selectedTip = useMemo(
+    () => (cartSummary ? getOptionFromTipAmount(cartSummary) : null),
+    [cartSummary],
+  );
   const tipOptions = useMemo(
     () =>
       TIP_OPTIONS.map(option => ({
@@ -197,7 +201,8 @@ export const AddTipSection = ({
 }) => {
   const { data: shop } = useShop({ id: shopId });
 
-  const { tipOptions, setTip } = useTipButtons(cart);
+  const cartSummary = useCartSummary();
+  const { tipOptions, setTip } = useTipButtons(cart, cartSummary);
 
   if (!shop) return null;
 

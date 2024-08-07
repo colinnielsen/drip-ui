@@ -1,16 +1,14 @@
+import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { HomeSvg, MapSvg, ProfileSvg } from './ui/icons';
-import dynamic from 'next/dynamic';
-import CartFooter from '@/components/cart/footer';
-import { cn } from '@/lib/utils';
 
-// const LazyCartFooter = dynamic(() => import('./cart/footer'), { ssr: false });
+const LazyCartFooter = dynamic(() => import('./cart/footer'), { ssr: false });
 
 export function Footer() {
   return (
     <footer className="fixed h-fit bottom-0 w-full flex flex-col">
-      {/* <LazyCartFooter /> */}
-      <CartFooter />
+      <LazyCartFooter />
       <div
         className={cn(
           'flex justify-between bg-background py-4 w-full z-10',

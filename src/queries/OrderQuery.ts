@@ -30,6 +30,8 @@ import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
 import { Item } from '@/data-model/item/ItemType';
+import { useMemo } from 'react';
+import { getOrderSummary } from '@/data-model/order/OrderDTO';
 //
 //// HELPERS
 //
@@ -77,7 +79,6 @@ function orderQuery<T = Order[]>(
       return sorted as T;
     },
     enabled: !!userId,
-    placeholderData: keepPreviousData,
   };
 }
 
@@ -109,38 +110,45 @@ const cartSelector = (orders: Order[]) =>
 
 export const useCart = () => {
   const { data: userId } = useUserId();
-  const cartQuery = useQuery({
+  return useQuery({
     ...orderQuery(userId, cartSelector),
   });
-  const { data: shop } = useShop({ id: cartQuery.data?.shop });
+};
 
-  if (!shop) return cartQuery;
+export const useCartSummary = () => {
+  const { data: cart } = useCart();
+  const { data: shop } = useShop({ id: cart?.shop });
+  const allShopItems = useMemo(
+    () =>
+      Object.values(shop?.menu ?? {})
+        .flat()
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .reduce<Record<UUID, Item>>((acc, item) => {
+          acc[item.id] = item;
+          return acc;
+        }, {}),
+    [shop?.menu],
+  );
 
-  const allShopItems = Object.values(shop?.menu ?? {})
-    .flat()
-    .reduce<Record<UUID, Item>>(
-      (acc, item) => ({
-        ...acc,
-        [item.id]: item,
-      }),
-      {},
-    );
-
-  return {
-    isLoading: false,
-    error: null,
-    isFetching: false,
-    data: {
-      ...cartQuery.data!,
-      orderItems: cartQuery.data!.orderItems.map(o => ({
+  const cartSummary = useMemo(() => {
+    if (!cart) return null;
+    const cartWithDiscountPrices = {
+      ...cart,
+      orderItems: cart.orderItems.map(o => ({
         ...o,
         item: {
           ...o.item,
           discountPrice: allShopItems[o.item.id]?.discountPrice,
         },
       })),
-    },
-  };
+    };
+    return getOrderSummary(
+      cartWithDiscountPrices.orderItems,
+      cartWithDiscountPrices.tip,
+    );
+  }, [cart, allShopItems]);
+
+  return cartSummary;
 };
 
 export const useCartId = () => {
@@ -237,11 +245,14 @@ export const useAddToCart = ({
       );
     },
     onError: (_error, _, context) => {
-      queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
-        if (context && context.initialCart)
-          return [context.initialCart, ...prev.slice(1)];
-        return prev.slice(1);
+      queryClient.invalidateQueries({
+        queryKey: [ORDERS_QUERY_KEY, userId!],
       });
+      // queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
+      //   if (context && context.initialCart)
+      //     return [context.initialCart, ...prev.slice(1)];
+      //   return prev.slice(1);
+      // });
     },
   });
 };

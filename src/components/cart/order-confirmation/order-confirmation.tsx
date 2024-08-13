@@ -64,13 +64,13 @@ export const OrderConfirmation = ({
             <Image src={orderComplete} alt="loading bar" width={280} />
           </div>
           <Drip className="text-2xl text-center py-2">
-            {cart.status === 'in-progress'
+            {cart.status === '3-in-progress'
               ? 'nice! order confirmed'
-              : cart.status === 'complete'
+              : cart.status === '4-complete'
                 ? 'Order complete!'
                 : ''}
           </Drip>
-          {cart.status === 'complete' && (
+          {cart.status === '4-complete' && (
             <Drip className="text-xl text-center py-2">
               enjoy that sweet, sweet brew
             </Drip>
@@ -78,7 +78,6 @@ export const OrderConfirmation = ({
           <DrawerClose asChild>
             <Link
               href={`/farmer/${farmer?.farmer.id}`}
-              prefetch
               onClick={() => setOpen(false)}
             >
               <InfoCard
@@ -139,7 +138,7 @@ export const OrderConfirmation = ({
               </span>
             </Label2>
           </div>
-          {cart.status !== 'complete' && (
+          {cart.status !== '4-complete' && (
             <div className="flex  items-center justify-center gap-2">
               <Timer className="w-4 h-4" />
               <Label2 className="text-primary-gray">

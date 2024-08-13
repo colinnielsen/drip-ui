@@ -146,25 +146,26 @@ export const getOrderSummary = (order: Order): OrderSummary => {
 
 export const mapStatusToStatusLabel = (status: Order['status']) => {
   switch (status) {
-    case 'pending':
-    case 'submitting':
+    case '1-pending':
+    case '2-submitting':
       return 'Pending';
-    case 'in-progress':
+    case '3-in-progress':
       return 'In Progress';
-    case 'complete':
+    case '4-complete':
       return 'Complete';
     case 'cancelled':
       return 'Cancelled';
   }
 };
 
-export const isPending = (o: Order): o is Cart => o.status === 'pending';
+export const isPending = (o: Order): o is Cart => o.status === '1-pending';
 
-export const isInProgress = (o: Order) => o.status === 'in-progress';
+export const isInProgress = (o: Order) => o.status === '3-in-progress';
 
-export const isComplete = (o: Order) => o.status === 'complete';
+export const isComplete = (o: Order) => o.status === '4-complete';
 
-export const isPaidOrder = (o: Order): o is PaidOrder => o.status !== 'pending';
+export const isPaidOrder = (o: Order): o is PaidOrder =>
+  o.status !== '1-pending';
 
 export const hasPaymentConfirmed = (o: Order) =>
-  o.status === 'in-progress' || o.status === 'complete';
+  o.status === '3-in-progress' || o.status === '4-complete';

@@ -69,7 +69,7 @@ async function handleUpdateOrder(
     ? await sqlDatabase.orders.findById(orderId)
     : null;
 
-  if (maybeOrder && maybeOrder.status !== 'pending')
+  if (maybeOrder && maybeOrder.status !== '1-pending')
     return res.status(400).json({ error: 'Order is not pending' });
 
   if (action === 'add') {

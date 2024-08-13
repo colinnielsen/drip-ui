@@ -52,18 +52,18 @@ type _BaseOrder = {
 
 export type Cart = _BaseOrder & {
   /**
-   * pending: the order has not been paid for
+   * - 1-pending: the order has not been paid for
    */
-  status: 'pending';
+  status: '1-pending';
 };
 
 export type PaidOrder = _BaseOrder & {
   /**
-   * submitting: the order has been paid for and the tx is yet to confirm
-   * in-progress: the order has been paid for and the tx has been confirmed - the external service has received the order
-   * complete: the order has been processed
+   * - 2-submitting: the order has been paid for and the tx is yet to confirm
+   * - 3-in-progress: the order has been paid for and the tx has been confirmed (the external service has received the order)
+   * - 4-complete: the order has been processed
    */
-  status: 'submitting' | 'in-progress' | 'complete';
+  status: '2-submitting' | '3-in-progress' | '4-complete';
   transactionHash: Hex;
   externalOrderInfo?: ExternalOrderInfo;
 };

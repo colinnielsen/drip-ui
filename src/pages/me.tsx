@@ -85,7 +85,7 @@ const OrderLineItem = ({ order, shop }: { order: Order; shop: Shop }) => {
         ) : null}
         <Label2>{order.orderItems.length} items</Label2>
         <Label2>${orderSummary.total.formatted}</Label2>
-        {order.status !== 'complete' && (
+        {order.status !== '4-complete' && (
           <Label2 className="flex items-center">
             {mapStatusToStatusLabel(order.status)}
             <AnimatedTimer height={14} className="inline stroke-primary-gray" />

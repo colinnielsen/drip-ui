@@ -59,19 +59,15 @@ const useDetermineCheckoutStep = (): {
   step: SliceCheckoutStep;
   //   button: JSX.Element | null;
 } => {
+  const slideInView = useSlideInView();
   const { authenticated, ready: privyReady } = usePrivy();
   const wallet = useWalletAddress();
-  const { data: user, isLoading: isUserLoading, error: userError } = useUser();
-  const {
-    data: balance,
-    isLoading: isBalanceLoading,
-    error: balanceError,
-  } = useUSDCBalance({ pollingInterval: 6_000 });
-  const {
-    data: cart,
-    isLoading: isCartLoading,
-    error: cartError,
-  } = useRecentCart();
+  const { data: user, isLoading: isUserLoading } = useUser();
+  const { data: cart } = useRecentCart();
+  const { data: balance, isLoading: isBalanceLoading } = useUSDCBalance({
+    pollingInterval:
+      slideInView === 0 && cart?.status === '1-pending' ? 6_000 : undefined,
+  });
 
   const cartSummary = useCartSummary();
 
@@ -122,10 +118,16 @@ const useShouldPollForCartStatus = (
   const shouldPoll =
     cartId &&
     slideInView === 1 &&
-    (cart.status === 'submitting' || cart.status === 'in-progress') &&
     !!secondsWhenPaid &&
     secondsWhenPaid + waitforatleastseconds < secondsSinceMount;
-
+  console.log({
+    slideInView,
+    shouldPoll,
+    secondsWhenPaid,
+    secondsSinceMount,
+    paymentStep,
+    waitforatleastseconds,
+  });
   useEffect(() => {
     if (!cartId || slideInView !== 1 || paymentStep !== 'success') return;
 
@@ -158,23 +160,20 @@ export const CheckoutProvider = ({
 
   useQuery({
     queryKey: ['cart-status', cartId],
-    queryFn: cartId
-      ? () =>
-          axiosFetcher<Order>(`/api/orders/status`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: { orderId: cartId },
-          }).then(data => {
-            if (data.status === 'in-progress') goToSlide?.(2);
-            return queryClient.setQueryData(
-              [ORDERS_QUERY_KEY, data.user],
-              (orders: Order[]) =>
-                orders.map(o => (o.id === data.id ? data : o)),
-            );
-          })
-      : skipToken,
+    queryFn: () =>
+      axiosFetcher<Order>(`/api/orders/status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: { orderId: cartId },
+      }).then(data => {
+        if (data.status === '3-in-progress') goToSlide?.(2);
+        return queryClient.setQueryData(
+          [ORDERS_QUERY_KEY, data.user],
+          (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
+        );
+      }),
     enabled: shouldPoll && !!cartId,
     refetchInterval: 3000,
   });
@@ -186,19 +185,6 @@ export const CheckoutProvider = ({
   useEffect(() => {
     console.log({ paymentStep });
   }, [paymentStep]);
-
-  //   const nextSlide = useCallback(
-  //     (() => {
-  //       console.log('redefining');
-  //       if (step === 'initializing') return null;
-  //       if (step === 'get-usdc') return null;
-  //       if(step === '')
-  //       return () => {
-  //         jumpToSlide(SLIDE_MAP[step]);
-  //       };
-  //     })(),
-  //     [step, jumpToSlide],
-  //   );
 
   return (
     <CheckoutContext.Provider value={{ step, paymentStep, setPaymentStep }}>

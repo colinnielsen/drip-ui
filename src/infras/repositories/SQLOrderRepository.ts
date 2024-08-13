@@ -45,7 +45,7 @@ export class SQLOrderRepository implements OrderRepository {
       id,
       shop: shopId,
       user: userId,
-      status: 'pending',
+      status: '1-pending',
       timestamp: new Date().toISOString(),
       tip: null,
       orderItems,
@@ -82,7 +82,7 @@ export class SQLOrderRepository implements OrderRepository {
     };
     const shop = relatedshop[0];
 
-    if (order.status !== 'pending')
+    if (order.status !== '1-pending')
       throw Error('Cannot update an order that is not pending');
 
     for (const op of operations) {
@@ -155,7 +155,7 @@ export class SQLOrderRepository implements OrderRepository {
     const nextOrder: Order = {
       ...order,
       transactionHash,
-      status: 'submitting',
+      status: '2-submitting',
       orderItems: order.orderItems.map<OrderItem>(o => ({
         ...o,
         paidPrice: paidPrices[o.id] || err('price not found'),
@@ -215,7 +215,7 @@ export class SQLOrderRepository implements OrderRepository {
     );
 
     const orders = result.rows.filter(
-      o => 'externalOrderInfo' in o && o.status === 'in-progress',
+      o => 'externalOrderInfo' in o && o.status === '3-in-progress',
     ) as PaidOrder[];
     if (!orders.length) return result.rows as Order[];
 
@@ -245,7 +245,7 @@ export class SQLOrderRepository implements OrderRepository {
       const status: SliceOrderStatus = sliceOrder.status;
       const newOrderStatus: Order['status'] =
         status === 'Completed'
-          ? 'complete'
+          ? '4-complete'
           : status === 'Canceled'
             ? 'cancelled'
             : order.status;
@@ -270,7 +270,7 @@ export class SQLOrderRepository implements OrderRepository {
     const [order] = result.rows as [Order];
     if (!order) throw Error('Order not found');
 
-    if (order.status === 'pending') return order;
+    if (order.status === '1-pending') return order;
 
     const txSettled = await getTransactionReceipt(BASE_CLIENT, {
       hash: order.transactionHash,
@@ -280,7 +280,7 @@ export class SQLOrderRepository implements OrderRepository {
 
     if (txSettled) {
       const result =
-        await sql`UPDATE orders SET status = 'in-progress' WHERE id = ${orderId} RETURNING *`;
+        await sql`UPDATE orders SET status = '3-in-progress' WHERE id = ${orderId} RETURNING *`;
 
       return result.rows[0] as Order;
     } else return order;

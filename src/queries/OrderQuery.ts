@@ -97,7 +97,9 @@ export const useIncompleteOrders = () => {
 
   return useQuery(
     orderQuery(userId, orders =>
-      orders.filter(o => o.status === 'in-progress'),
+      orders.filter(
+        o => o.status === '3-in-progress' || o.status === '2-submitting',
+      ),
     ),
   );
 };
@@ -107,10 +109,10 @@ const cartSelector = (orders: Order[]) =>
     .sort((a, b) => sortDateAsc(a.timestamp, b.timestamp))
     .find(
       o =>
-        (o.status !== 'complete' &&
+        (o.status !== '4-complete' &&
           o.status !== 'cancelled' &&
           new Date(o.timestamp).getTime() > Date.now() - 4 * 60 * 60 * 1000) ||
-        (o.status === 'complete' &&
+        (o.status === '4-complete' &&
           new Date(o.timestamp).getTime() > Date.now() - 10 * 60 * 1000),
     ) ?? null;
 
@@ -198,7 +200,7 @@ export const useAddToCart = ({
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
   const { data: recentCart } = useRecentCart();
-  const cart = recentCart?.status === 'complete' ? null : recentCart;
+  const cart = recentCart?.status === '4-complete' ? null : recentCart;
   const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
 
   return useMutation({
@@ -289,7 +291,7 @@ export const useRemoveItemFromCart = ({
         withCredentials: true,
       }),
     onMutate() {
-      if (!cart || cart.status !== 'pending') throw Error('cart not pending');
+      if (!cart || cart.status !== '1-pending') throw Error('cart not pending');
       const willEraseCart =
         cart?.orderItems.length === 1 && cart.orderItems[0].id === orderItemId;
 
@@ -495,10 +497,10 @@ export const useAssocateExternalOrderInfoToCart = () => {
 export const usePollExternalServiceForOrderCompletion = (
   incompleteOrders: Order[],
 ) => {
-  const pendingOrders = incompleteOrders.filter(o => o.status !== 'complete');
+  const pendingOrders = incompleteOrders.filter(o => o.status !== '4-complete');
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
-
+  console.log(pendingOrders);
   return useQuery({
     queryKey: [
       ORDERS_QUERY_KEY,
@@ -510,7 +512,9 @@ export const usePollExternalServiceForOrderCompletion = (
         method: 'POST',
         data: { orderIds: pendingOrders.map(o => o.id) },
       }).then(result => {
-        const remainingInProgress = result.filter(o => o.status !== 'complete');
+        const remainingInProgress = result.filter(
+          o => o.status !== '4-complete',
+        );
         queryClient.setQueryData(
           [ORDERS_QUERY_KEY, userId],
           (oldOrders: Order[]) => uniqBy([...oldOrders, ...result], 'id'),

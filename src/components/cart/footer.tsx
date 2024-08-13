@@ -61,14 +61,14 @@ export default function CartFooter() {
               </Headline>
             </div>
             <div className="relative flex justify-center items-center">
-              {cart?.status === 'complete' ? (
+              {cart?.status === '4-complete' ? (
                 <CheckCircle
                   height={25}
                   width={25}
                   color="white"
                   strokeWidth={1.5}
                 />
-              ) : cart?.status === 'pending' ? (
+              ) : cart?.status === '1-pending' ? (
                 <>
                   <ShoppingCart
                     height={40}
@@ -83,7 +83,7 @@ export default function CartFooter() {
                   </div>
                 </>
               ) : cart?.status === 'cancelled' ? null : cart?.status ===
-                  'in-progress' || cart?.status === 'submitting' ? (
+                  '3-in-progress' || cart?.status === '2-submitting' ? (
                 <AnimatedTimer />
               ) : null}
             </div>

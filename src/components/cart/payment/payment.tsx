@@ -8,19 +8,18 @@ import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { isDev } from '@/lib/utils';
-import { useWalletAddress, useWalletClient } from '@/queries/EthereumQuery';
+import { useWalletAddress } from '@/queries/EthereumQuery';
 import {
-  useRecentCart,
   useCartInSliceFormat,
   useCartSummary,
+  useRecentCart,
 } from '@/queries/OrderQuery';
 import { usePayAndOrder } from '@/queries/SliceQuery';
 import Image from 'next/image';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
-import { WalletClient } from 'viem';
 
 export const PayButton = () =>
   //  { walletClient }: { walletClient: WalletClient }

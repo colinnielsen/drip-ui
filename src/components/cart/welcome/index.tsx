@@ -37,7 +37,7 @@ export const ConnectButton = ({ onClose }: { onClose?: () => void }) => {
       ? () =>
           connectWallet({
             suggestedAddress:
-              user?.__type === 'user' ? user.wallet.address : undefined,
+              user?.__type === 'user' ? user?.wallet?.address : undefined,
           })
       : initialStep === 'login' || initialStep === 'signup'
         ? loginOrCreateUser
@@ -56,7 +56,7 @@ export const ConnectButton = ({ onClose }: { onClose?: () => void }) => {
       }
       type="submit"
     >
-      {action !== 'ERROR' ? 'Connect Wallet' : 'Login'}
+      {action !== 'ERROR' ? 'Connect Wallet' : '??'}
     </CTAButton>
   );
 };

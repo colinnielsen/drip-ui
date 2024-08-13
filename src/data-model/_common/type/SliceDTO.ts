@@ -136,27 +136,24 @@ export function mapCartToSliceCart(
   cart: Order,
   sliceProducts: ProductCart[],
 ): ProductCart[] {
-  const sliceCart = collapseDuplicateItems(cart.orderItems).reduce(
-    (acc, [orderItem, quantity]) => {
-      const sliceProduct = sliceProducts.find(
-        product =>
-          product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString() ===
-          orderItem.item.__sourceConfig.id,
-      );
+  const sliceCart = collapseDuplicateItems(cart.orderItems).reduce<
+    ProductCart[]
+  >((acc, [orderItem, quantity]) => {
+    const sliceProduct = sliceProducts.find(
+      product => deriveDripIdFromSliceProductId(product) === orderItem.item.id,
+    );
 
-      if (!sliceProduct) throw Error('slice product not found');
-      const variant = orderItem.mods?.[0]?.__sourceConfig.id;
-      return [
-        ...acc,
-        {
-          ...sliceProduct!,
-          quantity,
-          variant,
-        },
-      ];
-    },
-    [] as ProductCart[],
-  );
+    if (!sliceProduct) throw Error('slice product not found');
+    const variant = orderItem.mods?.[0]?.__sourceConfig.id;
+    return [
+      ...acc,
+      {
+        ...sliceProduct!,
+        quantity,
+        variant,
+      },
+    ];
+  }, []);
 
   return sliceCart;
 }

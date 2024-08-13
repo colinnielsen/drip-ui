@@ -1,10 +1,10 @@
+import { Item, ItemMod } from '@/data-model/item/ItemType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { axiosFetcher, minutes } from '@/lib/utils';
-import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { UUID } from 'crypto';
-import { Address } from 'viem';
 import { useWalletAddress } from './EthereumQuery';
-import { useUserId } from './UserQuery';
+import { useUser } from './UserQuery';
 
 export const useShops = () =>
   useQuery({
@@ -18,26 +18,24 @@ export const useShop = <TData = Shop>({
   select,
 }: { id?: UUID; select?: (data: Shop) => TData } = {}) => {
   const client = useQueryClient();
-  const { data: userId } = useUserId();
+  const { data: user } = useUser();
   const connectedWallet = useWalletAddress();
-
+  const walletAddress = connectedWallet ?? user?.wallet?.address;
   const initialData =
     client.getQueryData<Shop[]>(['shop'])?.find(shop => shop.id === id) ??
     client.getQueryData<Shop>(['shop', id]);
 
-  const includeDiscounts = !!(userId || connectedWallet);
+  const includeDiscounts = !!(user?.id || walletAddress);
   const queryParams = includeDiscounts
-    ? `?includeDiscounts=true${userId ? `&userId=${userId}` : ''}${connectedWallet ? `&walletAddress=${connectedWallet}` : ''}`
+    ? `?includeDiscounts=true${user?.id ? `&userId=${user.id}` : ''}${walletAddress ? `&walletAddress=${walletAddress}` : ''}`
     : '';
 
   const shopQueryKey = [
     'shop',
     id,
-    ...(includeDiscounts
-      ? [{ userId, connectedWallet: connectedWallet ?? undefined }]
-      : []),
+    ...(includeDiscounts ? [{ userId: user?.id, walletAddress }] : []),
   ];
-  console.log('shopQueryKey', shopQueryKey);
+
   return useQuery({
     queryKey: shopQueryKey,
     queryFn: () => axiosFetcher<Shop>(`/api/shops/${id}${queryParams}`),
@@ -47,6 +45,28 @@ export const useShop = <TData = Shop>({
     staleTime: 0,
   });
 };
+
+export const useShopSourceConfig = (id?: UUID) =>
+  useShop({
+    id,
+    select: shop => shop.__sourceConfig,
+  });
+
+export const useShopPriceDictionary = (id: UUID) =>
+  useShop({
+    id,
+    select: shop =>
+      Object.values(shop.menu)
+        .flat()
+        .reduce<Record<UUID, Item | ItemMod>>(
+          (acc, item) => ({
+            ...acc,
+            [item.id]: item,
+            ...item.mods.reduce((acc, mod) => ({ ...acc, [mod.id]: mod }), {}),
+          }),
+          {},
+        ),
+  });
 
 // export const useListenForDiscountRetching = () => {
 //   const { refetch } = useShop();

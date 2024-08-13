@@ -1,6 +1,5 @@
 import { useCheckoutContext } from '@/components/cart/context';
 import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
-import { PRIVY_WAGMI_CONFIG } from '@/lib/ethereum';
 import { sliceKit } from '@/lib/slice';
 import { minutes } from '@/lib/utils';
 import { ExtraCostParamsOptional, ProductCart } from '@slicekit/core';
@@ -9,13 +8,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { Address } from 'viem';
 import { base } from 'viem/chains';
-import { useWalletProvider } from './EthereumQuery';
+import { useConnectedWallet } from './EthereumQuery';
 import {
   useAssocateExternalOrderInfoToCart,
   useAssocatePaymentToCart,
-  useCart,
+  useRecentCart,
 } from './OrderQuery';
-import { useShop } from './ShopQuery';
+import { useShopSourceConfig } from './ShopQuery';
 
 /**
  * @returns the slice keyed by productId
@@ -86,10 +85,13 @@ export const useSliceStoreProducts = <TData = ProductCart[]>({
 
 export const usePayAndOrder = ({
   onSuccess,
-}: { onSuccess?: () => void } = {}) => {
-  const wallet = useWalletProvider();
-  const { data: dripCart } = useCart();
-  const { data: shop } = useShop({ id: dripCart?.shop });
+}: {
+  onSuccess?: () => void;
+} = {}) => {
+  const wallet = useConnectedWallet();
+
+  const { data: dripCart } = useRecentCart();
+  const { data: shopSourceConfig } = useShopSourceConfig(dripCart?.shop);
   const { mutateAsync: associatePayment } = useAssocatePaymentToCart();
   const { mutateAsync: associateExternalOrderInfo } =
     useAssocateExternalOrderInfoToCart();
@@ -97,7 +99,7 @@ export const usePayAndOrder = ({
 
   const extraCosts: ExtraCostParamsOptional[] | undefined = useMemo(
     () =>
-      dripCart?.tip && shop?.__sourceConfig.id
+      dripCart?.tip && shopSourceConfig?.id
         ? [
             {
               currency: dripCart.tip.amount.address,
@@ -105,12 +107,12 @@ export const usePayAndOrder = ({
               recipient: dripCart.tip.address,
               description: 'Tip',
               slicerId: BigInt(
-                getSlicerIdFromSliceStoreId(shop.__sourceConfig.id),
+                getSlicerIdFromSliceStoreId(shopSourceConfig.id),
               ),
             },
           ]
         : undefined,
-    [dripCart?.tip, shop?.__sourceConfig.id],
+    [dripCart?.tip, shopSourceConfig?.id],
   );
 
   const onError = useCallback(
@@ -134,20 +136,25 @@ export const usePayAndOrder = ({
     [associateExternalOrderInfo, associatePayment, onSuccess, setPaymentStep],
   );
 
-  const { checkout: initiatePrivyCheckout } = useCheckout(PRIVY_WAGMI_CONFIG, {
-    extraCosts,
-    buyer: wallet?.address as Address,
-    onError,
-    onSuccess: onSliceSuccess,
-  });
+  const useCheckoutParams = useMemo(
+    () => ({
+      buyer: wallet?.address.toLowerCase() as Address,
+      extraCosts,
+      onError,
+      onSuccess: onSliceSuccess,
+    }),
+    [extraCosts, onError, onSliceSuccess, wallet?.address],
+  );
 
+  const { checkout: initiatePrivyCheckout, errors } = useCheckout(
+    sliceKit.wagmiConfig,
+    useCheckoutParams,
+  );
+  console.log({ errors });
   const payAndOrder = useCallback(async () => {
     setPaymentStep('awaiting-confirmation');
     await wallet?.switchChain(base.id);
-    await initiatePrivyCheckout().catch(error => {
-      debugger;
-      console.error(error);
-    });
+    await initiatePrivyCheckout().catch(error => console.error(error));
   }, [initiatePrivyCheckout, setPaymentStep]);
 
   if (!wallet) throw new Error('No wallet connected');

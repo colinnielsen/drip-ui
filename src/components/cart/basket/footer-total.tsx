@@ -20,7 +20,7 @@ export const FooterTotal = ({
         <div className="flex justify-between">
           <Headline>Total</Headline>
           <Price
-            price={cartSummary?.total.usdc}
+            originalPrice={cartSummary?.total.usdc}
             isLoading={isLoading || !cartSummary}
           />
         </div>

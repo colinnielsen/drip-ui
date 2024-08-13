@@ -11,6 +11,8 @@ import {
   OrderSummary,
   PaidOrder,
 } from './OrderType';
+import { UUID } from 'crypto';
+import { Item, ItemMod } from '../item/ItemType';
 
 export const createExternalOrderInfo = (
   sourceConfig: Shop['__sourceConfig'],
@@ -51,38 +53,72 @@ export function collapseDuplicateItems(orderItems: OrderItem[]) {
   return Array.from(itemMap.values());
 }
 
-export const getTotalItemCostBasedOnModSelection = (
+export const getOrderItemCostFromPriceDict = (
+  priceDict: Record<UUID, Item | ItemMod>,
   orderItem: Unsaved<OrderItem>,
 ) => {
+  const item = priceDict[orderItem.item.id];
+
   return {
+    // add together the base price of the item and the mods
     price: orderItem.mods.reduce<Currency>(
-      (acc, mod) => addCurrencies(acc, mod.price),
-      orderItem.item.price,
+      (acc, mod) => addCurrencies(acc, priceDict[mod.id].price ?? USDC.ZERO),
+      item.price,
     ),
+    // add together the discount price of the item and the mods
     discountPrice: orderItem.mods.reduce<Currency>(
-      (acc, mod) => addCurrencies(acc, mod.discountPrice ?? mod.price),
-      orderItem.item.discountPrice ?? orderItem.item.price,
+      (acc, mod) =>
+        addCurrencies(
+          acc,
+          priceDict[mod.id].discountPrice ??
+            priceDict[mod.id].price ??
+            USDC.ZERO,
+        ),
+      item.discountPrice ?? item.price,
     ),
   };
 };
 
-export const getOrderSummary = (
-  orderItems: OrderItem[],
-  tip: Order['tip'],
-): OrderSummary => {
-  const total_noTip: USDC = orderItems.reduce<USDC>((acc, orderItem) => {
-    const paidForPrice = orderItem.item.discountPrice ?? orderItem.item.price;
-    return acc
-      .add(isUSDC(paidForPrice) ? paidForPrice : paidForPrice.toUSDC())
-      .add(
-        orderItem.mods.reduce((acc, mod) => {
-          const modPrice = mod.discountPrice ?? mod.price;
-          return acc.add(isUSDC(modPrice) ? modPrice : modPrice.toUSDC());
-        }, USDC.ZERO),
-      );
-  }, USDC.ZERO);
+/**
+ * @dev get the total cost of an order item based on the mods selected
+ */
+export const getOrderItemCost = (orderItem: OrderItem) => {
+  const priceDict = {
+    [orderItem.item.id]: orderItem.item,
+    ...orderItem.mods.map(mod => [mod.id, mod]),
+  };
 
-  const total_withTip = total_noTip.add(tip?.amount ?? USDC.ZERO);
+  return getOrderItemCostFromPriceDict(priceDict, orderItem);
+};
+
+export const getOrderSummary = (order: Order): OrderSummary => {
+  // if all order items have a paid price, then we can use the paid price
+  const total_noTip: USDC = order.orderItems.every(
+    orderItem => orderItem.paidPrice,
+  )
+    ? order.orderItems.reduce((acc, orderItem) => {
+        const paidForPrice = orderItem.paidPrice!;
+
+        return acc.add(
+          isUSDC(paidForPrice) ? paidForPrice : paidForPrice.toUSDC(),
+        );
+      }, USDC.ZERO)
+    : // otherwise, we need to use the discount prices and add the mods individually
+      order.orderItems.reduce<USDC>((acc, orderItem) => {
+        const paidForPrice =
+          orderItem.item.discountPrice ?? orderItem.item.price;
+
+        return acc
+          .add(isUSDC(paidForPrice) ? paidForPrice : paidForPrice.toUSDC())
+          .add(
+            orderItem.mods.reduce((acc, mod) => {
+              const modPrice = mod.discountPrice ?? mod.price;
+              return acc.add(isUSDC(modPrice) ? modPrice : modPrice.toUSDC());
+            }, USDC.ZERO),
+          );
+      }, USDC.ZERO);
+
+  const total_withTip = total_noTip.add(order.tip?.amount ?? USDC.ZERO);
 
   return {
     /**
@@ -92,10 +128,10 @@ export const getOrderSummary = (
       formatted: total_noTip.prettyFormat(),
       usdc: total_noTip,
     },
-    tip: tip
+    tip: order.tip
       ? {
-          formatted: tip.amount.prettyFormat(),
-          usdc: tip.amount,
+          formatted: order.tip.amount.prettyFormat(),
+          usdc: order.tip.amount,
         }
       : null,
     /**

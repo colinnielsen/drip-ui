@@ -45,9 +45,11 @@ export type SliceDataSourceConfig = {
   version: number;
 };
 
+export type ShopSourceConfig = SliceDataSourceConfig;
+
 export type BaseShop = BaseEntity & {
   __entity: Entity.shop;
-  __sourceConfig: SliceDataSourceConfig;
+  __sourceConfig: ShopSourceConfig;
   label: string;
   backgroundImage: string;
   logo: string;

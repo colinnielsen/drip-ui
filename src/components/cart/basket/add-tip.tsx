@@ -134,7 +134,7 @@ const TipDrawer = ({
 
   return (
     <>
-      <DrawerTitle className="pt-4 px-6 grow text-center">
+      <DrawerTitle className="pt-4 px-6 grow text-center" asChild>
         <Title1>Edit tip amount</Title1>
       </DrawerTitle>
       <USDCInput amount={tipAmount} setAmount={setTipAmount} />;

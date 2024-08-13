@@ -1,6 +1,6 @@
 import { UUID } from 'crypto';
 import { Order, OrderItem } from './OrderType';
-import { Unsaved } from '../_common/type/CommonType';
+import { Currency, Unsaved } from '../_common/type/CommonType';
 import { Hash } from 'viem';
 import { USDC } from '../_common/currency/USDC';
 
@@ -49,7 +49,11 @@ export type OrderRepository = {
   /**
    * @dev associates a payment to an order
    */
-  pay: (orderId: UUID, transactionHash: Hash) => Promise<Order>;
+  pay: (
+    orderId: UUID,
+    transactionHash: Hash,
+    paidPrices: Record<UUID, Currency>,
+  ) => Promise<Order>;
   /**
    * @dev deletes an order
    * @throws if order is not `pending`

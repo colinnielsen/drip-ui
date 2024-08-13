@@ -3,7 +3,7 @@ import { Shop } from '@/data-model/shop/ShopType';
 import { cn, isIOSSafari } from '@/lib/utils';
 import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel';
 import BasketSlide, { EmptyBasket, LoadingBasketSlide } from './basket/basket';
-import { ConfirmationSlide } from './confirmation/confirmation';
+import { ConfirmationSlide } from './order-confirmation/order-confirmation';
 import { CheckoutProvider } from './context';
 import PaymentSlide from './payment/payment';
 import { usePrevious } from '@/lib/hooks/utility-hooks';

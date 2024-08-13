@@ -47,11 +47,11 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@slicekit/core':
-        specifier: ^0.3.87
-        version: 0.3.90(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+        specifier: ^0.3.91
+        version: 0.3.91(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       '@slicekit/react':
-        specifier: ^0.2.70
-        version: 0.2.73(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+        specifier: ^0.2.75
+        version: 0.2.75(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       '@tanstack/react-query':
         specifier: ^5.51.1
         version: 5.51.1(react@18.3.1)
@@ -85,6 +85,9 @@ importers:
       ethers:
         specifier: 5.7.2
         version: 5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       lucide-react:
         specifier: ^0.397.0
         version: 0.397.0(react@18.3.1)
@@ -143,6 +146,9 @@ importers:
       '@types/eslint__js':
         specifier: ^8.42.3
         version: 8.42.3
+      '@types/lodash':
+        specifier: ^4.17.7
+        version: 4.17.7
       '@types/node':
         specifier: ^20.14.10
         version: 20.14.10
@@ -3600,10 +3606,10 @@ packages:
         integrity: sha512-kFFdI2DPAm8W8JwiPiizmsq4SYYADE1c7CN04xCSzLp+/mafrtM3s/Sdqq54vXsjHJZs9kmGEnTcdMoijP1I4w==,
       }
 
-  '@slicekit/core@0.3.90':
+  '@slicekit/core@0.3.91':
     resolution:
       {
-        integrity: sha512-mVAnaJcD7dxAyrS5qUaKOMCUTt2eo+rM+ZzN3iiEoRR4+ZccvXfop74DU6p9YNXIIhdXuQqTH8Q0d0ZEfljpmA==,
+        integrity: sha512-hDZGnYLpfw64cM2zlJRhKofslWfY84yvM3qkGKrDCHkuzsjeLe3wyYgDDNoWucrkkYkd5yDi16DSSFnCV8JPIQ==,
       }
     peerDependencies:
       '@wagmi/core': ^2.10.9
@@ -3611,10 +3617,10 @@ packages:
       merkletreejs: 0.4.0
       viem: ^2.17.0
 
-  '@slicekit/react@0.2.73':
+  '@slicekit/react@0.2.75':
     resolution:
       {
-        integrity: sha512-dsz8ACgQMSKhXzsNBZR981K+3XKbI9HV7yPjXbt2iTm0eI65DwYPSFXCaxLF6CH+lki0IBDg6GaE26WDvC1Esg==,
+        integrity: sha512-MUYjjZWbg6vUhaxiX70hkAe1ztJoyUG+At9cmJoLpMLk+U8ZtfX2AYW+Ld5hMXTbdd9cafzSWFSwXjtsFpQ7TA==,
       }
     peerDependencies:
       '@wagmi/core': ^2.10.9
@@ -3965,6 +3971,12 @@ packages:
     resolution:
       {
         integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==,
+      }
+
+  '@types/lodash@4.17.7':
+    resolution:
+      {
+        integrity: sha512-8wTvZawATi/lsmNu10/j2hk1KEP0IvjubqPE3cu1Xz7xfXXt5oCq3SNUz4fMIP4XGF9Ky+Ue2tBA3hcS7LSBlA==,
       }
 
   '@types/ms@0.7.34':
@@ -14509,7 +14521,7 @@ snapshots:
 
   '@slicekit/abi@0.0.11': {}
 
-  '@slicekit/core@0.3.90(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
+  '@slicekit/core@0.3.91(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
     dependencies:
       '@slicekit/abi': 0.0.11
       '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
@@ -14517,7 +14529,7 @@ snapshots:
       merkletreejs: 0.3.11
       viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)
 
-  '@slicekit/core@0.3.90(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
+  '@slicekit/core@0.3.91(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.4.0)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
     dependencies:
       '@slicekit/abi': 0.0.11
       '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
@@ -14525,10 +14537,10 @@ snapshots:
       merkletreejs: 0.4.0
       viem: 2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)
 
-  '@slicekit/react@0.2.73(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
+  '@slicekit/react@0.2.75(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(utf-8-validate@6.0.4)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))':
     dependencies:
       '@slicekit/abi': 0.0.11
-      '@slicekit/core': 0.3.90(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
+      '@slicekit/core': 0.3.91(@wagmi/core@2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8)))(ethers@5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4))(merkletreejs@0.3.11)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       '@tanstack/react-query': 5.17.19(react@18.3.1)
       '@wagmi/core': 2.12.1(@tanstack/query-core@5.51.1)(@types/react@18.3.3)(react@18.3.1)(typescript@5.5.3)(viem@2.17.4(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@6.0.4)(zod@3.23.8))
       ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
@@ -14765,6 +14777,8 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
+
+  '@types/lodash@4.17.7': {}
 
   '@types/ms@0.7.34': {}
 

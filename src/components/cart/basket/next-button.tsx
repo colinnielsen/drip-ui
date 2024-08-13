@@ -3,9 +3,11 @@ import { useCheckoutContext } from '../context';
 import { GetUSDCButton } from '../onboard/onboard';
 import { PayButton } from '../payment/payment';
 import { ConnectButton, shouldGoToWelcomeSlide } from '../welcome';
+import { useWalletClient } from '@/queries/EthereumQuery';
 
 export const NextButton = () => {
   const { step } = useCheckoutContext();
+  const walletClient = useWalletClient();
 
   return (
     <div className="px-6 pb-6 w-full min-h-20">
@@ -20,7 +22,7 @@ export const NextButton = () => {
         // null
         <PayButton />
       ) : (
-        'ERR: unexpected state'
+        ''
       )}
       {/* <DialogContent
           className={cn(CSS_FONT_CLASS_CONFIG, 'max-w-90vw')}

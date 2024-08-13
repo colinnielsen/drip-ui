@@ -8,9 +8,9 @@ import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { isDev } from '@/lib/utils';
-import { useWalletAddress } from '@/queries/EthereumQuery';
+import { useWalletAddress, useWalletClient } from '@/queries/EthereumQuery';
 import {
-  useCart,
+  useRecentCart,
   useCartInSliceFormat,
   useCartSummary,
 } from '@/queries/OrderQuery';
@@ -20,48 +20,43 @@ import { memo, useMemo } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
+import { WalletClient } from 'viem';
 
-export const PayButton = memo(() => {
-  const buyerAddress = useWalletAddress();
-
-  const { data: sliceCart, isFetching: sliceCartIsLoading } =
-    useCartInSliceFormat({
+export const PayButton = () =>
+  //  { walletClient }: { walletClient: WalletClient }
+  {
+    const buyerAddress = useWalletAddress();
+    const { isFetching: sliceCartIsLoading } = useCartInSliceFormat({
       buyerAddress,
     });
-  const { isFetching: cartIsLoading, data: cart } = useCart();
-  const { paymentStep } = useCheckoutContext();
-  const goToSlide = useGoToSlide();
-  const payAndOrder = usePayAndOrder();
-  const cartSummary = useCartSummary();
+    const { isFetching: cartIsLoading, data: cart } = useRecentCart();
+    const { paymentStep } = useCheckoutContext();
+    const goToSlide = useGoToSlide();
+    const payAndOrder = usePayAndOrder();
+    const cartSummary = useCartSummary();
 
-  if (
-    !sliceCart ||
-    sliceCartIsLoading ||
-    cartIsLoading ||
-    !cart ||
-    !buyerAddress
-  )
-    return <LoadingCTAButton />;
+    if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress)
+      return <LoadingCTAButton />;
 
-  const isLoading = paymentStep === 'awaiting-confirmation';
-  return (
-    <CTAButton
-      onClick={async () => {
-        if (!payAndOrder) return;
+    const isLoading = paymentStep === 'awaiting-confirmation';
+    return (
+      <CTAButton
+        onClick={async () => {
+          if (!payAndOrder) return;
 
-        goToSlide?.(1);
-        await payAndOrder();
-      }}
-      isLoading={isLoading}
-    >
-      {!cartSummary || isLoading
-        ? ''
-        : cartSummary?.total.usdc.gt(USDC.ZERO)
-          ? 'pay'
-          : 'place order'}
-    </CTAButton>
-  );
-});
+          goToSlide?.(1);
+          await payAndOrder();
+        }}
+        isLoading={isLoading}
+      >
+        {!cartSummary || isLoading
+          ? ''
+          : cartSummary?.total.usdc.gt(USDC.ZERO)
+            ? 'pay'
+            : 'place order'}
+      </CTAButton>
+    );
+  };
 
 export default function PaymentSlide({
   cart,
@@ -71,7 +66,7 @@ export default function PaymentSlide({
   shop: Shop;
 }) {
   const { paymentStep } = useCheckoutContext();
-
+  // const walletClient = useWalletClient();
   const seconds = useSecondsSinceMount();
 
   const dots = Array.from({ length: seconds % 4 }, () => '.');

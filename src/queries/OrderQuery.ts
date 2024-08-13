@@ -1,6 +1,11 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { mapCartToSliceCart } from '@/data-model/_common/type/SliceDTO';
+import { Item } from '@/data-model/item/ItemType';
+import {
+  getOrderItemCostFromPriceDict,
+  getOrderSummary,
+} from '@/data-model/order/OrderDTO';
 import { OrderRepository } from '@/data-model/order/OrderRepository';
 import {
   Cart,
@@ -17,21 +22,20 @@ import {
   uniqBy,
 } from '@/lib/utils';
 import {
-  keepPreviousData,
   QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
 import { UUID } from 'crypto';
+import _ from 'lodash';
+import { useMemo } from 'react';
 import { Address, Hash, zeroAddress } from 'viem';
 import { useFarmer } from './FarmerQuery';
-import { useShop } from './ShopQuery';
+import { useShop, useShopPriceDictionary } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
-import { Item } from '@/data-model/item/ItemType';
-import { useMemo } from 'react';
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
+
 //
 //// HELPERS
 //
@@ -103,12 +107,14 @@ const cartSelector = (orders: Order[]) =>
     .sort((a, b) => sortDateAsc(a.timestamp, b.timestamp))
     .find(
       o =>
-        o.status !== 'complete' &&
-        o.status !== 'cancelled' &&
-        new Date(o.timestamp).getTime() > Date.now() - 4 * 60 * 60 * 1000,
+        (o.status !== 'complete' &&
+          o.status !== 'cancelled' &&
+          new Date(o.timestamp).getTime() > Date.now() - 4 * 60 * 60 * 1000) ||
+        (o.status === 'complete' &&
+          new Date(o.timestamp).getTime() > Date.now() - 10 * 60 * 1000),
     ) ?? null;
 
-export const useCart = () => {
+export const useRecentCart = () => {
   const { data: userId } = useUserId();
   return useQuery({
     ...orderQuery(userId, cartSelector),
@@ -116,7 +122,7 @@ export const useCart = () => {
 };
 
 export const useCartSummary = () => {
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
   const { data: shop } = useShop({ id: cart?.shop });
   const allShopItems = useMemo(
     () =>
@@ -132,7 +138,7 @@ export const useCartSummary = () => {
 
   const cartSummary = useMemo(() => {
     if (!cart) return null;
-    const cartWithDiscountPrices = {
+    const cartWithDiscountPrices: Order = {
       ...cart,
       orderItems: cart.orderItems.map(o => ({
         ...o,
@@ -142,17 +148,14 @@ export const useCartSummary = () => {
         },
       })),
     };
-    return getOrderSummary(
-      cartWithDiscountPrices.orderItems,
-      cartWithDiscountPrices.tip,
-    );
+    return getOrderSummary(cartWithDiscountPrices);
   }, [cart, allShopItems]);
 
   return cartSummary;
 };
 
 export const useCartId = () => {
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
   return cart?.id;
 };
 
@@ -165,7 +168,7 @@ export const useCartInSliceFormat = ({
   buyerAddress?: Address | null | undefined;
 }) => {
   const buyerAddress = _buyer ?? undefined;
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
   const { data: shop } = useShop({ id: cart?.shop });
 
   const slicerId =
@@ -194,13 +197,14 @@ export const useAddToCart = ({
 }) => {
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
-  const { data: cart } = useCart();
+  const { data: recentCart } = useRecentCart();
+  const cart = recentCart?.status === 'complete' ? null : recentCart;
   const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
 
   return useMutation({
-    mutationFn: async (orderId?: UUID) => {
+    mutationFn: async () => {
       return axiosFetcher<Order>(
-        `/api/orders/order${orderId ? `?orderId=${orderId}` : ''}`,
+        `/api/orders/order${cart ? `?orderId=${cart.id}` : ''}`,
         {
           method: 'POST',
           headers: {
@@ -211,49 +215,52 @@ export const useAddToCart = ({
         },
       );
     },
-    onMutate: async () => {
-      const optimisticCart: Cart = {
-        id: cart?.id || generateUUID(),
-        orderItems: [
-          ...(cart?.orderItems || []),
-          ...itemArray.map(i => ({ id: generateUUID(), ...i })),
-        ],
-        user: userId!,
-        shop: shopId,
-        status: 'pending',
-        timestamp: cart?.timestamp || new Date().toISOString(),
-        tip: cart?.tip || null,
-      };
+    // onMutate: async () => {
+    //   const optimisticCart: Cart = {
+    //     id: cart?.id || generateUUID(),
+    //     orderItems: [
+    //       ...(cart?.orderItems || []),
+    //       ...itemArray.map(i => ({ id: generateUUID(), ...i })),
+    //     ],
+    //     user: userId!,
+    //     shop: shopId,
+    //     status: 'pending',
+    //     timestamp: cart?.timestamp || new Date().toISOString(),
+    //     tip: cart?.tip || null,
+    //   };
 
-      queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
-        // replace the cart if it already exists
-        if (!!cart)
-          return prev.map(o =>
-            o.id === optimisticCart.id ? optimisticCart : o,
-          );
-        // otherwise, unshift the cart on the front of the array
-        return [optimisticCart, ...prev];
-      });
+    //   queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
+    //     // replace the cart if it already exists
+    //     if (!!cart)
+    //       return prev.map(o =>
+    //         o.id === optimisticCart.id ? optimisticCart : o,
+    //       );
+    //     // otherwise, unshift the cart on the front of the array
+    //     return [optimisticCart, ..._.cloneDeep(prev)];
+    //   });
 
-      return { optimisticCart, initialCart: cart };
-    },
-    onSuccess: (data, _) => {
-      if (!data) debugger;
-      return queryClient.setQueryData(
-        [ORDERS_QUERY_KEY, userId!],
-        (prev: Order[]) => [data, ...prev.slice(1)],
-      );
-    },
-    onError: (_error, _, context) => {
+    //   return { optimisticCart, initialCart: cart };
+    // },
+    onSettled: (data, _) => {
       queryClient.invalidateQueries({
         queryKey: [ORDERS_QUERY_KEY, userId!],
       });
-      // queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
-      //   if (context && context.initialCart)
-      //     return [context.initialCart, ...prev.slice(1)];
-      //   return prev.slice(1);
-      // });
+      // if (!data) debugger;
+      // return queryClient.setQueryData(
+      //   [ORDERS_QUERY_KEY, userId!],
+      //   (prev: Order[]) => prev.map(o => (o.id === data.id ? data : o)),
+      // );
     },
+    // onError: (_error, _, context) => {
+    //   queryClient.invalidateQueries({
+    //     queryKey: [ORDERS_QUERY_KEY, userId!],
+    //   });
+    // queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
+    //   if (context && context.initialCart)
+    //     return [context.initialCart, ...prev.slice(1)];
+    //   return prev.slice(1);
+    // });
+    // },
   });
 };
 
@@ -268,7 +275,7 @@ export const useRemoveItemFromCart = ({
 }) => {
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
 
   return useMutation({
     scope: { id: 'cart' },
@@ -301,30 +308,40 @@ export const useRemoveItemFromCart = ({
 
       return { optimisticCart, prevCart: cart };
     },
-    onSuccess: (result, _vars, { optimisticCart }) => {
-      // if the item is removed we're successful
-      if (!result || !optimisticCart) return;
-
-      // otherwise sync the orders with the result by replacing the optimistic cart with the result from the backend
-      return queryClient.setQueryData(
-        [ORDERS_QUERY_KEY, userId],
-        (prev: Order[]) =>
-          prev.map(o => (o.id === optimisticCart.id ? result : o)),
-      );
-    },
-    onError: (_error, _variables, context) => {
-      if (!context) return;
-
-      queryClient.setQueryData([ORDERS_QUERY_KEY, userId], (old: Order[]) => {
-        const wasDeleteOperation = context.optimisticCart === null;
-        // put the cart back if it was deleted
-        if (wasDeleteOperation) return [context.prevCart, ...old];
-        // otherwise, put the prev cart back in place
-        return old.map(o =>
-          o.id === context.optimisticCart!.id ? context.prevCart : o,
-        );
+    onSettled: variable => {
+      queryClient.invalidateQueries({
+        queryKey: [ORDERS_QUERY_KEY, variable?.id!],
       });
     },
+    // onSuccess: (result, _vars, { optimisticCart }) => {
+    //   queryClient.invalidateQueries({
+    //     queryKey: [ORDERS_QUERY_KEY, userId!],
+    //   });
+    //   // // if the item is removed we're successful
+    //   // if (!result || !optimisticCart) return;
+
+    //   // // otherwise sync the orders with the result by replacing the optimistic cart with the result from the backend
+    //   // return queryClient.setQueryData(
+    //   //   [ORDERS_QUERY_KEY, userId],
+    //   //   (prev: Order[]) =>
+    //   //     prev.map(o => (o.id === optimisticCart.id ? result : o)),
+    //   // );
+    // },
+    // onError: (_error, _variables, context) => {
+    //   if (!context) return;
+    //   queryClient.invalidateQueries({
+    //     queryKey: [ORDERS_QUERY_KEY, userId!],
+    //   });
+    // queryClient.setQueryData([ORDERS_QUERY_KEY, userId], (old: Order[]) => {
+    //   const wasDeleteOperation = context.optimisticCart === null;
+    //   // put the cart back if it was deleted
+    //   if (wasDeleteOperation) return [context.prevCart, ..._.cloneDeep(old)];
+    //   // otherwise, put the prev cart back in place
+    //   return old.map(o =>
+    //     o.id === context.optimisticCart!.id ? context.prevCart : o,
+    //   );
+    // });
+    // },
   });
 };
 
@@ -364,11 +381,16 @@ export const useTipMutation = () => {
       updateOrderInPlace(queryClient, optimisticCart);
       return { originalOrder, optimisticCart };
     },
-    onError(error, _, ctx) {
-      console.error(error);
-      if (!ctx) return;
-      rollbackOrderUpdate(queryClient, ctx.originalOrder);
+    onSettled: variable => {
+      queryClient.invalidateQueries({
+        queryKey: [ORDERS_QUERY_KEY, variable?.id!],
+      });
     },
+    // onError(error, _, ctx) {
+    //   console.error(error);
+    //   if (!ctx) return;
+    //   rollbackOrderUpdate(queryClient, ctx.originalOrder);
+    // },
     // onSuccess: (result, { order }) => {
     //   if (result === null) removeOrder(queryClient, order);
     //   else updateOrderInPlace(queryClient, result);
@@ -392,11 +414,13 @@ export const useFarmerAllocationFromOrder = (order: Order) => {
 export const useAssocatePaymentToCart = () => {
   const queryClient = useQueryClient();
 
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
+  const { data: priceDict } = useShopPriceDictionary(cart?.shop!);
 
   return useMutation({
     scope: { id: 'cart' },
     mutationFn: async (transactionHash: Hash) => {
+      if (!cart || !priceDict) throw Error('No cart or price dict');
       return axiosFetcher<Order>(`/api/orders/pay`, {
         method: 'POST',
         headers: {
@@ -404,17 +428,30 @@ export const useAssocatePaymentToCart = () => {
         },
         data: {
           transactionHash,
-          orderId: cart?.id || err('No cart in useAssocatePaymentToCart'),
+          orderId: cart.id,
+          paidPrices: cart.orderItems.reduce(
+            (acc, o) => ({
+              ...acc,
+              // the user pays the discount price
+              [o.id]: getOrderItemCostFromPriceDict(priceDict, o).discountPrice,
+            }),
+            {},
+          ),
         },
         withCredentials: true,
       });
     },
-    onSuccess: data => {
-      return queryClient.setQueryData(
-        [ORDERS_QUERY_KEY, data.user ?? err('expected userId')],
-        (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
-      );
+    onSettled: variable => {
+      queryClient.invalidateQueries({
+        queryKey: [ORDERS_QUERY_KEY, variable?.id!],
+      });
     },
+    // onSuccess: data => {
+    // return queryClient.setQueryData(
+    //   [ORDERS_QUERY_KEY, data.user ?? err('expected userId')],
+    //   (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
+    // );
+    // },
     retry: 3,
   });
 };
@@ -422,7 +459,7 @@ export const useAssocatePaymentToCart = () => {
 export const useAssocateExternalOrderInfoToCart = () => {
   const queryClient = useQueryClient();
 
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
 
   return useMutation({
     scope: { id: 'cart' },
@@ -440,12 +477,17 @@ export const useAssocateExternalOrderInfoToCart = () => {
         withCredentials: true,
       });
     },
-    onSuccess: data => {
-      return queryClient.setQueryData(
-        [ORDERS_QUERY_KEY, data.user ?? err('expected userId')],
-        (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
-      );
+    onSettled: variable => {
+      queryClient.invalidateQueries({
+        queryKey: [ORDERS_QUERY_KEY, variable?.id!],
+      });
     },
+    // onSuccess: data => {
+    //   return queryClient.setQueryData(
+    //     [ORDERS_QUERY_KEY, data.user ?? err('expected userId')],
+    //     (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
+    //   );
+    // },
     retry: 3,
   });
 };
@@ -481,7 +523,7 @@ export const usePollExternalServiceForOrderCompletion = (
 
         return result;
       }),
-    refetchInterval: 10_000,
+    refetchInterval: 8_000,
     enabled: pendingOrders.length > 0,
   });
 };

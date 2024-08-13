@@ -4,7 +4,7 @@ import { axiosFetcher } from '@/lib/utils';
 import { useUSDCBalance, useWalletAddress } from '@/queries/EthereumQuery';
 import {
   ORDERS_QUERY_KEY,
-  useCart,
+  useRecentCart,
   useCartId,
   useCartSummary,
 } from '@/queries/OrderQuery';
@@ -66,8 +66,12 @@ const useDetermineCheckoutStep = (): {
     data: balance,
     isLoading: isBalanceLoading,
     error: balanceError,
-  } = useUSDCBalance();
-  const { data: cart, isLoading: isCartLoading, error: cartError } = useCart();
+  } = useUSDCBalance({ pollingInterval: 6_000 });
+  const {
+    data: cart,
+    isLoading: isCartLoading,
+    error: cartError,
+  } = useRecentCart();
 
   const cartSummary = useCartSummary();
 
@@ -108,7 +112,7 @@ const useShouldPollForCartStatus = (
   checkoutStep: SliceCheckoutStep,
   paymentStep: PaymentStep,
 ) => {
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
   const cartId = cart?.id;
   const slideInView = useSlideInView();
   const secondsSinceMount = useSecondsSinceMount();

@@ -1,4 +1,4 @@
-import { Unsaved } from '@/data-model/_common/type/CommonType';
+import { Currency, Unsaved } from '@/data-model/_common/type/CommonType';
 import {
   OrderRepository,
   UpdateOrderOperation,
@@ -19,7 +19,7 @@ import {
 import { Hash } from 'viem';
 import { getTransactionReceipt } from 'viem/actions';
 import { BASE_CLIENT } from '@/lib/ethereum';
-import { sortDateAsc } from '@/lib/utils';
+import { err, sortDateAsc } from '@/lib/utils';
 import { Shop } from '@/data-model/shop/ShopType';
 import { sliceKit } from '@/lib/slice';
 import { OrderStatus as SliceOrderStatus } from '@slicekit/core';
@@ -144,13 +144,31 @@ export class SQLOrderRepository implements OrderRepository {
     return order;
   }
 
-  async pay(orderId: UUID, transactionHash: Hash): Promise<Order> {
+  async pay(
+    orderId: UUID,
+    transactionHash: Hash,
+    paidPrices: Record<UUID, Currency>,
+  ): Promise<Order> {
+    const order = await this.findById(orderId);
+    if (!order) throw Error('Order not found');
+
+    const nextOrder: Order = {
+      ...order,
+      transactionHash,
+      status: 'submitting',
+      orderItems: order.orderItems.map<OrderItem>(o => ({
+        ...o,
+        paidPrice: paidPrices[o.id] || err('price not found'),
+      })),
+    };
+
     const result = await sql`UPDATE orders
-    SET
-    "transactionHash" = ${transactionHash},
-    "status" = 'submitting'
-    WHERE id = ${orderId}
-    RETURNING *
+      SET
+      "transactionHash" = ${nextOrder.transactionHash},
+      "status" = ${nextOrder.status},
+      "orderItems" = ${JSON.stringify(nextOrder.orderItems)}
+      WHERE id = ${orderId}
+      RETURNING *
     `;
     const o = result.rows[0];
     return o as Order;

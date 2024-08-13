@@ -6,23 +6,24 @@ import { cn } from '@/lib/utils';
 import { Clock11, Clock2, Clock5, Clock8, LucideProps } from 'lucide-react';
 import { Label2 } from './typography';
 
-export function Price<T extends Currency>(
-  data: Partial<{
-    price: T;
-    discountPrice: T;
-    isLoading: boolean;
-  }>,
-) {
-  const isLoading = !data.price || data.isLoading;
-  const isUSDC =
-    data.price instanceof USDC && data.discountPrice instanceof USDC;
+export function Price<T extends Currency>({
+  originalPrice,
+  actualPrice,
+  isLoading: _isLoading,
+}: Partial<{
+  originalPrice: T;
+  actualPrice: T;
+  isLoading: boolean;
+}>) {
+  const isLoading = !originalPrice || _isLoading;
+  const isUSDC = originalPrice instanceof USDC || actualPrice instanceof USDC;
   const isDiscounted =
-    (data.discountPrice instanceof USDC &&
-      data.price instanceof USDC &&
-      data.discountPrice.lt(data.price)) ||
-    (data.discountPrice instanceof ETH &&
-      data.price instanceof ETH &&
-      data.discountPrice.lt(data.price));
+    (actualPrice instanceof USDC &&
+      originalPrice instanceof USDC &&
+      actualPrice.lt(originalPrice)) ||
+    (actualPrice instanceof ETH &&
+      originalPrice instanceof ETH &&
+      actualPrice.lt(originalPrice));
 
   return (
     <div className="flex items-center gap-1">
@@ -35,11 +36,11 @@ export function Price<T extends Currency>(
           isLoading && 'animate-pulse',
         )}
       >
-        ${data.price?.prettyFormat?.()}
+        ${originalPrice?.prettyFormat?.()}
       </Label2>
-      {isDiscounted && !!data.discountPrice && (
+      {isDiscounted && !!actualPrice && (
         <Label2 as="span" className="text-sm text-green-500 font-medium">
-          {data.discountPrice.prettyFormat?.()}
+          {actualPrice.prettyFormat?.()}
         </Label2>
       )}
     </div>

@@ -23,12 +23,13 @@ export default withErrorHandling(async function (
   if (!shop)
     return res.status(404).json({ error: `Shop with id ${shopId} not found` });
 
-  if (includeDiscounts === 'true')
+  if (includeDiscounts === 'true') {
     return res.status(200).json(
       await includeDiscountsOnShop(shop, {
         walletAddress: walletAddress as Address,
         userId,
       }),
     );
+  }
   return res.status(200).json(shop);
 }, 'shops/[shopId]');

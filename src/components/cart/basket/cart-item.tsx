@@ -1,7 +1,10 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { getTotalItemCostBasedOnModSelection } from '@/data-model/order/OrderDTO';
+import { USDC } from '@/data-model/_common/currency/USDC';
+import { Currency } from '@/data-model/_common/type/CommonType';
+import { getOrderItemCostFromPriceDict } from '@/data-model/order/OrderDTO';
 import { OrderItem } from '@/data-model/order/OrderType';
 import { useAddToCart, useRemoveItemFromCart } from '@/queries/OrderQuery';
+import { useShopPriceDictionary } from '@/queries/ShopQuery';
 import { UUID } from 'crypto';
 import Image from 'next/image';
 import { ReactNode } from 'react';
@@ -35,14 +38,16 @@ export function LoadingCartItem() {
 export function OrderItemDisplay({
   orderItem,
   rightSide,
+  originalPrice,
+  actualPrice,
   isLoading,
 }: {
   orderItem: OrderItem;
+  originalPrice: Currency;
+  actualPrice: Currency;
   rightSide?: ReactNode;
   isLoading?: boolean;
 }) {
-  const { price, discountPrice } =
-    getTotalItemCostBasedOnModSelection(orderItem);
   return (
     <div className="flex items-start gap-4 w-full px-6">
       <div className="rounded-2xl overflow-hidden h-24 w-24 relative aspect-square">
@@ -62,7 +67,7 @@ export function OrderItemDisplay({
           ))}
         </div>
 
-        <Price {...{ price, discountPrice, isLoading }} />
+        <Price {...{ originalPrice, actualPrice, isLoading }} />
       </div>
       <div className="flex-grow" />
       {rightSide && <div className="flex-1 justify-end flex">{rightSide}</div>}
@@ -84,6 +89,8 @@ export function CartItem({
   isLoading?: boolean;
 }) {
   const { id, ...orderItemWithoutId } = orderItem;
+  const { data: priceDict } = useShopPriceDictionary(shopId);
+
   const { mutate: addAnother } = useAddToCart({
     shopId,
     orderItem: orderItemWithoutId,
@@ -94,15 +101,22 @@ export function CartItem({
     shopId,
   });
 
+  if (!priceDict) return <LoadingCartItem />;
+
+  const { price, discountPrice } = priceDict
+    ? getOrderItemCostFromPriceDict(priceDict, orderItem)
+    : { price: new USDC(0), discountPrice: new USDC(0) };
+
   return (
     <OrderItemDisplay
+      {...{ originalPrice: price, actualPrice: discountPrice }}
       orderItem={orderItem}
       isLoading={isLoading}
       rightSide={
         <NumberInput
           value={quantity}
           useTrashForDelete
-          onPlus={() => addAnother(orderId)}
+          onPlus={() => addAnother()}
           onMinus={removeItem}
         />
       }

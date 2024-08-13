@@ -1,7 +1,8 @@
 import { Order } from '@/data-model/order/OrderType';
 import { Price } from '../../ui/icons';
 import { Body, Headline } from '../../ui/typography';
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
+import { useCartSummary } from '@/queries/OrderQuery';
+import { cn } from '@/lib/utils';
 
 export const OrderSummary = ({
   cart,
@@ -10,23 +11,31 @@ export const OrderSummary = ({
   cart: Order;
   isLoading?: boolean;
 }) => {
-  const summary = getOrderSummary(cart.orderItems, cart.tip);
+  const summary = useCartSummary();
 
   return (
-    <div className="p-6 flex flex-col gap-y-4 w-full h-fit transition-all duration-500">
+    <div className="p-6 flex flex-col gap-y-4 w-full h-fit transition-all duration-300">
       <div className="flex justify-between items-center">
         <Body>Subtotal</Body>
-        <Price price={summary?.subTotal.usdc} isLoading={isLoading} />
+        <Price originalPrice={summary?.subTotal.usdc} isLoading={isLoading} />
       </div>
-      {summary && summary.tip && (
-        <div className="flex justify-between items-center">
-          <Body>Tip</Body>
-          <Price price={summary?.tip.usdc} isLoading={isLoading} />
-        </div>
-      )}
+
+      <div
+        className={cn('flex justify-between items-center h-5', {
+          'text-gray-500 opacity-60': !summary?.tip?.usdc,
+        })}
+      >
+        <Body>Tip</Body>
+        {summary?.tip?.usdc ? (
+          <Price originalPrice={summary?.tip?.usdc} isLoading={isLoading} />
+        ) : (
+          <Body className="opacity-60">--</Body>
+        )}
+      </div>
+
       <div className="flex justify-between items-center">
         <Headline>Total</Headline>
-        <Price price={summary?.total.usdc} isLoading={isLoading} />
+        <Price originalPrice={summary?.total.usdc} isLoading={isLoading} />
       </div>
     </div>
   );

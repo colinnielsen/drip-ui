@@ -1,4 +1,3 @@
-import emptyCart from '@/assets/empty-cart.png';
 import { Divider } from '@/components/ui/divider';
 import {
   DrawerClose,
@@ -6,25 +5,24 @@ import {
   DrawerTitle,
   useNearestDrawer,
 } from '@/components/ui/drawer';
-import { Drip, Label1, Title1 } from '@/components/ui/typography';
+import { Title1 } from '@/components/ui/typography';
 import {
   collapseDuplicateItems,
   isPaidOrder,
 } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
+import { useShop } from '@/queries/ShopQuery';
 import { X } from 'lucide-react';
-import Image from 'next/image';
 import { Fragment } from 'react';
 import { AsCheckoutSlide } from '../checkout-slides';
+import { OrderConfirmation } from '../order-confirmation/order-confirmation';
 import { AddTipSection } from './add-tip';
 import { CartItem, LoadingCartItem } from './cart-item';
 import { FarmerCard } from './farmer-card';
 import { FooterTotal } from './footer-total';
 import { NextButton } from './next-button';
 import { OrderSummary } from './summary';
-import { OrderConfirmation } from '../confirmation/confirmation';
-import { useShop } from '@/queries/ShopQuery';
 
 export const EmptyBasket = () => {
   const { setOpen } = useNearestDrawer();
@@ -133,17 +131,22 @@ export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
               </Fragment>
             ))}
           </div>
+
           {shop.tipConfig.enabled && (
             <>
               <AddTipSection cart={cart} shopId={shop.id} />
               <Divider />
             </>
           )}
+
           <OrderSummary cart={cart} isLoading={isFetching} />
+
           <Divider />
+
           <div className="p-6">
             <FarmerCard {...{ order: cart, className: 'h-28' }} />
           </div>
+
           <DrawerFooter className="p-0 w-full">
             <FooterTotal cart={cart} isLoading={isFetching} />
             <NextButton />

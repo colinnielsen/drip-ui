@@ -3,25 +3,52 @@ import { USDC_INSTANCE } from '@/lib/ethereum';
 import { err } from '@/lib/utils';
 import { useWallets } from '@privy-io/react-auth';
 import { useQuery } from '@tanstack/react-query';
-import { Address } from 'viem';
+import { useEffect, useState } from 'react';
+import { Address, createWalletClient, custom, WalletClient } from 'viem';
+import { base } from 'viem/chains';
 
-export const useWalletProvider = () => {
+export const useConnectedWallet = () => {
   const {
+    ready,
     wallets: [wallet],
   } = useWallets();
 
+  if (!ready) return null;
   if (!wallet) return null;
   return wallet;
 };
 
+export const useWalletClient = () => {
+  const [client, setClient] = useState<WalletClient | null>(null);
+  const wallet = useConnectedWallet();
+
+  useEffect(() => {
+    setClient(null);
+    wallet?.getEthereumProvider().then(p => {
+      const client = createWalletClient({
+        chain: base,
+        transport: custom(p),
+      });
+
+      setClient(client);
+    });
+  }, [wallet?.address]);
+
+  return client?.account ? client : null;
+};
+
 export const useWalletAddress = () => {
-  const wallet = useWalletProvider();
+  const wallet = useConnectedWallet();
 
   if (!wallet) return null;
   return wallet.address as Address;
 };
 
-export const useUSDCBalance = () => {
+export const useUSDCBalance = ({
+  pollingInterval,
+}: {
+  pollingInterval?: number;
+} = {}) => {
   const wallet = useWalletAddress();
 
   return useQuery({
@@ -33,5 +60,6 @@ export const useUSDCBalance = () => {
             .then(balance => USDC.fromWei(balance))
         : err('Address is required'),
     enabled: !!wallet,
+    refetchInterval: pollingInterval,
   });
 };

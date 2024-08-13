@@ -11,7 +11,7 @@ import {
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { Item, ItemCategory, ItemMod } from '@/data-model/item/ItemType';
 import { OrderItem } from '@/data-model/order/OrderType';
-import { useAddToCart, useCart } from '@/queries/OrderQuery';
+import { useAddToCart, useRecentCart } from '@/queries/OrderQuery';
 import { UUID } from 'crypto';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
@@ -43,7 +43,7 @@ function AddToBasketButton({
   return (
     <DrawerFooter>
       <DrawerClose asChild>
-        <CTAButton onClick={e => mutate(orderId)}>Add to Basket</CTAButton>
+        <CTAButton onClick={e => mutate()}>Add to Basket</CTAButton>
       </DrawerClose>
     </DrawerFooter>
   );
@@ -71,7 +71,7 @@ export const AddButton = ({
       className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:bg-neutral-300 active:scale-95 drop-shadow-md"
       onClick={e => {
         e.stopPropagation();
-        mutate(orderId);
+        mutate();
       }}
     >
       <PlusSvg />
@@ -86,7 +86,7 @@ export function QuickAddItemCard({
   shopId: UUID;
   item: Item;
 }) {
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
   const { isFetching } = useShop({ id: shopId });
   const { image, name, price, discountPrice } = item;
 
@@ -104,7 +104,13 @@ export function QuickAddItemCard({
         <div className="flex flex-col gap-1">
           <h3 className="font-medium">{name}</h3>
 
-          <Price {...{ price, discountPrice, isLoading: isFetching }} />
+          <Price
+            {...{
+              originalPrice: price,
+              actualPrice: discountPrice,
+              isLoading: isFetching,
+            }}
+          />
         </div>
       </div>
     </DrawerTrigger>
@@ -205,8 +211,8 @@ export const ItemOption = ({
         </div>
         {mod.price.wei > 0n ? (
           <Price
-            price={mod.price}
-            discountPrice={mod.discountPrice}
+            originalPrice={mod.price}
+            actualPrice={mod.discountPrice}
             isLoading={isFetching}
           />
         ) : null}
@@ -258,7 +264,7 @@ export function ItemWithSelector({
   const [selectedOptions, setSelectedOptions] = useState<Record<UUID, ItemMod>>(
     {},
   );
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
   const { isFetching } = useShop({ id: shopId });
 
   const reset = () => {
@@ -299,7 +305,11 @@ export function ItemWithSelector({
                 <Title1 className="text-left">{item.name}</Title1>
               </DrawerTitle>
 
-              <Price {...item} isLoading={isFetching} />
+              <Price
+                originalPrice={item.price}
+                actualPrice={item.discountPrice}
+                isLoading={isFetching}
+              />
 
               <NumberInput
                 onPlus={() => setQuantity(quantity + 1)}

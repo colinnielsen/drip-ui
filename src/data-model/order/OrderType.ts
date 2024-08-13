@@ -2,12 +2,12 @@ import { UUID } from 'crypto';
 import { Item, ItemMod } from '../item/ItemType';
 import { Address, Hex } from 'viem';
 import { USDC } from '../_common/currency/USDC';
-
-export const DRIP_TIP_ITEM_NAME = '__drip-tip';
+import { Currency } from '../_common/type/CommonType';
 
 export type OrderItem = {
   id: UUID;
   item: Item;
+  paidPrice?: Currency;
   mods: ItemMod[];
 };
 
@@ -66,7 +66,6 @@ export type PaidOrder = _BaseOrder & {
   status: 'submitting' | 'in-progress' | 'complete';
   transactionHash: Hex;
   externalOrderInfo?: ExternalOrderInfo;
-  orderSummary?: OrderSummary;
 };
 
 export type CancelledOrder = Omit<PaidOrder, 'status'> & {

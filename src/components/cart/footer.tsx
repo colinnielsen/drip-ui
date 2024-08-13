@@ -6,9 +6,9 @@ import {
 } from '@/components/ui/drawer';
 import { cn, sleep } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
-import { useCart } from '@/queries/OrderQuery';
+import { useRecentCart } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
-import { ShoppingCart } from 'lucide-react';
+import { CheckCircle, ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AnimatedTimer } from '../ui/icons';
 import { Headline, Label2 } from '../ui/typography';
@@ -19,7 +19,7 @@ import { SliceProvider } from '@slicekit/react';
 import { SliceCartListener } from '@/lib/slice';
 
 export default function CartFooter() {
-  const { data: cart } = useCart();
+  const { data: cart } = useRecentCart();
   const { data: shop } = useShop({ id: cart?.shop });
   const [ready, setIsReady] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -27,6 +27,15 @@ export default function CartFooter() {
   useEffect(() => {
     sleep(1000).then(() => setIsReady(true));
   }, []);
+
+  const orderNumber =
+    (!!cart &&
+      'externalOrderInfo' in cart &&
+      cart?.externalOrderInfo?.orderNumber) ||
+    undefined;
+
+  const label = orderNumber ? shop?.label : 'Pickup Store';
+  const headline = orderNumber ? `Order #${orderNumber}` : shop?.label;
 
   return (
     <DrawerContext.Provider value={{ open: isOpen, setOpen: setIsOpen }}>
@@ -44,15 +53,22 @@ export default function CartFooter() {
             onClick={() => setIsOpen(true)}
           >
             <div className="flex flex-col gap-1">
-              <Label2 className="text-light-gray">Pickup Store</Label2>
+              <Label2 className="text-light-gray">{label}</Label2>
               <Headline className="flex items-center gap-2 text-light-gray">
-                <p>{shop?.label}</p>
+                <p>{headline}</p>
                 {/* <div className="rounded-full h-1 w-1 bg-white"></div>
               <p> 0.7mi</p> */}
               </Headline>
             </div>
             <div className="relative flex justify-center items-center">
-              {cart?.status === 'pending' ? (
+              {cart?.status === 'complete' ? (
+                <CheckCircle
+                  height={25}
+                  width={25}
+                  color="white"
+                  strokeWidth={1.5}
+                />
+              ) : cart?.status === 'pending' ? (
                 <>
                   <ShoppingCart
                     height={40}
@@ -66,9 +82,10 @@ export default function CartFooter() {
                     </div>
                   </div>
                 </>
-              ) : (
+              ) : cart?.status === 'cancelled' ? null : cart?.status ===
+                  'in-progress' || cart?.status === 'submitting' ? (
                 <AnimatedTimer />
-              )}
+              ) : null}
             </div>
           </button>
         </DrawerTrigger>

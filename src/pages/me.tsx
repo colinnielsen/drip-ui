@@ -62,10 +62,7 @@ const SkeletonLineItem = () => {
 };
 
 const OrderLineItem = ({ order, shop }: { order: Order; shop: Shop }) => {
-  const orderSummary = useMemo(
-    () => getOrderSummary(order.orderItems, order.tip),
-    [order],
-  );
+  const orderSummary = useMemo(() => getOrderSummary(order), [order]);
   return (
     <div
       key={order.id}
@@ -204,8 +201,8 @@ const Me = () => {
           <div className="px-6 py-4 flex flex-col gap-4">
             <Headline>Connected Address</Headline>
             <Body>
-              {user.wallet.address.slice(0, 6)}...
-              {user.wallet.address.slice(-4)}
+              {user.wallet?.address.slice(0, 6)}...
+              {user.wallet?.address.slice(-4)}
             </Body>
           </div>
           <Divider />

@@ -34,7 +34,7 @@ export const useWalletClient = () => {
     });
   }, [wallet?.address]);
 
-  return client?.account ? client : null;
+  return client;
 };
 
 export const useWalletAddress = () => {

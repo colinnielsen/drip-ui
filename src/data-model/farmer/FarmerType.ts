@@ -1,4 +1,6 @@
 import { UUID } from 'crypto';
+import { Currency } from '../_common/type/CommonType';
+import { User } from '../user/UserType';
 
 /**
  * Represents a message sent on a farmer's page.
@@ -7,8 +9,13 @@ export type FarmerMessage = {
   id: UUID;
   farmer: UUID;
   sendingUser: UUID;
-  message: string;
+  message: string | null;
+  amount: Currency | null;
   createdAt: Date;
+};
+
+export type FarmerMessageWithUser = Omit<FarmerMessage, 'sendingUser'> & {
+  sendingUser: User;
 };
 
 export type FarmerAllocation = {
@@ -23,14 +30,14 @@ export type FarmerCampaign = {
   amountSupported: number;
 };
 
-export type FarmerPosts = {
+export type FarmerPost = {
   id: UUID;
   farmer: UUID;
   createdAt: Date;
   /**
    * @format uri
    */
-  image: string;
+  images: string[];
   title: string;
   content: string;
 };
@@ -47,7 +54,7 @@ export type Farmer = {
    */
   pfp: string;
   campaigns: FarmerCampaign[];
-  posts: FarmerPosts[];
+  posts: FarmerPost[];
   shortDescription: string;
   bio: string;
   bioImages: string[];

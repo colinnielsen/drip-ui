@@ -107,7 +107,7 @@ export const bootstrapDB = async () => {
       "id" UUID PRIMARY KEY,
       "farmer" UUID NOT NULL,
       "title" TEXT NOT NULL,
-      "image" TEXT NOT NULL,
+      "images" JSONB NOT NULL,
       "content" TEXT NOT NULL,
       "createdAt" TIMESTAMP NOT NULL,
       FOREIGN KEY ("farmer") REFERENCES "farmers" ("id") ON DELETE CASCADE
@@ -115,13 +115,14 @@ export const bootstrapDB = async () => {
   `;
   await sql`
     CREATE TABLE IF NOT EXISTS "farmermessages" (
-      "id" UUID PRIMARY KEY,
-      "farmer" UUID NOT NULL,
-      "sendingUser" UUID NOT NULL,
-      "message" TEXT NOT NULL,
-      "createdAt" TIMESTAMP NOT NULL,
+      id UUID PRIMARY KEY,
+      farmer UUID NOT NULL,
+      sending_user UUID NOT NULL,
+      message TEXT,
+      amount JSONB,
+      created_at TIMESTAMP NOT NULL,
       FOREIGN KEY ("farmer") REFERENCES "farmers" ("id"),
-      FOREIGN KEY ("sendingUser") REFERENCES "users" ("id")
+      FOREIGN KEY ("sending_user") REFERENCES "users" ("id")
     );
   `;
   console.debug('database bootstrapped');

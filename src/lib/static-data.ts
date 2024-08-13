@@ -2,7 +2,7 @@ import { createFarmer } from '@/data-model/farmer/FarmerDTO';
 import { Farmer } from '@/data-model/farmer/FarmerType';
 import { ManualStoreConfig } from '@/data-model/shop/ShopType';
 import { UUID } from 'crypto';
-import { zeroAddress } from 'viem';
+import { subDays } from 'date-fns';
 import { generateUUID } from './utils';
 
 export const STATIC_FARMER_DATA: Farmer[] = [
@@ -19,17 +19,17 @@ export const STATIC_FARMER_DATA: Farmer[] = [
     posts: [
       {
         id: generateUUID(),
-        image: '/base-cafe.png',
+        images: ['/base-cafe.png'],
         title: 'EthCC 2024',
         content:
           'Base Cafe at EthCC was a huge success 🎉🎉🎉 I received over $600 USDC from this event and I am excited for the future. Thank you to everyone who bought and enjoyed coffees with USDC and the incredible barista team',
-        createdAt: new Date(),
+        createdAt: subDays(new Date(), 1),
         farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
       },
     ],
     bio: "My wife and I run a farm in the beautiful Costa region of Costa Rica. Our family coffee farm has been running the past two generations. My wife and I decided to build a micro mill, giving us more control over processing and production. We're using innovative technologies to save our family farm.",
     bioImages: ['/marco-1.jpg', '/marco-2.jpg', '/marco-3.jpg'],
-    ethAddress: zeroAddress,
+    ethAddress: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
   }),
 ];
 

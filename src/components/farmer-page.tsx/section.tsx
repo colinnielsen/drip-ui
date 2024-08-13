@@ -9,7 +9,7 @@ export const FarmerSection = ({
   title: string;
 }) => {
   return (
-    <div className="flex flex-col gap-5 py-5">
+    <div className="flex flex-col gap-2 py-5 first:pt-0 last:pb-0">
       <Headline className="px-6">{title}</Headline>
       {children}
     </div>

@@ -48,8 +48,7 @@ export const axiosFetcher = async <T>(
       withCredentials: true,
       transformResponse: (data: string) => {
         if (typeof data === 'string') {
-          const parsed = JSON.parse(data);
-          return rehydrateData(parsed);
+          return rehydrateData(JSON.parse(data));
         } else return data;
       },
       ...options,

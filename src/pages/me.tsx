@@ -25,6 +25,7 @@ import {
   ACTIVE_USER_QUERY_KEY,
   useResetUser,
   useUser,
+  useUserName,
 } from '@/queries/UserQuery';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Avatar from 'boring-avatars';
@@ -118,15 +119,7 @@ const Me = () => {
     },
   });
 
-  const { data: name, isLoading: nameLoading } = useQuery({
-    queryKey: ['user', 'username'],
-    queryFn: () =>
-      user?.__type === 'user'
-        ? getEnsName(createClient({ chain: mainnet, transport: http() }), {
-            address: user?.wallet?.address!,
-          }).then(n => (!n ? 'You' : n))
-        : Promise.resolve('Guest'),
-  });
+  const { data: name, isLoading: nameLoading } = useUserName(user);
   return (
     <PageWrapper>
       <PageHeader title="Profile" />

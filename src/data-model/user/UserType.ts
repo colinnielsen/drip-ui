@@ -1,24 +1,5 @@
 import { UUID } from 'crypto';
 import { PrivyDID } from '../_external/privy';
-import { mapPrivyIdToUserId } from './UserDTO';
-
-const COLIN_PRIVY_ID = 'did:privy:clyoxt6w201xt3i8one16peqj';
-export const TESTING_USER_UUID = mapPrivyIdToUserId(COLIN_PRIVY_ID);
-
-export const TESTING_USER: User = {
-  __type: 'user',
-  id: TESTING_USER_UUID,
-  authServiceId: {
-    __type: 'privy',
-    id: COLIN_PRIVY_ID,
-  },
-  createdAt: '2024-02-20T12:00:00Z',
-  wallet: {
-    __type: 'embedded',
-    address: '0xe2B28b58cc5d34872794E861fd1ba1982122B907',
-  },
-  role: 'admin',
-} as const;
 
 export type SessionUser = {
   /**

@@ -79,6 +79,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       embla-carousel-react:
         specifier: ^8.1.6
         version: 8.1.6(react@18.3.1)
@@ -5671,6 +5674,12 @@ packages:
         integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==,
       }
     engines: { node: '>=0.11' }
+
+  date-fns@3.6.0:
+    resolution:
+      {
+        integrity: sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==,
+      }
 
   dateformat@4.6.3:
     resolution:
@@ -16284,6 +16293,8 @@ snapshots:
   date-fns@2.30.0:
     dependencies:
       '@babel/runtime': 7.24.8
+
+  date-fns@3.6.0: {}
 
   dateformat@4.6.3: {}
 

@@ -4,7 +4,6 @@ import { FarmerHeader } from '@/components/farmer-page.tsx/header';
 import { FarmerMessageBoard } from '@/components/farmer-page.tsx/message-board';
 import { FarmerPosts } from '@/components/farmer-page.tsx/posts';
 import { FarmerSection } from '@/components/farmer-page.tsx/section';
-import { Divider } from '@/components/ui/divider';
 import { PageHeader } from '@/components/ui/page-header';
 import { PageWrapper } from '@/components/ui/page-wrapper';
 import { sqlDatabase } from '@/infras/database';
@@ -57,40 +56,35 @@ export default function FarmerPage({ farmerId }: { farmerId: string }) {
       <FarmerHeader {...{ farmer: farmer || 'loading' }} />
       <div className="h-8" />
 
-      {farmer?.campaigns && (
-        <>
+      <div className="flex flex-col divide-y divide-light-gray">
+        {farmer?.campaigns && (
           <FarmerSection title="Campaigns">
             <FarmerCampaigns {...{ farmer }} />
           </FarmerSection>
-          <Divider />
-        </>
-      )}
+        )}
 
-      {farmer?.posts && (
-        <>
+        {!!farmer?.posts.length && (
           <FarmerSection title="Updates">
             <FarmerPosts {...{ farmer }} />
           </FarmerSection>
-          <Divider />
-        </>
-      )}
+        )}
 
-      <FarmerSection title="About the farm">
-        <FarmerBio {...{ farmer: farmer || 'loading' }} />
-      </FarmerSection>
-      <Divider />
-
-      {farmer && (
-        <FarmerSection title="Message board">
-          <FarmerMessageBoard {...{ farmer }} />
+        <FarmerSection title="About the farm">
+          <FarmerBio {...{ farmer: farmer || 'loading' }} />
         </FarmerSection>
-      )}
 
-      {/* {farmer && (
+        {farmer && (
+          <FarmerSection title="Message board">
+            <FarmerMessageBoard {...{ farmer }} />
+          </FarmerSection>
+        )}
+
+        {/* {farmer && (
         <FarmerSection title="Activity">
-          <FarmerActivity {...{ farmer }} />
+        <FarmerActivity {...{ farmer }} />
         </FarmerSection>
-      )} */}
+        )} */}
+      </div>
     </PageWrapper>
   );
 }

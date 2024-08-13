@@ -25,14 +25,32 @@ export const USDC_PARTIAL_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+  {
+    name: 'transfer',
+    inputs: [
+      {
+        name: 'recipient',
+        type: 'address',
+      },
+      {
+        name: 'amount',
+        type: 'uint256',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
 ] as const;
 
 export const BASE_RPC_CONFIG = {
   chains: [base],
-  transport: http(base.rpcUrls.default.http[0]),
+  transport: http(
+    'https://base-mainnet.g.alchemy.com/v2/6XLCQYYWBLRr-UwF8QQeYQ2l2g7KOgKZ',
+  ),
 } as const;
 
-export const BASE_CLIENT = createClient(BASE_RPC_CONFIG);
+export const BASE_CLIENT = createPublicClient(BASE_RPC_CONFIG);
 
 export const USDC_INSTANCE = getContract({
   abi: USDC_PARTIAL_ABI,

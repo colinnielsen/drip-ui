@@ -71,7 +71,7 @@ const CTAButton = React.forwardRef(
         variant={props.variant || 'cta'}
         {...rest}
         className="w-full"
-        disabled={isLoading}
+        disabled={isLoading || rest.disabled}
         ref={ref}
       >
         {isLoading ? (

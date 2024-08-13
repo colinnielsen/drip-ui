@@ -8,6 +8,12 @@ export type ValueType<BaseType, TypeName> = BaseType & {
 
 export type Unsaved<T> = Omit<T, 'id'>;
 
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & {
+  [P in K]?: T[P] | null;
+};
+
 export type SupportedCurrency = 'eth' | 'usdc';
 
-export type Currency = USDC | ETH;
+export const CURRENCIES = [ETH, USDC] as const;
+
+export type Currency = InstanceType<(typeof CURRENCIES)[number]>;

@@ -1,7 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import { UUID } from 'crypto';
+import { USDC } from '@/data-model/_common/currency/USDC';
+import {
+  Farmer,
+  FarmerMessage,
+  FarmerMessageWithUser,
+} from '@/data-model/farmer/FarmerType';
+import { BASE_CLIENT, USDC_INSTANCE } from '@/lib/ethereum';
 import { axiosFetcher, minutes } from '@/lib/utils';
-import { Farmer } from '@/data-model/farmer/FarmerType';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { UUID } from 'crypto';
+import { useWalletClient } from './EthereumQuery';
 
 //
 //// QUERIES
@@ -25,6 +32,81 @@ export const farmerQuery = (id?: UUID, enabled: boolean = true) => {
 export const useFarmer = (id?: UUID, enabled: boolean = true) =>
   useQuery({ ...farmerQuery(id, enabled), staleTime: minutes(30) });
 
+const getFarmerMessages = (
+  farmerId: string,
+): Promise<FarmerMessageWithUser[]> => {
+  return axiosFetcher<FarmerMessageWithUser[]>(
+    `/api/farmers/${farmerId}/messages?limit=10`,
+  );
+};
+
+export const useFarmerMessages = (farmerId: string) => {
+  return useQuery({
+    queryKey: ['farmer-messages', farmerId],
+    queryFn: () => getFarmerMessages(farmerId),
+  });
+};
+
 //
 //// MUTATIONS
 //
+
+export const useDonate = () => {
+  const wallet = useWalletClient();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (variables: { farmer: Farmer; amount: USDC }) => {
+      if (!wallet) throw new Error('Wallet not connected');
+
+      const [account] = await wallet.getAddresses();
+      const { request } = await BASE_CLIENT.simulateContract({
+        address: USDC_INSTANCE.address,
+        abi: USDC_INSTANCE.abi,
+        functionName: 'transfer',
+        args: [variables.farmer.ethAddress, variables.amount.toWei()],
+        account: account,
+      });
+      const txHash = await wallet!.writeContract(request);
+
+      return axiosFetcher<FarmerMessage>(
+        `/api/farmers/${variables.farmer.id}/donate`,
+        {
+          method: 'post',
+          data: {
+            amount: variables.amount,
+            txHash,
+          },
+        },
+      );
+    },
+    onSuccess: (_, vars) => {
+      queryClient.refetchQueries({
+        queryKey: ['farmer-messages', vars.farmer.id],
+      });
+    },
+  });
+};
+
+export const useMessage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (variables: { farmer: Farmer; message: string }) => {
+      return axiosFetcher<FarmerMessage>(
+        `/api/farmers/${variables.farmer.id}/message`,
+        {
+          method: 'post',
+          data: {
+            message: variables.message,
+          },
+        },
+      );
+    },
+    onSuccess: (_, vars) => {
+      queryClient.refetchQueries({
+        queryKey: ['farmer-messages', vars.farmer.id],
+      });
+    },
+  });
+};

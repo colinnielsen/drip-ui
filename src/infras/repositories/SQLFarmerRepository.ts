@@ -1,8 +1,27 @@
+import { rehydrateCurrency } from '@/data-model/_common/currency/currencyDTO';
+import { OptionalKeys } from '@/data-model/_common/type/CommonType';
 import { FarmerRepository } from '@/data-model/farmer/FarmerRepository';
-import { Farmer, FarmerPosts } from '@/data-model/farmer/FarmerType';
+import {
+  Farmer,
+  FarmerMessage,
+  FarmerMessageWithUser,
+  FarmerPost,
+} from '@/data-model/farmer/FarmerType';
+import { err, generateUUID } from '@/lib/utils';
 import { sql } from '@vercel/postgres';
 import { UUID } from 'crypto';
 import { v4 } from 'uuid';
+
+function mapSavedFarmerMessageToFarmerMessage(row: any): FarmerMessageWithUser {
+  return {
+    id: row.id,
+    farmer: row.farmer ?? err('expectedFarmerId'),
+    sendingUser: row.sending_user?.[0] ?? err('expectedSendingUserId'),
+    message: row.message ?? null,
+    amount: row.amount ? rehydrateCurrency(row.amount) : null,
+    createdAt: new Date(row.created_at) ?? err('expectedCreatedAt'),
+  };
+}
 
 export class SQLFarmerRepository implements FarmerRepository {
   async findById(id: UUID): Promise<Farmer | null> {
@@ -51,12 +70,12 @@ export class SQLFarmerRepository implements FarmerRepository {
     return { ...farmer, id } as Farmer;
   }
 
-  async savePosts(posts: FarmerPosts[]): Promise<void> {
+  async savePosts(posts: FarmerPost[]): Promise<void> {
     // batch insert posts
     for (const post of posts) {
       await sql`
-        INSERT INTO farmerposts (id, "farmer", "title", "content", "image", "createdAt")
-        VALUES (${post.id}, ${post.farmer}, ${post.title}, ${post.content}, ${post.image}, ${post.createdAt.toISOString()})
+        INSERT INTO farmerposts (id, "farmer", "title", "content", "images", "createdAt")
+        VALUES (${post.id}, ${post.farmer}, ${post.title}, ${post.content}, ${JSON.stringify(post.images)}, ${post.createdAt.toISOString()})
       `;
     }
   }
@@ -64,5 +83,46 @@ export class SQLFarmerRepository implements FarmerRepository {
   async delete(id: UUID): Promise<void> {
     const result = await sql`DELETE FROM farmers WHERE id = ${id}`;
     if (result.rowCount === 0) throw Error('could not delete');
+  }
+
+  async getFarmerMessages(
+    farmerId: UUID,
+    limit: number = 100,
+  ): Promise<FarmerMessageWithUser[]> {
+    const result = await sql`
+      SELECT 
+        fm.*,
+        (
+          SELECT json_agg(u.*)
+          FROM users u
+          WHERE u.id = fm.sending_user
+        ) AS "sending_user"
+      FROM farmermessages fm
+      WHERE fm.farmer = ${farmerId}
+      ORDER BY fm.created_at
+      DESC LIMIT ${limit}`;
+
+    return result.rows.map(mapSavedFarmerMessageToFarmerMessage);
+  }
+
+  async upsertFarmerMessage(
+    message: OptionalKeys<FarmerMessage, 'id' | 'createdAt'>,
+  ): Promise<FarmerMessage> {
+    const id = message.id || generateUUID();
+    const createdAt = message.createdAt || new Date();
+    const amount = message.amount ? rehydrateCurrency(message.amount) : null;
+    const result = await sql`
+      INSERT INTO farmermessages (id, farmer, sending_user, message, amount, created_at)
+      VALUES (${id}, ${message.farmer}, ${message.sendingUser}, ${message.message}, ${amount ? JSON.stringify(amount) : null}, ${createdAt.toISOString()})
+      ON CONFLICT (id) DO UPDATE SET
+        farmer = EXCLUDED.farmer,
+        sending_user = EXCLUDED.sending_user,
+        message = EXCLUDED.message,
+        amount = EXCLUDED.amount,
+        created_at = EXCLUDED.created_at
+      RETURNING *
+    `;
+
+    return (result.rows[0] ?? err('expectedFarmerMessage')) as FarmerMessage;
   }
 }

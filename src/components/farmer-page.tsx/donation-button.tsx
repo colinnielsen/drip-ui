@@ -13,7 +13,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '../ui/drawer';
-import { Title1 } from '../ui/typography';
+import { Label1, Title1 } from '../ui/typography';
 import { USDCInput } from '../ui/usdc-input';
 
 const SendButton = ({
@@ -54,9 +54,18 @@ const SendButton = ({
 export const DonationButton = ({ farmer }: { farmer: Farmer }) => {
   const [amount, setAmount] = useState(USDC.ZERO);
   const [open, setOpen] = useState(false);
+  const [donationComplete, setDonationComplete] = useState(false);
 
+  const farmerName = farmer.name.split(' ')[0];
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer
+      open={open}
+      onOpenChange={open => {
+        setOpen(open);
+        if (donationComplete) setAmount(USDC.ZERO);
+        if (!open) setDonationComplete(false);
+      }}
+    >
       <DrawerTrigger asChild>
         <CTAButton variant="cta-small" className="grow">
           support me
@@ -65,16 +74,32 @@ export const DonationButton = ({ farmer }: { farmer: Farmer }) => {
 
       <DrawerContent className="flex flex-col gap-4 w-full p-0">
         <DrawerTitle className="pt-4 px-6 grow text-center">
-          <Title1>Support {farmer.name.split(' ')[0]}</Title1>
+          <Title1>
+            {donationComplete
+              ? `Thanks for supporting ${farmerName}!`
+              : `Support ${farmerName}`}
+          </Title1>
         </DrawerTitle>
-        <USDCInput amount={amount} setAmount={setAmount} />
+        {donationComplete ? (
+          <Label1 className="text-primary-gray px-6 text-center py-2">
+            Your donation goes directly to {farmerName}&apos;s farm
+          </Label1>
+        ) : (
+          <USDCInput amount={amount} setAmount={setAmount} />
+        )}
         <Divider />
         <DrawerFooter className="p-6 pt-0">
-          <SendButton
-            farmer={farmer}
-            amount={amount}
-            onComplete={() => setOpen(false)}
-          />
+          {donationComplete ? (
+            <CTAButton onClick={() => setOpen(false)}>done</CTAButton>
+          ) : (
+            <SendButton
+              farmer={farmer}
+              amount={amount}
+              onComplete={() => {
+                setDonationComplete(true);
+              }}
+            />
+          )}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

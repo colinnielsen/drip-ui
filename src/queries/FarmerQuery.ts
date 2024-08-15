@@ -67,7 +67,18 @@ export const useDonate = () => {
         args: [variables.farmer.ethAddress, variables.amount.toWei()],
         account: account,
       });
-      const txHash = await wallet!.writeContract(request);
+      let txHash: `0x${string}` | null = null;
+      try {
+        txHash = await wallet.writeContract(request);
+      } catch (e) {
+        if (
+          e instanceof Error &&
+          !e.message.includes('User rejected the request')
+        )
+          throw e;
+      }
+
+      if (!txHash) return null;
 
       return axiosFetcher<FarmerMessage>(
         `/api/farmers/${variables.farmer.id}/donate`,

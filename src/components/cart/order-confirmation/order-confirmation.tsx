@@ -208,7 +208,7 @@ export const OrderConfirmation = ({
           </div>
         </div>
 
-        <OrderSummary cart={cart} />
+        <OrderSummary summary={summary} hideTipIfZero />
 
         <DialogFooter className="w-full px-6 pb-8">
           <DialogClose asChild>

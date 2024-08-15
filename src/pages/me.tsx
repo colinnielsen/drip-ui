@@ -1,5 +1,17 @@
-import { Button } from '@/components/ui/button';
+import { OrderItemDisplay } from '@/components/cart/basket/cart-item';
+import { FarmerCard } from '@/components/cart/basket/farmer-card';
+import { OrderSummary } from '@/components/cart/basket/summary';
+import { Button, CTAButton, SecondaryButton } from '@/components/ui/button';
 import { Divider } from '@/components/ui/divider';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import { AnimatedTimer } from '@/components/ui/icons';
 import { PageHeader } from '@/components/ui/page-header';
 import { PageWrapper } from '@/components/ui/page-wrapper';
@@ -9,32 +21,39 @@ import {
   Headline,
   Label2,
   Mono,
+  Title1,
   Title2,
 } from '@/components/ui/typography';
 import {
+  collapseDuplicateItems,
+  getOrderItemCost,
+  getOrderNumber,
   getOrderSummary,
   isPaidOrder,
   mapStatusToStatusLabel,
 } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
+import { basescanTxUrl } from '@/lib/ethereum';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
+import { axiosFetcher, cn } from '@/lib/utils';
 import { ORDERS_QUERY_KEY, useOrders } from '@/queries/OrderQuery';
-import { useShops } from '@/queries/ShopQuery';
 import {
   ACTIVE_USER_QUERY_KEY,
   useResetUser,
   useUser,
   useUserName,
 } from '@/queries/UserQuery';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 import Avatar from 'boring-avatars';
-import { LogOut } from 'lucide-react';
+import { UUID } from 'crypto';
+import { format } from 'date-fns';
+import { ArrowLeft, LogOut } from 'lucide-react';
 import Image from 'next/image';
-import { useMemo } from 'react';
-import { createClient, http } from 'viem';
-import { getEnsName } from 'viem/actions';
-import { mainnet } from 'viem/chains';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
+import { isHex } from 'viem';
+import { Prettify } from 'viem/chains';
 
 const SkeletonLineItem = () => {
   return (
@@ -62,7 +81,21 @@ const SkeletonLineItem = () => {
   );
 };
 
-const OrderLineItem = ({ order, shop }: { order: Order; shop: Shop }) => {
+type OrderWithShop = Prettify<
+  Order & {
+    shopData: Shop;
+  }
+>;
+
+const OrderLineItem = ({
+  order,
+  shop,
+  onSelect,
+}: {
+  order: Order;
+  shop: Shop;
+  onSelect: (order: UUID) => void;
+}) => {
   const orderSummary = useMemo(() => getOrderSummary(order), [order]);
   return (
     <div
@@ -94,19 +127,214 @@ const OrderLineItem = ({ order, shop }: { order: Order; shop: Shop }) => {
         )}
       </div>
 
-      {/* <DrawerTrigger asChild> */}
-      <Button className="px-4 py-2.5 uppercase rounded-[50px] bg-secondary-pop">
-        <Mono className="text-[14px]">view</Mono>
-      </Button>
-      {/* </DrawerTrigger> */}
+      <DrawerTrigger asChild>
+        <Button
+          onClick={() => onSelect(order.id)}
+          className="px-4 py-2.5 uppercase rounded-[50px] bg-secondary-pop"
+        >
+          <Mono className="text-[14px]">view</Mono>
+        </Button>
+      </DrawerTrigger>
     </div>
+  );
+};
+
+const OrderDetail = ({ order }: { order: OrderWithShop | null }) => {
+  const orderSummary = useMemo(
+    () => (order ? getOrderSummary(order) : null),
+    [order],
+  );
+  return (
+    <DrawerContent className="h-[100vh]">
+      <DrawerHeader className="h-14 flex items-center justify-evenly py-4 px-6">
+        <div className="w-full">
+          <DrawerClose asChild>
+            <ArrowLeft height={24} width={24} strokeWidth={2.4} />
+          </DrawerClose>
+        </div>
+        <DrawerTitle asChild>
+          <Headline className="text-palette-foreground px-6 whitespace-nowrap w-full text-[16px] leading-[19.4px] font-libreFranklin font-semibold">
+            {order && getOrderNumber(order)
+              ? `Order #${getOrderNumber(order)}`
+              : 'Your Cart'}
+          </Headline>
+        </DrawerTitle>
+        <div className="w-full" />
+      </DrawerHeader>
+
+      <div className="flex flex-col py-2 gap-2">
+        <Title1 className="text-palette-foreground px-6">
+          {order?.shopData.label}
+        </Title1>
+
+        <div className="flex gap-2 px-6">
+          <Label2
+            className={cn({
+              'text-secondary-pop': order?.status === '4-complete',
+              'text-yellow-600': order?.status === '1-pending',
+              'text-red-700': order?.status === 'cancelled',
+            })}
+          >
+            Order{' '}
+            {order?.status && mapStatusToStatusLabel(order?.status, 'past')}
+          </Label2>
+          <Label2>
+            {order?.timestamp &&
+              format(new Date(order.timestamp), 'PPp')
+                .split(', ')
+                .map((s, i) => (i === 1 ? `${s} at` : `${s},`))
+                .join(' ')
+                .slice(0, -1)}
+          </Label2>
+        </div>
+      </div>
+
+      <div className="flex flex-col w-full py-2 divide-y divide-light-gray">
+        {order?.orderItems &&
+          collapseDuplicateItems(order.orderItems).map(
+            ([orderItem, quantity], index) => {
+              const { price, discountPrice } = getOrderItemCost(orderItem);
+              return (
+                <div key={index} className="py-6 w-full first:pt-0 last:pb-0">
+                  <OrderItemDisplay
+                    orderItem={orderItem}
+                    originalPrice={price}
+                    actualPrice={orderItem.paidPrice ?? discountPrice}
+                    rightSide={
+                      <div
+                        className={
+                          'flex items-center gap-2 px-4 py-2 font-normal text-sm bg-light-gray rounded-2xl justify-between'
+                        }
+                      >
+                        <div className="flex items-center justify-center grow">
+                          <Label2 className="text-black">{quantity}</Label2>
+                        </div>
+                      </div>
+                    }
+                  />
+                </div>
+              );
+            },
+          )}
+        {order && (
+          <OrderSummary
+            summary={orderSummary}
+            isLoading={!orderSummary}
+            hideTipIfZero
+          />
+        )}
+        {order && (
+          <div className="px-6 py-6">
+            <FarmerCard
+              {...{
+                order: order,
+                showPics: false,
+                // className: !isPaying ? 'opacity-0' : 'opacity-1',
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      <DrawerFooter>
+        <div className="flex flex-col px-4 gap-2 justify-center items-center">
+          {order &&
+            'transactionHash' in order &&
+            isHex(order.transactionHash) && (
+              <Link
+                className="w-full"
+                href={basescanTxUrl(order?.transactionHash)}
+                target="_blank"
+              >
+                <SecondaryButton>onchain receipt</SecondaryButton>
+              </Link>
+            )}
+          <Link
+            href={'https://t.me/colinnielsen'}
+            target="_blank"
+            className="w-full"
+          >
+            <CTAButton>get help</CTAButton>
+          </Link>
+        </div>
+      </DrawerFooter>
+    </DrawerContent>
+  );
+};
+
+const HistoricalOrderList = () => {
+  const client = useQueryClient();
+  const { data: orders } = useOrders();
+
+  const [selectedOrderId, setSelectedOrder] = useState<UUID | null>(null);
+
+  const shopQueries = useQueries({
+    queries: (orders ?? []).map(order => ({
+      queryKey: ['shop', order.shop],
+      queryFn: () => axiosFetcher<Shop>(`/api/shops/${order.shop}`),
+      initialData:
+        client
+          .getQueryData<Shop[]>(['shop'])
+          ?.find(shop => shop.id === order.shop) ??
+        client.getQueryData<Shop>(['shop', order.shop]),
+    })),
+  });
+
+  console.log(selectedOrderId);
+  const selectedOrderData = useMemo(() => {
+    if (
+      !orders ||
+      !selectedOrderId ||
+      !shopQueries?.every(query => query.isSuccess)
+    )
+      return null;
+
+    const order = orders.find(order => order.id === selectedOrderId);
+    return {
+      ...order!,
+      shopData: shopQueries.find(query => query.data.id === order?.shop)!.data,
+    } satisfies OrderWithShop;
+  }, [orders, selectedOrderId, shopQueries]);
+  if (!orders?.length) return null;
+
+  return (
+    <>
+      <Divider />
+      <div className="px-6 py-4 flex flex-col gap-4">
+        <Headline>Order history</Headline>
+        <Drawer
+          onOpenChange={open => !open && setSelectedOrder(null)}
+          dismissible={false}
+        >
+          <div className="flex flex-col gap-4">
+            {orders && shopQueries.every(query => query.isSuccess)
+              ? shopQueries.map((query, i) => {
+                  const shop = query.data;
+                  const order = orders[i];
+
+                  if (!shop || !order) return <SkeletonLineItem key={i} />;
+                  return (
+                    <OrderLineItem
+                      key={order.id}
+                      order={order}
+                      shop={shop}
+                      onSelect={setSelectedOrder}
+                    />
+                  );
+                })
+              : Array.from({ length: 2 }, (_, i) => (
+                  <SkeletonLineItem key={i} />
+                ))}
+          </div>
+          <OrderDetail order={selectedOrderData} />
+        </Drawer>
+      </div>
+    </>
   );
 };
 
 const Me = () => {
   const { data: user } = useUser();
-  const { data: orders } = useOrders();
-  const { data: shops } = useShops();
   const queryClient = useQueryClient();
 
   const { mutate: reset } = useResetUser();
@@ -160,32 +388,7 @@ const Me = () => {
 
       <div className="h-4" />
 
-      {orders?.length ? (
-        <>
-          <Divider />
-          <div className="px-6 py-4 flex flex-col gap-4">
-            <Headline>Order history</Headline>
-            <div className="flex flex-col gap-4">
-              {shops && orders
-                ? orders?.map(order => {
-                    const shop = shops?.find(shop => shop.id === order.shop);
-                    if (!shop)
-                      return (
-                        <div className="text-red-500 px-6" key={order.id}>
-                          Shop not found
-                        </div>
-                      );
-                    return (
-                      <OrderLineItem key={order.id} order={order} shop={shop} />
-                    );
-                  })
-                : Array.from({ length: 2 }, (_, i) => (
-                    <SkeletonLineItem key={i} />
-                  ))}
-            </div>
-          </div>
-        </>
-      ) : null}
+      <HistoricalOrderList />
 
       <Divider />
 

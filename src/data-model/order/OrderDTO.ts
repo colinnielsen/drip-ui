@@ -144,17 +144,30 @@ export const getOrderSummary = (order: Order): OrderSummary => {
   };
 };
 
-export const mapStatusToStatusLabel = (status: Order['status']) => {
+export const getOrderNumber = (order: Order): string | null => {
+  return (
+    ('externalOrderInfo' in order &&
+      order.externalOrderInfo?.__type === 'slice' &&
+      order.externalOrderInfo.orderNumber) ||
+    null
+  );
+};
+
+export const mapStatusToStatusLabel = (
+  status: Order['status'],
+  tense: 'present' | 'past' = 'present',
+) => {
   switch (status) {
     case '1-pending':
+      return tense === 'present' ? 'Pending' : 'Pending';
     case '2-submitting':
-      return 'Pending';
+      return tense === 'present' ? 'Pending' : 'Submitted';
     case '3-in-progress':
       return 'In Progress';
     case '4-complete':
-      return 'Complete';
+      return tense === 'present' ? 'Complete' : 'Completed';
     case 'cancelled':
-      return 'Cancelled';
+      return tense === 'present' ? 'Cancelled' : 'Cancelled';
   }
 };
 

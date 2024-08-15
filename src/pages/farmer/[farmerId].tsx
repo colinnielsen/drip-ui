@@ -6,7 +6,9 @@ import { FarmerPosts } from '@/components/farmer-page.tsx/posts';
 import { FarmerSection } from '@/components/farmer-page.tsx/section';
 import { PageHeader } from '@/components/ui/page-header';
 import { PageWrapper } from '@/components/ui/page-wrapper';
+import { Farmer } from '@/data-model/farmer/FarmerType';
 import { sqlDatabase } from '@/infras/database';
+import { isUUID } from '@/lib/utils';
 import { useFarmer } from '@/queries/FarmerQuery';
 import { UUID } from 'crypto';
 import { GetStaticPaths } from 'next';
@@ -29,14 +31,20 @@ export async function getStaticProps({
 }: {
   params: { farmerId: string };
 }) {
-  if (!params.farmerId)
+  if (!params.farmerId || !isUUID(params.farmerId))
+    return {
+      notFound: true,
+    };
+
+  const farmer = await sqlDatabase.farmers.findById(params.farmerId);
+  if (!farmer)
     return {
       notFound: true,
     };
   else
     return {
       props: {
-        farmerId: params.farmerId,
+        farmer,
       },
     };
 }
@@ -44,12 +52,7 @@ export async function getStaticProps({
 //
 //// DYNAMIC RENDERING
 //
-export default function FarmerPage({ farmerId }: { farmerId: string }) {
-  const { data: farmer, error } = useFarmer(farmerId as UUID);
-
-  if (error) return <div>Error: {error.message}</div>;
-  if (farmer === null) return <div>Farmer not found</div>;
-
+export default function FarmerPage({ farmer }: { farmer: Farmer }) {
   return (
     <PageWrapper>
       <PageHeader />

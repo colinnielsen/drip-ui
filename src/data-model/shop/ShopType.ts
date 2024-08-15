@@ -26,6 +26,7 @@ export type SingleRecipientTipConfig =
 export type TipConfig = SingleRecipientTipConfig;
 
 export type ManualStoreConfig = {
+  __type: 'slice';
   sliceId: number;
   sliceVersion: number;
   name?: string;
@@ -57,17 +58,6 @@ export type BaseShop = BaseEntity & {
   tipConfig: TipConfig;
   farmerAllocations: FarmerAllocation[];
   menu: Menu;
-  // // NOTE This is a mapping from itemCategory -> ItemCategory[]
-  // // It conveys the list of options we should have for a given category
-  // // IE espresso should support espresso options + syrup options
-  // // So this would be: "espress" -> ["espresso", "syrup"]
-  // categoryOptions: CategoryOptions;
-  // // NOTE This is a mapping from category to options
-  // // This lets each shop configure what options each item category supports
-  // options: Options;
-  // TODO This might make more sense as [ItemCategory, ItemId] in case there are potential collisions on names?
-  // bestsellers is a list of tuples, where the first element is the category and the second is the item name
-  bestSellers?: [ItemCategory, string][];
 };
 
 export type Storefront = BaseShop & {

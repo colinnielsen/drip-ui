@@ -14,10 +14,11 @@ import { useMessage } from '@/queries/FarmerQuery';
 
 export const SendMessageButton = ({ farmer }: { farmer: Farmer }) => {
   const [text, setText] = useState('');
+  const [open, setOpen] = useState(false);
   const { mutateAsync: message, isPending: sending } = useMessage();
 
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <SecondaryButton
           variant="secondary-small"
@@ -28,7 +29,10 @@ export const SendMessageButton = ({ farmer }: { farmer: Farmer }) => {
         </SecondaryButton>
       </DrawerTrigger>
 
-      <DrawerContent className="flex flex-col gap-4 w-full p-0">
+      <DrawerContent
+        className="flex flex-col gap-4 w-full p-0"
+        aria-describedby="Post a message"
+      >
         <DrawerTitle className="px-6 pt-4 grow text-center">
           <Title1>Post a message</Title1>
         </DrawerTitle>
@@ -46,7 +50,9 @@ export const SendMessageButton = ({ farmer }: { farmer: Farmer }) => {
           <CTAButton
             disabled={text.length === 0 || sending}
             type="submit"
-            onClick={() => message({ farmer, message: text })}
+            onClick={() =>
+              message({ farmer, message: text }).then(() => setOpen(false))
+            }
           >
             Send
           </CTAButton>

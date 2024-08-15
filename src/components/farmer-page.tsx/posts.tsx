@@ -25,14 +25,16 @@ const Post = ({
           />
         </div>
         <Label1 className="text-primary-gray">
-          {formatDistance(post.createdAt, new Date(), { addSuffix: true })}
+          {formatDistance(new Date(post.createdAt), new Date(), {
+            addSuffix: true,
+          })}
         </Label1>
       </div>
       <Headline>{post.title}</Headline>
       <Label1 className="text-primary-gray">{post.content}</Label1>
       <ItemCarousel
-        className="overflow-scroll"
         data={post.images}
+        className={cn('overflow-scroll w-full')}
         renderFn={(img, index) => (
           <div
             className={cn(

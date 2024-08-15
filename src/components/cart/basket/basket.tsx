@@ -22,7 +22,7 @@ import { CartItem, LoadingCartItem } from './cart-item';
 import { FarmerCard } from './farmer-card';
 import { FooterTotal } from './footer-total';
 import { NextButton } from './next-button';
-import { OrderSummary } from './summary';
+import { CartSummary, OrderSummary } from './summary';
 
 export const EmptyBasket = () => {
   const { setOpen } = useNearestDrawer();
@@ -139,7 +139,7 @@ export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
             </>
           )}
 
-          <OrderSummary cart={cart} isLoading={isFetching} />
+          <CartSummary isLoading={isFetching} />
 
           <Divider />
 

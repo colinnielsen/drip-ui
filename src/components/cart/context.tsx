@@ -120,14 +120,7 @@ const useShouldPollForCartStatus = (
     slideInView === 1 &&
     !!secondsWhenPaid &&
     secondsWhenPaid + waitforatleastseconds < secondsSinceMount;
-  console.log({
-    slideInView,
-    shouldPoll,
-    secondsWhenPaid,
-    secondsSinceMount,
-    paymentStep,
-    waitforatleastseconds,
-  });
+
   useEffect(() => {
     if (!cartId || slideInView !== 1 || paymentStep !== 'success') return;
 

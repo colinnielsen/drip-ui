@@ -107,3 +107,11 @@ export function parseUnits(value: string, decimals: number) {
 
   return BigInt(`${negative ? '-' : ''}${integer}${fraction}`);
 }
+
+export const basescanTxUrl = (txHash: string) => {
+  return `https://basescan.org/tx/${txHash}`;
+};
+
+export const basescanAddressUrl = (address: string) => {
+  return `https://basescan.org/address/${address}`;
+};

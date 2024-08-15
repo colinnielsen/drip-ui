@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.7",
-    "@privy-io/react-auth": "^1.77.0",
-    "@privy-io/server-auth": "^1.9.7",
+    "@privy-io/react-auth": "^1.78.2",
+    "@privy-io/server-auth": "^1.10.0",
     "@privy-io/wagmi": "^0.2.12",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-checkbox": "^1.1.1",

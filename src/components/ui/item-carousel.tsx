@@ -21,7 +21,9 @@ export function ItemCarousel<T>({
         opts={{
           align: 'start',
         }}
-        className="w-full max-w-sm"
+        className={cn('w-full max-w-sm flex', {
+          'justify-center': data.length === 1,
+        })}
       >
         <CarouselContent>
           {data.map((item, index) => (

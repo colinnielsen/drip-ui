@@ -54,7 +54,6 @@ export const bootstrapDB = async () => {
       "url" TEXT,
       "farmerAllocations" JSONB,
       "menu" JSONB,
-      "bestSellers" JSONB,
       "location" JSONB,
       "tipConfig" JSONB
     );  

@@ -7,6 +7,7 @@ import { Currency } from '../_common/type/CommonType';
 export type OrderItem = {
   id: UUID;
   item: Item;
+  //quoted price?
   paidPrice?: Currency;
   mods: ItemMod[];
 };

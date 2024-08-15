@@ -500,7 +500,7 @@ export const usePollExternalServiceForOrderCompletion = (
   const pendingOrders = incompleteOrders.filter(o => o.status !== '4-complete');
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
-  console.log(pendingOrders);
+
   return useQuery({
     queryKey: [
       ORDERS_QUERY_KEY,

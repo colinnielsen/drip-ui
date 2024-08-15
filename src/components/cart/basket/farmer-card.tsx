@@ -6,6 +6,7 @@ import { Skeleton } from '../../ui/skeleton';
 import { Label1, Title2 } from '../../ui/typography';
 import { cn } from '@/lib/utils';
 import { InfoCard } from '@/components/ui/info-card';
+import Link from 'next/link';
 
 export const FarmerCard = ({
   order,
@@ -32,7 +33,10 @@ export const FarmerCard = ({
   );
 
   const info = (
-    <div className={'w-full flex flex-col gap-y-2'}>
+    <Link
+      href={`/farmer/${data.farmer.id}`}
+      className={'w-full flex flex-col gap-y-2'}
+    >
       <Title2>{allocPercent}% for growers</Title2>
       {data.farmer ? (
         <Label1 className="text-primary-gray">
@@ -41,7 +45,7 @@ export const FarmerCard = ({
       ) : (
         <Skeleton className="h-4 w-1/2" />
       )}
-    </div>
+    </Link>
   );
 
   return <InfoCard left={left} info={info} className={className} />;

@@ -35,6 +35,7 @@ export const STATIC_FARMER_DATA: Farmer[] = [
 
 export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   {
+    __type: 'slice',
     sliceId: 799,
     sliceVersion: 1,
     location: {
@@ -55,6 +56,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     ],
   },
   {
+    __type: 'slice',
     sliceId: 827,
     sliceVersion: 1,
     location: {
@@ -75,6 +77,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     ],
   },
   {
+    __type: 'slice',
     sliceId: 805,
     sliceVersion: 1,
     location: {
@@ -100,6 +103,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     ],
   },
   {
+    __type: 'slice',
     sliceId: 769,
     sliceVersion: 1,
     location: {

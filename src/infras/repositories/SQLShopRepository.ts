@@ -50,7 +50,6 @@ export class SQLShopRepository implements ShopRepository {
         logo,
         "farmerAllocations",
         menu,
-        "bestSellers",
         "__sourceConfig",
         location,
         "tipConfig"
@@ -63,7 +62,6 @@ export class SQLShopRepository implements ShopRepository {
         ${shop.logo},
         ${JSON.stringify(shop.farmerAllocations)},
         ${JSON.stringify(shop.menu)},
-        ${JSON.stringify(shop.bestSellers)},
         ${JSON.stringify(shop.__sourceConfig)},
         ${isStorefront(shop) ? JSON.stringify(shop.location) : null},
         ${JSON.stringify(shop.tipConfig)}
@@ -77,7 +75,6 @@ export class SQLShopRepository implements ShopRepository {
         url = EXCLUDED.url,
         "farmerAllocations" = EXCLUDED."farmerAllocations",
         menu = EXCLUDED.menu,
-        "bestSellers" = EXCLUDED."bestSellers",
         location = EXCLUDED.location,
         "tipConfig" = EXCLUDED."tipConfig"
     `;

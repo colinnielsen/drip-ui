@@ -16,7 +16,7 @@ import CheckoutSlides from './checkout-slides';
 import { PRIVY_WAGMI_CONFIG } from '@/lib/ethereum';
 import { WagmiProvider } from '@privy-io/wagmi';
 import { SliceProvider } from '@slicekit/react';
-import { SliceCartListener } from '@/lib/slice';
+import { SliceCartListener, sliceKit } from '@/lib/slice';
 
 export default function CartFooter() {
   const { data: cart } = useRecentCart();
@@ -95,7 +95,7 @@ export default function CartFooter() {
           className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
           aria-describedby="cart-footer"
         >
-          <WagmiProvider config={PRIVY_WAGMI_CONFIG}>
+          <WagmiProvider config={sliceKit.wagmiConfig}>
             <SliceProvider>
               <SliceCartListener>
                 <CheckoutSlides {...{ shop, cart }} />

@@ -72,13 +72,13 @@ export default function PaymentSlide({
   const isPaying = paymentStep === 'success';
 
   const headerText = useMemo(() => {
-    if (!isPaying) return 'setting up your order';
+    if (!isPaying) return 'grinding the beans';
     return 'your order is brewing';
   }, [isPaying]);
 
   const subTitle = useMemo(() => {
     if (!isPaying) return '(we will prompt your wallet soon)';
-    return '(via onchain superpowers)';
+    return null;
   }, [isPaying]);
 
   return (

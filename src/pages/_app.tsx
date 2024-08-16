@@ -1,16 +1,13 @@
+import { Footer } from '@/components/app-footer';
+import { GlobalListeners } from '@/components/global-listeners';
+import { PrivyProvider } from '@/components/providers.tsx/PrivyProvider';
 import { ReactQueryClientProvider } from '@/components/providers.tsx/ReactQueryClientProvider';
-import { cn, isDev } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { AppProps } from 'next/app';
 import { EB_Garamond, Libre_Franklin, Roboto_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
+import Head from 'next/head';
 import '../styles/globals.css';
-import { PrivyProvider } from '@/components/providers.tsx/PrivyProvider';
-import { WagmiProvider } from '@privy-io/wagmi';
-import { PRIVY_WAGMI_CONFIG } from '@/lib/ethereum';
-import { SliceCartListener } from '@/lib/slice';
-import { SliceProvider } from '@slicekit/react';
-import { GlobalListeners } from '@/components/global-listeners';
-import { Footer } from '@/components/app-footer';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -55,6 +52,13 @@ export default function App({ Component, pageProps }: AppProps) {
             // 'prose',
           )}
         >
+          <Head>
+            <title>Drip</title>
+            <meta
+              name="viewport"
+              content="width=device-width, user-scalable=no"
+            />
+          </Head>
           <Component {...pageProps} />
           <Footer />
           <GlobalListeners />

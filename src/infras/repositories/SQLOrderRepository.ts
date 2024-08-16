@@ -23,6 +23,7 @@ import { err, sortDateAsc } from '@/lib/utils';
 import { Shop } from '@/data-model/shop/ShopType';
 import { sliceKit } from '@/lib/slice';
 import { OrderStatus as SliceOrderStatus } from '@slicekit/core';
+import { differenceInMinutes, parseISO } from 'date-fns';
 
 export class SQLOrderRepository implements OrderRepository {
   async findById(id: UUID): Promise<Order | null> {
@@ -230,6 +231,10 @@ export class SQLOrderRepository implements OrderRepository {
     order: PaidOrder,
   ): Promise<PaidOrder> {
     if (!order.externalOrderInfo) throw Error('externalOrderInfo not found');
+
+    const itsBeen5Minutes = (timestamp: string) =>
+      differenceInMinutes(new Date(), parseISO(timestamp)) > 5;
+
     if (order.externalOrderInfo.__type === 'slice') {
       const sliceOrders = await sliceKit
         .getOrder({
@@ -244,7 +249,7 @@ export class SQLOrderRepository implements OrderRepository {
       const orderNumber = sliceOrder.refOrderId;
       const status: SliceOrderStatus = sliceOrder.status;
       const newOrderStatus: Order['status'] =
-        status === 'Completed'
+        status === 'Completed' || itsBeen5Minutes(order.timestamp)
           ? '4-complete'
           : status === 'Canceled'
             ? 'cancelled'

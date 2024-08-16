@@ -12,8 +12,7 @@ import {
   QueryClient,
 } from '@tanstack/react-query';
 import { GetStaticProps } from 'next';
-import Head from 'next/head';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 
 export const getStaticProps: GetStaticProps<{
   dehydratedState: DehydratedState;
@@ -48,13 +47,6 @@ export default function Home({
   return (
     <HydrationBoundary state={dehydratedState}>
       <div className="flex flex-col gap-5 pb-32">
-        <Head>
-          <title>Drip</title>
-          <meta
-            name="viewport"
-            content="width=device-width, user-scalable=no"
-          />
-        </Head>
         <HomePageHeader />
         {/* <div className="w-screen max-h-64 overflow-hidden">
         <Image src={map} alt="coffee" />

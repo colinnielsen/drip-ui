@@ -4,17 +4,12 @@ import { Skeleton } from '../ui/skeleton';
 import { Label1, Title1 } from '../ui/typography';
 import { DonationButton } from './donation-button';
 import { SendMessageButton } from './message-button';
-import Head from 'next/head';
 
 export function FarmerHeader({ farmer }: { farmer: Farmer | 'loading' }) {
   const isLoading = farmer === 'loading';
 
   return (
     <div className="w-full flex flex-col gap-4 px-6">
-      <Head>
-        <title>{!isLoading && farmer.name}</title>
-        <meta name="viewport" content="width=device-width, user-scalable=no" />
-      </Head>
       <div className="flex flex-col gap-2 items-center">
         <div className="w-[120px] h-[120px] rounded-full overflow-clip">
           {isLoading ? (

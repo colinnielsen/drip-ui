@@ -43,7 +43,7 @@ function AddToBasketButton({
   return (
     <DrawerFooter>
       <DrawerClose asChild>
-        <CTAButton onClick={e => mutate()}>Add to Basket</CTAButton>
+        <CTAButton onClick={e => mutate()}>Add to Cart</CTAButton>
       </DrawerClose>
     </DrawerFooter>
   );

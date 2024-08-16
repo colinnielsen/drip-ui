@@ -45,10 +45,17 @@ const config: Config = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        'cart-shake': {
+          '0%, 100%': { transform: 'rotate(0deg) scale(1)' },
+          '25%': { transform: 'rotate(-5deg) scale(1.1)' },
+          '50%': { transform: 'rotate(5deg) scale(1.1)' },
+          '75%': { transform: 'rotate(-5deg) scale(1.1)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'cart-shake': 'cart-shake 0.5s ease-in-out',
       },
     },
   },

@@ -96,6 +96,7 @@ export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
   const isPaid = isPaidOrder(cart);
   const { setOpen } = useNearestDrawer();
   const { isFetching } = useShop({ id: shop.id });
+
   return (
     <AsCheckoutSlide>
       {isPaid ? (

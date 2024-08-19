@@ -76,10 +76,7 @@ export const OrderConfirmation = ({
             </Drip>
           )}
           <DrawerClose asChild>
-            <Link
-              href={`/farmer/${farmer?.farmer.id}`}
-              onClick={() => setOpen(false)}
-            >
+            <Link href={`/farmer/${farmer?.farmer.id}`}>
               <InfoCard
                 className="h-32"
                 left={

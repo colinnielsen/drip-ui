@@ -43,7 +43,11 @@ const SendButton = ({
   return (
     <CTAButton
       disabled={amount.eq(USDC.ZERO) || sending}
-      onClick={() => donate({ farmer, amount }).then(onComplete)}
+      onClick={() =>
+        donate({ farmer, amount }).then(
+          donationMessage => donationMessage && onComplete(),
+        )
+      }
       isLoading={sending}
     >
       send
@@ -87,8 +91,9 @@ export const DonationButton = ({ farmer }: { farmer: Farmer }) => {
         ) : (
           <USDCInput amount={amount} setAmount={setAmount} />
         )}
+
         <Divider />
-        <DrawerFooter className="p-6 pt-0">
+        <DrawerFooter className="p-6 pt-0 pb-">
           {donationComplete ? (
             <CTAButton onClick={() => setOpen(false)}>done</CTAButton>
           ) : (

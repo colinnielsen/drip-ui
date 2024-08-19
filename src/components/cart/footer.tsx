@@ -123,13 +123,11 @@ export default function CartFooter() {
           className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
           aria-describedby="cart-footer"
         >
-          <WagmiProvider config={sliceKit.wagmiConfig}>
-            <SliceProvider>
-              <SliceCartListener>
-                <CheckoutSlides {...{ shop, cart }} />
-              </SliceCartListener>
-            </SliceProvider>
-          </WagmiProvider>
+          <SliceProvider>
+            <SliceCartListener>
+              <CheckoutSlides {...{ shop, cart }} />
+            </SliceCartListener>
+          </SliceProvider>
         </DrawerContent>
       </Drawer>
     </DrawerContext.Provider>

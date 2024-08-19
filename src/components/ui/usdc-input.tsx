@@ -15,7 +15,7 @@ export const USDCInput = ({
     <div className="flex gap-1 justify-center items-center">
       <UsdcSVG className="h-6 w-6 " />
       <input
-        type="number"
+        type="tel"
         value={amount.toUSD() || ''}
         placeholder="0.00"
         className={cn(

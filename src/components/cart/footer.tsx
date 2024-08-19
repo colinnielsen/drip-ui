@@ -41,7 +41,7 @@ export const FooterButtonTrigger = ({
   const itemCount = cart?.orderItems?.length || 0;
 
   useEffect(() => {
-    if (itemCount !== cartItemCount && itemCount > 0) {
+    if (itemCount !== cartItemCount && itemCount > 1) {
       setCartItemCount(itemCount || 0);
       cartIconRef.current?.classList.add('animate-cart-shake');
       setTimeout(() => {

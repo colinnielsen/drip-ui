@@ -10,6 +10,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
       appId={appId}
       config={{
         defaultChain: base,
+        supportedChains: [base],
         // Customize Privy's appearance in your app
         appearance: {
           showWalletLoginFirst: true,

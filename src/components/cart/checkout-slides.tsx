@@ -21,9 +21,6 @@ export const AsCheckoutSlide = ({
   <CarouselItem
     className={cn(
       'flex flex-col w-screen h-screen overflow-y-scroll overflow-x-clip',
-      {
-        'pb-20': isIOSSafari(),
-      },
     )}
   >
     {children}
@@ -46,7 +43,6 @@ export default function CheckoutSlides({
   }, [cart, prevCart]);
 
   if (cart === null) return <EmptyBasket />;
-  if (cart === undefined) return <LoadingBasketSlide />;
   if (!shop) return "no shop (this shouldn't happen";
 
   return (
@@ -62,11 +58,17 @@ export default function CheckoutSlides({
     >
       <CarouselContent className="h-full">
         <CheckoutProvider>
-          <BasketSlide cart={cart} shop={shop} />
+          {cart === undefined ? (
+            <LoadingBasketSlide />
+          ) : (
+            <>
+              <BasketSlide cart={cart} shop={shop} />
 
-          <PaymentSlide cart={cart} shop={shop} />
+              <PaymentSlide cart={cart} shop={shop} />
 
-          <ConfirmationSlide cart={cart} shop={shop} />
+              <ConfirmationSlide cart={cart} shop={shop} />
+            </>
+          )}
         </CheckoutProvider>
       </CarouselContent>
       {/* <div className="absolute top-7 right-20">

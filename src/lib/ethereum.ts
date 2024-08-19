@@ -1,5 +1,5 @@
 import { createConfig } from '@privy-io/wagmi';
-import { createClient, createPublicClient, getContract, http } from 'viem';
+import { createPublicClient, getContract, http } from 'viem';
 import { base } from 'viem/chains';
 
 export const USDC_ADDRESS_BASE =
@@ -63,6 +63,7 @@ export const PRIVY_WAGMI_CONFIG = createConfig({
   transports: {
     '8453': BASE_RPC_CONFIG.transport,
   },
+  ssr: typeof window === 'undefined',
 }) as any;
 
 export const isAddressEql = (a?: string, b?: string) => {

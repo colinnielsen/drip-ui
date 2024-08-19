@@ -9,7 +9,7 @@ import {
   useCartSummary,
 } from '@/queries/OrderQuery';
 import { useUser } from '@/queries/UserQuery';
-import { usePrivy } from '@privy-io/react-auth';
+import { useWallets } from '@privy-io/react-auth';
 import { skipToken, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useGoToSlide, useSlideInView } from '../ui/carousel';
@@ -60,8 +60,7 @@ const useDetermineCheckoutStep = (): {
   //   button: JSX.Element | null;
 } => {
   const slideInView = useSlideInView();
-  const { authenticated, ready: privyReady } = usePrivy();
-  const wallet = useWalletAddress();
+  const { wallets, ready: privyReady } = useWallets();
   const { data: user, isLoading: isUserLoading } = useUser();
   const { data: cart } = useRecentCart();
   const { data: balance, isLoading: isBalanceLoading } = useUSDCBalance({
@@ -83,17 +82,18 @@ const useDetermineCheckoutStep = (): {
   //   cartError,
   //   userError,
   // });
+
   // (shouldn't happen)
   if (!privyReady || isUserLoading || !user || !cart || !cartSummary)
     return {
       step: 'initializing',
     };
 
-  if (user.__type === 'session') return { step: 'signup' };
+  // if (user.__type === 'session') return { step: 'signup' };
 
-  if (user.__type === 'user' && !authenticated) return { step: 'login' };
+  // if (user.__type === 'user' && !authenticated) return { step: 'login' };
 
-  if (wallet === null) return { step: 'connect' };
+  if (wallets.length === 0) return { step: 'connect' };
   if (isBalanceLoading || balance === undefined)
     return {
       step: 'initializing',

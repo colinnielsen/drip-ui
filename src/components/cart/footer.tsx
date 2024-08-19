@@ -101,7 +101,7 @@ export default function CartFooter() {
 
   return (
     <DrawerContext.Provider value={{ open: isOpen, setOpen: setIsOpen }}>
-      <Drawer open={isOpen}>
+      <Drawer open={isOpen} dismissible={false}>
         <DrawerTrigger asChild>
           <button
             className={cn(

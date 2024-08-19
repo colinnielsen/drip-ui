@@ -244,7 +244,7 @@ export const useAddToCart = ({
     //   return { optimisticCart, initialCart: cart };
     // },
     onSettled: (data, _) => {
-      queryClient.invalidateQueries({
+      queryClient.refetchQueries({
         queryKey: [ORDERS_QUERY_KEY, userId!],
       });
       // if (!data) debugger;
@@ -311,7 +311,7 @@ export const useRemoveItemFromCart = ({
       return { optimisticCart, prevCart: cart };
     },
     onSettled: variable => {
-      queryClient.invalidateQueries({
+      queryClient.refetchQueries({
         queryKey: [ORDERS_QUERY_KEY, variable?.id!],
       });
     },
@@ -384,7 +384,7 @@ export const useTipMutation = () => {
       return { originalOrder, optimisticCart };
     },
     onSettled: variable => {
-      queryClient.invalidateQueries({
+      queryClient.refetchQueries({
         queryKey: [ORDERS_QUERY_KEY, variable?.id!],
       });
     },
@@ -444,7 +444,7 @@ export const useAssocatePaymentToCart = () => {
       });
     },
     onSettled: variable => {
-      queryClient.invalidateQueries({
+      queryClient.refetchQueries({
         queryKey: [ORDERS_QUERY_KEY, variable?.id!],
       });
     },
@@ -480,7 +480,7 @@ export const useAssocateExternalOrderInfoToCart = () => {
       });
     },
     onSettled: variable => {
-      queryClient.invalidateQueries({
+      queryClient.refetchQueries({
         queryKey: [ORDERS_QUERY_KEY, variable?.id!],
       });
     },

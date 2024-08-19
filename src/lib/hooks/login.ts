@@ -24,7 +24,7 @@ export const useLoginOrCreateUser = ({
   return () =>
     authenticated
       ? logout()
-          .then(() => sleep(1000))
+          .then(() => sleep(300))
           .then(() => login())
       : login();
 };

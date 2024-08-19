@@ -37,12 +37,22 @@ export default function Home({
   shops: Shop[];
   dehydratedState: DehydratedState;
 }) {
+  // const all = usePrivy();
+  // const wallets = useWallets();
+  // // const acct = useAccount();
   const rehydratedShops = useMemo(() => rehydrateData<Shop[]>(shops), [shops]);
 
   const dehydratedState = useMemo(
     () => rehydrateData(_dehydratedState),
     [_dehydratedState],
   );
+  // useEffect(() => {
+  //   const acct = getAccount(sliceKit.wagmiConfig);
+  //   console.log(acct);
+  // }, []);
+
+  // console.log(all);
+  // console.log(wallets);
 
   return (
     <HydrationBoundary state={dehydratedState}>

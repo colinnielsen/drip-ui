@@ -76,32 +76,32 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
       },
     ],
   },
-  {
-    __type: 'slice',
-    sliceId: 805,
-    sliceVersion: 1,
-    location: {
-      label: 'Bruxelles, Belgium',
-      address: 'Mont des Arts, 1000 Bruxelles, Belgium',
-      coords: [50.8443, 4.3563],
-    },
-    name: 'Base Cafe',
-    logo: 'https://raw.githubusercontent.com/base-org/brand-kit/8984fe6e08be3058fd7cf5cd0b201f8b92b5a70e/logo/in-product/Base_Network_Logo.svg',
-    backgroundImage:
-      'https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/805/main_6j25kd0y.png',
-    tipConfig: {
-      __type: 'single-recipient',
-      address: '0xcd3E2237f4e9275fEF664d7C9bFA81cD5613c95b',
-      enabled: true,
-    },
-    farmerAllocation: [
-      {
-        allocationBPS: 300,
-        farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
-        id: crypto.randomUUID() as UUID,
-      },
-    ],
-  },
+  // {
+  //   __type: 'slice',
+  //   sliceId: 805,
+  //   sliceVersion: 1,
+  //   location: {
+  //     label: 'Bruxelles, Belgium',
+  //     address: 'Mont des Arts, 1000 Bruxelles, Belgium',
+  //     coords: [50.8443, 4.3563],
+  //   },
+  //   name: 'Base Cafe',
+  //   logo: 'https://raw.githubusercontent.com/base-org/brand-kit/8984fe6e08be3058fd7cf5cd0b201f8b92b5a70e/logo/in-product/Base_Network_Logo.svg',
+  //   backgroundImage:
+  //     'https://gvlinweehfwzdcdxkkan.supabase.co/storage/v1/object/public/slicer-images/805/main_6j25kd0y.png',
+  //   tipConfig: {
+  //     __type: 'single-recipient',
+  //     address: '0xcd3E2237f4e9275fEF664d7C9bFA81cD5613c95b',
+  //     enabled: true,
+  //   },
+  //   farmerAllocation: [
+  //     {
+  //       allocationBPS: 300,
+  //       farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
+  //       id: crypto.randomUUID() as UUID,
+  //     },
+  //   ],
+  // },
   {
     __type: 'slice',
     sliceId: 769,

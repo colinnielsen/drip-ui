@@ -145,7 +145,7 @@ const OrderDetail = ({ order }: { order: OrderWithShop | null }) => {
     [order],
   );
   return (
-    <DrawerContent className="h-[100vh] overflow-y-scroll">
+    <DrawerContent className="h-[100vh] overflow-y-scroll pb-20">
       <DrawerHeader className="h-14 flex items-center justify-evenly py-4 px-6">
         <div className="w-full">
           <DrawerClose asChild>

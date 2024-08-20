@@ -66,7 +66,7 @@ export const PayButton = () =>
             <span className="text-primary-gray">status: {account.status}</span>
           </div>
           {labels.map(l => (
-            <div>
+            <div key={l}>
               <span className="text-primary-gray">{l}</span>
             </div>
           ))}

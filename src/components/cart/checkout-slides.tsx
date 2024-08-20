@@ -1,15 +1,15 @@
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
-import { cn, isIOSSafari } from '@/lib/utils';
-import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel';
-import BasketSlide, { EmptyBasket, LoadingBasketSlide } from './basket/basket';
-import { ConfirmationSlide } from './order-confirmation/order-confirmation';
-import { CheckoutProvider } from './context';
-import PaymentSlide from './payment/payment';
 import { usePrevious } from '@/lib/hooks/utility-hooks';
-import { useEffect } from 'react';
-import { useNearestDrawer } from '../ui/drawer';
+import { cn } from '@/lib/utils';
 import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel';
+import { useCartDrawer } from '../ui/drawer';
+import BasketSlide, { EmptyBasket, LoadingBasketSlide } from './basket/basket';
+import { CheckoutProvider } from './context';
+import { ConfirmationSlide } from './order-confirmation/order-confirmation';
+import PaymentSlide from './payment/payment';
 
 /**
  * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
@@ -38,7 +38,7 @@ export default function CheckoutSlides({
   const { asPath } = useRouter();
   const prevCart = usePrevious(cart);
   const prevPath = usePrevious(asPath);
-  const { setOpen } = useNearestDrawer();
+  const { setOpen } = useCartDrawer();
 
   useEffect(() => {
     if (prevCart && cart === null) setOpen(false);

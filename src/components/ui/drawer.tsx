@@ -9,6 +9,16 @@ export const DrawerContext = React.createContext<{
   setOpen: (open: boolean) => void;
 }>({ open: false, setOpen: () => {} });
 
+export const CartDrawerContext = React.createContext<{
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}>({ open: false, setOpen: () => {} });
+
+export const useCartDrawer = () => {
+  const { open, setOpen } = React.useContext(CartDrawerContext);
+  return { open, setOpen };
+};
+
 export const useNearestDrawer = () => {
   const { open, setOpen } = React.useContext(DrawerContext);
   return { open, setOpen };
@@ -123,14 +133,14 @@ DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
   Drawer,
-  NestedDrawer,
-  DrawerPortal,
-  DrawerOverlay,
-  DrawerTrigger,
   DrawerClose,
   DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
   DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerTitle,
+  DrawerTrigger,
+  NestedDrawer,
 };

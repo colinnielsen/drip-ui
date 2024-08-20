@@ -3,15 +3,15 @@ import {
   DrawerContent,
   DrawerContext,
   DrawerTrigger,
+  useCartDrawer,
 } from '@/components/ui/drawer';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
-import { SliceCartListener, sliceKit } from '@/lib/slice';
+import { SliceCartListener } from '@/lib/slice';
 import { cn, sleep } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
 import { useRecentCart } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
-import { WagmiProvider } from '@privy-io/wagmi';
 import { SliceProvider } from '@slicekit/react';
 import { CheckCircle, ShoppingCart } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -93,43 +93,42 @@ export default function CartFooter() {
   const { data: cart } = useRecentCart();
   const { data: shop } = useShop({ id: cart?.shop });
   const [ready, setIsReady] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+
+  const { open, setOpen } = useCartDrawer();
 
   useEffect(() => {
     sleep(1000).then(() => setIsReady(true));
   }, []);
 
   return (
-    <DrawerContext.Provider value={{ open: isOpen, setOpen: setIsOpen }}>
-      <Drawer open={isOpen} dismissible={false}>
-        <DrawerTrigger asChild>
-          <button
-            className={cn(
-              'shadow-[4px_0px_60px_0px_rgba(0,0,0,0.20)]',
-              'relative',
-              'flex justify-between px-6 py-4 items-center bg-secondary-pop w-full text-left',
-              'transition-all',
-              'transition-[600ms]',
-              !!cart?.orderItems?.length && ready ? 'top-0' : 'top-[100px]',
-            )}
-            onClick={() => setIsOpen(true)}
-          >
-            <FooterButtonTrigger {...{ cart, shop }} />
-          </button>
-        </DrawerTrigger>
-
-        <DrawerContent
-          full
-          className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
-          aria-describedby="cart-footer"
+    <Drawer open={open} dismissible={false}>
+      <DrawerTrigger asChild>
+        <button
+          className={cn(
+            'shadow-[4px_0px_60px_0px_rgba(0,0,0,0.20)]',
+            'relative',
+            'flex justify-between px-6 py-4 items-center bg-secondary-pop w-full text-left',
+            'transition-all',
+            'transition-[600ms]',
+            !!cart?.orderItems?.length && ready ? 'top-0' : 'top-[100px]',
+          )}
+          onClick={() => setOpen(true)}
         >
-          <SliceProvider>
-            <SliceCartListener>
-              <CheckoutSlides {...{ shop, cart }} />
-            </SliceCartListener>
-          </SliceProvider>
-        </DrawerContent>
-      </Drawer>
-    </DrawerContext.Provider>
+          <FooterButtonTrigger {...{ cart, shop }} />
+        </button>
+      </DrawerTrigger>
+
+      <DrawerContent
+        full
+        className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
+        aria-describedby="cart-footer"
+      >
+        <SliceProvider>
+          <SliceCartListener>
+            <CheckoutSlides {...{ shop, cart }} />
+          </SliceCartListener>
+        </SliceProvider>
+      </DrawerContent>
+    </Drawer>
   );
 }

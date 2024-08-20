@@ -2,7 +2,7 @@ import orderComplete from '@/assets/order-complete-2.png';
 import { CTAButton } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Divider } from '@/components/ui/divider';
-import { DrawerClose, useNearestDrawer } from '@/components/ui/drawer';
+import { DrawerClose, useCartDrawer } from '@/components/ui/drawer';
 import { InfoCard } from '@/components/ui/info-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -40,7 +40,7 @@ export const OrderConfirmation = ({
   cart: Order;
   shop: Shop;
 }) => {
-  const { setOpen } = useNearestDrawer();
+  const { setOpen } = useCartDrawer();
   const farmer = useFarmerAllocationFromOrder(cart);
   const summary = useCartSummary();
 

@@ -10,7 +10,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
+  useCartDrawer,
 } from '@/components/ui/drawer';
 import { AnimatedTimer } from '@/components/ui/icons';
 import { PageHeader } from '@/components/ui/page-header';
@@ -37,7 +37,11 @@ import { Shop } from '@/data-model/shop/ShopType';
 import { basescanTxUrl } from '@/lib/ethereum';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
 import { axiosFetcher, cn } from '@/lib/utils';
-import { ORDERS_QUERY_KEY, useOrders } from '@/queries/OrderQuery';
+import {
+  ORDERS_QUERY_KEY,
+  useOrders,
+  useRecentCart,
+} from '@/queries/OrderQuery';
 import {
   ACTIVE_USER_QUERY_KEY,
   useResetUser,
@@ -127,14 +131,12 @@ const OrderLineItem = ({
         )}
       </div>
 
-      <DrawerTrigger asChild>
-        <Button
-          onClick={() => onSelect(order.id)}
-          className="px-4 py-2.5 uppercase rounded-[50px] bg-secondary-pop"
-        >
-          <Mono className="text-[14px]">view</Mono>
-        </Button>
-      </DrawerTrigger>
+      <Button
+        onClick={() => onSelect(order.id)}
+        className="px-4 py-2.5 uppercase rounded-[50px] bg-secondary-pop"
+      >
+        <Mono className="text-[14px]">view</Mono>
+      </Button>
     </div>
   );
 };
@@ -145,119 +147,117 @@ const OrderDetail = ({ order }: { order: OrderWithShop | null }) => {
     [order],
   );
   return (
-    <DrawerContent className="h-[100vh] overflow-y-scroll pb-20">
-      <DrawerHeader className="h-14 flex items-center justify-evenly py-4 px-6">
-        <div className="w-full">
-          <DrawerClose asChild>
-            <ArrowLeft height={24} width={24} strokeWidth={2.4} />
-          </DrawerClose>
-        </div>
-        <DrawerTitle asChild>
-          <Headline className="text-palette-foreground px-6 whitespace-nowrap w-full text-[16px] leading-[19.4px] font-libreFranklin font-semibold">
-            {order && getOrderNumber(order)
-              ? `Order #${getOrderNumber(order)}`
-              : 'Your Cart'}
-          </Headline>
-        </DrawerTitle>
-        <div className="w-full" />
-      </DrawerHeader>
-
-      <div className="flex flex-col py-2 gap-2">
-        <Title1 className="text-palette-foreground px-6">
-          {order?.shopData.label}
-        </Title1>
-
-        <div className="flex gap-2 px-6">
-          <Label2
-            className={cn({
-              'text-secondary-pop': order?.status === '4-complete',
-              'text-yellow-600': order?.status === '1-pending',
-              'text-red-700': order?.status === 'cancelled',
-            })}
-          >
-            Order{' '}
-            {order?.status && mapStatusToStatusLabel(order?.status, 'past')}
-          </Label2>
-          <Label2>
-            {order?.timestamp &&
-              format(new Date(order.timestamp), 'PPp')
-                .split(', ')
-                .map((s, i) => (i === 1 ? `${s} at` : `${s},`))
-                .join(' ')
-                .slice(0, -1)}
-          </Label2>
-        </div>
-      </div>
-
-      <div className="flex flex-col w-full py-2 divide-y divide-light-gray">
-        {order?.orderItems &&
-          collapseDuplicateItems(order.orderItems).map(
-            ([orderItem, quantity], index) => {
-              const { price, discountPrice } = getOrderItemCost(orderItem);
-              return (
-                <div key={index} className="py-6 w-full first:pt-0 last:pb-0">
-                  <OrderItemDisplay
-                    orderItem={orderItem}
-                    originalPrice={price}
-                    actualPrice={orderItem.paidPrice ?? discountPrice}
-                    rightSide={
-                      <div
-                        className={
-                          'flex items-center gap-2 px-4 py-2 font-normal text-sm bg-light-gray rounded-2xl justify-between'
-                        }
-                      >
-                        <div className="flex items-center justify-center grow">
-                          <Label2 className="text-black">{quantity}</Label2>
-                        </div>
-                      </div>
-                    }
-                  />
-                </div>
-              );
-            },
-          )}
-        {order && (
-          <OrderSummary
-            summary={orderSummary}
-            isLoading={!orderSummary}
-            hideTipIfZero
-          />
-        )}
-        {order && (
-          <div className="px-6 py-6">
-            <FarmerCard
-              {...{
-                order: order,
-                showPics: false,
-                // className: !isPaying ? 'opacity-0' : 'opacity-1',
-              }}
-            />
+    <DrawerContent className="">
+      <div className="flex flex-col h-screen overflow-scroll">
+        <DrawerHeader className="h-14 flex items-center justify-evenly py-4 px-6">
+          <div className="w-full">
+            <DrawerClose asChild>
+              <ArrowLeft height={24} width={24} strokeWidth={2.4} />
+            </DrawerClose>
           </div>
-        )}
-      </div>
-
-      <DrawerFooter>
-        <div className="flex flex-col px-4 gap-2 justify-center items-center">
-          {order &&
-            'transactionHash' in order &&
-            isHex(order.transactionHash) && (
-              <Link
-                className="w-full"
-                href={basescanTxUrl(order?.transactionHash)}
-                target="_blank"
-              >
-                <SecondaryButton>onchain receipt</SecondaryButton>
-              </Link>
-            )}
-          <Link
-            href={'https://t.me/colinnielsen'}
-            target="_blank"
-            className="w-full"
-          >
-            <CTAButton>get help</CTAButton>
-          </Link>
+          <DrawerTitle asChild>
+            <Headline className="text-palette-foreground px-6 whitespace-nowrap w-full text-[16px] leading-[19.4px] font-libreFranklin font-semibold">
+              {order && getOrderNumber(order)
+                ? `Order #${getOrderNumber(order)}`
+                : 'Your Cart'}
+            </Headline>
+          </DrawerTitle>
+          <div className="w-full" />
+        </DrawerHeader>
+        <div className="flex flex-col py-2 gap-2">
+          <Title1 className="text-palette-foreground px-6">
+            {order?.shopData.label}
+          </Title1>
+          <div className="flex gap-2 px-6">
+            <Label2
+              className={cn({
+                'text-secondary-pop': order?.status === '4-complete',
+                'text-yellow-600': order?.status === '1-pending',
+                'text-red-700': order?.status === 'cancelled',
+              })}
+            >
+              Order{' '}
+              {order?.status && mapStatusToStatusLabel(order?.status, 'past')}
+            </Label2>
+            <Label2>
+              {order?.timestamp &&
+                format(new Date(order.timestamp), 'PPp')
+                  .split(', ')
+                  .map((s, i) => (i === 1 ? `${s} at` : `${s},`))
+                  .join(' ')
+                  .slice(0, -1)}
+            </Label2>
+          </div>
         </div>
-      </DrawerFooter>
+        <div className="flex flex-col w-full py-2 divide-y divide-light-gray">
+          {order?.orderItems &&
+            collapseDuplicateItems(order.orderItems).map(
+              ([orderItem, quantity], index) => {
+                const { price, discountPrice } = getOrderItemCost(orderItem);
+                return (
+                  <div key={index} className="py-6 w-full first:pt-0 last:pb-0">
+                    <OrderItemDisplay
+                      orderItem={orderItem}
+                      originalPrice={price}
+                      actualPrice={orderItem.paidPrice ?? discountPrice}
+                      rightSide={
+                        <div
+                          className={
+                            'flex items-center gap-2 px-4 py-2 font-normal text-sm bg-light-gray rounded-2xl justify-between'
+                          }
+                        >
+                          <div className="flex items-center justify-center grow">
+                            <Label2 className="text-black">{quantity}</Label2>
+                          </div>
+                        </div>
+                      }
+                    />
+                  </div>
+                );
+              },
+            )}
+          {order && (
+            <OrderSummary
+              summary={orderSummary}
+              isLoading={!orderSummary}
+              hideTipIfZero
+            />
+          )}
+          {order && (
+            <div className="px-6 py-6">
+              <FarmerCard
+                {...{
+                  order: order,
+                  showPics: false,
+                  // className: !isPaying ? 'opacity-0' : 'opacity-1',
+                }}
+              />
+            </div>
+          )}
+        </div>
+        <DrawerFooter>
+          <div className="flex flex-col px-4 gap-2 justify-center items-center">
+            {order &&
+              'transactionHash' in order &&
+              isHex(order.transactionHash) && (
+                <Link
+                  className="w-full"
+                  href={basescanTxUrl(order?.transactionHash)}
+                  target="_blank"
+                >
+                  <SecondaryButton>onchain receipt</SecondaryButton>
+                </Link>
+              )}
+            <Link
+              href={'https://t.me/colinnielsen'}
+              target="_blank"
+              className="w-full"
+            >
+              <CTAButton>get help</CTAButton>
+            </Link>
+          </div>
+        </DrawerFooter>
+      </div>
     </DrawerContent>
   );
 };
@@ -265,6 +265,8 @@ const OrderDetail = ({ order }: { order: OrderWithShop | null }) => {
 const HistoricalOrderList = () => {
   const client = useQueryClient();
   const { data: orders } = useOrders();
+  const { data: cart } = useRecentCart();
+  const { setOpen } = useCartDrawer();
 
   const [selectedOrderId, setSelectedOrder] = useState<UUID | null>(null);
 
@@ -280,7 +282,6 @@ const HistoricalOrderList = () => {
     })),
   });
 
-  console.log(selectedOrderId);
   const selectedOrderData = useMemo(() => {
     if (
       !orders ||
@@ -301,9 +302,23 @@ const HistoricalOrderList = () => {
     <>
       <Divider />
       <div className="px-6 py-4 flex flex-col gap-4">
+        {cart && shopQueries.find(s => s.data?.id === cart.shop)?.data ? (
+          <>
+            <Headline>Current Order</Headline>
+            <OrderLineItem
+              order={cart}
+              shop={shopQueries.find(s => s.data?.id === cart.shop)?.data!}
+              onSelect={() => setOpen(true)}
+            />
+            <Divider />
+          </>
+        ) : (
+          <></>
+        )}
         <Headline>Order history</Headline>
         <Drawer
           onOpenChange={open => !open && setSelectedOrder(null)}
+          open={!!selectedOrderId}
           dismissible={false}
         >
           <div className="flex flex-col gap-4">
@@ -312,6 +327,7 @@ const HistoricalOrderList = () => {
                   const shop = query.data;
                   const order = orders[i];
 
+                  if (order.id === cart?.id) return <></>;
                   if (!shop || !order) return <SkeletonLineItem key={i} />;
                   return (
                     <OrderLineItem

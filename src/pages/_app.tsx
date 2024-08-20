@@ -10,6 +10,8 @@ import Head from 'next/head';
 import '../styles/globals.css';
 import { WagmiProvider } from '@privy-io/wagmi';
 import { sliceKit } from '@/lib/slice';
+import { CartDrawerContext } from '@/components/ui/drawer';
+import { useState } from 'react';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -43,29 +45,34 @@ export const CSS_FONT_CLASS_CONFIG = cn(
  * }; */
 
 export default function App({ Component, pageProps }: AppProps) {
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <PrivyProvider>
       <ReactQueryClientProvider useDevTools>
         <WagmiProvider config={sliceKit.wagmiConfig}>
-          <div
-            className={cn(
-              CSS_FONT_CLASS_CONFIG,
-              'bg-background',
-              'min-h-screen',
-              // 'prose',
-            )}
+          <CartDrawerContext.Provider
+            value={{ open: isOpen, setOpen: setIsOpen }}
           >
-            <Head>
-              <title>Drip</title>
-              <meta
-                name="viewport"
-                content="width=device-width, user-scalable=no"
-              />
-            </Head>
-            <Component {...pageProps} />
-            <Footer />
-            <GlobalListeners />
-          </div>
+            <div
+              className={cn(
+                CSS_FONT_CLASS_CONFIG,
+                'bg-background',
+                'min-h-screen',
+                // 'prose',
+              )}
+            >
+              <Head>
+                <title>Drip</title>
+                <meta
+                  name="viewport"
+                  content="width=device-width, user-scalable=no"
+                />
+              </Head>
+              <Component {...pageProps} />
+              <Footer />
+              <GlobalListeners />
+            </div>
+          </CartDrawerContext.Provider>
         </WagmiProvider>
       </ReactQueryClientProvider>
     </PrivyProvider>

@@ -3,7 +3,7 @@ import {
   DrawerClose,
   DrawerFooter,
   DrawerTitle,
-  useNearestDrawer,
+  useCartDrawer,
 } from '@/components/ui/drawer';
 import { Title1 } from '@/components/ui/typography';
 import {
@@ -22,10 +22,10 @@ import { CartItem, LoadingCartItem } from './cart-item';
 import { FarmerCard } from './farmer-card';
 import { FooterTotal } from './footer-total';
 import { NextButton } from './next-button';
-import { CartSummary, OrderSummary } from './summary';
+import { CartSummary } from './summary';
 
 export const EmptyBasket = () => {
-  const { setOpen } = useNearestDrawer();
+  const { setOpen } = useCartDrawer();
   return (
     <>
       <div className="flex justify-start w-full items-center px-6 py-4">
@@ -94,7 +94,7 @@ export const LoadingBasketSlide = () => {
 export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
   const orderItems = collapseDuplicateItems(cart.orderItems);
   const isPaid = isPaidOrder(cart);
-  const { setOpen } = useNearestDrawer();
+  const { setOpen } = useCartDrawer();
   const { isFetching } = useShop({ id: shop.id });
 
   return (

@@ -16,10 +16,11 @@ import {
 } from '@/queries/OrderQuery';
 import { usePayAndOrder } from '@/queries/SliceQuery';
 import Image from 'next/image';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
+import { useAccount, useConnectors, useConnections } from 'wagmi';
 
 export const PayButton = () =>
   //  { walletClient }: { walletClient: WalletClient }
@@ -33,27 +34,59 @@ export const PayButton = () =>
     const goToSlide = useGoToSlide();
     const payAndOrder = usePayAndOrder();
     const cartSummary = useCartSummary();
+    const connectors = useConnectors();
+    const account = useAccount();
+    const [labels, setLabels] = useState<string[]>([]);
+
+    useEffect(() => {
+      connectors.forEach((c, i) => {
+        Promise.all([c.getAccounts(), c.isAuthorized(), c.name]).then(
+          ([accounts, isAuthorized, name]) => {
+            setLabels(labels => [
+              `${accounts.join(', ')} - ${
+                isAuthorized ? 'authorized' : 'not authorized'
+              } - ${name}`,
+            ]);
+          },
+        );
+      });
+    }, [connectors]);
 
     if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress)
       return <LoadingCTAButton />;
 
     const isLoading = paymentStep === 'awaiting-confirmation';
     return (
-      <CTAButton
-        onClick={async () => {
-          if (!payAndOrder) return;
+      <>
+        <div className="flex flex-col gap-2">
+          <div>
+            <span>
+              main account: {account.connector?.name} {account.address}
+            </span>
+            <span className="text-primary-gray">status: {account.status}</span>
+          </div>
+          {labels.map(l => (
+            <div>
+              <span className="text-primary-gray">{l}</span>
+            </div>
+          ))}
+        </div>
+        <CTAButton
+          onClick={async () => {
+            if (!payAndOrder) return;
 
-          goToSlide?.(1);
-          await payAndOrder();
-        }}
-        isLoading={isLoading}
-      >
-        {!cartSummary || isLoading
-          ? ''
-          : cartSummary?.total.usdc.gt(USDC.ZERO)
-            ? 'pay'
-            : 'place order'}
-      </CTAButton>
+            goToSlide?.(1);
+            await payAndOrder();
+          }}
+          isLoading={isLoading}
+        >
+          {!cartSummary || isLoading
+            ? ''
+            : cartSummary?.total.usdc.gt(USDC.ZERO)
+              ? 'pay'
+              : 'place order'}
+        </CTAButton>
+      </>
     );
   };
 

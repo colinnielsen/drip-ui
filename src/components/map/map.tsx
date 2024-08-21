@@ -8,13 +8,10 @@ export default function HomePageMap({ shops }: { shops: Shop[] }) {
   return (
     <Map
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAP_BOX_TOKEN}
-      onLoad={() => {
-        document.getElementsByClassName('mapboxgl-ctrl-logo')[0]?.remove();
-      }}
       initialViewState={{
         longitude: -73.970866,
         latitude: 40.716146,
-        zoom: 11,
+        zoom: 2,
       }}
       attributionControl={false}
       customAttribution={''}

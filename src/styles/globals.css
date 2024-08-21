@@ -13,3 +13,7 @@
   z-index: 10000000000000;
   pointer-events: all;
 }
+
+.mapboxgl-ctrl-logo {
+  display: none !important;
+}

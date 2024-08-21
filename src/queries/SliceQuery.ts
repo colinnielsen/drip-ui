@@ -15,6 +15,8 @@ import {
   useRecentCart,
 } from './OrderQuery';
 import { useShopSourceConfig } from './ShopQuery';
+import { useSetActiveWallet } from '@privy-io/wagmi';
+import { useConnectors, useReconnect } from 'wagmi';
 
 /**
  * @returns the slice keyed by productId
@@ -96,6 +98,9 @@ export const usePayAndOrder = ({
   const { mutateAsync: associateExternalOrderInfo } =
     useAssocateExternalOrderInfoToCart();
   const { setPaymentStep } = useCheckoutContext();
+  const { setActiveWallet } = useSetActiveWallet();
+  const { reconnect } = useReconnect();
+  const connectors = useConnectors();
 
   const extraCosts: ExtraCostParamsOptional[] | undefined = useMemo(
     () =>
@@ -146,16 +151,20 @@ export const usePayAndOrder = ({
     [extraCosts, onError, onSliceSuccess, wallet?.address],
   );
 
-  const { checkout: initiatePrivyCheckout, errors } = useCheckout(
+  const { checkout: initiatePrivyCheckout } = useCheckout(
     sliceKit.wagmiConfig,
     useCheckoutParams,
   );
-  console.log({ errors });
+
   const payAndOrder = useCallback(async () => {
+    if (!wallet) throw new Error('No wallet connected');
     setPaymentStep('awaiting-confirmation');
+    await setActiveWallet(wallet!);
+    reconnect({ connectors: connectors });
+
     await wallet?.switchChain(base.id);
     await initiatePrivyCheckout().catch(error => console.error(error));
-  }, [initiatePrivyCheckout, setPaymentStep]);
+  }, [initiatePrivyCheckout, setPaymentStep, wallet, connectors]);
 
   if (!wallet) throw new Error('No wallet connected');
   else return payAndOrder;

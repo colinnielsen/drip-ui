@@ -16,11 +16,11 @@ import {
 } from '@/queries/OrderQuery';
 import { usePayAndOrder } from '@/queries/SliceQuery';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useAccount, useConnectors } from 'wagmi';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
-import { useAccount, useConnectors, useConnections } from 'wagmi';
 
 export const PayButton = () =>
   //  { walletClient }: { walletClient: WalletClient }
@@ -36,7 +36,7 @@ export const PayButton = () =>
     const cartSummary = useCartSummary();
     const connectors = useConnectors();
     const account = useAccount();
-    const [labels, setLabels] = useState<string[]>([]);
+    // const [labels, setLabels] = useState<string[]>([]);
 
     // useEffect(() => {
     //   connectors.forEach((c, i) => {
@@ -65,16 +65,15 @@ export const PayButton = () =>
             </span>
             <span className="text-primary-gray">status: {account.status}</span>
           </div>
-          {labels.map(l => (
+          {/* {labels.map(l => (
             <div key={l}>
               <span className="text-primary-gray">{l}</span>
             </div>
-          ))}
+          ))} */}
         </div>
         <CTAButton
           onClick={async () => {
             if (!payAndOrder) return;
-            await account.connector?.connect();
 
             goToSlide?.(1);
             await payAndOrder();

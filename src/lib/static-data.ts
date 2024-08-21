@@ -41,7 +41,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     location: {
       label: 'Montgomery, AL',
       address: '39 Dexter Ave suite 102, Montgomery, AL 36104',
-      coords: [32.3792, 86.3077],
+      coords: [32.3792, -86.3077],
     },
     name: 'Prevail Coffee',
     logo: '/prevail.png',

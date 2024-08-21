@@ -1,9 +1,8 @@
-import Map, { Marker, ScaleControl } from 'react-map-gl';
-import { StyleSpecification } from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { Shop, Storefront } from '@/data-model/shop/ShopType';
 import { isStorefront } from '@/data-model/shop/ShopDTO';
-import { useEffect } from 'react';
+import { Shop } from '@/data-model/shop/ShopType';
+import { Popup, StyleSpecification } from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import Map, { Marker } from 'react-map-gl';
 
 export default function HomePageMap({ shops }: { shops: Shop[] }) {
   return (
@@ -13,30 +12,31 @@ export default function HomePageMap({ shops }: { shops: Shop[] }) {
         document.getElementsByClassName('mapboxgl-ctrl-logo')[0]?.remove();
       }}
       initialViewState={{
-        longitude: -122.4,
-        latitude: 37.8,
-        zoom: 12,
+        longitude: -73.970866,
+        latitude: 40.716146,
+        zoom: 11,
       }}
-      styleDiffing
       attributionControl={false}
       customAttribution={''}
       style={{ width: '100%', height: '245px' }}
       mapStyle={mapStyle}
     >
-      {/* {shops
-        .filter((s): s is Storefront => isStorefront(s) && !!s.location)
-        .map(shop => {
-          console.log(shop.location);
-          return (
-            <Marker
-              key={shop.id}
-              longitude={shop.location!.coords[0] % 90}
-              latitude={shop.location!.coords[1] % 90}
-            >
-              <div>{shop.label}</div>
-            </Marker>
-          );
-        })} */}
+      {shops.map(shop => {
+        if (!isStorefront(shop) || shop.location === null) return null;
+        return (
+          <Marker
+            key={shop.id}
+            latitude={shop.location.coords[0]}
+            longitude={shop.location.coords[1]}
+            anchor="bottom"
+            color="#000000"
+            popup={new Popup({
+              className:
+                'p-6 font-libreFranklin font-semibold align-middle text-md',
+            }).setHTML(shop.label)}
+          />
+        );
+      })}
     </Map>
   );
 }

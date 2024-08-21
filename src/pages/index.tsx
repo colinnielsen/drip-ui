@@ -2,6 +2,7 @@ import drip from '@/assets/drip.jpg';
 import { HomePageHeader } from '@/components/home-page/header';
 import { ShopList } from '@/components/home-page/shop-list';
 import { WelcomeDialog } from '@/components/home-page/welcome-popup';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Shop } from '@/data-model/shop/ShopType';
 import { sqlDatabase } from '@/infras/database';
 import { rehydrateData } from '@/lib/utils';
@@ -12,6 +13,7 @@ import {
   QueryClient,
 } from '@tanstack/react-query';
 import { GetStaticProps } from 'next';
+import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
 
 export const getStaticProps: GetStaticProps<{
@@ -29,6 +31,11 @@ export const getStaticProps: GetStaticProps<{
     },
   };
 };
+
+const LazyMap = dynamic(() => import('../components/map/map'), {
+  ssr: false,
+  loading: () => <Skeleton className="w-full h-[245px]" />,
+});
 
 export default function Home({
   shops,
@@ -58,14 +65,7 @@ export default function Home({
     <HydrationBoundary state={dehydratedState}>
       <div className="flex flex-col gap-5 pb-32">
         <HomePageHeader />
-        {/* <div className="w-screen max-h-64 overflow-hidden">
-        <Image src={map} alt="coffee" />
-      </div> */}
-        {/* 
-        {error ? (
-          <div className="p-4 text-red-500">Error: {error.message}</div>
-        ) : (
-          )} */}
+        <LazyMap shops={rehydratedShops} />
 
         <ShopList
           title="Participating shops"

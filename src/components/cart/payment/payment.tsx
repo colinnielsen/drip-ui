@@ -38,19 +38,19 @@ export const PayButton = () =>
     const account = useAccount();
     const [labels, setLabels] = useState<string[]>([]);
 
-    useEffect(() => {
-      connectors.forEach((c, i) => {
-        Promise.all([c.getAccounts(), c.isAuthorized(), c.name]).then(
-          ([accounts, isAuthorized, name]) => {
-            setLabels(labels => [
-              `${accounts.join(', ')} - ${
-                isAuthorized ? 'authorized' : 'not authorized'
-              } - ${name}`,
-            ]);
-          },
-        );
-      });
-    }, [connectors]);
+    // useEffect(() => {
+    //   connectors.forEach((c, i) => {
+    //     Promise.all([c.getAccounts(), c.isAuthorized(), c.name]).then(
+    //       ([accounts, isAuthorized, name]) => {
+    //         setLabels(labels => [
+    //           `${accounts.join(', ')} - ${
+    //             isAuthorized ? 'authorized' : 'not authorized'
+    //           } - ${name}`,
+    //         ]);
+    //       },
+    //     );
+    //   });
+    // }, [connectors]);
 
     if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress)
       return <LoadingCTAButton />;
@@ -74,6 +74,7 @@ export const PayButton = () =>
         <CTAButton
           onClick={async () => {
             if (!payAndOrder) return;
+            await account.connector?.connect();
 
             goToSlide?.(1);
             await payAndOrder();

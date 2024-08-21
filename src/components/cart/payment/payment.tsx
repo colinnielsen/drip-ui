@@ -60,9 +60,9 @@ export const PayButton = () =>
       <>
         <div className="flex flex-col gap-2">
           <div>
-            <span>
+            {/* <span>
               main account: {account.connector?.name} {account.address}
-            </span>
+            </span> */}
             <span className="text-primary-gray">status: {account.status}</span>
           </div>
           {/* {labels.map(l => (

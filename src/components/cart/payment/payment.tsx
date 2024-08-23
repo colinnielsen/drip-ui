@@ -58,19 +58,6 @@ export const PayButton = () =>
     const isLoading = paymentStep === 'awaiting-confirmation';
     return (
       <>
-        <div className="flex flex-col gap-2">
-          <div>
-            {/* <span>
-              main account: {account.connector?.name} {account.address}
-            </span> */}
-            <span className="text-primary-gray">status: {account.status}</span>
-          </div>
-          {/* {labels.map(l => (
-            <div key={l}>
-              <span className="text-primary-gray">{l}</span>
-            </div>
-          ))} */}
-        </div>
         <CTAButton
           onClick={async () => {
             if (!payAndOrder) return;

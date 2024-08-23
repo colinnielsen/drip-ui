@@ -68,13 +68,15 @@ export const AddButton = ({
 
   return (
     <button
-      className="bg-white rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:bg-neutral-300 active:scale-95 drop-shadow-md"
+      className="absolute bottom-0 right-0 w-14 h-14 rounded-full flex justify-center items-center"
       onClick={e => {
         e.stopPropagation();
         mutate();
       }}
     >
-      <PlusSvg />
+      <div className="bg-white rounded-full flex justify-center items-center w-7 h-7 active:bg-neutral-200 drop-shadow-md">
+        <PlusSvg />
+      </div>
     </button>
   );
 };

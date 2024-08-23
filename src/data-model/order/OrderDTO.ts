@@ -85,7 +85,7 @@ export const getOrderItemCostFromPriceDict = (
 export const getOrderItemCost = (orderItem: OrderItem) => {
   const priceDict = {
     [orderItem.item.id]: orderItem.item,
-    ...orderItem.mods.map(mod => [mod.id, mod]),
+    ...orderItem.mods.reduce((acc, mod) => ({ ...acc, [mod.id]: mod }), {}),
   };
 
   return getOrderItemCostFromPriceDict(priceDict, orderItem);

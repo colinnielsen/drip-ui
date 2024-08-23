@@ -1,7 +1,7 @@
 import {
   Drawer,
   DrawerContent,
-  DrawerContext,
+  DrawerDescription,
   DrawerTrigger,
   useCartDrawer,
 } from '@/components/ui/drawer';
@@ -123,6 +123,8 @@ export default function CartFooter() {
         className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
         aria-describedby="cart-footer"
       >
+        <DrawerDescription className="hidden">Checkout</DrawerDescription>
+
         <SliceProvider>
           <SliceCartListener>
             <CheckoutSlides {...{ shop, cart }} />

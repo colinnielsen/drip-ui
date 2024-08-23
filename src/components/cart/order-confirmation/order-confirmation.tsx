@@ -2,7 +2,11 @@ import orderComplete from '@/assets/order-complete-2.png';
 import { CTAButton } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Divider } from '@/components/ui/divider';
-import { DrawerClose, useCartDrawer } from '@/components/ui/drawer';
+import {
+  DrawerClose,
+  DrawerTitle,
+  useCartDrawer,
+} from '@/components/ui/drawer';
 import { InfoCard } from '@/components/ui/info-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -63,13 +67,15 @@ export const OrderConfirmation = ({
           <div className="flex items-center justify-center h-[280px] w-[280px] overflow-clip">
             <Image src={orderComplete} alt="loading bar" width={280} />
           </div>
-          <Drip className="text-2xl text-center py-2">
-            {cart.status === '3-in-progress'
-              ? 'nice! order confirmed'
-              : cart.status === '4-complete'
-                ? 'Order complete!'
-                : ''}
-          </Drip>
+          <DrawerTitle>
+            <Drip className="text-2xl text-center py-2" as="div">
+              {cart.status === '3-in-progress'
+                ? 'nice! order confirmed'
+                : cart.status === '4-complete'
+                  ? 'Order complete!'
+                  : ''}
+            </Drip>
+          </DrawerTitle>
           {cart.status === '4-complete' && (
             <Drip className="text-xl text-center py-2">
               enjoy that sweet, sweet brew
@@ -120,11 +126,11 @@ export const OrderConfirmation = ({
 
         <Divider />
 
-        <div className="flex flex-col w-full gap-3.5 px-6 items-start">
+        <div className="flex flex-col w-full gap-2.5 px-6 items-start">
           <Headline>Pick up details</Headline>
           <div className="flex  items-center justify-center gap-2">
             <Newspaper className="w-4 h-4" />
-            <Label2 className="text-primary-gray flex gap-x-1 items-center">
+            <Label2 className="text flex gap-x-1 items-center text-palette-foreground font-semibold text-md underline">
               Order number:
               <span>
                 {cart?.externalOrderInfo?.orderNumber ? (

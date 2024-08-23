@@ -33,17 +33,16 @@ function AddToBasketButton({
 }: {
   orderId?: UUID;
   shopId: UUID;
-  orderItem: Unsaved<OrderItem>;
+  orderItem: Unsaved<OrderItem[]>;
 }) {
   const { mutate } = useAddToCart({
     shopId,
-    orderItem,
   });
 
   return (
-    <DrawerFooter>
+    <DrawerFooter className="bottom-0 sticky bg-white shadow-drawer-secondary">
       <DrawerClose asChild>
-        <CTAButton onClick={e => mutate()}>Add to Cart</CTAButton>
+        <CTAButton onClick={e => mutate({ orderItem })}>Add to Cart</CTAButton>
       </DrawerClose>
     </DrawerFooter>
   );
@@ -60,19 +59,28 @@ export const AddButton = ({
 }) => {
   const { mutate } = useAddToCart({
     shopId,
-    orderItem: {
-      item,
-      mods: [],
-    },
   });
+
+  const shouldOpenOptionSelection = item.mods.length > 1;
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (shouldOpenOptionSelection) return;
+    else {
+      // if we stop the event propagation, the drawer will not open
+      e.stopPropagation();
+      mutate({
+        orderItem: {
+          item,
+          mods: [],
+        },
+      });
+    }
+  };
 
   return (
     <button
       className="absolute bottom-0 right-0 w-14 h-14 rounded-full flex justify-center items-center"
-      onClick={e => {
-        e.stopPropagation();
-        mutate();
-      }}
+      onClick={handleClick}
     >
       <div className="bg-white rounded-full flex justify-center items-center w-7 h-7 active:bg-neutral-200 drop-shadow-md">
         <PlusSvg />
@@ -92,16 +100,30 @@ export function QuickAddItemCard({
   const { isFetching } = useShop({ id: shopId });
   const { image, name, price, discountPrice } = item;
 
+  const cartHasSameShop = cart && cart.shop === shopId;
+
+  const orderIsPending = cart && cart.status === '1-pending';
+  // if there's no cart, you can always add to cart
+  // if the current shop is the same as the cart's shop, you can add to cart
+  const canAddToCart =
+    !cart || (cartHasSameShop && orderIsPending) || cart.status !== '1-pending';
+
   return (
     <DrawerTrigger asChild>
       <div className="flex flex-col gap-2">
         <div className="relative overflow-hidden rounded-xl h-36 w-36">
           <Image src={image} alt={name} fill className="object-cover" />
-          {cart !== undefined ? (
-            <AddButton {...{ shopId, orderId: cart?.id, item }} />
-          ) : (
+          {cart === undefined ? (
             <Skeleton className="bg-gray-200 rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:bg-neutral-300 active:scale-95 drop-shadow-md" />
-          )}
+          ) : canAddToCart ? (
+            <AddButton
+              {...{
+                shopId,
+                orderId: orderIsPending ? cart?.id : undefined,
+                item,
+              }}
+            />
+          ) : null}
         </div>
         <div className="flex flex-col gap-1">
           <h3 className="font-medium">{name}</h3>
@@ -246,7 +268,12 @@ export function ModSection({
         {mods?.map((mod, i) => (
           <ItemOption
             key={i}
-            {...{ mod, setSelectedOptions, selectedOptions, isFetching }}
+            {...{
+              mod,
+              setSelectedOptions,
+              selectedOptions,
+              isFetching,
+            }}
           />
         ))}
       </div>
@@ -274,10 +301,10 @@ export function ItemWithSelector({
     setSelectedOptions({});
   };
 
-  const orderItem: Unsaved<OrderItem> = {
+  const orderItems: Unsaved<OrderItem[]> = new Array(quantity).fill({
     item,
     mods: Object.values(selectedOptions),
-  };
+  });
 
   const modSections = item.mods.reduce((acc, mod) => {
     if (!acc[mod?.category || '__misc__'])
@@ -292,8 +319,8 @@ export function ItemWithSelector({
 
       <DrawerContent>
         <div className="h-[75vh] flex flex-col overflow-scroll">
-          <DrawerHeader className="p-0 rounded-t-xl overflow-clip">
-            <div className="min-h-64 relative">
+          <DrawerHeader className="p-0 rounded-t-xl">
+            <div className="min-h-64 relative rounded-t-xl overflow-clip">
               <Image
                 src={item.image}
                 alt={item.name}
@@ -346,9 +373,9 @@ export function ItemWithSelector({
             ))}
 
           <div className="flex-grow" />
-          {cart !== undefined && (
+          {cart !== undefined && cart?.shop === shopId && (
             <AddToBasketButton
-              orderItem={orderItem}
+              orderItem={orderItems}
               orderId={cart?.id}
               shopId={shopId}
             />

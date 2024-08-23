@@ -102,7 +102,7 @@ export class SQLOrderRepository implements OrderRepository {
           orderItemId = order.orderItems.findIndex(
             o => o.id === op.orderItemId,
           );
-          if (orderItemId === -1) throw Error('bad order id');
+          if (orderItemId === -1) break;
           order.orderItems.splice(orderItemId, 1);
           break;
         case 'update':
@@ -232,8 +232,11 @@ export class SQLOrderRepository implements OrderRepository {
   ): Promise<PaidOrder> {
     if (!order.externalOrderInfo) throw Error('externalOrderInfo not found');
 
-    const itsBeen5Minutes = (timestamp: string) =>
-      differenceInMinutes(new Date(), parseISO(timestamp)) > 5;
+    const timeSince = differenceInMinutes(
+      new Date(),
+      new Date(order.timestamp),
+    );
+    const itsBeen5Minutes = timeSince > 5;
 
     if (order.externalOrderInfo.__type === 'slice') {
       const sliceOrders = await sliceKit
@@ -249,7 +252,7 @@ export class SQLOrderRepository implements OrderRepository {
       const orderNumber = sliceOrder.refOrderId;
       const status: SliceOrderStatus = sliceOrder.status;
       const newOrderStatus: Order['status'] =
-        status === 'Completed' || itsBeen5Minutes(order.timestamp)
+        status === 'Completed' || itsBeen5Minutes
           ? '4-complete'
           : status === 'Canceled'
             ? 'cancelled'

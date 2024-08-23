@@ -190,21 +190,18 @@ export const useCartInSliceFormat = ({
 //
 //// MUTATIONS
 //
-export const useAddToCart = ({
-  shopId,
-  orderItem,
-}: {
-  shopId: UUID;
-  orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[];
-}) => {
+export const useAddToCart = ({ shopId }: { shopId: UUID }) => {
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
   const { data: recentCart } = useRecentCart();
-  const cart = recentCart?.status === '4-complete' ? null : recentCart;
-  const itemArray = Array.isArray(orderItem) ? orderItem : [orderItem];
+  const cart = recentCart?.status === '1-pending' ? recentCart : null;
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({
+      orderItem,
+    }: {
+      orderItem: Unsaved<OrderItem[]> | Unsaved<OrderItem>;
+    }) => {
       return axiosFetcher<Order>(
         `/api/orders/order${cart ? `?orderId=${cart.id}` : ''}`,
         {
@@ -212,7 +209,11 @@ export const useAddToCart = ({
           headers: {
             'Content-Type': 'application/json',
           },
-          data: { action: 'add', shopId, orderItems: itemArray },
+          data: {
+            action: 'add',
+            shopId,
+            orderItems: Array.isArray(orderItem) ? orderItem : [orderItem],
+          },
           withCredentials: true,
         },
       );

@@ -34,8 +34,6 @@ export const PayButton = () =>
     const goToSlide = useGoToSlide();
     const payAndOrder = usePayAndOrder();
     const cartSummary = useCartSummary();
-    const connectors = useConnectors();
-    const account = useAccount();
     // const [labels, setLabels] = useState<string[]>([]);
 
     // useEffect(() => {
@@ -92,13 +90,19 @@ export default function PaymentSlide({
   const isPaying = paymentStep === 'success';
 
   const headerText = useMemo(() => {
-    if (!isPaying) return 'grinding the beans';
+    // if (!isPaying) return 'grinding the beans';
     return 'your order is brewing';
   }, [isPaying]);
 
   const subTitle = useMemo(() => {
-    if (!isPaying) return '(we will prompt your wallet soon)';
+    // if (!isPaying) return '(we will prompt your wallet soon)';
     return null;
+  }, [isPaying]);
+
+  const icon = useMemo(() => {
+    return coffeeGif;
+    // if (isPaying)
+    // return coffeeStill;
   }, [isPaying]);
 
   return (
@@ -115,11 +119,7 @@ export default function PaymentSlide({
         ) : (
           <>
             <div className="flex items-center justify-center h-[280px] w-[280px] overflow-clip">
-              {isPaying ? (
-                <Image src={coffeeGif} alt="loading bar" width={280} />
-              ) : (
-                <Image src={coffeeStill} alt="loading bar" width={280} />
-              )}
+              <Image src={icon} alt="loading bar" width={280} />
             </div>
             <Drip className="text-2xl text-center transition-opacity">
               {headerText}

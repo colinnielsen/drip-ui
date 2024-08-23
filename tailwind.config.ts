@@ -31,6 +31,10 @@ const config: Config = {
         'background-card': '#F9F9F9',
         'palette-foreground': '#0A0B0D',
       },
+      boxShadow: {
+        drawer: '4px 0px 60px 0px rgba(0,0,0,0.40)',
+        'drawer-secondary': '4px 0px 60px 0px rgba(0,0,0,0.20)',
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':

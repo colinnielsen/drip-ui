@@ -298,6 +298,8 @@ const HistoricalOrderList = () => {
   }, [orders, selectedOrderId, shopQueries]);
   if (!orders?.length) return null;
 
+  const nonCartOrders = orders.filter(order => order.id !== cart?.id);
+
   return (
     <>
       <Divider />
@@ -310,40 +312,43 @@ const HistoricalOrderList = () => {
               shop={shopQueries.find(s => s.data?.id === cart.shop)?.data!}
               onSelect={() => setOpen(true)}
             />
-            <Divider />
           </>
         ) : (
           <></>
         )}
-        <Headline>Order history</Headline>
-        <Drawer
-          onOpenChange={open => !open && setSelectedOrder(null)}
-          open={!!selectedOrderId}
-          dismissible={false}
-        >
-          <div className="flex flex-col gap-4">
-            {orders && shopQueries.every(query => query.isSuccess)
-              ? shopQueries.map((query, i) => {
-                  const shop = query.data;
-                  const order = orders[i];
+        {nonCartOrders.length > 0 && (
+          <>
+            <Headline>Order history</Headline>
+            <Drawer
+              onOpenChange={open => !open && setSelectedOrder(null)}
+              open={!!selectedOrderId}
+              dismissible={false}
+            >
+              <div className="flex flex-col gap-4">
+                {orders && shopQueries.every(query => query.isSuccess)
+                  ? shopQueries.map((query, i) => {
+                      const shop = query.data;
+                      const order = orders[i];
 
-                  if (order.id === cart?.id) return <></>;
-                  if (!shop || !order) return <SkeletonLineItem key={i} />;
-                  return (
-                    <OrderLineItem
-                      key={order.id}
-                      order={order}
-                      shop={shop}
-                      onSelect={setSelectedOrder}
-                    />
-                  );
-                })
-              : Array.from({ length: 2 }, (_, i) => (
-                  <SkeletonLineItem key={i} />
-                ))}
-          </div>
-          <OrderDetail order={selectedOrderData} />
-        </Drawer>
+                      if (order.id === cart?.id) return <></>;
+                      if (!shop || !order) return <SkeletonLineItem key={i} />;
+                      return (
+                        <OrderLineItem
+                          key={order.id}
+                          order={order}
+                          shop={shop}
+                          onSelect={setSelectedOrder}
+                        />
+                      );
+                    })
+                  : Array.from({ length: 2 }, (_, i) => (
+                      <SkeletonLineItem key={i} />
+                    ))}
+              </div>
+              <OrderDetail order={selectedOrderData} />
+            </Drawer>
+          </>
+        )}
       </div>
     </>
   );

@@ -150,7 +150,7 @@ export function mapCartToSliceCart(
       {
         ...sliceProduct!,
         quantity,
-        variant,
+        externalVariantId: +variant,
       },
     ];
   }, []);

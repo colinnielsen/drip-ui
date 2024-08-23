@@ -293,7 +293,7 @@ export function ItemWithSelector({
   const [selectedOptions, setSelectedOptions] = useState<Record<UUID, ItemMod>>(
     {},
   );
-  const { data: cart } = useRecentCart();
+  const { data: cart, isLoading: cartIsLoading } = useRecentCart();
   const { isFetching } = useShop({ id: shopId });
 
   const reset = () => {
@@ -373,7 +373,7 @@ export function ItemWithSelector({
             ))}
 
           <div className="flex-grow" />
-          {cart === null || (cart !== undefined && cart?.shop === shopId) ? (
+          {cartIsLoading ? null : !cart || cart.shop === shopId ? (
             <AddToBasketButton
               orderItem={orderItems}
               orderId={cart?.id}

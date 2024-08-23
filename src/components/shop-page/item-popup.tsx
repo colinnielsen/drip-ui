@@ -373,13 +373,13 @@ export function ItemWithSelector({
             ))}
 
           <div className="flex-grow" />
-          {cart !== undefined && cart?.shop === shopId && (
+          {cart === null || (cart !== undefined && cart?.shop === shopId) ? (
             <AddToBasketButton
               orderItem={orderItems}
               orderId={cart?.id}
               shopId={shopId}
             />
-          )}
+          ) : null}
         </div>
       </DrawerContent>
     </Drawer>

@@ -81,7 +81,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     sliceId: 766,
     sliceVersion: 1,
     name: 'Piccolo Caffe e Vino',
-    logo: '/cafes/piccolo.jpg',
+    logo: '/cafes/piccolo.png',
     url: 'https://www.piccolocaffe.ca',
     backgroundImage: '/cafes/piccolo-background.jpg',
     location: {

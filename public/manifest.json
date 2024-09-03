@@ -1,16 +1,17 @@
 {
   "name": "Drip",
   "short_name": "Drip",
-  "icons": [
-    {
-      "src": "/drip.png",
-      "sizes": "1024x1024",
-      "type": "image/png"
-    }
-  ],
-  "theme_color": "#FFFFFF",
-  "background_color": "#446144",
+  "description": "Order Coffee, Tip Growers",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait"
+  "theme_color": "#FFFFFF",
+  "background_color": "#446144",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
 }

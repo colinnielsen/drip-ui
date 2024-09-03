@@ -44,9 +44,9 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
       coords: [32.3792, -86.3077],
     },
     name: 'Prevail Coffee',
-    logo: '/prevail.png',
+    logo: '/cafes/prevail.png',
     url: 'https://prevailcoffee.com/',
-    backgroundImage: '/prevail-background.jpg',
+    backgroundImage: '/cafes/prevail-background.jpg',
     farmerAllocation: [
       {
         allocationBPS: 300,
@@ -65,9 +65,9 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
       coords: [37.7949, -122.2745],
     },
     name: 'Bicycle Coffee Co',
-    logo: '/bicycle-coffee.png',
+    logo: '/cafes/bicycle-coffee.png',
     url: 'https://www.bicyclecoffeeco.com',
-    backgroundImage: '/bicycle-background.jpg',
+    backgroundImage: '/cafes/bicycle-background.jpg',
     farmerAllocation: [
       {
         allocationBPS: 300,
@@ -75,6 +75,34 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
         id: crypto.randomUUID() as UUID,
       },
     ],
+  },
+  {
+    __type: 'slice',
+    sliceId: 766,
+    sliceVersion: 1,
+    name: 'Piccolo Caffe e Vino',
+    logo: '/cafes/piccolo.jpg',
+    url: 'https://www.piccolocaffe.ca',
+    backgroundImage: '/cafes/piccolo-background.jpg',
+    location: {
+      label: 'Toronto, ON',
+      address: '111 John Street, Toronto Ontario, Canada, M5V 2E2',
+      coords: [43.647995, -79.38997],
+    },
+  },
+  {
+    __type: 'slice',
+    sliceId: 815,
+    sliceVersion: 1,
+    name: "Lion's Milk",
+    logo: '/cafes/lions-milk.png',
+    url: 'https://www.lionsmilkbk.com/',
+    backgroundImage: '/cafes/lions-milk-background.webp',
+    location: {
+      label: 'New York, NY',
+      address: '104 Roebling St, Brooklyn, NY 11211',
+      coords: [40.71590151851203, -73.95575958202109],
+    },
   },
   // {
   //   __type: 'slice',
@@ -117,8 +145,8 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
       enabled: true,
     },
     name: 'The Dev Cafe',
-    logo: '/drip.png',
-    backgroundImage: '/mountains.webp',
+    logo: '/cafes/drip.png',
+    backgroundImage: '/cafes/mountains.webp',
     farmerAllocation: [
       {
         allocationBPS: 300,

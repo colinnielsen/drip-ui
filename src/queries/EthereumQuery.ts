@@ -63,3 +63,25 @@ export const useUSDCBalance = ({
     refetchInterval: pollingInterval,
   });
 };
+
+export const useUSDCAllowance = ({
+  spender,
+  pollingInterval,
+}: {
+  spender?: Address;
+  pollingInterval?: number;
+}) => {
+  const wallet = useWalletAddress();
+
+  return useQuery({
+    queryKey: ['usdc-allowance', wallet],
+    queryFn: async () =>
+      wallet && spender
+        ? await USDC_INSTANCE.read
+            .allowance([wallet, spender])
+            .then(balance => USDC.fromWei(balance))
+        : err('Address is required'),
+    enabled: !!wallet && !!spender,
+    refetchInterval: pollingInterval,
+  });
+};

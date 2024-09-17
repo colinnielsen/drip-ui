@@ -7,12 +7,10 @@ import {
 } from '@/components/ui/drawer';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
-import { SliceCartListener } from '@/lib/slice';
 import { cn, sleep } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
 import { useRecentCart } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
-import { SliceProvider } from '@slicekit/react';
 import { CheckCircle, ShoppingCart } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatedTimer } from '../ui/icons';
@@ -124,12 +122,7 @@ export default function CartFooter() {
         aria-describedby="cart-footer"
       >
         <DrawerDescription className="hidden">Checkout</DrawerDescription>
-
-        <SliceProvider>
-          <SliceCartListener>
-            <CheckoutSlides {...{ shop, cart }} />
-          </SliceCartListener>
-        </SliceProvider>
+        <CheckoutSlides {...{ shop, cart }} />
       </DrawerContent>
     </Drawer>
   );

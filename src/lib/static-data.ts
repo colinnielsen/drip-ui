@@ -13,7 +13,7 @@ export const STATIC_FARMER_DATA: Farmer[] = [
     shortDescription:
       'My wife and I run a farm in the beautiful Costa region of Costa Rica',
     image:
-      'https://images.squarespace-cdn.com/content/v1/5a8cebefe9bfdf59a2d406ff/1519999467027-LWGK5HC14VTJU60J4LZM/FarmersProject_Sircof_Marco.jpg?format=1000w',
+      'https://images.squarespace-cdn.com/content/v1/5a8cebefe9bfdf59a2d406ff/1519999467027-LWGK5HC14VTJU60J4LZM/FarmersProject_Sircof_Marco.webp?format=1000w',
     infoUrl: 'https://www.farmersproject-cr.com/sircof',
     campaigns: [],
     posts: [
@@ -44,9 +44,9 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
       coords: [32.3792, -86.3077],
     },
     name: 'Prevail Coffee',
-    logo: '/cafes/prevail.png',
+    logo: '/cafes/prevail.webp',
     url: 'https://prevailcoffee.com/',
-    backgroundImage: '/cafes/prevail-background.jpg',
+    backgroundImage: '/cafes/prevail-background.webp',
     farmerAllocation: [
       {
         allocationBPS: 300,
@@ -65,9 +65,9 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
       coords: [37.7949, -122.2745],
     },
     name: 'Bicycle Coffee Co',
-    logo: '/cafes/bicycle-coffee.png',
+    logo: '/cafes/bicycle-coffee.webp',
     url: 'https://www.bicyclecoffeeco.com',
-    backgroundImage: '/cafes/bicycle-background.jpg',
+    backgroundImage: '/cafes/bicycle-background.webp',
     farmerAllocation: [
       {
         allocationBPS: 300,
@@ -81,9 +81,9 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     sliceId: 766,
     sliceVersion: 1,
     name: 'Piccolo Caffe e Vino',
-    logo: '/cafes/piccolo.png',
+    logo: '/cafes/piccolo.webp',
     url: 'https://www.piccolocaffe.ca',
-    backgroundImage: '/cafes/piccolo-background.jpg',
+    backgroundImage: '/cafes/piccolo-background.webp',
     location: {
       label: 'Toronto, ON',
       address: '111 John Street, Toronto Ontario, Canada, M5V 2E2',
@@ -95,13 +95,83 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     sliceId: 815,
     sliceVersion: 1,
     name: "Lion's Milk",
-    logo: '/cafes/lions-milk.png',
+    logo: '/cafes/lions-milk.webp',
     url: 'https://www.lionsmilkbk.com/',
     backgroundImage: '/cafes/lions-milk-background.webp',
     location: {
       label: 'New York, NY',
       address: '104 Roebling St, Brooklyn, NY 11211',
       coords: [40.71590151851203, -73.95575958202109],
+    },
+  },
+  {
+    __type: 'slice',
+    sliceId: 852,
+    sliceVersion: 1,
+    name: 'Noun Coffee',
+    logo: '/cafes/noun.webp',
+    url: 'https://noun.coffee/',
+    backgroundImage: '/cafes/noun-background.webp',
+    location: {
+      label: 'Los Angeles, CA',
+      address: '7702 Santa Monica Blvd, West Hollywood, CA 90046',
+      coords: [34.09070262919442, -118.35688561636172],
+    },
+  },
+  // {
+  //   __type: 'slice',
+  //   sliceId: 877,
+  //   sliceVersion: 1,
+  //   name: 'poorboy coffee',
+  //   logo: '/cafes/poorboy.webp',
+  //   url: 'https://www.instagram.com/poorboy.coffee/?hl=en',
+  //   backgroundImage: '/cafes/poorboy-background.webp',
+  //   location: {
+  //     label: 'San Francisco, CA',
+  //     address: '1235 9th Ave San Francisco, CA 94122',
+  //     coords: [37.765287994762986, -122.46652275888438],
+  //   },
+  // },
+  {
+    __type: 'slice',
+    sliceId: 425,
+    sliceVersion: 1,
+    name: 'Compass Coffee',
+    logo: '/cafes/compass.webp',
+    url: 'https://www.compasscoffee.com/',
+    backgroundImage: '/cafes/compass-background.webp',
+    location: {
+      label: 'Washington, DC',
+      address: '1201 Half Street, Washington, District of Columbia 20003, USA',
+      coords: [38.875350752814555, -77.00768132534003],
+    },
+  },
+  {
+    __type: 'slice',
+    sliceId: 974,
+    sliceVersion: 1,
+    name: 'Town Mouse',
+    logo: '/cafes/town-mouse.webp',
+    url: 'https://www.townmouse.de/',
+    backgroundImage: '/cafes/town-mouse-background.webp',
+    location: {
+      label: 'Berlin, Germany',
+      address: 'Marienburger Straße 5, Berlin, Germany 10405',
+      coords: [52.53501427738041, 13.42346353801631],
+    },
+  },
+  {
+    __type: 'slice',
+    sliceId: 1008,
+    sliceVersion: 1,
+    name: "Menotti's Coffee",
+    logo: '/cafes/menottis.webp',
+    url: 'https://menottis.com/',
+    backgroundImage: '/cafes/menottis-background.webp',
+    location: {
+      label: 'Los Angeles, CA',
+      address: '56 Windward Ave, Venice, CA 90291',
+      coords: [33.987311727259836, -118.47271489159513],
     },
   },
   // {
@@ -137,7 +207,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     location: {
       label: 'Denver, CO',
       address: "Colin's office",
-      coords: [50.8443, 4.3563],
+      coords: [39.738996182282825, -104.99163434025536],
     },
     tipConfig: {
       __type: 'single-recipient',
@@ -145,7 +215,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
       enabled: true,
     },
     name: 'The Dev Cafe',
-    logo: '/cafes/drip.png',
+    logo: '/drip.png',
     backgroundImage: '/cafes/mountains.webp',
     farmerAllocation: [
       {

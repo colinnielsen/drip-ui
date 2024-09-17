@@ -1,5 +1,3 @@
-import { useWalletAddress } from '@/queries/EthereumQuery';
-import { useCartInSliceFormat } from '@/queries/OrderQuery';
 import {
   getOrder,
   GetOrderParams,
@@ -15,12 +13,16 @@ import {
   updateDynamicProducts,
   UpdateDynamicProductsParams,
 } from '@slicekit/core';
-import { useCart as useSliceCart } from '@slicekit/react';
-import { ReactNode, useEffect } from 'react';
 import { PRIVY_WAGMI_CONFIG } from './ethereum';
 import { axiosFetcher } from './utils';
 
 export const SLICE_CART_LOCAL_STORAGE_KEY = 'cart';
+
+/**
+ * @dev the address to approve USDC for to spend across slice stores
+ */
+export const SLICE_ENTRYPOINT_ADDRESS =
+  '0xb9d5B99d5D0fA04dD7eb2b0CD7753317C2ea1a84';
 
 export const sliceKit = {
   wagmiConfig: PRIVY_WAGMI_CONFIG,
@@ -67,22 +69,4 @@ export const sliceKit = {
       params,
     );
   },
-};
-
-export const SliceCartListener = ({ children }: { children: ReactNode }) => {
-  const walletAddress = useWalletAddress();
-  const { data: sliceCart } = useCartInSliceFormat({
-    buyerAddress: walletAddress,
-  });
-  const { updateCart } = useSliceCart();
-  const cartHash = sliceCart
-    ?.map(i => i.slicerId + i.dbId + i.name + i.quantity + i.externalVariantId)
-    .join('');
-
-  useEffect(() => {
-    console.debug('hydrating cart', { cartHash });
-    updateCart(sliceCart || []);
-  }, [cartHash]);
-
-  return <>{children}</>;
 };

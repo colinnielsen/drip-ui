@@ -1,11 +1,10 @@
 import coffeeGif from '@/assets/coffee-dive.gif';
-import coffeeStill from '@/assets/coffee-still.png';
 import { CTAButton, LoadingCTAButton } from '@/components/ui/button';
 import { useGoToSlide } from '@/components/ui/carousel';
 import { Drip, DripSmall, Label1, Mono } from '@/components/ui/typography';
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { Order } from '@/data-model/order/OrderType';
-import { Shop } from '@/data-model/shop/ShopType';
+import { Shop, ShopSourceConfig } from '@/data-model/shop/ShopType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { isDev } from '@/lib/utils';
 import { useWalletAddress } from '@/queries/EthereumQuery';
@@ -17,63 +16,56 @@ import {
 import { usePayAndOrder } from '@/queries/SliceQuery';
 import Image from 'next/image';
 import { useMemo } from 'react';
-import { useAccount, useConnectors } from 'wagmi';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
 
-export const PayButton = () =>
-  //  { walletClient }: { walletClient: WalletClient }
-  {
-    const buyerAddress = useWalletAddress();
-    const { isFetching: sliceCartIsLoading } = useCartInSliceFormat({
-      buyerAddress,
-    });
-    const { isFetching: cartIsLoading, data: cart } = useRecentCart();
-    const { paymentStep } = useCheckoutContext();
-    const goToSlide = useGoToSlide();
-    const payAndOrder = usePayAndOrder();
-    const cartSummary = useCartSummary();
-    // const [labels, setLabels] = useState<string[]>([]);
+export const SlicePayButton = () => {
+  const buyerAddress = useWalletAddress();
+  const { isFetching: sliceCartIsLoading } = useCartInSliceFormat({
+    buyerAddress,
+  });
+  const { isFetching: cartIsLoading, data: cart } = useRecentCart();
+  const { paymentStep } = useCheckoutContext();
+  const goToSlide = useGoToSlide();
+  const { payAndOrder, ready } = usePayAndOrder();
+  const cartSummary = useCartSummary();
 
-    // useEffect(() => {
-    //   connectors.forEach((c, i) => {
-    //     Promise.all([c.getAccounts(), c.isAuthorized(), c.name]).then(
-    //       ([accounts, isAuthorized, name]) => {
-    //         setLabels(labels => [
-    //           `${accounts.join(', ')} - ${
-    //             isAuthorized ? 'authorized' : 'not authorized'
-    //           } - ${name}`,
-    //         ]);
-    //       },
-    //     );
-    //   });
-    // }, [connectors]);
+  if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress)
+    return <LoadingCTAButton />;
 
-    if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress)
-      return <LoadingCTAButton />;
+  const isLoading = paymentStep === 'awaiting-confirmation';
+  return (
+    <>
+      <CTAButton
+        onClick={async () => {
+          if (!ready) return;
 
-    const isLoading = paymentStep === 'awaiting-confirmation';
-    return (
-      <>
-        <CTAButton
-          onClick={async () => {
-            if (!payAndOrder) return;
+          goToSlide?.(1);
+          await payAndOrder();
+        }}
+        isLoading={isLoading}
+      >
+        {!cartSummary || isLoading
+          ? ''
+          : cartSummary?.total.usdc.gt(USDC.ZERO)
+            ? 'pay'
+            : 'place order'}
+      </CTAButton>
+    </>
+  );
+};
 
-            goToSlide?.(1);
-            await payAndOrder();
-          }}
-          isLoading={isLoading}
-        >
-          {!cartSummary || isLoading
-            ? ''
-            : cartSummary?.total.usdc.gt(USDC.ZERO)
-              ? 'pay'
-              : 'place order'}
-        </CTAButton>
-      </>
-    );
-  };
+export const PayButton = ({
+  shopType,
+}: {
+  shopType: ShopSourceConfig['type'];
+}) => {
+  if (shopType === 'slice') return <SlicePayButton />;
+
+  let a: never = shopType;
+  return a;
+};
 
 export default function PaymentSlide({
   cart,
@@ -114,7 +106,7 @@ export default function PaymentSlide({
             <Label1 className="text-primary-gray">
               something went wrong, let&apos;s try again
             </Label1>
-            <PayButton />
+            <PayButton shopType={shop.__sourceConfig.type} />
           </div>
         ) : (
           <>

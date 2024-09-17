@@ -10,6 +10,14 @@ export const getAndValidateUserRequest = (req: NextApiRequest) => {
   return userId;
 };
 
+export const revalidatePathIfExists = async (
+  res: NextApiResponse,
+  path: string,
+) => {
+  const response = await fetch(path, { method: 'HEAD' }).catch(() => {});
+  if (response?.ok) await res.revalidate(path);
+};
+
 export const withErrorHandling = (
   handler: NextApiHandler,
   handlerPrefix?: string,

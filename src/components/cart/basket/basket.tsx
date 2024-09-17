@@ -150,7 +150,7 @@ export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
 
           <DrawerFooter className="p-0 w-full sticky bottom-0 bg-background shadow-[4px_0px_60px_0px_rgba(0,0,0,0.10)]">
             <FooterTotal cart={cart} isLoading={isFetching} />
-            <NextButton />
+            <NextButton shopType={shop.__sourceConfig.type} />
           </DrawerFooter>
         </>
       )}

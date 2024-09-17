@@ -49,31 +49,29 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <PrivyProvider>
       <ReactQueryClientProvider useDevTools>
-        <WagmiProvider config={sliceKit.wagmiConfig}>
-          <CartDrawerContext.Provider
-            value={{ open: isOpen, setOpen: setIsOpen }}
+        <CartDrawerContext.Provider
+          value={{ open: isOpen, setOpen: setIsOpen }}
+        >
+          <div
+            className={cn(
+              CSS_FONT_CLASS_CONFIG,
+              'bg-background',
+              'min-h-screen',
+              // 'prose',
+            )}
           >
-            <div
-              className={cn(
-                CSS_FONT_CLASS_CONFIG,
-                'bg-background',
-                'min-h-screen',
-                // 'prose',
-              )}
-            >
-              <Head>
-                <title>Drip</title>
-                <meta
-                  name="viewport"
-                  content="width=device-width, user-scalable=no"
-                />
-              </Head>
-              <Component {...pageProps} />
-              <Footer />
-              <GlobalListeners />
-            </div>
-          </CartDrawerContext.Provider>
-        </WagmiProvider>
+            <Head>
+              <title>Drip</title>
+              <meta
+                name="viewport"
+                content="width=device-width, user-scalable=no"
+              />
+            </Head>
+            <Component {...pageProps} />
+            <Footer />
+            <GlobalListeners />
+          </div>
+        </CartDrawerContext.Provider>
       </ReactQueryClientProvider>
     </PrivyProvider>
   );

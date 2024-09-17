@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { SyncService } from '@/services/SyncService';
 import { ONBOARDED_SHOPS } from '@/lib/static-data';
 import { sqlDatabase } from '@/infras/database';
-import { withErrorHandling } from '@/lib/next';
+import { revalidatePathIfExists, withErrorHandling } from '@/lib/next';
 
 const syncService = new SyncService(sqlDatabase);
 
@@ -19,9 +19,7 @@ export default withErrorHandling(async function (
     .then(async () => {
       await res.revalidate('/');
       await Promise.all(
-        previousShopIds.map(id => {
-          res.revalidate(`/shops/${id}`).catch(err => console.error(err));
-        }),
+        previousShopIds.map(id => revalidatePathIfExists(res, `/shops/${id}`)),
       );
       return res.status(200).json({ message: 'Sync completed' });
     })

@@ -3,6 +3,7 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -112,7 +113,14 @@ export function QuickAddItemCard({
     <DrawerTrigger asChild>
       <div className="flex flex-col gap-2">
         <div className="relative overflow-hidden rounded-xl h-36 w-36">
-          <Image src={image} alt={name} fill className="object-cover" />
+          <Image
+            src={image}
+            alt={name}
+            fill
+            className="object-cover"
+            quality={50}
+            sizes="30vw"
+          />
           {cart === undefined ? (
             <Skeleton className="bg-gray-200 rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:bg-neutral-300 active:scale-95 drop-shadow-md" />
           ) : canAddToCart ? (
@@ -318,6 +326,9 @@ export function ItemWithSelector({
       <QuickAddItemCard item={item} shopId={shopId} />
 
       <DrawerContent>
+        <DrawerDescription className="hidden md:block">
+          {item.name}
+        </DrawerDescription>
         <div className="h-[75vh] flex flex-col overflow-scroll">
           <DrawerHeader className="p-0 rounded-t-xl">
             <div className="min-h-64 relative rounded-t-xl overflow-clip">
@@ -327,6 +338,7 @@ export function ItemWithSelector({
                 fill
                 className="object-cover"
                 quality={30}
+                sizes="100vw"
               />
             </div>
             <div className="flex flex-col px-6 py-4 gap-y-2">

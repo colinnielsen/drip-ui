@@ -1,22 +1,31 @@
 import { useCheckoutContext } from '@/components/cart/context';
 import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
-import { sliceKit } from '@/lib/slice';
+import { BASE_CLIENT, PRIVY_WAGMI_CONFIG } from '@/lib/ethereum';
+import { SLICE_ENTRYPOINT_ADDRESS, sliceKit } from '@/lib/slice';
 import { minutes } from '@/lib/utils';
-import { ExtraCostParamsOptional, ProductCart } from '@slicekit/core';
-import { useCheckout } from '@slicekit/react';
+import {
+  ExtraCostParamsOptional,
+  ProductCart,
+  handleCheckoutViem,
+  payProductsConfig,
+} from '@slicekit/core';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
-import { Address } from 'viem';
+import { Address, zeroAddress } from 'viem';
 import { base } from 'viem/chains';
-import { useConnectedWallet } from './EthereumQuery';
+import {
+  useConnectedWallet,
+  useUSDCAllowance,
+  useWalletClient,
+} from './EthereumQuery';
 import {
   useAssocateExternalOrderInfoToCart,
   useAssocatePaymentToCart,
+  useCartInSliceFormat,
+  useCartSummary,
   useRecentCart,
 } from './OrderQuery';
 import { useShopSourceConfig } from './ShopQuery';
-import { useSetActiveWallet } from '@privy-io/wagmi';
-import { useConnectors, useReconnect } from 'wagmi';
 
 /**
  * @returns the slice keyed by productId
@@ -44,63 +53,26 @@ export const useSliceStoreProducts = <TData = ProductCart[]>({
     select: select ? data => select(data.cartProducts) : undefined,
   });
 
-// export type PriceLookup = Record<
-//   UUID,
-//   {
-//     basePrice: Currency;
-//     discountedPrice: Currency;
-//     modPrices: { modId: UUID; price: Currency }[];
-//   }
-// >;
-// /**
-//  * @returns a map of {[dripItemId]: discountedPrice}
-//  * { [{@link deriveDripIdFromSliceProductId}]: {@link Currency} }
-//  */
-// export const useSlicePrices = (config: SliceDataSourceConfig | undefined) => {
-//   const wallet = useConnectedWallet();
-
-//   return useSliceStoreProducts({
-//     slicerId: config ? getSlicerIdFromSliceStoreId(config.id) : undefined,
-//     buyer: wallet?.address,
-//     enabled: config?.type === 'slice',
-//     select: data =>
-//       data.reduce<PriceLookup>(
-//         (acc, product) => ({
-//           ...acc,
-//           [deriveDripIdFromSliceProductId(product)]: {
-//             discountedPrice: getPriceFromSliceCart(
-//               product.currency,
-//               product.price,
-//             ).price,
-//             basePrice: getPriceFromSliceCart(
-//               product.currency,
-//               product.basePrice,
-//             ).price,
-//             // slice mods do not have additional costs
-//             modPrices: [],
-//           },
-//         }),
-//         {},
-//       ),
-//   });
-// };
-
 export const usePayAndOrder = ({
   onSuccess,
 }: {
   onSuccess?: () => void;
 } = {}) => {
   const wallet = useConnectedWallet();
+  const walletClient = useWalletClient();
+  const address = wallet?.address as Address;
 
   const { data: dripCart } = useRecentCart();
+  const { data: sliceCart } = useCartInSliceFormat({ buyerAddress: address });
   const { data: shopSourceConfig } = useShopSourceConfig(dripCart?.shop);
   const { mutateAsync: associatePayment } = useAssocatePaymentToCart();
   const { mutateAsync: associateExternalOrderInfo } =
     useAssocateExternalOrderInfoToCart();
   const { setPaymentStep } = useCheckoutContext();
-  const { setActiveWallet } = useSetActiveWallet();
-  const { reconnect } = useReconnect();
-  const connectors = useConnectors();
+  const summary = useCartSummary();
+  const { data: allowance } = useUSDCAllowance({
+    spender: SLICE_ENTRYPOINT_ADDRESS,
+  });
 
   const extraCosts: ExtraCostParamsOptional[] | undefined = useMemo(
     () =>
@@ -141,31 +113,43 @@ export const usePayAndOrder = ({
     [associateExternalOrderInfo, associatePayment, onSuccess, setPaymentStep],
   );
 
-  const useCheckoutParams = useMemo(
-    () => ({
-      buyer: wallet?.address.toLowerCase() as Address,
-      extraCosts,
-      onError,
-      onSuccess: onSliceSuccess,
-    }),
-    [extraCosts, onError, onSliceSuccess, wallet?.address],
-  );
+  const ready =
+    !!wallet &&
+    !!walletClient &&
+    !!sliceCart &&
+    !!address &&
+    !!summary &&
+    !!allowance;
 
-  const { checkout: initiatePrivyCheckout } = useCheckout(
-    sliceKit.wagmiConfig,
-    useCheckoutParams,
-  );
-
-  const payAndOrder = useCallback(async () => {
-    if (!wallet) throw new Error('No wallet connected');
+  const payAndOrder = async () => {
+    if (!ready) throw new Error('No wallet connected');
     setPaymentStep('awaiting-confirmation');
-    await setActiveWallet(wallet!);
-    reconnect({ connectors: connectors });
 
     await wallet?.switchChain(base.id);
-    await initiatePrivyCheckout().catch(error => console.error(error));
-  }, [initiatePrivyCheckout, setPaymentStep, wallet, connectors]);
+    const totalUsdcToPay = summary?.total.usdc.toWei();
+    await handleCheckoutViem(BASE_CLIENT, walletClient, {
+      // @ts-ignore
+      buyerInfo: null,
+      // @ts-ignore
+      capabilities: null,
+      payProductsConfig: await payProductsConfig(PRIVY_WAGMI_CONFIG, {
+        account: address,
+        cart: sliceCart,
+        buyer: address,
+        extraCosts,
+      }),
+      ref: '',
+      referrer: zeroAddress,
+      onError: onError,
+      onSuccess: onSliceSuccess,
+      buyer: address,
+      setLoadingState: console.debug,
+      totalUsdcToPay,
+      cart: sliceCart,
+      allowance: allowance.toWei(),
+    }).catch(error => console.error(error));
+  };
 
   if (!wallet) throw new Error('No wallet connected');
-  else return payAndOrder;
+  else return { payAndOrder, ready };
 };

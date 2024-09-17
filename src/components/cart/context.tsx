@@ -1,16 +1,16 @@
 import { Order } from '@/data-model/order/OrderType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { axiosFetcher } from '@/lib/utils';
-import { useUSDCBalance, useWalletAddress } from '@/queries/EthereumQuery';
+import { useUSDCBalance } from '@/queries/EthereumQuery';
 import {
   ORDERS_QUERY_KEY,
-  useRecentCart,
   useCartId,
   useCartSummary,
+  useRecentCart,
 } from '@/queries/OrderQuery';
 import { useUser } from '@/queries/UserQuery';
 import { useWallets } from '@privy-io/react-auth';
-import { skipToken, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useGoToSlide, useSlideInView } from '../ui/carousel';
 

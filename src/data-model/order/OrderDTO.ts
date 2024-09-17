@@ -14,6 +14,33 @@ import {
 import { UUID } from 'crypto';
 import { Item, ItemMod } from '../item/ItemType';
 
+export const getOrderNumber = (order: Order): string | null => {
+  return (
+    ('externalOrderInfo' in order &&
+      order.externalOrderInfo?.__type === 'slice' &&
+      order.externalOrderInfo.orderNumber) ||
+    null
+  );
+};
+
+export const mapStatusToStatusLabel = (
+  status: Order['status'],
+  tense: 'present' | 'past' = 'present',
+) => {
+  switch (status) {
+    case '1-pending':
+      return tense === 'present' ? 'Pending' : 'Pending';
+    case '2-submitting':
+      return tense === 'present' ? 'Pending' : 'Submitted';
+    case '3-in-progress':
+      return 'In Progress';
+    case '4-complete':
+      return tense === 'present' ? 'Complete' : 'Completed';
+    case 'cancelled':
+      return tense === 'present' ? 'Cancelled' : 'Cancelled';
+  }
+};
+
 export const createExternalOrderInfo = (
   sourceConfig: Shop['__sourceConfig'],
   data: Partial<ExternalOrderInfo>,
@@ -33,25 +60,6 @@ export const createExternalOrderInfo = (
 
   return externalOrderInfo;
 };
-
-/**
- * @dev if a cart item has the same id and the same mods, then it can be squashed with a quantity
- */
-export function collapseDuplicateItems(orderItems: OrderItem[]) {
-  const itemMap = new Map<string, [OrderItem, number]>();
-
-  orderItems.forEach(orderItem => {
-    const allIds = [
-      orderItem.item.id,
-      ...orderItem.mods.map(mod => mod.id),
-    ].sort();
-    const key = allIds.join('-');
-    if (itemMap.has(key)) itemMap.get(key)![1] += 1;
-    else itemMap.set(key, [orderItem, 1]);
-  });
-
-  return Array.from(itemMap.values());
-}
 
 export const getOrderItemCostFromPriceDict = (
   priceDict: Record<UUID, Item | ItemMod>,
@@ -90,6 +98,25 @@ export const getOrderItemCost = (orderItem: OrderItem) => {
 
   return getOrderItemCostFromPriceDict(priceDict, orderItem);
 };
+
+/**
+ * @dev if an `OrderItem` has the same id and the same mods, then it can be squashed with a quantity
+ */
+export function collapseDuplicateItems(orderItems: OrderItem[]) {
+  const itemMap = new Map<string, [OrderItem, number]>();
+
+  orderItems.forEach(orderItem => {
+    const allIds = [
+      orderItem.item.id,
+      ...orderItem.mods.map(mod => mod.id),
+    ].sort();
+    const key = allIds.join('-');
+    if (itemMap.has(key)) itemMap.get(key)![1] += 1;
+    else itemMap.set(key, [orderItem, 1]);
+  });
+
+  return Array.from(itemMap.values());
+}
 
 export const getOrderSummary = (order: Order): OrderSummary => {
   // if all order items have a paid price, then we can use the paid price
@@ -142,33 +169,6 @@ export const getOrderSummary = (order: Order): OrderSummary => {
       usdc: total_withTip,
     },
   };
-};
-
-export const getOrderNumber = (order: Order): string | null => {
-  return (
-    ('externalOrderInfo' in order &&
-      order.externalOrderInfo?.__type === 'slice' &&
-      order.externalOrderInfo.orderNumber) ||
-    null
-  );
-};
-
-export const mapStatusToStatusLabel = (
-  status: Order['status'],
-  tense: 'present' | 'past' = 'present',
-) => {
-  switch (status) {
-    case '1-pending':
-      return tense === 'present' ? 'Pending' : 'Pending';
-    case '2-submitting':
-      return tense === 'present' ? 'Pending' : 'Submitted';
-    case '3-in-progress':
-      return 'In Progress';
-    case '4-complete':
-      return tense === 'present' ? 'Complete' : 'Completed';
-    case 'cancelled':
-      return tense === 'present' ? 'Cancelled' : 'Cancelled';
-  }
 };
 
 export const isPending = (o: Order): o is Cart => o.status === '1-pending';

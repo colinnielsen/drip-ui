@@ -11,14 +11,16 @@ export function ShopCard(shop: Shop) {
   const allocationTotal = getTotalAllocationBPS(farmerAllocations);
   return (
     <Link href={`/shop/${id}`}>
-      <div className="flex flex-col gap-4">
-        <div className="overflow-hidden h-40 relative w-full">
+      <div className="flex flex-col gap-4 w-full">
+        <div className="overflow-hidden h-40 relative w-full rounded-3xl">
           <Image
             src={backgroundImage}
             alt={label}
             quality={20}
-            fill={true}
-            className="rounded-3xl object-cover"
+            sizes="90vw"
+            width={0}
+            height={0}
+            className="w-full h-full object-cover overflow-clip"
           />
         </div>
         <div className="flex flex-col gap-y-1">
@@ -32,12 +34,14 @@ export function ShopCard(shop: Shop) {
             {/* <div className="rounded-full h-0.5 w-0.5 bg-primary-gray" />
             <Label2>tbd district</Label2> */}
           </div>
-          <div className="flex items-center gap-x-1">
-            <Coffee />
-            <p className="text-xs font-semibold">
-              {allocationTotal / 100}% FOR THE GROWER
-            </p>
-          </div>
+          {allocationTotal > 0 && (
+            <div className="flex items-center gap-x-1">
+              <Coffee />
+              <p className="text-xs font-semibold">
+                {allocationTotal / 100}% FOR THE GROWER
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </Link>

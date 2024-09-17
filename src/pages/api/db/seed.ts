@@ -1,4 +1,5 @@
 import { sqlDatabase } from '@/infras/database';
+import { revalidatePathIfExists } from '@/lib/next';
 import { ONBOARDED_SHOPS, STATIC_FARMER_DATA } from '@/lib/static-data';
 import { SyncService } from '@/services/SyncService';
 import { sql } from '@vercel/postgres';
@@ -148,16 +149,12 @@ export default async function handler(
     .then(async () => {
       await res.revalidate('/');
       await Promise.all(
-        previousShopIds.map(id => {
-          res.revalidate(`/shops/${id}`).catch(err => console.error(err));
-        }),
+        previousShopIds.map(id => revalidatePathIfExists(res, `/shops/${id}`)),
       );
       await Promise.all(
-        STATIC_FARMER_DATA.map(farmer => {
-          res
-            .revalidate(`/farmers/${farmer.id}`)
-            .catch(err => console.error(err));
-        }),
+        STATIC_FARMER_DATA.map(farmer =>
+          revalidatePathIfExists(res, `/farmers/${farmer.id}`),
+        ),
       );
       return res.status(200).json({ message: 'Seeding complete' });
     })

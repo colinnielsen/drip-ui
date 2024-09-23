@@ -4,11 +4,11 @@ import { ItemList } from '@/components/shop-page/item-list';
 import { SLICE_VERSION } from '@/data-model/_common/type/SliceDTO';
 import { deriveShopIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
-import { sqlDatabase } from '@/infras/database';
 import { ONBOARDED_SHOPS } from '@/lib/static-data';
 import { rehydrateData } from '@/lib/utils';
 import { farmerQuery } from '@/queries/FarmerQuery';
 import { useShop } from '@/queries/ShopQuery';
+import ShopService from '@/services/ShopService';
 import {
   DehydratedState,
   HydrationBoundary,
@@ -55,9 +55,7 @@ export const getStaticProps: GetStaticProps<{
   await queryClient.prefetchQuery({
     queryKey: ['shop', staticShop.id],
     queryFn: () =>
-      sqlDatabase.shops
-        .findById(staticShop.id, { rehydrate: false })
-        .then(s => s!),
+      ShopService.findById(staticShop.id, { rehydrate: false }).then(s => s!),
     staleTime: 0,
   });
 

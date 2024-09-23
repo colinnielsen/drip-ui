@@ -1,5 +1,5 @@
-import { sqlDatabase } from '@/infras/database';
 import { withErrorHandling } from '@/lib/next';
+import FarmerService from '@/services/FarmerService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -15,7 +15,7 @@ export default withErrorHandling(async function (
     return res.status(400).json({ error: 'Invalid farmerId' });
 
   try {
-    const farmer = await sqlDatabase.farmers.findById(id as UUID);
+    const farmer = await FarmerService.findById(id as UUID);
     if (!farmer) {
       return res.status(404).json({ error: `Farmer with id ${id} not found` });
     }

@@ -1,10 +1,11 @@
 import { PrivyDID } from '@/data-model/_external/privy';
 import { mapUserToSavedUserViaPrivy } from '@/data-model/user/UserDTO';
 import { SavedUser } from '@/data-model/user/UserType';
-import { sqlDatabase } from '@/infras/database';
 import { withErrorHandling } from '@/lib/next';
 import privy from '@/lib/privy';
 import { PRIVY_TOKEN_NAME, SESSION_COOKIE_NAME } from '@/lib/session';
+import OrderService from '@/services/OrderService';
+import UserService from '@/services/UserService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -29,7 +30,7 @@ export default withErrorHandling(async function (
   const privyId = verifiedClaims.userId as PrivyDID;
 
   // case 1: the user existed on another device and signed with the same wallet, this will yield the same user
-  const maybeUser = await sqlDatabase.users.findByAuthServiceId(privyId);
+  const maybeUser = await UserService.findByAuthServiceId(privyId);
   if (
     maybeUser &&
     maybeUser.__type === 'user' &&
@@ -41,12 +42,12 @@ export default withErrorHandling(async function (
     if (user.id !== sessionToken) {
       // we need to:
       // 1. then migrate their old orders to their new account
-      await sqlDatabase.orders.migrate({
+      await OrderService.migrate({
         prevUserId: user.id,
         newUserId: sessionToken,
       });
       // 2. migrate their old account to their new one (pull old data to new)
-      const migratedUser = await sqlDatabase.users.migrate({
+      const migratedUser = await UserService.migrate({
         prevId: user.id,
         newId: sessionToken,
       });
@@ -59,7 +60,7 @@ export default withErrorHandling(async function (
   }
 
   // case 2: the user is just a session user, and we load their session user, and convert it to a saved user with the privy user data
-  const sessionUser = await sqlDatabase.users.findById(sessionToken);
+  const sessionUser = await UserService.findById(sessionToken);
   if (!sessionUser)
     return res
       .status(404)
@@ -71,6 +72,6 @@ export default withErrorHandling(async function (
   });
 
   return await mapUserToSavedUserViaPrivy(sessionUser, privyUser)
-    .then(u => sqlDatabase.users.save(u))
+    .then(u => UserService.save(u))
     .then(savedUser => res.status(200).json(savedUser));
 }, 'upsert user');

@@ -1,6 +1,6 @@
-import { sqlDatabase } from '@/infras/database';
 import { revalidatePathIfExists } from '@/lib/next';
 import { ONBOARDED_SHOPS, STATIC_FARMER_DATA } from '@/lib/static-data';
+import ShopService from '@/services/ShopService';
 import { SyncService } from '@/services/SyncService';
 import { sql } from '@vercel/postgres';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -128,15 +128,15 @@ export const bootstrapDB = async () => {
   console.debug('database bootstrapped');
 };
 
-const syncService = new SyncService(sqlDatabase);
+const syncService = new SyncService();
 
 export default async function handler(
   _req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const previousShopIds = await sqlDatabase.shops
-    .findAll()
-    .then(shops => shops.map(shop => shop.id));
+  const previousShopIds = await ShopService.findAll().then(shops =>
+    shops.map(shop => shop.id),
+  );
 
   if (_req.query.reset) await _resetDB();
 

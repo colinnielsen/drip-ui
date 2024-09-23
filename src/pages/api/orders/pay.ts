@@ -1,8 +1,8 @@
 import { isCurrency } from '@/data-model/_common/currency/currencyDTO';
 import { Currency } from '@/data-model/_common/type/CommonType';
-import { sqlDatabase } from '@/infras/database';
 import { withErrorHandling } from '@/lib/next';
 import { rehydrateData } from '@/lib/utils';
+import OrderService from '@/services/OrderService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, isHex } from 'viem';
@@ -25,8 +25,7 @@ export default withErrorHandling(async function (
   )
     return res.status(400).json({ error: 'Bad request' });
 
-  await sqlDatabase.orders
-    .pay(orderId, transactionHash, paidPrices)
+  await OrderService.pay(orderId, transactionHash, paidPrices)
     .then(order => res.status(200).json(order))
     .catch(error =>
       res

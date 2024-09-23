@@ -4,8 +4,8 @@ import { ShopList } from '@/components/home-page/shop-list';
 import { WelcomeDialog } from '@/components/home-page/welcome-popup';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Shop } from '@/data-model/shop/ShopType';
-import { sqlDatabase } from '@/infras/database';
 import { rehydrateData } from '@/lib/utils';
+import ShopService from '@/services/ShopService';
 import {
   dehydrate,
   DehydratedState,
@@ -19,7 +19,7 @@ import { useMemo } from 'react';
 export const getStaticProps: GetStaticProps<{
   dehydratedState: DehydratedState;
 }> = async () => {
-  const shops = await sqlDatabase.shops.findAll({ rehydrate: false });
+  const shops = await ShopService.findAll({ rehydrate: false });
 
   const queryClient = new QueryClient();
   await queryClient.setQueryData(['shop'], shops);

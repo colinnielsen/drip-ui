@@ -6,7 +6,6 @@ import {
   getOrderItemCostFromPriceDict,
   getOrderSummary,
 } from '@/data-model/order/OrderDTO';
-import { OrderRepository } from '@/data-model/order/OrderRepository';
 import {
   Cart,
   ExternalOrderInfo,
@@ -35,6 +34,7 @@ import { useFarmer } from './FarmerQuery';
 import { useShop, useShopPriceDictionary } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
+import OrderService from '@/services/OrderService';
 
 //
 //// HELPERS
@@ -355,7 +355,7 @@ export const useTipMutation = () => {
     scope: { id: 'tip' },
 
     mutationFn: async ({ order, tip }: { order: Order; tip: USDC | null }) =>
-      await axiosFetcher<ReturnType<OrderRepository['update']>>(
+      await axiosFetcher<ReturnType<(typeof OrderService)['update']>>(
         '/api/orders/order?orderId=' + order.id,
         {
           method: 'POST',

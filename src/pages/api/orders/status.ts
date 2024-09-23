@@ -1,5 +1,5 @@
-import { sqlDatabase } from '@/infras/database';
 import { withErrorHandling } from '@/lib/next';
+import OrderService from '@/services/OrderService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -12,8 +12,7 @@ export default withErrorHandling(async function (
   if (!orderId || req.method !== 'POST')
     return res.status(400).json({ error: 'Bad request' });
 
-  await sqlDatabase.orders
-    .checkStatus(orderId)
+  await OrderService.checkStatus(orderId)
     .then(order => res.status(200).json(order))
     .catch(error =>
       res

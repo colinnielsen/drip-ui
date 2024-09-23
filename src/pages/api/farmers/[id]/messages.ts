@@ -1,6 +1,6 @@
-import { sqlDatabase } from '@/infras/database';
 import { withErrorHandling } from '@/lib/next';
 import { isUUID } from '@/lib/utils';
+import FarmerService from '@/services/FarmerService';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default withErrorHandling(async function (
@@ -13,7 +13,7 @@ export default withErrorHandling(async function (
 
   if (!isUUID(id)) return res.status(400).json({ error: 'Invalid farmerId' });
 
-  const messages = await sqlDatabase.farmers.getFarmerMessages(
+  const messages = await FarmerService.getFarmerMessages(
     id,
     req.query.limit ? parseInt(req.query.limit as string) : undefined,
   );

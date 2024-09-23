@@ -7,17 +7,15 @@ import { FarmerSection } from '@/components/farmer-page.tsx/section';
 import { PageHeader } from '@/components/ui/page-header';
 import { PageWrapper } from '@/components/ui/page-wrapper';
 import { Farmer } from '@/data-model/farmer/FarmerType';
-import { sqlDatabase } from '@/infras/database';
 import { isUUID } from '@/lib/utils';
-import { useFarmer } from '@/queries/FarmerQuery';
-import { UUID } from 'crypto';
+import FarmerService from '@/services/FarmerService';
 import { GetStaticPaths } from 'next';
 
 //
 //// STATIC SITE GENERATION
 //
 export const getStaticPaths = (async () => {
-  const res = await sqlDatabase.farmers.findAll();
+  const res = await FarmerService.findAll();
   return {
     paths: res.map(farmer => ({
       params: { farmerId: farmer.id },
@@ -36,7 +34,7 @@ export async function getStaticProps({
       notFound: true,
     };
 
-  const farmer = await sqlDatabase.farmers.findById(params.farmerId);
+  const farmer = await FarmerService.findById(params.farmerId);
   if (!farmer)
     return {
       notFound: true,

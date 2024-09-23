@@ -1,8 +1,8 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
-import { sqlDatabase } from '@/infras/database';
 import { withErrorHandling } from '@/lib/next';
 import { SESSION_COOKIE_NAME } from '@/lib/session';
 import { err, isUUID } from '@/lib/utils';
+import OrderService from '@/services/OrderService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -38,7 +38,7 @@ export default withErrorHandling(async function (
 
 async function handleGetOrder(res: NextApiResponse, orderId: UUID) {
   try {
-    const order = await sqlDatabase.orders.findById(orderId);
+    const order = await OrderService.findById(orderId);
     return res.status(200).json(order);
   } catch (error) {
     console.error('Error fetching order:', error);
@@ -48,7 +48,7 @@ async function handleGetOrder(res: NextApiResponse, orderId: UUID) {
 
 async function handleGetOrders(res: NextApiResponse, userId: UUID) {
   try {
-    const orders = await sqlDatabase.orders.getOrdersByUserId(userId);
+    const orders = await OrderService.getOrdersByUserId(userId);
     return res.status(200).json(orders);
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -65,9 +65,7 @@ async function handleUpdateOrder(
   const { action } = req.body;
   if (!action) return res.status(400).json({ error: 'Missing action' });
 
-  const maybeOrder = orderId
-    ? await sqlDatabase.orders.findById(orderId)
-    : null;
+  const maybeOrder = orderId ? await OrderService.findById(orderId) : null;
 
   if (maybeOrder && maybeOrder.status !== '1-pending')
     return res.status(400).json({ error: 'Order is not pending' });
@@ -79,11 +77,11 @@ async function handleUpdateOrder(
 
     const updatedOrder = maybeOrder
       ? // if the order exists already
-        await sqlDatabase.orders.update(maybeOrder.id, [
+        await OrderService.update(maybeOrder.id, [
           { __type: 'add', orderItem: orderItems },
         ])
       : // if the order does not exist, create a new one
-        await sqlDatabase.orders.save(
+        await OrderService.save(
           req.body.shopId || err('Missing shopId'),
           userId,
           orderItems,
@@ -95,7 +93,7 @@ async function handleUpdateOrder(
     if (!maybeOrder) return res.status(500).json({ error: 'Order not found' });
 
     const { orderItemId } = req.body;
-    const updatedOrder = await sqlDatabase.orders.update(maybeOrder.id, [
+    const updatedOrder = await OrderService.update(maybeOrder.id, [
       { __type: 'delete', orderItemId },
     ]);
     return res.status(200).json(updatedOrder);
@@ -108,7 +106,7 @@ async function handleUpdateOrder(
     if (typeof tip === 'number' && tip < 0)
       return res.status(400).json({ error: 'Invalid tip amount' });
 
-    const updatedOrder = await sqlDatabase.orders.update(maybeOrder.id, [
+    const updatedOrder = await OrderService.update(maybeOrder.id, [
       { __type: 'tip', tip: tip ? { amount: USDC.fromUSD(tip) } : null },
     ]);
 
@@ -119,9 +117,9 @@ async function handleUpdateOrder(
 }
 
 async function handleDeleteOrder(res: NextApiResponse, orderId: UUID) {
-  const maybeOrder = await sqlDatabase.orders.findById(orderId);
+  const maybeOrder = await OrderService.findById(orderId);
   if (!maybeOrder) return res.status(404).json({ error: 'Order not found' });
 
-  const clearedOrder = await sqlDatabase.orders.clear(maybeOrder.id);
+  const clearedOrder = await OrderService.clear(maybeOrder.id);
   return res.status(200).json(clearedOrder);
 }

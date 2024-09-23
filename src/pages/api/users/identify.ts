@@ -1,11 +1,11 @@
 import { PrivyDID } from '@/data-model/_external/privy';
 import { mapUserToSavedUserViaPrivy } from '@/data-model/user/UserDTO';
 import { User } from '@/data-model/user/UserType';
-import { sqlDatabase } from '@/infras/database';
 import { withErrorHandling } from '@/lib/next';
 import privy from '@/lib/privy';
 import { SESSION_COOKIE_NAME, setSessionId } from '@/lib/session';
 import { generateUUID, isUUID } from '@/lib/utils';
+import UserService from '@/services/UserService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -40,8 +40,7 @@ export default withErrorHandling(async function identify(
     const privyId = verifResponse.userId as PrivyDID;
 
     // try and find the user by their privy id
-    const maybeUserFromPrivyId =
-      await sqlDatabase.users.findByAuthServiceId(privyId);
+    const maybeUserFromPrivyId = await UserService.findByAuthServiceId(privyId);
 
     // if the user exists, return the user
     if (maybeUserFromPrivyId) {
@@ -57,13 +56,13 @@ export default withErrorHandling(async function identify(
       const newUserId = generateUUID();
       if (!isUUID(incomingSessionId)) setSessionId(newUserId, res);
       // otherwise, create a new session user for them
-      return await sqlDatabase.users
+      return await UserService
         // otherwise, create a new session user for them
         .getOrCreateSessionUser(newUserId)
         // then map the user to a saved user via privy
         .then(u => mapUserToSavedUserViaPrivy(u, privyId))
         // then save the user
-        .then(u => sqlDatabase.users.save(u))
+        .then(u => UserService.save(u))
         // then return the user
         .then(u => res.status(200).json(u));
     }
@@ -76,7 +75,7 @@ export default withErrorHandling(async function identify(
 
     setSessionId(sessionId, res);
 
-    return await sqlDatabase.users
+    return await UserService
       // we create a new session user for them
       .getOrCreateSessionUser(sessionId)
       .then(u => res.status(200).json(u));

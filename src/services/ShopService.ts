@@ -93,10 +93,12 @@ export const includeDiscountsOnShop = async (
   if (shop.__sourceConfig.type !== 'slice') return shop;
 
   const slicerId = getSlicerIdFromSliceStoreId(shop.__sourceConfig.id);
+  console.debug('slicerId', slicerId);
   const { cartProducts } = await sliceKit.getStoreProducts({
     slicerId,
     buyer: walletAddress,
   });
+  console.debug('cartProducts');
   const discountedItemById = cartProducts
     .map(mapSliceProductCartToItem)
     .reduce<Record<UUID, Item>>(

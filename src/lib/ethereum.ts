@@ -1,4 +1,4 @@
-import { createConfig } from '@privy-io/wagmi';
+import { createConfig } from '@wagmi/core';
 import { createPublicClient, getContract, http } from 'viem';
 import { base } from 'viem/chains';
 

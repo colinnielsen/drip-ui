@@ -8,8 +8,6 @@ import { EB_Garamond, Libre_Franklin, Roboto_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
 import Head from 'next/head';
 import '../styles/globals.css';
-import { WagmiProvider } from '@privy-io/wagmi';
-import { sliceKit } from '@/lib/slice';
 import { CartDrawerContext } from '@/components/ui/drawer';
 import { useState } from 'react';
 

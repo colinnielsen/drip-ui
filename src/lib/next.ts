@@ -1,6 +1,6 @@
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next/types';
 import { SESSION_COOKIE_NAME } from './session';
-import { isUUID } from './utils';
+import { generateUUID, isUUID } from './utils';
 
 export const getAndValidateUserRequest = (req: NextApiRequest) => {
   const userId = req.cookies[SESSION_COOKIE_NAME];
@@ -24,7 +24,8 @@ export const withErrorHandling = (
 ) => {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-      const timePrefix = `\x1b[33m${handlerPrefix} time\x1b[0m`;
+      const id = generateUUID().slice(0, 4);
+      const timePrefix = `\x1b[33m${handlerPrefix} time\x1b[0m ${id}`;
       console.time(timePrefix);
       const response = await handler(req, res);
       console.timeEnd(timePrefix);

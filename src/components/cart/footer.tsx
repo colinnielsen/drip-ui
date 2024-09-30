@@ -118,7 +118,7 @@ export default function CartFooter() {
 
       <DrawerContent
         full
-        className={cn(CSS_FONT_CLASS_CONFIG, 'bg-background')}
+        className={cn(CSS_FONT_CLASS_CONFIG, '!bg-background')}
         aria-describedby="cart-footer"
       >
         <DrawerDescription className="hidden">Checkout</DrawerDescription>

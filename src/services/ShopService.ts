@@ -94,10 +94,15 @@ export const includeDiscountsOnShop = async (
 
   const slicerId = getSlicerIdFromSliceStoreId(shop.__sourceConfig.id);
   console.debug('slicerId', slicerId);
-  const { cartProducts } = await sliceKit.getStoreProducts({
-    slicerId,
-    buyer: walletAddress,
-  });
+  const { cartProducts } = await sliceKit
+    .getStoreProducts({
+      slicerId,
+      buyer: walletAddress,
+    })
+    .catch(err => {
+      console.error('error getting store products', err);
+      return { cartProducts: [] };
+    });
   console.debug('cartProducts');
   const discountedItemById = cartProducts
     .map(mapSliceProductCartToItem)

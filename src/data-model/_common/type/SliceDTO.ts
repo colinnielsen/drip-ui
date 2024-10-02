@@ -74,7 +74,7 @@ export function deriveDripIdFromSliceProductId(product: ProductCart) {
 }
 
 export function getPriceFromSliceCart(
-  currencyAddress: Address | string,
+  currencyAddress: string,
   priceString_wei: string,
 ): {
   currency: 'eth' | 'usdc';
@@ -103,7 +103,7 @@ export const mapSliceProductCartToItem = (product: ProductCart): Item => {
   const uuid = deriveDripIdFromSliceProductId(product);
 
   const { currency, price } = getPriceFromSliceCart(
-    product.currency,
+    product.currency.address,
     product.basePrice,
   );
 

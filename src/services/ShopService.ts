@@ -103,7 +103,7 @@ export const includeDiscountsOnShop = async (
       console.error('error getting store products', err);
       return { cartProducts: [] };
     });
-  console.debug('cartProducts');
+
   const discountedItemById = cartProducts
     .map(mapSliceProductCartToItem)
     .reduce<Record<UUID, Item>>(

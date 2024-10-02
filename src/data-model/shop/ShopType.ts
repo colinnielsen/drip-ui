@@ -65,6 +65,10 @@ export type Storefront = BaseShop & {
   location: Location | null;
 };
 
+export type StorefrontWithLocation = Omit<Storefront, 'location'> & {
+  location: Location;
+};
+
 export type OnlineShop = BaseShop & {
   __type: 'online';
   url: string;

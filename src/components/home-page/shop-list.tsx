@@ -1,5 +1,12 @@
-import { Shop } from '@/data-model/shop/ShopType';
 import { getTotalAllocationBPS } from '@/data-model/farmer/FarmerDTO';
+import { isStorefrontWithLocation } from '@/data-model/shop/ShopDTO';
+import { Shop } from '@/data-model/shop/ShopType';
+import {
+  isLocationReady,
+  useGeolocationPermissionState,
+  useLocationState,
+} from '@/lib/hooks/utility-hooks';
+import { useShops } from '@/queries/ShopQuery';
 import { Coffee } from '@phosphor-icons/react/dist/ssr';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -48,6 +55,17 @@ export function ShopCard(shop: Shop) {
   );
 }
 
+export const LoadingCards = () => {
+  return Array.from({ length: 2 }).map((_, index) => (
+    <div key={index} className="animate-pulse flex flex-col gap-y-2">
+      <Skeleton className="h-40 bg-gray-300 rounded-3xl" />
+      <Skeleton className="h-6 bg-gray-300 rounded w-1/4" />
+      <Skeleton className="h-4 bg-gray-300 rounded w-1/3" />
+      <Skeleton className="h-4 bg-gray-300 rounded w-1/2" />
+    </div>
+  ));
+};
+
 export function ShopList({
   title,
   shops,
@@ -61,17 +79,73 @@ export function ShopList({
     <div className="w-full px-4">
       <Title1>{title}</Title1>
       <div className="grid grid-cols-1 gap-8 mt-5 pb-10">
-        {isLoading
-          ? Array.from({ length: 2 }).map((_, index) => (
-              <div key={index} className="animate-pulse flex flex-col gap-y-2">
-                <Skeleton className="h-40 bg-gray-300 rounded-3xl" />
-                <Skeleton className="h-6 bg-gray-300 rounded w-1/4" />
-                <Skeleton className="h-4 bg-gray-300 rounded w-1/3" />
-                <Skeleton className="h-4 bg-gray-300 rounded w-1/2" />
-              </div>
-            ))
-          : shops.map((shop, index) => <ShopCard key={index} {...shop} />)}
+        {isLoading ? (
+          <LoadingCards />
+        ) : (
+          shops.map((shop, index) => <ShopCard key={index} {...shop} />)
+        )}
       </div>
     </div>
   );
 }
+
+const EnableLocationCard = () => {
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <div className="overflow-hidden h-40 relative w-full rounded-3xl">
+        <button
+          className="flex flex-col gap-y-1 h-full w-full items-center justify-center bg-light-gray"
+          onClick={() => {
+            console.log('enable location');
+          }}
+        >
+          <Headline>Enable location</Headline>
+          <div className="flex items-center gap-x-2 text-primary-gray">
+            <Label2>Enable location to see nearby shops</Label2>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const useShopsByLocation = () => {
+  const locationState = useLocationState();
+  const { data: shops } = useShops();
+
+  if (!shops) return [];
+  if (!isLocationReady(locationState)) return [];
+
+  const { latitude, longitude } = locationState;
+  return shops.filter(isStorefrontWithLocation).sort((a, b) => {
+    return (
+      Math.abs(a.location.coords[0] - latitude) +
+      Math.abs(a.location.coords[1] - longitude) -
+      (Math.abs(b.location.coords[0] - latitude) +
+        Math.abs(b.location.coords[1] - longitude))
+    );
+  });
+};
+
+const First3ClosestShops = () => {
+  const shopsByLocation = useShopsByLocation();
+  return <div>First3ClosestShops</div>;
+};
+
+export const NearMeList = () => {
+  const permissionState = useGeolocationPermissionState();
+  return (
+    <div className="w-full px-4">
+      <Title1>Near me</Title1>
+      <div className="grid grid-cols-1 gap-8 mt-5">
+        {permissionState === 'init' ? (
+          <LoadingCards />
+        ) : permissionState === 'prompt' || permissionState === 'denied' ? (
+          <EnableLocationCard />
+        ) : (
+          <First3ClosestShops />
+        )}
+      </div>
+    </div>
+  );
+};

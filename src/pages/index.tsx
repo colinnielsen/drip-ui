@@ -1,6 +1,6 @@
 import drip from '@/assets/drip.jpg';
 import { HomePageHeader } from '@/components/home-page/header';
-import { ShopList } from '@/components/home-page/shop-list';
+import { NearMeList, ShopList } from '@/components/home-page/shop-list';
 import { WelcomeDialog } from '@/components/home-page/welcome-popup';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Shop } from '@/data-model/shop/ShopType';
@@ -66,6 +66,8 @@ export default function Home({
       <div className="flex flex-col gap-5 pb-32">
         <HomePageHeader />
         <LazyMap shops={rehydratedShops} />
+
+        <NearMeList />
 
         <ShopList
           title="Participating shops"

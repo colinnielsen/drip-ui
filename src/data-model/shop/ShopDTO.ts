@@ -8,12 +8,19 @@ import {
   OnlineShop,
   Shop,
   Storefront,
+  StorefrontWithLocation,
 } from './ShopType';
 import { SLICE_VERSION, SliceStoreId } from '../_common/type/SliceDTO';
 
 export const isStorefront = (shop: Shop): shop is Storefront => {
   return shop.__type === 'storefront';
 };
+
+export function isStorefrontWithLocation(
+  shop: Shop,
+): shop is StorefrontWithLocation {
+  return isStorefront(shop) && shop.location !== null;
+}
 
 export const isOnlineShop = (shop: Shop): shop is OnlineShop => {
   return shop.__type === 'online';

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const useSecondsSinceMount = () => {
   const [seconds, setSeconds] = useState(0);
@@ -68,31 +68,37 @@ export const useGeolocationPermissionState = () => {
 
 type LocationState =
   | 'init'
-  | 'requesting'
+  | 'ready-to-request'
+  | 'loading'
   | GeolocationCoordinates
   | 'denied'
   | 'error';
 
 export const useLocationState = () => {
-  const [isGeolocationEnabled, setIsGeolocationEnabled] =
-    useState<LocationState>('init');
+  const permissionState = useGeolocationPermissionState();
+  const [locationState, setLocationState] = useState<LocationState>('init');
+
+  const request = useCallback(() => {
+    setLocationState('loading');
+    navigator.geolocation.getCurrentPosition(
+      position => setLocationState(position.coords),
+      error => {
+        console.warn(error);
+
+        if (error.PERMISSION_DENIED) setLocationState('denied');
+        else if (error.POSITION_UNAVAILABLE) setLocationState('error');
+        else if (error.TIMEOUT) setLocationState('ready-to-request');
+      },
+    );
+  }, [setLocationState]);
 
   useEffect(() => {
-    if (isGeolocationEnabled === 'init') {
-      setIsGeolocationEnabled('requesting');
-      navigator.geolocation.getCurrentPosition(
-        position => setIsGeolocationEnabled(position.coords),
-        error => {
-          console.error(error);
-          if (error.PERMISSION_DENIED) setIsGeolocationEnabled('denied');
-          if (error.POSITION_UNAVAILABLE) setIsGeolocationEnabled('error');
-          if (error.TIMEOUT) setIsGeolocationEnabled('error');
-        },
-      );
-    }
-  }, [isGeolocationEnabled]);
+    if (permissionState === 'granted') request();
+    else if (permissionState === 'prompt') setLocationState('ready-to-request');
+    else if (permissionState === 'denied') setLocationState('denied');
+  }, [request, permissionState]);
 
-  return isGeolocationEnabled;
+  return { locationState, request };
 };
 
 export const isLocationReady = (location: LocationState) => {

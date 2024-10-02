@@ -1,6 +1,10 @@
 import { useCheckoutContext } from '@/components/cart/context';
 import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
-import { BASE_CLIENT, PRIVY_WAGMI_CONFIG } from '@/lib/ethereum';
+import {
+  BASE_CLIENT,
+  PRIVY_WAGMI_CONFIG,
+  USDC_ADDRESS_BASE,
+} from '@/lib/ethereum';
 import { SLICE_ENTRYPOINT_ADDRESS, sliceKit } from '@/lib/slice';
 import { minutes } from '@/lib/utils';
 import {
@@ -128,9 +132,6 @@ export const usePayAndOrder = ({
     await wallet?.switchChain(base.id);
     const totalUsdcToPay = summary?.total.usdc.toWei();
     await handleCheckoutViem(BASE_CLIENT, walletClient, {
-      // @ts-ignore
-      buyerInfo: null,
-      // @ts-ignore
       capabilities: null,
       payProductsConfig: await payProductsConfig(PRIVY_WAGMI_CONFIG, {
         account: address,
@@ -144,9 +145,21 @@ export const usePayAndOrder = ({
       onSuccess: onSliceSuccess,
       buyer: address,
       setLoadingState: console.debug,
-      totalUsdcToPay,
+      //@ts-ignore
+      buyerInfo: null,
       cart: sliceCart,
-      allowance: allowance.toWei(),
+      totalPrices: [
+        {
+          currency: { address: USDC_ADDRESS_BASE, decimals: 6, symbol: 'USDC' },
+          total: totalUsdcToPay,
+        },
+      ],
+      allowances: [
+        {
+          currency: { address: USDC_ADDRESS_BASE, decimals: 6, symbol: 'USDC' },
+          allowance: allowance.toWei(),
+        },
+      ],
     }).catch(error => console.error(error));
   };
 

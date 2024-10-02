@@ -12,6 +12,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Skeleton } from '../ui/skeleton';
 import { Headline, Label2, Title1 } from '../ui/typography';
+import { cn } from '@/lib/utils';
 
 export function ShopCard(shop: Shop) {
   const { label, backgroundImage, farmerAllocations, id } = shop;
@@ -90,18 +91,29 @@ export function ShopList({
 }
 
 const EnableLocationCard = () => {
+  const { request, locationState } = useLocationState();
+
   return (
     <div className="flex flex-col gap-4 w-full">
-      <div className="overflow-hidden h-40 relative w-full rounded-3xl">
+      <div
+        className={cn(
+          'overflow-hidden h-40 relative w-full rounded-3xl',
+          locationState === 'loading' && 'opacity-50 animate-pulse',
+        )}
+      >
         <button
           className="flex flex-col gap-y-1 h-full w-full items-center justify-center bg-light-gray"
-          onClick={() => {
-            console.log('enable location');
-          }}
+          onClick={request}
         >
           <Headline>Enable location</Headline>
-          <div className="flex items-center gap-x-2 text-primary-gray">
-            <Label2>Enable location to see nearby shops</Label2>
+          <div className="flex items-center gap-x-2 text-primary-gray flex-col">
+            {locationState === 'denied' ? (
+              <Label2 className="underline">
+                You have denied location access
+              </Label2>
+            ) : (
+              <Label2>Enable location to see nearby shops</Label2>
+            )}
           </div>
         </button>
       </div>
@@ -110,7 +122,7 @@ const EnableLocationCard = () => {
 };
 
 const useShopsByLocation = () => {
-  const locationState = useLocationState();
+  const { locationState } = useLocationState();
   const { data: shops } = useShops();
 
   if (!shops) return [];
@@ -129,18 +141,24 @@ const useShopsByLocation = () => {
 
 const First3ClosestShops = () => {
   const shopsByLocation = useShopsByLocation();
-  return <div>First3ClosestShops</div>;
+  return shopsByLocation
+    .slice(0, 3)
+    .map((shop, index) => <ShopCard key={index} {...shop} />);
 };
 
 export const NearMeList = () => {
-  const permissionState = useGeolocationPermissionState();
+  const { locationState } = useLocationState();
+
   return (
     <div className="w-full px-4">
       <Title1>Near me</Title1>
       <div className="grid grid-cols-1 gap-8 mt-5">
-        {permissionState === 'init' ? (
+        {locationState === 'init' ? (
           <LoadingCards />
-        ) : permissionState === 'prompt' || permissionState === 'denied' ? (
+        ) : locationState === 'ready-to-request' ||
+          locationState === 'loading' ||
+          locationState === 'error' ||
+          locationState === 'denied' ? (
           <EnableLocationCard />
         ) : (
           <First3ClosestShops />

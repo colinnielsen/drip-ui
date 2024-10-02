@@ -69,11 +69,7 @@ export default function Home({
 
         <NearMeList />
 
-        <ShopList
-          title="Participating shops"
-          shops={rehydratedShops}
-          isLoading={false}
-        />
+        <ShopList title="All Cafes" shops={rehydratedShops} isLoading={false} />
 
         <WelcomeDialog
           title="Welcome to Drip"

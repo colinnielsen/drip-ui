@@ -12,6 +12,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     .getStoreProducts({ ...req.body, dynamicPricing: true })
     .then(r => res.status(200).json(r))
     .catch(error => {
+      console.log('error', error);
       return res
         .status(500)
         .json({ message: 'Internal Server Error', error: error });

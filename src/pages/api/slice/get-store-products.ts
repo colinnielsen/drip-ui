@@ -8,6 +8,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return;
   }
 
+  console.log('params', { ...req.body, dynamicPricing: true });
   await sliceKit
     .getStoreProducts({ ...req.body, dynamicPricing: true })
     .then(r => res.status(200).json(r))

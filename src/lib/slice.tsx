@@ -13,8 +13,10 @@ import {
   updateDynamicProducts,
   UpdateDynamicProductsParams,
 } from '@slicekit/core';
-import { WAGMI_CONFIG } from './ethereum';
+import { BASE_RPC_CONFIG, WAGMI_CONFIG } from './ethereum';
 import { axiosFetcher } from './utils';
+import { createConfig } from '@wagmi/core';
+import { base } from 'viem/chains';
 
 export const SLICE_CART_LOCAL_STORAGE_KEY = 'cart';
 
@@ -28,7 +30,15 @@ export const sliceKit = {
   wagmiConfig: WAGMI_CONFIG,
   getStores: (params: GetStoresParams) => getStores(params),
   getStoreProducts: (params: GetStoreProductsParams) =>
-    getStoreProducts(WAGMI_CONFIG, params),
+    getStoreProducts(
+      createConfig({
+        transports: {
+          [base.id]: BASE_RPC_CONFIG.transport,
+        },
+        chains: [base],
+      }),
+      params,
+    ),
   getStoreProducts_proxied: (params: GetStoreProductsParams) =>
     axiosFetcher<{ cartProducts: ProductCart[]; storeClosed: boolean }>(
       `/api/slice/get-store-products`,

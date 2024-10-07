@@ -35,6 +35,7 @@ export const sliceKit = {
         [base.id]: BASE_RPC_CONFIG.transport,
       },
       chains: [base],
+      ssr: true,
     });
     console.log('config', config);
     console.log('params', params);

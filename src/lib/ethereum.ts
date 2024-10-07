@@ -86,7 +86,6 @@ export const WAGMI_CONFIG = createConfig({
   transports: {
     '8453': BASE_RPC_CONFIG.transport,
   },
-  ssr: typeof window === 'undefined',
 });
 
 export const isAddressEql = (a?: string, b?: string) => {

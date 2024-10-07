@@ -10,7 +10,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return;
   }
 
-  console.log('params', { ...req.body, dynamicPricing: true });
+  console.log('params', WAGMI_CONFIG, {
+    ...req.body,
+    chainId: 8453,
+    dynamicPricing: true,
+  });
   await getStoreProducts(WAGMI_CONFIG, {
     ...req.body,
     chainId: 8453,

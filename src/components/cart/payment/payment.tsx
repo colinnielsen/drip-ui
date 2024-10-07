@@ -31,7 +31,7 @@ export const SlicePayButton = () => {
   const { payAndOrder, ready } = usePayAndOrder();
   const cartSummary = useCartSummary();
 
-  if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress)
+  if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress || !ready)
     return <LoadingCTAButton />;
 
   const isLoading = paymentStep === 'awaiting-confirmation';
@@ -39,8 +39,6 @@ export const SlicePayButton = () => {
     <>
       <CTAButton
         onClick={async () => {
-          if (!ready) return;
-
           goToSlide?.(1);
           await payAndOrder();
         }}

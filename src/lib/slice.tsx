@@ -29,16 +29,17 @@ export const SLICE_ENTRYPOINT_ADDRESS =
 export const sliceKit = {
   wagmiConfig: WAGMI_CONFIG,
   getStores: (params: GetStoresParams) => getStores(params),
-  getStoreProducts: (params: GetStoreProductsParams) =>
-    getStoreProducts(
-      createConfig({
-        transports: {
-          [base.id]: BASE_RPC_CONFIG.transport,
-        },
-        chains: [base],
-      }),
-      params,
-    ),
+  getStoreProducts: (params: GetStoreProductsParams) => {
+    const config = createConfig({
+      transports: {
+        [base.id]: BASE_RPC_CONFIG.transport,
+      },
+      chains: [base],
+    });
+    console.log('config', config);
+    console.log('params', params);
+    return getStoreProducts(config, params);
+  },
   getStoreProducts_proxied: (params: GetStoreProductsParams) =>
     axiosFetcher<{ cartProducts: ProductCart[]; storeClosed: boolean }>(
       `/api/slice/get-store-products`,

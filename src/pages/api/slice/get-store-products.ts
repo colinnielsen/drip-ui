@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   console.log('params', { ...req.body, dynamicPricing: true });
   await sliceKit
-    .getStoreProducts({ ...req.body, dynamicPricing: true })
+    .getStoreProducts({ ...req.body, chainId: 8453, dynamicPricing: true })
     .then(r => res.status(200).json(r))
     .catch(error => {
       console.log('error', error);

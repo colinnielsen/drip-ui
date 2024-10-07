@@ -87,7 +87,7 @@ export const PRIVY_WAGMI_CONFIG = createConfig({
     '8453': BASE_RPC_CONFIG.transport,
   },
   ssr: typeof window === 'undefined',
-}) as any;
+});
 
 export const isAddressEql = (a?: string, b?: string) => {
   return a?.toLowerCase() === b?.toLowerCase();

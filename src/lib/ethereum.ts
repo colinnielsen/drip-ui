@@ -81,7 +81,7 @@ export const USDC_INSTANCE = getContract({
   client: BASE_CLIENT,
 });
 
-export const PRIVY_WAGMI_CONFIG = createConfig({
+export const WAGMI_CONFIG = createConfig({
   chains: BASE_RPC_CONFIG.chains,
   transports: {
     '8453': BASE_RPC_CONFIG.transport,

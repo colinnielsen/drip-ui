@@ -1,10 +1,6 @@
 import { useCheckoutContext } from '@/components/cart/context';
 import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
-import {
-  BASE_CLIENT,
-  PRIVY_WAGMI_CONFIG,
-  USDC_ADDRESS_BASE,
-} from '@/lib/ethereum';
+import { BASE_CLIENT, WAGMI_CONFIG, USDC_ADDRESS_BASE } from '@/lib/ethereum';
 import { SLICE_ENTRYPOINT_ADDRESS, sliceKit } from '@/lib/slice';
 import { minutes } from '@/lib/utils';
 import {
@@ -133,7 +129,7 @@ export const usePayAndOrder = ({
     const totalUsdcToPay = summary?.total.usdc.toWei();
     await handleCheckoutViem(BASE_CLIENT, walletClient, {
       capabilities: null,
-      payProductsConfig: await payProductsConfig(PRIVY_WAGMI_CONFIG, {
+      payProductsConfig: await payProductsConfig(WAGMI_CONFIG, {
         account: address,
         cart: sliceCart,
         buyer: address,

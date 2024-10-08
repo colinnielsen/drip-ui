@@ -38,15 +38,13 @@ export const sliceKit = {
       chains: [base],
       ssr: true,
     });
-    console.log('config', config);
-    const fullParams = {
+
+    return getStoreProducts(config, {
       ...params,
       chainId: 8453,
       dynamicPricing: true,
       thegraphApiKey: getSliceSubgraphApiKey(),
-    };
-    console.log('params', fullParams);
-    return getStoreProducts(config, fullParams);
+    });
   },
   getStoreProducts_proxied: (params: GetStoreProductsParams) =>
     axiosFetcher<{ cartProducts: ProductCart[]; storeClosed: boolean }>(

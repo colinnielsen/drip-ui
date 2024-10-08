@@ -13,7 +13,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     .getStoreProducts({
       ...req.body,
       chainId: 8453,
-      dynamicPricing: false,
+      dynamicPricing: true,
       thegraphApiKey: getSliceSubgraphApiKey(),
     })
     .then(r => res.status(200).json(r))

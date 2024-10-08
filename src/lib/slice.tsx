@@ -17,6 +17,7 @@ import { BASE_RPC_CONFIG, WAGMI_CONFIG } from './ethereum';
 import { axiosFetcher } from './utils';
 import { createConfig } from '@wagmi/core';
 import { base } from 'viem/chains';
+import { getSliceSubgraphApiKey } from './constants';
 
 export const SLICE_CART_LOCAL_STORAGE_KEY = 'cart';
 
@@ -38,8 +39,14 @@ export const sliceKit = {
       ssr: true,
     });
     console.log('config', config);
-    console.log('params', params);
-    return getStoreProducts(config, params);
+    const fullParams = {
+      ...params,
+      chainId: 8453,
+      dynamicPricing: true,
+      thegraphApiKey: getSliceSubgraphApiKey(),
+    };
+    console.log('params', fullParams);
+    return getStoreProducts(config, fullParams);
   },
   getStoreProducts_proxied: (params: GetStoreProductsParams) =>
     axiosFetcher<{ cartProducts: ProductCart[]; storeClosed: boolean }>(

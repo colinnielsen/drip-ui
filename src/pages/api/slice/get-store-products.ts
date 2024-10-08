@@ -1,7 +1,5 @@
-import { WAGMI_CONFIG } from '@/lib/ethereum';
 import { withErrorHandling } from '@/lib/next';
 import { sliceKit } from '@/lib/slice';
-import { getStoreProducts } from '@slicekit/core';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -14,7 +12,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     .getStoreProducts({
       ...req.body,
       chainId: 8453,
-      dynamicPricing: true,
+      dynamicPricing: false,
     })
     .then(r => res.status(200).json(r))
     .catch(error => {

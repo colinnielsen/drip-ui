@@ -26,7 +26,7 @@ const useSearchInput = (int = 300) => {
     return () => {
       if (typeof timeout === 'number') clearTimeout(timeout);
     };
-  }, [search, setSearch]);
+  }, [search, setSearch, int]);
 
   return { debouncedSearch, search, setSearch };
 };

@@ -1,3 +1,4 @@
+import { getSliceSubgraphApiKey } from '@/lib/constants';
 import { withErrorHandling } from '@/lib/next';
 import { sliceKit } from '@/lib/slice';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -13,6 +14,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ...req.body,
       chainId: 8453,
       dynamicPricing: false,
+      thegraphApiKey: getSliceSubgraphApiKey(),
     })
     .then(r => res.status(200).json(r))
     .catch(error => {

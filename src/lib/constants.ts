@@ -9,3 +9,9 @@ export const getPrivySecret = (): string => {
   if (secret) return secret;
   throw Error('undefined App Secret');
 };
+
+export const getSliceSubgraphApiKey = (): string => {
+  const key = process.env.SLICE_SUBGRAPH_API_KEY;
+  if (key) return key;
+  throw Error('undefined Slice Subgraph API Key');
+};

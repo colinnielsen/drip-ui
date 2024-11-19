@@ -1,5 +1,5 @@
 import { withErrorHandling } from '@/lib/next';
-import { SESSION_COOKIE_NAME } from '@/lib/session';
+import { getSessionId } from '@/lib/session';
 import ShopService, { includeDiscountsOnShop } from '@/services/ShopService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -10,7 +10,9 @@ export default withErrorHandling(async function (
   res: NextApiResponse,
 ) {
   const { shopId, includeDiscounts, walletAddress } = req.query;
-  const userId = req.cookies[SESSION_COOKIE_NAME];
+  const userId = getSessionId(req);
+
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   if (req.method !== 'GET')
     return res.status(405).json({ error: 'Method not allowed' });

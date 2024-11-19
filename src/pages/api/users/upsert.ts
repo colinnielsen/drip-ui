@@ -3,10 +3,9 @@ import { mapUserToSavedUserViaPrivy } from '@/data-model/user/UserDTO';
 import { SavedUser } from '@/data-model/user/UserType';
 import { withErrorHandling } from '@/lib/next';
 import privy from '@/lib/privy';
-import { PRIVY_TOKEN_NAME, SESSION_COOKIE_NAME } from '@/lib/session';
+import { getSessionId, PRIVY_TOKEN_NAME } from '@/lib/session';
 import OrderService from '@/services/OrderService';
 import UserService from '@/services/UserService';
-import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default withErrorHandling(async function (
@@ -17,7 +16,7 @@ export default withErrorHandling(async function (
     return res.status(405).json({ error: 'Method not allowed' });
 
   const privyToken = req.cookies[PRIVY_TOKEN_NAME];
-  const sessionToken = req.cookies[SESSION_COOKIE_NAME] as UUID | undefined;
+  const sessionToken = getSessionId(req);
 
   if (!privyToken)
     return res.status(400).json({ error: 'privy-token not found in cookies' });

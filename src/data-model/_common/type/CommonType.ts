@@ -6,7 +6,7 @@ export type ValueType<BaseType, TypeName> = BaseType & {
   readonly [__value_type__]: TypeName;
 };
 
-export type Unsaved<T> = Omit<T, 'id'>;
+export type Unsaved<T> = Omit<T, 'id' | 'createdAt' | 'updatedAt'>;
 
 export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & {
   [P in K]?: T[P] | null;

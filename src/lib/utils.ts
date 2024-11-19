@@ -86,6 +86,25 @@ export function isDev() {
   return process.env.NODE_ENV === 'development';
 }
 
+export const getProtocol = (): 'http' | 'https' => {
+  return (
+    (typeof window !== 'undefined'
+      ? (window?.location?.protocol.replace(':', '') as 'http' | 'https')
+      : undefined) ?? 'http'
+  );
+};
+
+/**
+ * @returns `www.drip.com` || `drip.com` || `localhost:1234`
+ */
+export const getHostname = () => {
+  return (
+    process.env.VERCEL_URL ||
+    (typeof window !== 'undefined' ? window?.location?.hostname : '') ||
+    'localhost:3000'
+  );
+};
+
 export const sleep = async (ms?: number) =>
   await new Promise(r => setTimeout(() => r(null), ms));
 

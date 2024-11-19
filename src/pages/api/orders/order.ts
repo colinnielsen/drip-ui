@@ -1,6 +1,6 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { withErrorHandling } from '@/lib/next';
-import { SESSION_COOKIE_NAME } from '@/lib/session';
+import { getSessionId } from '@/lib/session';
 import { err, isUUID } from '@/lib/utils';
 import OrderService from '@/services/OrderService';
 import { UUID } from 'crypto';
@@ -10,7 +10,7 @@ export default withErrorHandling(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const userId = req.cookies[SESSION_COOKIE_NAME];
+  const userId = getSessionId(req);
 
   if (!userId || !isUUID(userId))
     return res.status(401).json({ error: 'Unauthorized' });

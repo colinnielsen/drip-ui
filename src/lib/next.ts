@@ -1,9 +1,9 @@
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next/types';
-import { SESSION_COOKIE_NAME } from './session';
+import { getSessionId } from './session';
 import { generateUUID, isUUID } from './utils';
 
 export const getAndValidateUserRequest = (req: NextApiRequest) => {
-  const userId = req.cookies[SESSION_COOKIE_NAME];
+  const userId = getSessionId(req);
   if (!userId) throw new Error('User ID not found');
   if (!isUUID(userId)) throw new Error('Invalid User ID');
 

@@ -10,4 +10,4 @@ function getSquareService(
   };
 }
 
-export const SquareService = getSquareService(SquareConnectionPersistance);
+export const SquareService = SquareConnectionPersistance;

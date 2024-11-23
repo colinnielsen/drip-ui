@@ -4,7 +4,7 @@ import {
   getSquareAppSecret,
 } from '@/lib/constants';
 import { withErrorHandling } from '@/lib/next';
-import { getSessionId, getTempSquareOAuthId } from '@/lib/session';
+import { getTempSquareOAuthId } from '@/lib/session';
 import { getHostname, getProtocol } from '@/lib/utils';
 import { SquareService } from '@/services/SquareService';
 import axios, { AxiosError } from 'axios';
@@ -73,7 +73,7 @@ const handleAllowCase = async (
         client_secret: getSquareAppSecret(),
         code,
         grant_type: 'authorization_code',
-        redirect_uri: `${getProtocol()}://${getHostname()}/api/external/square-callback`,
+        redirect_uri: `${getProtocol()}://${getHostname()}/api/square/square-callback`,
       },
       {
         headers: {

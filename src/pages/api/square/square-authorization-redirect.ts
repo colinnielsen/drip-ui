@@ -1,14 +1,14 @@
 import { getSquareAppId } from '@/lib/constants';
 import { withErrorHandling } from '@/lib/next';
 import { getSessionId, setTempSquareOAuthId } from '@/lib/session';
-import { err, generateUUID, getHostname, getProtocol } from '@/lib/utils';
+import { generateUUID, getHostname, getProtocol } from '@/lib/utils';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { join } from 'node:path';
 
 export const getCallbackUrl = () => {
   return (
     `${getProtocol()}://${getHostname()}/` +
-    join('api', 'external', 'square-callback')
+    join('api', 'square', 'square-callback')
   );
 };
 

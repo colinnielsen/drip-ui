@@ -59,17 +59,15 @@ const save = async (
 /**
  * @returns the square connection with decrypted access and refresh tokens
  */
-const findByAttribute = async (
-  attribute: keyof SquareConnection,
-  value: SquareConnection[keyof SquareConnection],
+const findByUserId = async (
+  userId: UUID,
 ): Promise<DecryptedSquareConnection | null> => {
   const result = await sql`
-      SELECT * FROM square_connections
-      WHERE ${attribute} = ${value.toString()}
-      ORDER BY "createdAt" DESC
-      LIMIT 1
-    `;
-
+    SELECT * FROM square_connections
+    WHERE "userId" = ${userId}
+    ORDER BY "createdAt" DESC
+    LIMIT 1
+  `;
   const connection = result.rows[0] as EncryptedSquareConnection | null;
 
   if (!connection) return null;
@@ -100,7 +98,7 @@ const remove = async (id: UUID): Promise<void> => {
 const SQLSquarePersistanceLayer: PersistanceLayer<SquareConnection> = {
   save,
   findById,
-  findByAttribute,
+  findByUserId,
   remove,
 };
 

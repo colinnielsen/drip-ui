@@ -12,6 +12,13 @@ export const getCallbackUrl = () => {
   );
 };
 
+const scopes = [
+  'ITEMS_READ',
+  'ORDERS_WRITE',
+  'PAYMENTS_WRITE',
+  'MERCHANT_PROFILE_READ',
+];
+
 /**
  * @dev redirects the user to the generated authorization url
  */
@@ -31,7 +38,7 @@ export default withErrorHandling(async function handler(
   const url = new URL('https://connect.squareup.com/oauth2/authorize');
 
   url.searchParams.append('client_id', getSquareAppId());
-  url.searchParams.append('scope', 'ITEMS_READ ORDERS_WRITE');
+  url.searchParams.append('scope', scopes.join(' '));
   url.searchParams.append('session', 'false');
   url.searchParams.append('state', state);
   url.searchParams.append('redirect_uri', getCallbackUrl());

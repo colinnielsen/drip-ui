@@ -1,19 +1,24 @@
 import { CTAButton } from '@/components/ui/button';
 import { PageWrapper } from '@/components/ui/page-wrapper';
-import { Body, Title2 } from '@/components/ui/typography';
+import { Body, Title1, Title2 } from '@/components/ui/typography';
+import { StoreConfig } from '@/data-model/shop/ShopType';
 import { isDecryptedSquareConnection } from '@/data-model/square-connection/SquareConnectionDTO';
 import { SquareConnection } from '@/data-model/square-connection/SquareConnectionType';
+import { SQUARE_AUTHORIZATION_ERRORS } from '@/lib/squareClient';
 import { Spinner } from '@phosphor-icons/react/dist/ssr';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
+import { UUID } from 'crypto';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { z } from 'zod';
-import { SQUARE_AUTHORIZATION_ERRORS } from './api/square/square-callback';
 
 const getSquareConnectionStatus = async () => {
   const response = await axios
-    .get<SquareConnection>('/api/square/square-connection')
+    .get<{
+      connection: SquareConnection;
+      squareStoreConfig: StoreConfig;
+    }>('/api/square/square-connection')
     .catch((e: AxiosError) =>
       e.response?.status === 404 ? { data: null } : Promise.reject(e),
     );
@@ -45,11 +50,57 @@ const AuthorizationResponses = () => {
   );
 };
 
-const ConnectedState = ({ merchantId }: { merchantId: string }) => {
+const syncStore = async (merchantId: string) =>
+  await axios
+    .post<{ shopId: UUID }>('/api/shops/sync', { merchantId })
+    .then(res => res.data.shopId);
+
+const ConnectedState = ({
+  connection,
+  squareStoreConfig,
+}: {
+  connection: SquareConnection;
+  squareStoreConfig: StoreConfig;
+}) => {
+  const mutation = useMutation({
+    mutationFn: () => syncStore(connection.merchantId),
+  });
+
+  const visitShop = () => {
+    window.open(`/shops/${mutation.data}`, '_blank');
+  };
+
   return (
     <>
       <Title2>Square Account Connected ✅</Title2>
-      <Body>merchantId: {merchantId}</Body>
+      <Body>merchantId: {connection.merchantId}</Body>
+      <Title1>{squareStoreConfig.name}</Title1>
+      {squareStoreConfig.logo && (
+        <img
+          src={squareStoreConfig.logo}
+          alt={squareStoreConfig.name ?? 'Square Store Logo'}
+          width={100}
+          height={100}
+        />
+      )}
+      <div className="flex justify-center gap-2 flex-col">
+        <CTAButton
+          className="w-40"
+          onClick={() => mutation.mutate()}
+          isLoading={mutation.isPending}
+        >
+          Sync
+        </CTAButton>
+        {mutation.isSuccess && (
+          <div className="flex flex-col items-center justify-center">
+            <Body>Sync completed ✅</Body>
+            <CTAButton onClick={visitShop}>Visit Shop</CTAButton>
+          </div>
+        )}
+        {mutation.error && (
+          <Body className="text-red-500">{mutation.error.message}</Body>
+        )}
+      </div>
     </>
   );
 };
@@ -76,13 +127,13 @@ export default function SellerPage() {
 
   return (
     <PageWrapper>
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-6">
+      <div className="flex flex-col items-center justify-center py-20 gap-6">
         <AuthorizationResponses />
         {state === 'not-connected' ? (
           <ConnectPrompt />
         ) : state === 'loading' ? (
           <Spinner className="animate-spin" />
-        ) : isDecryptedSquareConnection(state) ? (
+        ) : isDecryptedSquareConnection(state.connection) ? (
           <ConnectedState {...state} />
         ) : null}
       </div>

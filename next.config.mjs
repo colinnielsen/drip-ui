@@ -11,6 +11,18 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'square-web-production-f.squarecdn.com',
+        port: '',
+        pathname: '/files/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'items-images-production.s3.us-west-2.amazonaws.com',
+        port: '',
+        pathname: '/files/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'slice.so',
         port: '',
         pathname: '/_next/**',

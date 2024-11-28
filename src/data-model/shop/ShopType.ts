@@ -2,8 +2,9 @@ import { BaseEntity, Entity } from '@/data-model/__global/entities';
 import { FarmerAllocation } from '../farmer/FarmerType';
 import { Item, ItemCategory } from '../item/ItemType';
 import { Location } from '@/data-model/_common/type/LocationType';
-import { SliceStoreId } from '../_common/type/SliceDTO';
+import { SliceStoreId } from '../_external/data-sources/slice/SliceDTO';
 import { Address } from 'viem';
+import { UUID } from 'crypto';
 
 ///
 //// TYPES
@@ -25,10 +26,11 @@ export type SingleRecipientTipConfig =
 
 export type TipConfig = SingleRecipientTipConfig;
 
-export type ManualStoreConfig = {
+export type SliceStoreConfig = {
+  id: UUID;
   __type: 'slice';
-  sliceId: number;
-  sliceVersion: number;
+  /** The external ID of the slice store / */
+  externalId: SliceStoreId;
   name?: string;
   location: Location;
   logo?: string;
@@ -38,15 +40,34 @@ export type ManualStoreConfig = {
   tipConfig?: TipConfig;
 };
 
-export type ShopDataSource = 'slice';
+export type SquareStoreConfig = {
+  id: UUID;
+  __type: 'square';
+  /** The merchant ID of the square store / */
+  externalId: string;
+  name?: string;
+  location: Location;
+  logo?: string;
+  backgroundImage?: string;
+  url?: string;
+  farmerAllocation?: [FarmerAllocation];
+  tipConfig?: TipConfig;
+};
+
+export type StoreConfig = SliceStoreConfig | SquareStoreConfig;
+
+type SquareDataSourceConfig = {
+  type: 'square';
+  merchantId: string;
+};
 
 export type SliceDataSourceConfig = {
-  type: ShopDataSource;
+  type: 'slice';
   id: SliceStoreId;
   version: number;
 };
 
-export type ShopSourceConfig = SliceDataSourceConfig;
+export type ShopSourceConfig = SliceDataSourceConfig | SquareDataSourceConfig;
 
 export type BaseShop = BaseEntity & {
   __entity: Entity.shop;

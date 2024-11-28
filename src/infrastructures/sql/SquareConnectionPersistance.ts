@@ -1,5 +1,6 @@
 import { PersistanceLayer } from '@/data-model/_common/db/PersistanceType';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
+import { deriveSquareConnectionIdFromMerchantId } from '@/data-model/_external/data-sources/square/SquareDTO';
 import {
   decryptSquareConnection,
   isDecryptedSquareConnection,
@@ -28,12 +29,9 @@ export type EncryptedSquareConnection = BaseSquareConnection & {
 const save = async (
   connection: Unsaved<SquareConnection>,
 ): Promise<DecryptedSquareConnection> => {
-  const id = generateUUID();
-
   if (isDecryptedSquareConnection(connection)) {
     const encryptedAccessToken = encrypt(connection.accessToken);
     const encryptedRefreshToken = encrypt(connection.refreshToken);
-
     await sql`
       INSERT INTO square_connections (
         id,
@@ -42,14 +40,21 @@ const save = async (
         "accessToken_encrypted",
         "refreshToken_encrypted",
         "expiresAt"
-      ) VALUES (
-        ${id},
+        )
+        VALUES
+        (
+        ${deriveSquareConnectionIdFromMerchantId(connection.merchantId)},
         ${connection.userId},
         ${connection.merchantId},
         ${encryptedAccessToken},
         ${encryptedRefreshToken},
         ${connection.expiresAt.toISOString()}
       )
+      ON CONFLICT (id) DO UPDATE SET
+        "userId" = EXCLUDED."userId",
+        "accessToken_encrypted" = EXCLUDED."accessToken_encrypted",
+        "refreshToken_encrypted" = EXCLUDED."refreshToken_encrypted",
+        "expiresAt" = EXCLUDED."expiresAt"
     `;
 
     return connection;

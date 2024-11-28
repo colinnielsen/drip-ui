@@ -1,3 +1,4 @@
+import { getLocationFromSquareLocation } from '@/data-model/_external/data-sources/square/SquareDTO';
 import {
   getSquareAccessToken,
   getSquareAppId,
@@ -5,22 +6,14 @@ import {
 } from '@/lib/constants';
 import { withErrorHandling } from '@/lib/next';
 import { getTempSquareOAuthId } from '@/lib/session';
+import { SquareAuthorizationErrors } from '@/lib/squareClient';
 import { getHostname, getProtocol } from '@/lib/utils';
+import ShopService from '@/services/ShopService';
 import { SquareService } from '@/services/SquareService';
 import axios, { AxiosError } from 'axios';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { z } from 'zod';
-
-export const SQUARE_AUTHORIZATION_ERRORS = [
-  'access_denied',
-  'invalid_request',
-  'obtain_token_error',
-  'save_error',
-] as const;
-
-export type SquareAuthorizationErrors =
-  (typeof SQUARE_AUTHORIZATION_ERRORS)[number];
 
 const handleErrorCase = (
   res: NextApiResponse,
@@ -106,6 +99,10 @@ const handleAllowCase = async (
   if (token_type !== 'bearer')
     return handleErrorCase(res, 'invalid_request', 'Token type is not bearer');
 
+  const connectionExists = await SquareService.findSquareConnectionByMerchantId(
+    merchant_id,
+  ).then(r => !!r);
+
   // save the encrypted square connection tokens
   const connection = await SquareService.save({
     userId,
@@ -114,13 +111,28 @@ const handleAllowCase = async (
     refreshToken: refresh_token,
     expiresAt: new Date(expires_at),
   }).catch((e: Error) => e);
-
   if (connection instanceof Error)
     return handleErrorCase(
       res,
       'save_error',
       'Failed to save square connection',
     );
+
+  if (!connectionExists) {
+    const { merchant, location } =
+      await SquareService.fetchSquareStoreInfo(merchant_id);
+
+    // save an initial version of the square store config
+    await ShopService.saveStoreConfig({
+      __type: 'square',
+      externalId: merchant_id,
+      name: merchant.businessName ?? `Square Store: ${merchant_id}`,
+      logo: location.logoUrl,
+      backgroundImage: location.posBackgroundUrl,
+      url: location.websiteUrl ?? undefined,
+      location: getLocationFromSquareLocation(location),
+    });
+  }
 
   return res.redirect(`/manage?success=true`);
 };

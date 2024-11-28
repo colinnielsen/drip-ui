@@ -1,6 +1,9 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
-import { mapCartToSliceCart } from '@/data-model/_common/type/SliceDTO';
+import {
+  getSlicerIdFromSliceStoreId,
+  mapCartToSliceCart,
+} from '@/data-model/_external/data-sources/slice/SliceDTO';
 import { Item } from '@/data-model/item/ItemType';
 import {
   getOrderItemCostFromPriceDict,
@@ -12,14 +15,8 @@ import {
   Order,
   OrderItem,
 } from '@/data-model/order/OrderType';
-import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
-import {
-  axiosFetcher,
-  err,
-  generateUUID,
-  sortDateAsc,
-  uniqBy,
-} from '@/lib/utils';
+import { axiosFetcher, err, sortDateAsc, uniqBy } from '@/lib/utils';
+import OrderService from '@/services/OrderService';
 import {
   QueryClient,
   useMutation,
@@ -27,14 +24,12 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { UUID } from 'crypto';
-import _ from 'lodash';
 import { useMemo } from 'react';
 import { Address, Hash, zeroAddress } from 'viem';
 import { useFarmer } from './FarmerQuery';
 import { useShop, useShopPriceDictionary } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
-import OrderService from '@/services/OrderService';
 
 //
 //// HELPERS

@@ -1,16 +1,15 @@
 import { generateUUID } from '@/lib/utils';
-import { SlicerBasics } from '@slicekit/core';
 import { UUID } from 'crypto';
-import { Entity } from '../__global/entities';
 import {
-  ManualStoreConfig,
   Menu,
   OnlineShop,
   Shop,
   Storefront,
   StorefrontWithLocation,
 } from './ShopType';
-import { SLICE_VERSION, SliceStoreId } from '../_common/type/SliceDTO';
+
+export const DEFAULT_SHOP_LOGO = '';
+export const DEFAULT_BACKGROUND_IMAGE = '';
 
 export const isStorefront = (shop: Shop): shop is Storefront => {
   return shop.__type === 'storefront';
@@ -31,18 +30,6 @@ export const deriveShopIdFromSliceStoreId = (
   sliceVersion: number,
 ): UUID => generateUUID(`SLICE_V${sliceVersion}::${sliceId}`);
 
-export const getSliceStoreIdFromSliceId = (sliceId: number): SliceStoreId =>
-  `SLICE_STORE::V${SLICE_VERSION}::${sliceId}`;
-
-export const getSlicerIdFromSliceStoreId = (
-  sliceStoreId: SliceStoreId,
-): number => {
-  const [, , sliceId] = sliceStoreId.split('::');
-  if (!sliceId) throw new Error('Fatal Error parsing slice store id!');
-
-  return parseInt(sliceId);
-};
-
 export const EMPTY_MENU: Menu = {
   espresso: [],
   coffee: [],
@@ -50,28 +37,3 @@ export const EMPTY_MENU: Menu = {
   food: [],
   other: [],
 };
-
-export const mapSliceStoreToShop = (
-  sliceStore: SlicerBasics,
-  manualConfig: ManualStoreConfig,
-): Shop => ({
-  __entity: Entity.shop,
-  __type: 'storefront',
-  __sourceConfig: {
-    type: 'slice',
-    id: getSliceStoreIdFromSliceId(sliceStore.id),
-    version: SLICE_VERSION,
-  },
-  id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
-  tipConfig: manualConfig.tipConfig || {
-    __type: 'single-recipient',
-    enabled: false,
-  },
-  menu: EMPTY_MENU,
-  label: sliceStore.name,
-  location: manualConfig.location,
-  backgroundImage: manualConfig.backgroundImage || sliceStore.image || '',
-  logo: manualConfig.logo || sliceStore.image || '',
-  url: manualConfig.url || sliceStore.slicerConfig?.storefrontUrl || '',
-  farmerAllocations: manualConfig.farmerAllocation || [],
-});

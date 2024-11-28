@@ -1,5 +1,4 @@
 import { useCheckoutContext } from '@/components/cart/context';
-import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
 import { BASE_CLIENT, WAGMI_CONFIG, USDC_ADDRESS_BASE } from '@/lib/ethereum';
 import { SLICE_ENTRYPOINT_ADDRESS, sliceKit } from '@/lib/slice';
 import { minutes } from '@/lib/utils';
@@ -26,6 +25,7 @@ import {
   useRecentCart,
 } from './OrderQuery';
 import { useShopSourceConfig } from './ShopQuery';
+import { getSlicerIdFromSliceStoreId } from '@/data-model/_external/data-sources/slice/SliceDTO';
 
 /**
  * @returns the slice keyed by productId

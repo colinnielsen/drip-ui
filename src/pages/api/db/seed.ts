@@ -16,9 +16,16 @@ export default withErrorHandling(
     if (_req.query.reset) await resetSQLDB();
 
     await bootstrapSQLDB();
-
+    // save all store configs
+    await Promise.all(
+      ONBOARDED_SHOPS.map(
+        async storeConfig => await ShopService.saveStoreConfig(storeConfig),
+      ),
+    );
     await Promise.all([
-      syncService.syncStores(ONBOARDED_SHOPS),
+      // sync all stores
+      syncService.syncStores(),
+      // sync all farmers
       syncService.syncFarmers(STATIC_FARMER_DATA),
     ]);
 

@@ -1,13 +1,19 @@
+import { Entity } from '@/data-model/__global/entities';
 import { Item, ItemMod } from '@/data-model/item/ItemType';
 import { collapseDuplicateItems } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
-import { USDC_ADDRESS_BASE, isAddressEql } from '@/lib/ethereum';
+import {
+  deriveShopIdFromSliceStoreId,
+  EMPTY_MENU,
+} from '@/data-model/shop/ShopDTO';
+import { Menu, Shop, StoreConfig } from '@/data-model/shop/ShopType';
+import { isAddressEql, USDC_ADDRESS_BASE } from '@/lib/ethereum';
 import { err, generateUUID } from '@/lib/utils';
-import { ProductCart, Variant } from '@slicekit/core';
-import { USDC } from '../currency/USDC';
-import { Address } from 'viem';
-import { ETH } from '../currency/ETH';
-import { Currency } from './CommonType';
+import { ProductCart, SlicerBasics, Variant } from '@slicekit/core';
+import { ETH } from '../../../_common/currency/ETH';
+import { USDC } from '../../../_common/currency/USDC';
+import { Currency } from '../../../_common/type/CommonType';
+import { buildMenuFromItems } from '../common';
 
 export const SLICE_VERSION = 1;
 
@@ -17,6 +23,18 @@ export type SliceStoreId = `SLICE_STORE::V${number}::${number}`;
  * @dev the slice product cart has a dbId, but we want to derive our ids from this stable id
  */
 const SLICE_PRODUCT_ID_TO_DERIVE_FROM: keyof ProductCart = 'dbId';
+
+export const getSliceStoreIdFromSliceId = (sliceId: number): SliceStoreId =>
+  `SLICE_STORE::V${SLICE_VERSION}::${sliceId}`;
+
+export const getSlicerIdFromSliceStoreId = (
+  sliceStoreId: SliceStoreId,
+): number => {
+  const [, , sliceId] = sliceStoreId.split('::');
+  if (!sliceId) throw new Error('Fatal Error parsing slice store id!');
+
+  return parseInt(sliceId);
+};
 
 export function mapSliceVariantsToMods(variants: Variant[]): ItemMod[] {
   return variants.reduce<ItemMod[]>((acc, variant) => {
@@ -157,3 +175,39 @@ export function mapCartToSliceCart(
 
   return sliceCart;
 }
+
+export const mapSliceStoreToShop = (
+  sliceStore: SlicerBasics,
+  manualConfig: StoreConfig,
+): Shop => ({
+  __entity: Entity.shop,
+  __type: 'storefront',
+  __sourceConfig: {
+    type: 'slice',
+    id: getSliceStoreIdFromSliceId(sliceStore.id),
+    version: SLICE_VERSION,
+  },
+  id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
+  tipConfig: manualConfig.tipConfig || {
+    __type: 'single-recipient',
+    enabled: false,
+  },
+  menu: EMPTY_MENU,
+  label: sliceStore.name,
+  location: 'location' in manualConfig ? manualConfig.location : null,
+  backgroundImage: manualConfig.backgroundImage || sliceStore.image || '',
+  logo: manualConfig.logo || sliceStore.image || '',
+  url: manualConfig.url || sliceStore.slicerConfig?.storefrontUrl || '',
+  farmerAllocations: manualConfig.farmerAllocation || [],
+});
+
+export const buildMenuFromSliceProducts = async (
+  products: ProductCart[],
+): Promise<{ menu: Menu; items: Item[] }> => {
+  // map every slice product to an item object and save
+  const items = products.map(mapSliceProductCartToItem);
+
+  const menu = buildMenuFromItems(items);
+
+  return { menu, items };
+};

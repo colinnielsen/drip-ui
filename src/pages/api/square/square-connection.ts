@@ -1,5 +1,7 @@
+import { StoreConfig } from '@/data-model/shop/ShopType';
 import { withErrorHandling } from '@/lib/next';
 import { getSessionId } from '@/lib/session';
+import shopService from '@/services/ShopService';
 import { SquareService } from '@/services/SquareService';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -17,5 +19,8 @@ export default withErrorHandling(async function handler(
   if (!connection)
     return res.status(404).json({ error: 'Connection not found' });
 
-  return res.status(200).json(connection);
+  const squareStoreConfig: StoreConfig | null =
+    await shopService.findStoreConfigByExternalId(connection.merchantId);
+
+  return res.status(200).json({ connection, squareStoreConfig });
 }, 'square-connection');

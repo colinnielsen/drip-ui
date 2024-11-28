@@ -1,13 +1,12 @@
-import { mapSliceProductCartToItem } from '@/data-model/_common/type/SliceDTO';
-import { Item, ItemCategory } from '@/data-model/item/ItemType';
 import {
-  EMPTY_MENU,
   getSlicerIdFromSliceStoreId,
-  isStorefront,
-} from '@/data-model/shop/ShopDTO';
-import { Shop } from '@/data-model/shop/ShopType';
+  mapSliceProductCartToItem,
+} from '@/data-model/_external/data-sources/slice/SliceDTO';
+import { Item, ItemCategory } from '@/data-model/item/ItemType';
+import { EMPTY_MENU, isStorefront } from '@/data-model/shop/ShopDTO';
+import { Shop, StoreConfig } from '@/data-model/shop/ShopType';
 import { sliceKit } from '@/lib/slice';
-import { rehydrateData } from '@/lib/utils';
+import { generateUUID, rehydrateData } from '@/lib/utils';
 import { sql } from '@vercel/postgres';
 import { UUID } from 'crypto';
 import { Address } from 'viem';
@@ -29,7 +28,7 @@ const findAll = async ({ rehydrate = true } = {}): Promise<Shop[]> => {
 };
 
 const save = async (shop: Shop): Promise<Shop> => {
-  await sql`
+  const result = await sql`
     INSERT INTO shops (
       id,
       __type,
@@ -65,8 +64,9 @@ const save = async (shop: Shop): Promise<Shop> => {
       menu = EXCLUDED.menu,
       location = EXCLUDED.location,
       "tipConfig" = EXCLUDED."tipConfig"
+    RETURNING *
   `;
-  return shop;
+  return result.rows[0] as Shop;
 };
 
 const remove = async (id: UUID): Promise<void> => {
@@ -129,6 +129,53 @@ export const includeDiscountsOnShop = async (
   };
 };
 
+export const saveStoreConfig = async (storeConfig: Omit<StoreConfig, 'id'>) => {
+  await sql`
+    INSERT INTO store_configs (
+      id,
+      __type,
+      "externalId",
+      name,
+      location,
+      logo,
+      "backgroundImage",
+      url,
+      "farmerAllocation",
+      "tipConfig"
+    )
+    VALUES (
+      ${generateUUID(storeConfig.externalId)},
+      ${storeConfig.__type},
+      ${storeConfig.externalId},
+      ${storeConfig.name},
+      ${JSON.stringify(storeConfig.location)},
+      ${storeConfig.logo},
+      ${storeConfig.backgroundImage},
+      ${storeConfig.url},
+      ${JSON.stringify(storeConfig.farmerAllocation)},
+      ${JSON.stringify(storeConfig.tipConfig)}
+    )
+  `;
+};
+
+const findAllStoreConfigs = async (): Promise<StoreConfig[]> => {
+  const result = await sql`SELECT * FROM store_configs`;
+  return result.rows as StoreConfig[];
+};
+
+const findStoreConfigById = async (id: UUID): Promise<StoreConfig | null> => {
+  const result = await sql`SELECT * FROM store_configs WHERE id = ${id}`;
+  return result.rows[0] as StoreConfig | null;
+};
+
+const findStoreConfigByExternalId = async (
+  externalId: string,
+): Promise<StoreConfig | null> => {
+  const result =
+    await sql`SELECT * FROM store_configs WHERE "externalId" = ${externalId}`;
+  return result.rows[0] as StoreConfig | null;
+};
+
 //
 //// SERVICE OBJECT
 ///
@@ -136,6 +183,10 @@ const shopService = {
   findById,
   findAll,
   save,
+  saveStoreConfig,
+  findAllStoreConfigs,
+  findStoreConfigById,
+  findStoreConfigByExternalId,
   remove,
   includeDiscountsOnShop,
 };

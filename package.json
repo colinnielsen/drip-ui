@@ -46,11 +46,13 @@
     "react-dom": "^18.3.1",
     "react-map-gl": "^7.1.7",
     "sharp": "^0.33.4",
+    "square": "^39.0.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
     "vaul": "^0.9.1",
-    "viem": "^2.17.4"
+    "viem": "^2.17.4",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",

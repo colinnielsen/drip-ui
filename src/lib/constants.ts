@@ -46,8 +46,6 @@ export const getEncryptionKey = (): string => {
 };
 
 export const getSquareAccessToken = (): string => {
-  notAllowedOnClient();
-
   const token = process.env.SQUARE_ACCESS_TOKEN;
   if (token) return token;
   throw Error('undefined Square Access Token');

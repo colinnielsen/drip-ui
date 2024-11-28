@@ -121,7 +121,8 @@ export const generateUUID = (input?: string): UUID => {
   return input ? (uuidv5(input, NAMESPACE) as UUID) : (uuidv4() as UUID);
 };
 
-export const err = (msg: string): never => {
+export const err = (msg: string, logObject?: any): never => {
+  console.debug(logObject);
   debugger;
   throw new Error(msg);
 };

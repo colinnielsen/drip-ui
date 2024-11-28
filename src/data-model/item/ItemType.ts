@@ -11,19 +11,26 @@ export type ItemPrice = {
   discountPercentage: number;
 };
 
+type ModSourceConfig =
+  | {
+      type: 'slice';
+      /**
+       * the variant id in the slice store
+       */
+      id: string;
+      version: number;
+    }
+  | {
+      type: 'square';
+      id: string;
+    };
+
 //
 //// OPTIONS
 //
 type BaseMod = {
   id: UUID;
-  __sourceConfig: {
-    type: 'slice';
-    /**
-     * the variant id in the slice store
-     */
-    id: string;
-    version: number;
-  };
+  __sourceConfig: ModSourceConfig;
   type: 'exclusive' | 'inclusive';
   category: ItemCategory | null;
   name: string;
@@ -46,19 +53,26 @@ type BaseMod = {
 
 export type ItemMod = BaseMod;
 
+type ItemSourceConfig =
+  | {
+      type: 'slice';
+      /**
+       * the product item id in the slice store
+       */
+      id: string;
+      version: number;
+    }
+  | {
+      type: 'square';
+      id: string;
+    };
+
 //
 //// ITEM
 ///
 export type Item = {
   id: UUID;
-  __sourceConfig: {
-    type: 'slice';
-    /**
-     * the product item id in the slice store
-     */
-    id: string;
-    version: number;
-  };
+  __sourceConfig: ItemSourceConfig;
   name: string;
   price: Currency;
   /**

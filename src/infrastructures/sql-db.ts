@@ -109,6 +109,21 @@ export const bootstrapSQLDB = async () => {
         UNIQUE ("userId", "merchantId")
       );
     `;
+
+  await sql`
+      CREATE TABLE IF NOT EXISTS "store_configs" (
+        "id" UUID PRIMARY KEY,
+        "__type" TEXT NOT NULL,
+        "externalId" TEXT NOT NULL,
+        "name" TEXT,
+        "location" JSONB,
+        "logo" TEXT,
+        "backgroundImage" TEXT,
+        "url" TEXT,
+        "farmerAllocation" JSONB,
+        "tipConfig" JSONB
+      );
+    `;
   console.debug('database bootstrapped');
 };
 

@@ -1,7 +1,11 @@
 import FarmerCard from '@/components/shop-page/farmer-intro-card';
 import { ShopHeader, ShopHeaderDetails } from '@/components/shop-page/header';
 import { ItemList } from '@/components/shop-page/item-list';
-import { SLICE_VERSION } from '@/data-model/_common/type/SliceDTO';
+import {
+  getSlicerIdFromSliceStoreId,
+  SLICE_VERSION,
+} from '@/data-model/_external/data-sources/slice/SliceDTO';
+import { deriveShopIdFromSquareStoreId } from '@/data-model/_external/data-sources/square/SquareDTO';
 import { deriveShopIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
 import { ONBOARDED_SHOPS } from '@/lib/static-data';
@@ -23,23 +27,31 @@ import { useMemo } from 'react';
 ///// STATIC SITE GENERATION
 ///
 
-const STATIC_PAGE_DATA = ONBOARDED_SHOPS.map(c => ({
-  __type: 'storefront',
-  id: deriveShopIdFromSliceStoreId(c.sliceId, SLICE_VERSION),
-  label: c.name,
-  backgroundImage: c.backgroundImage ?? '',
-  logo: c.logo ?? '',
-  location: 'location' in c ? c.location : null,
-}));
+const STATIC_PAGE_DATA = ShopService.findAllStoreConfigs().then(configs =>
+  configs.map(c => ({
+    __type: 'storefront',
+    id:
+      c.__type === 'slice'
+        ? deriveShopIdFromSliceStoreId(
+            getSlicerIdFromSliceStoreId(c.externalId),
+            SLICE_VERSION,
+          )
+        : deriveShopIdFromSquareStoreId(c.externalId),
+    label: c.name,
+    backgroundImage: c.backgroundImage ?? '',
+    logo: c.logo ?? '',
+    location: 'location' in c ? c.location : null,
+  })),
+);
 
-export type StaticPageData = (typeof STATIC_PAGE_DATA)[number];
+export type StaticPageData = Awaited<typeof STATIC_PAGE_DATA>[number];
 
-export const getStaticPaths: GetStaticPaths<{ shopId: UUID }> = () => {
-  const paths = STATIC_PAGE_DATA.map(d => ({
+export const getStaticPaths = (async () => {
+  const paths = (await STATIC_PAGE_DATA).map(d => ({
     params: { shopId: d.id },
   }));
   return { paths, fallback: false };
-};
+}) satisfies GetStaticPaths;
 
 export const getStaticProps: GetStaticProps<{
   staticShop: StaticPageData;
@@ -47,7 +59,9 @@ export const getStaticProps: GetStaticProps<{
 }> = async ({ params }) => {
   if (!params?.shopId) throw Error('cannot find params');
 
-  const staticShop = STATIC_PAGE_DATA.find(l => l.id === params.shopId)!;
+  const staticShop = (await STATIC_PAGE_DATA).find(
+    l => l.id === params.shopId,
+  )!;
   if (!staticShop) return { notFound: true };
 
   const queryClient = new QueryClient();

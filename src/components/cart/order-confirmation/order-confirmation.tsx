@@ -72,7 +72,7 @@ export const OrderConfirmation = ({
               {cart.status === '3-in-progress'
                 ? 'nice! order confirmed'
                 : cart.status === '4-complete'
-                  ? 'Order complete!'
+                  ? 'ready for pickup!'
                   : ''}
             </Drip>
           </DrawerTitle>

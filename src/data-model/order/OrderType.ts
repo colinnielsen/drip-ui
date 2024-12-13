@@ -4,6 +4,21 @@ import { Address, Hex } from 'viem';
 import { USDC } from '../_common/currency/USDC';
 import { Currency } from '../_common/type/CommonType';
 
+export type OrderSummary = {
+  subTotal: {
+    formatted: string;
+    usdc: USDC;
+  };
+  tip: {
+    formatted: string;
+    usdc: USDC;
+  } | null;
+  total: {
+    formatted: string;
+    usdc: USDC;
+  };
+};
+
 export type OrderItem = {
   id: UUID;
   item: Item;
@@ -19,22 +34,14 @@ export type SliceOrderInfo = {
   status?: OrderStatus;
 };
 
-export type ExternalOrderInfo = SliceOrderInfo;
-
-export type OrderSummary = {
-  subTotal: {
-    formatted: string;
-    usdc: USDC;
-  };
-  tip: {
-    formatted: string;
-    usdc: USDC;
-  } | null;
-  total: {
-    formatted: string;
-    usdc: USDC;
-  };
+export type SquareOrderInfo = {
+  __type: 'square';
+  orderId: string;
+  orderNumber?: string;
+  status?: OrderStatus;
 };
+
+export type ExternalOrderInfo = SliceOrderInfo | SquareOrderInfo;
 
 type _BaseOrder = {
   id: UUID;
@@ -73,6 +80,11 @@ export type CancelledOrder = Omit<PaidOrder, 'status'> & {
   status: 'cancelled';
 };
 
-export type Order = Cart | PaidOrder | CancelledOrder;
+export type ErroredOrder = Omit<PaidOrder, 'status'> & {
+  status: 'error';
+  errorMessage: string;
+};
+
+export type Order = Cart | PaidOrder | CancelledOrder | ErroredOrder;
 
 export type OrderStatus = Order['status'];

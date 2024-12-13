@@ -1,7 +1,8 @@
-import { err } from '@/lib/utils';
+import { UUID } from 'crypto';
 import { addCurrencies } from '../_common/currency/currencyDTO';
 import { isUSDC, USDC } from '../_common/currency/USDC';
 import { Currency, Unsaved } from '../_common/type/CommonType';
+import { Item, ItemMod } from '../item/ItemType';
 import { Shop } from '../shop/ShopType';
 import {
   Cart,
@@ -11,8 +12,6 @@ import {
   OrderSummary,
   PaidOrder,
 } from './OrderType';
-import { UUID } from 'crypto';
-import { Item, ItemMod } from '../item/ItemType';
 
 export const getOrderNumber = (order: Order): string | null => {
   return (
@@ -45,18 +44,16 @@ export const createExternalOrderInfo = (
   sourceConfig: Shop['__sourceConfig'],
   data: Partial<ExternalOrderInfo>,
 ): ExternalOrderInfo => {
-  const externalOrderInfo: ExternalOrderInfo =
-    sourceConfig.type === 'slice'
-      ? {
-          __type: 'slice',
-          ...data,
-          orderId:
-            data.orderId ??
-            (() => {
-              throw new Error('orderId is required');
-            })(),
-        }
-      : err('sourceConfig type is not supported');
+  const externalOrderInfo = {
+    __type: sourceConfig.type,
+    orderId:
+      data.orderId ??
+      (() => {
+        throw new Error('orderId is required');
+      })(),
+    orderNumber: data.orderNumber,
+    status: data.status,
+  } satisfies ExternalOrderInfo;
 
   return externalOrderInfo;
 };
@@ -124,10 +121,10 @@ export const getOrderSummary = (order: Order): OrderSummary => {
     orderItem => orderItem.paidPrice,
   )
     ? order.orderItems.reduce((acc, orderItem) => {
-        const paidForPrice = orderItem.paidPrice!;
+        const paidForPrice = orderItem.paidPrice || USDC.ZERO;
 
         return acc.add(
-          isUSDC(paidForPrice) ? paidForPrice : paidForPrice.toUSDC(),
+          isUSDC(paidForPrice) ? paidForPrice : paidForPrice?.toUSDC(),
         );
       }, USDC.ZERO)
     : // otherwise, we need to use the discount prices and add the mods individually

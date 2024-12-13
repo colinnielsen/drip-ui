@@ -1,14 +1,13 @@
-import { getLocationFromSquareLocation } from '@/data-model/_external/data-sources/square/SquareDTO';
 import {
   getSquareAccessToken,
   getSquareAppId,
   getSquareAppSecret,
 } from '@/lib/constants';
-import { withErrorHandling } from '@/lib/next';
+import { ApiRoute } from '@/lib/next';
 import { getTempSquareOAuthId } from '@/lib/session';
-import { SquareAuthorizationErrors } from '@/lib/squareClient';
+import getSquareClient, { SquareAuthorizationErrors } from '@/lib/squareClient';
 import { getHostname, getProtocol } from '@/lib/utils';
-import ShopService from '@/services/ShopService';
+import { CSRFTokenService } from '@/services/CSRFTokenService';
 import { SquareService } from '@/services/SquareService';
 import axios, { AxiosError } from 'axios';
 import { UUID } from 'crypto';
@@ -43,9 +42,22 @@ const handleAllowCase = async (
       'invalid_request',
       'failed to parse the authorization response',
     );
+
   const { code, state } = parsed.data;
 
-  // TODO: verify state token
+  const CSRFToken = await CSRFTokenService.findByUserId(userId);
+
+  if (!CSRFToken)
+    return handleErrorCase(
+      res,
+      'invalid_request',
+      'No CSRF token found for this user',
+    );
+
+  const expectedState = CSRFTokenService.hashToStateParam(CSRFToken);
+
+  if (state !== expectedState)
+    return handleErrorCase(res, 'access_denied', 'Invalid CSRF token');
 
   // Use the authorization code in the response to call the OAuth API to obtain the seller's access and refresh tokens.
   const result = await axios
@@ -99,45 +111,34 @@ const handleAllowCase = async (
   if (token_type !== 'bearer')
     return handleErrorCase(res, 'invalid_request', 'Token type is not bearer');
 
-  const connectionExists = await SquareService.findSquareConnectionByMerchantId(
-    merchant_id,
-  ).then(r => !!r);
+  const squareClient = getSquareClient().withConfiguration({
+    bearerAuthCredentials: {
+      accessToken: access_token,
+    },
+  });
 
   // save the encrypted square connection tokens
   const connection = await SquareService.save({
     userId,
     merchantId: merchant_id,
+    businessName: await squareClient.merchantsApi
+      .retrieveMerchant(merchant_id)
+      .then(m => m.result.merchant?.businessName || ''),
     accessToken: access_token,
     refreshToken: refresh_token,
     expiresAt: new Date(expires_at),
   }).catch((e: Error) => e);
+
   if (connection instanceof Error)
     return handleErrorCase(
       res,
       'save_error',
       'Failed to save square connection',
     );
-
-  if (!connectionExists) {
-    const { merchant, location } =
-      await SquareService.fetchSquareStoreInfo(merchant_id);
-
-    // save an initial version of the square store config
-    await ShopService.saveStoreConfig({
-      __type: 'square',
-      externalId: merchant_id,
-      name: merchant.businessName ?? `Square Store: ${merchant_id}`,
-      logo: location.logoUrl,
-      backgroundImage: location.posBackgroundUrl,
-      url: location.websiteUrl ?? undefined,
-      location: getLocationFromSquareLocation(location),
-    });
-  }
-
-  return res.redirect(`/manage?success=true`);
+  else return res.redirect(`/manage?success=true`);
 };
 
-export default withErrorHandling(async function handler(
+export default ApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

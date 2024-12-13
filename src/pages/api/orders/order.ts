@@ -1,12 +1,12 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
-import { withErrorHandling } from '@/lib/next';
+import { ApiRoute } from '@/lib/next';
 import { getSessionId } from '@/lib/session';
 import { err, isUUID } from '@/lib/utils';
 import OrderService from '@/services/OrderService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default withErrorHandling(async function (
+export default ApiRoute(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

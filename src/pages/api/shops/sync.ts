@@ -1,5 +1,5 @@
 import { StoreConfig } from '@/data-model/shop/ShopType';
-import { revalidatePathIfExists, withErrorHandling } from '@/lib/next';
+import { revalidatePathIfExists, ApiRoute } from '@/lib/next';
 import ShopService from '@/services/ShopService';
 import { SyncService } from '@/services/SyncService';
 import { UUID } from 'crypto';
@@ -27,7 +27,7 @@ async function syncAllStores(res: NextApiResponse) {
     });
 }
 
-export default withErrorHandling(async function (
+export default ApiRoute(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

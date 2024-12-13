@@ -13,7 +13,8 @@ import {
   useCartSummary,
   useRecentCart,
 } from '@/queries/OrderQuery';
-import { usePayAndOrder } from '@/queries/SliceQuery';
+import { usePayAndOrder as useSlicePayAndOrder } from '@/queries/SliceQuery';
+import { usePayAndOrder as useSquarePayAndOrder } from '@/queries/SquareQuery';
 import Image from 'next/image';
 import { useMemo } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
@@ -28,7 +29,7 @@ export const SlicePayButton = () => {
   const { isFetching: cartIsLoading, data: cart } = useRecentCart();
   const { paymentStep } = useCheckoutContext();
   const goToSlide = useGoToSlide();
-  const { payAndOrder, ready } = usePayAndOrder();
+  const { payAndOrder, ready } = useSlicePayAndOrder();
   const cartSummary = useCartSummary();
 
   if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress || !ready)
@@ -54,13 +55,38 @@ export const SlicePayButton = () => {
   );
 };
 
+export const SquarePayButton = () => {
+  const cartSummary = useCartSummary();
+  const goToSlide = useGoToSlide();
+  const { paymentStep } = useCheckoutContext();
+  const { ready, mutateAsync: payAndOrder } = useSquarePayAndOrder();
+
+  if (!cartSummary || !ready) return <LoadingCTAButton />;
+
+  const isFree = cartSummary?.total.usdc.gt(USDC.ZERO);
+  const isLoading = paymentStep === 'awaiting-confirmation';
+
+  const handleClick = async () => {
+    goToSlide?.(1);
+    await payAndOrder().catch(() => {
+      goToSlide?.(0);
+    });
+  };
+
+  return (
+    <CTAButton onClick={handleClick} isLoading={isLoading}>
+      {!cartSummary ? '' : isFree ? 'pay' : 'place order'}
+    </CTAButton>
+  );
+};
+
 export const PayButton = ({
   shopType,
 }: {
   shopType: ShopSourceConfig['type'];
 }) => {
   if (shopType === 'slice') return <SlicePayButton />;
-
+  if (shopType === 'square') return <SquarePayButton />;
   let a: never = shopType;
   return a;
 };

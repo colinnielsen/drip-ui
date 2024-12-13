@@ -19,9 +19,11 @@ export const isDecryptedSquareConnection = (
 export const decryptSquareConnection =
   //   (persistanceLayer: PersistanceLayer<SquareConnection>) =>
   (connection: EncryptedSquareConnection): DecryptedSquareConnection => {
+    const { accessToken_encrypted, refreshToken_encrypted, ...rest } =
+      connection;
     return {
-      ...connection,
-      accessToken: decrypt(connection.accessToken_encrypted),
-      refreshToken: decrypt(connection.refreshToken_encrypted),
+      ...rest,
+      accessToken: decrypt(accessToken_encrypted),
+      refreshToken: decrypt(refreshToken_encrypted),
     };
   };

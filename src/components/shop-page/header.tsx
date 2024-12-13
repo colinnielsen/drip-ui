@@ -13,21 +13,25 @@ export function ShopHeader({
 }) {
   return (
     <header className="relative h-[25vh]">
-      <Image
-        src={backgroundImage}
-        alt="backdrop"
-        quality={20}
-        fill={true}
-        className="object-cover"
-      />
-      <Image
-        src={logo}
-        alt="logo"
-        width={75}
-        height={75}
-        quality={20}
-        className="absolute -bottom-5 left-5 rounded-full shadow-lg"
-      />
+      {backgroundImage && (
+        <Image
+          src={backgroundImage}
+          alt="backdrop"
+          quality={20}
+          fill={true}
+          className="object-cover"
+        />
+      )}
+      {logo && (
+        <Image
+          src={logo}
+          alt="logo"
+          width={75}
+          height={75}
+          quality={20}
+          className="absolute -bottom-5 left-5 rounded-full shadow-lg"
+        />
+      )}
       <Link href="/">
         <BackSvg />
       </Link>

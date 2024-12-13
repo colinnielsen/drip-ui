@@ -6,16 +6,15 @@ import {
   isDecryptedSquareConnection,
 } from '@/data-model/square-connection/SquareConnectionDTO';
 import {
-  BaseSquareConnection,
+  MinSquareConnection,
   DecryptedSquareConnection,
   SquareConnection,
 } from '@/data-model/square-connection/SquareConnectionType';
 import { encrypt } from '@/lib/encryption';
-import { generateUUID } from '@/lib/utils';
 import { sql } from '@vercel/postgres';
 import { UUID } from 'crypto';
 
-export type EncryptedSquareConnection = BaseSquareConnection & {
+export type EncryptedSquareConnection = MinSquareConnection & {
   /**
    * Encrypted access token
    */
@@ -32,11 +31,13 @@ const save = async (
   if (isDecryptedSquareConnection(connection)) {
     const encryptedAccessToken = encrypt(connection.accessToken);
     const encryptedRefreshToken = encrypt(connection.refreshToken);
+
     await sql`
       INSERT INTO square_connections (
         id,
         "userId",
         "merchantId",
+        "businessName",
         "accessToken_encrypted",
         "refreshToken_encrypted",
         "expiresAt"
@@ -46,6 +47,7 @@ const save = async (
         ${deriveSquareConnectionIdFromMerchantId(connection.merchantId)},
         ${connection.userId},
         ${connection.merchantId},
+        ${connection.businessName},
         ${encryptedAccessToken},
         ${encryptedRefreshToken},
         ${connection.expiresAt.toISOString()}
@@ -54,6 +56,7 @@ const save = async (
         "userId" = EXCLUDED."userId",
         "accessToken_encrypted" = EXCLUDED."accessToken_encrypted",
         "refreshToken_encrypted" = EXCLUDED."refreshToken_encrypted",
+        "businessName" = EXCLUDED."businessName",
         "expiresAt" = EXCLUDED."expiresAt"
     `;
 

@@ -150,6 +150,10 @@ export class USDC {
     return Number(this.wei) / Number(USDC.UNIT);
   }
 
+  toCents(): bigint {
+    return (this.wei * 100n) / USDC.UNIT;
+  }
+
   /**
    * @example
    * const usdc = new USDC(1);

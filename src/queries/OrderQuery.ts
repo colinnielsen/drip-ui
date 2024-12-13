@@ -1,9 +1,6 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
-import {
-  getSlicerIdFromSliceStoreId,
-  mapCartToSliceCart,
-} from '@/data-model/_external/data-sources/slice/SliceDTO';
+import { mapCartToSliceCart } from '@/data-model/_external/data-sources/slice/SliceDTO';
 import { Item } from '@/data-model/item/ItemType';
 import {
   getOrderItemCostFromPriceDict,
@@ -16,6 +13,7 @@ import {
   OrderItem,
 } from '@/data-model/order/OrderType';
 import { axiosFetcher, err, sortDateAsc, uniqBy } from '@/lib/utils';
+import { PayRequest } from '@/pages/api/orders/pay';
 import OrderService from '@/services/OrderService';
 import {
   QueryClient,
@@ -30,6 +28,7 @@ import { useFarmer } from './FarmerQuery';
 import { useShop, useShopPriceDictionary } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
+import { getSlicerIdFromSliceExternalId } from '@/data-model/shop/ShopDTO';
 
 //
 //// HELPERS
@@ -170,7 +169,7 @@ export const useCartInSliceFormat = ({
 
   const slicerId =
     shop?.__sourceConfig.type === 'slice'
-      ? getSlicerIdFromSliceStoreId(shop.__sourceConfig.id)
+      ? getSlicerIdFromSliceExternalId(shop.__sourceConfig.id)
       : undefined;
 
   return useSliceStoreProducts({
@@ -425,6 +424,7 @@ export const useAssocatePaymentToCart = () => {
           'Content-Type': 'application/json',
         },
         data: {
+          type: 'slice',
           transactionHash,
           orderId: cart.id,
           paidPrices: cart.orderItems.reduce(
@@ -435,7 +435,7 @@ export const useAssocatePaymentToCart = () => {
             }),
             {},
           ),
-        },
+        } satisfies PayRequest,
         withCredentials: true,
       });
     },

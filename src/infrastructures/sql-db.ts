@@ -53,6 +53,7 @@ export const bootstrapSQLDB = async () => {
         "tip" JSONB,
         "transactionHash" TEXT,
         "externalOrderInfo" JSONB,
+        "errorMessage" TEXT,
         FOREIGN KEY ("shop") REFERENCES "shops" ("id"),
         FOREIGN KEY ("user") REFERENCES "users" ("id")
       );
@@ -100,6 +101,7 @@ export const bootstrapSQLDB = async () => {
         "id" UUID PRIMARY KEY,
         "userId" UUID NOT NULL,
         "merchantId" TEXT NOT NULL,
+        "businessName" TEXT NOT NULL,
         "accessToken_encrypted" TEXT NOT NULL,
         "refreshToken_encrypted" TEXT NOT NULL,
         "expiresAt" TIMESTAMP NOT NULL,
@@ -111,7 +113,33 @@ export const bootstrapSQLDB = async () => {
     `;
 
   await sql`
-      CREATE TABLE IF NOT EXISTS "store_configs" (
+    CREATE TABLE IF NOT EXISTS "csrf_tokens" (
+      id UUID PRIMARY KEY,
+      user_id UUID NOT NULL,
+      token UUID NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (id),
+      UNIQUE (user_id)
+    );
+  `;
+
+  await sql`
+      CREATE TABLE IF NOT EXISTS "square_connections" (
+        "id" UUID PRIMARY KEY,
+        "userId" UUID NOT NULL,
+        "merchantId" TEXT NOT NULL,
+        "businessName" TEXT NOT NULL,
+        "accessToken_encrypted" TEXT NOT NULL,
+        "refreshToken_encrypted" TEXT NOT NULL,
+        "expiresAt" TIMESTAMP NOT NULL,
+        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY ("userId") REFERENCES "users" ("id"),
+        UNIQUE ("userId", "merchantId")
+      );
+    `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS "store_configs" (
         "id" UUID PRIMARY KEY,
         "__type" TEXT NOT NULL,
         "externalId" TEXT NOT NULL,
@@ -129,26 +157,24 @@ export const bootstrapSQLDB = async () => {
 
 export const resetSQLDB = async () => {
   console.debug('resetting database...');
-  // await sql`
-  //   DROP TABLE IF EXISTS "orders";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "shops";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "items";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "farmerposts";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "farmermessages";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "farmers";
-  // `;
-  // await sql`
-  //   DROP TABLE IF EXISTS "users";
-  // `;
+  const tables = [
+    'orders',
+    'shops',
+    'square_connections',
+    'store_configs',
+    'csrf_tokens',
+    'items',
+    'farmerposts',
+    'farmermessages',
+    'farmers',
+    'users',
+  ];
+
+  for (const table of tables) {
+    await sql`
+      DROP TABLE IF EXISTS "${table}";
+    `;
+  }
+
   console.debug('database reset');
 };

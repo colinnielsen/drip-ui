@@ -1,9 +1,9 @@
-import { getAndValidateUserRequest, withErrorHandling } from '@/lib/next';
+import { getAndValidateUserRequest, ApiRoute } from '@/lib/next';
 import { isUUID } from '@/lib/utils';
 import FarmerService from '@/services/FarmerService';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default withErrorHandling(async function (
+export default ApiRoute(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

@@ -1,9 +1,10 @@
-import {
-  getSlicerIdFromSliceStoreId,
-  mapSliceProductCartToItem,
-} from '@/data-model/_external/data-sources/slice/SliceDTO';
+import { mapSliceProductCartToItem } from '@/data-model/_external/data-sources/slice/SliceDTO';
 import { Item, ItemCategory } from '@/data-model/item/ItemType';
-import { EMPTY_MENU, isStorefront } from '@/data-model/shop/ShopDTO';
+import {
+  EMPTY_MENU,
+  getSlicerIdFromSliceExternalId,
+  isStorefront,
+} from '@/data-model/shop/ShopDTO';
 import { Shop, StoreConfig } from '@/data-model/shop/ShopType';
 import { sliceKit } from '@/lib/slice';
 import { generateUUID, rehydrateData } from '@/lib/utils';
@@ -92,7 +93,7 @@ export const includeDiscountsOnShop = async (
   // no op for other store types
   if (shop.__sourceConfig.type !== 'slice') return shop;
 
-  const slicerId = getSlicerIdFromSliceStoreId(shop.__sourceConfig.id);
+  const slicerId = getSlicerIdFromSliceExternalId(shop.__sourceConfig.id);
   console.debug('slicerId', slicerId);
   const { cartProducts } = await sliceKit
     .getStoreProducts({
@@ -129,8 +130,10 @@ export const includeDiscountsOnShop = async (
   };
 };
 
-export const saveStoreConfig = async (storeConfig: Omit<StoreConfig, 'id'>) => {
-  await sql`
+export const saveStoreConfig = async (
+  storeConfig: Omit<StoreConfig, 'id'>,
+): Promise<StoreConfig> => {
+  const result = await sql`
     INSERT INTO store_configs (
       id,
       __type,
@@ -155,7 +158,9 @@ export const saveStoreConfig = async (storeConfig: Omit<StoreConfig, 'id'>) => {
       ${JSON.stringify(storeConfig.farmerAllocation)},
       ${JSON.stringify(storeConfig.tipConfig)}
     )
+    RETURNING *
   `;
+  return result.rows[0] as StoreConfig;
 };
 
 const findAllStoreConfigs = async (): Promise<StoreConfig[]> => {
@@ -176,6 +181,14 @@ const findStoreConfigByExternalId = async (
   return result.rows[0] as StoreConfig | null;
 };
 
+const findSquareStoreConfigsByMerchantId = async (
+  merchantId: string,
+): Promise<StoreConfig[]> => {
+  const result =
+    await sql`SELECT * FROM store_configs WHERE "externalId" LIKE ${`%${merchantId}%::%`}`;
+  return result.rows as StoreConfig[];
+};
+
 //
 //// SERVICE OBJECT
 ///
@@ -187,6 +200,7 @@ const shopService = {
   findAllStoreConfigs,
   findStoreConfigById,
   findStoreConfigByExternalId,
+  findSquareStoreConfigsByMerchantId,
   remove,
   includeDiscountsOnShop,
 };

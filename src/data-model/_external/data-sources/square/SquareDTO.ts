@@ -3,12 +3,21 @@ import { USDC } from '@/data-model/_common/currency/USDC';
 import { SupportedCurrency } from '@/data-model/_common/type/CommonType';
 import { Location } from '@/data-model/_common/type/LocationType';
 import { Item, ItemCategory } from '@/data-model/item/ItemType';
+import { collapseDuplicateItems } from '@/data-model/order/OrderDTO';
+import { Order, OrderStatus } from '@/data-model/order/OrderType';
 import {
   DEFAULT_BACKGROUND_IMAGE,
   DEFAULT_SHOP_LOGO,
   EMPTY_MENU,
+  getMerchantIdFromSquareExternalId,
+  isSquareShop,
 } from '@/data-model/shop/ShopDTO';
-import { Menu, Shop, StoreConfig } from '@/data-model/shop/ShopType';
+import {
+  Menu,
+  Shop,
+  SquareExternalId,
+  StoreConfig,
+} from '@/data-model/shop/ShopType';
 import { SquareConnection } from '@/data-model/square-connection/SquareConnectionType';
 import { err, generateUUID } from '@/lib/utils';
 import { SquareService } from '@/services/SquareService';
@@ -16,19 +25,24 @@ import { UUID } from 'crypto';
 import {
   CatalogImage,
   CatalogObject,
+  Fulfillment,
+  OrderLineItem,
   Location as SquareLocation,
   Merchant as SquareMerchant,
+  Order as SquareOrder,
 } from 'square';
 import {
   buildMenuFromItems,
   deriveCategoryFromItemName,
   deriveDefaultImageFromItemName,
 } from '../common';
+import { SquareOrderFulfillmentState, SquareOrderStatus } from './SquareType';
 
 type ImageLookup = Record<string, CatalogImage>;
 
-export const deriveShopIdFromSquareStoreId = (merchantId: string) =>
-  generateUUID(`${merchantId}`);
+export const deriveShopIdFromSquareStoreExternalId = (
+  squareExternalId: SquareExternalId,
+) => generateUUID(`${squareExternalId}`);
 
 export function deriveDripIdFromSquareItemId(itemId: string) {
   return generateUUID(`SQUARE_ITEM:${itemId}`);
@@ -39,6 +53,47 @@ export function deriveSquareConnectionIdFromMerchantId(
 ): UUID {
   return generateUUID('SQUARE_CONNECTION' + merchantId);
 }
+
+/**
+ * @throws on empty state variable
+ */
+export const deriveOrderStatusFromSquareOrderState = (
+  state: SquareOrder['state'],
+): OrderStatus => {
+  if (!state) throw Error('Square order state is undefined');
+
+  const _state = state as SquareOrderStatus;
+  if (_state === SquareOrderStatus.OPEN) return '3-in-progress';
+  if (_state === SquareOrderStatus.DRAFT) return '3-in-progress';
+
+  if (_state === SquareOrderStatus.COMPLETED) return '4-complete';
+  if (_state === SquareOrderStatus.CANCELED) return 'cancelled';
+
+  let n: never = _state;
+  throw Error(`unimplemented square order state: ${state}`);
+};
+
+/**
+ * @throws on empty state variable
+ */
+export const deriveOrderStatusFromSquareOrderFulfillmentState = (
+  state: Fulfillment['state'],
+): OrderStatus => {
+  if (!state) throw Error('Square order state is undefined');
+
+  const _state = state as SquareOrderFulfillmentState;
+  switch (_state) {
+    case SquareOrderFulfillmentState.PROPOSED:
+    case SquareOrderFulfillmentState.RESERVED:
+      return '3-in-progress';
+    case SquareOrderFulfillmentState.PREPARED:
+    case SquareOrderFulfillmentState.COMPLETED:
+      return '4-complete';
+    case SquareOrderFulfillmentState.CANCELED:
+    case SquareOrderFulfillmentState.FAILED:
+      return 'cancelled';
+  }
+};
 
 export function getLocationFromSquareLocation({
   merchantId,
@@ -127,42 +182,53 @@ function getPriceFromSquareItem(squareItem: CatalogObject): USDC {
 }
 
 export const mapSquareStoreToShop = ({
-  merchantId,
   squareStore,
   squareLocation,
   storeConfig,
 }: {
-  merchantId: string;
   squareStore: SquareMerchant;
   squareLocation: SquareLocation;
   storeConfig: StoreConfig;
 }): Shop => {
+  const location = (function () {
+    // prefer to use the storeconfig's location in the case of manual override
+    if (storeConfig.location) return storeConfig.location;
+    if (squareLocation.address)
+      return getLocationFromSquareLocation(squareLocation);
+    return null;
+  })();
+
+  const merchantId = getMerchantIdFromSquareExternalId(storeConfig.externalId);
+  const locationId =
+    squareLocation.id ||
+    (function () {
+      throw new Error('expected square location id');
+    })();
+
   return {
+    id: deriveShopIdFromSquareStoreExternalId(storeConfig.externalId),
     __entity: Entity.shop,
     __type: 'storefront',
     __sourceConfig: {
       type: 'square',
       merchantId,
+      locationId,
     },
-    id: deriveShopIdFromSquareStoreId(merchantId),
     tipConfig: storeConfig.tipConfig || {
       __type: 'single-recipient',
       enabled: false,
     },
     menu: EMPTY_MENU,
     label:
-      squareStore.businessName ||
       storeConfig.name ||
+      squareLocation.name ||
+      squareStore.businessName ||
       err('business must include a name'),
-    location:
-      'location' in storeConfig
-        ? storeConfig.location
-        : squareLocation.address
-          ? getLocationFromSquareLocation(squareLocation)
-          : null,
+    location: location,
     backgroundImage:
       squareLocation.posBackgroundUrl ||
       squareLocation.fullFormatLogoUrl ||
+      squareLocation.logoUrl ||
       DEFAULT_BACKGROUND_IMAGE,
     logo: squareLocation.logoUrl || DEFAULT_SHOP_LOGO,
     farmerAllocations: storeConfig.farmerAllocation || [],
@@ -231,3 +297,29 @@ export async function buildMenuFromSquareCatalog({
 
   return { menu: buildMenuFromItems(finalizedItems), items: finalizedItems };
 }
+
+// TODO: update for variant refactor
+export const mapOrderToSquareOrder = (
+  shop: Shop<'square'>,
+  order: Order,
+): SquareOrder => {
+  if (!isSquareShop(shop)) throw Error('expected square shop');
+
+  return {
+    locationId: shop.__sourceConfig.locationId,
+    ticketName: 'DO NOT MAKE!',
+    lineItems: collapseDuplicateItems(order.orderItems).map<OrderLineItem>(
+      ([oi, quantity]) => {
+        if (oi.item.__sourceConfig.type !== 'square')
+          throw Error('expected square item');
+
+        return {
+          note: 'DO NOT MAKE!',
+          // catalogObjectId: '4GNIZSYNBVZPXFAEOTN4UHAF', //oi.item.__sourceConfig.id,
+          catalogObjectId: '4GNIZSYNBVZPXFAEOTN4UHAF', //oi.item.__sourceConfig.id,
+          quantity: quantity.toString(),
+        };
+      },
+    ),
+  } as SquareOrder;
+};

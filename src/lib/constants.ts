@@ -50,3 +50,11 @@ export const getSquareAccessToken = (): string => {
   if (token) return token;
   throw Error('undefined Square Access Token');
 };
+
+export const getDBSecret = (): string => {
+  notAllowedOnClient();
+
+  const secret = process.env.DB_ADMIN_SECRET;
+  if (!secret) throw Error('undefined DB Secret');
+  return secret;
+};

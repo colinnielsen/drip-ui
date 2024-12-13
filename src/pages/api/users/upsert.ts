@@ -1,14 +1,14 @@
 import { PrivyDID } from '@/data-model/_external/privy';
 import { mapUserToSavedUserViaPrivy } from '@/data-model/user/UserDTO';
 import { SavedUser } from '@/data-model/user/UserType';
-import { withErrorHandling } from '@/lib/next';
+import { ApiRoute } from '@/lib/next';
 import privy from '@/lib/privy';
 import { getSessionId, PRIVY_TOKEN_NAME } from '@/lib/session';
 import OrderService from '@/services/OrderService';
 import UserService from '@/services/UserService';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default withErrorHandling(async function (
+export default ApiRoute(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

@@ -1,10 +1,19 @@
 import { BaseEntity, Entity } from '@/data-model/__global/entities';
+import { Location } from '@/data-model/_common/type/LocationType';
+import { UUID } from 'crypto';
+import { Address } from 'viem';
 import { FarmerAllocation } from '../farmer/FarmerType';
 import { Item, ItemCategory } from '../item/ItemType';
-import { Location } from '@/data-model/_common/type/LocationType';
-import { SliceStoreId } from '../_external/data-sources/slice/SliceDTO';
-import { Address } from 'viem';
-import { UUID } from 'crypto';
+
+type SliceVersion = 1;
+type SlicerId = number;
+
+export type SliceExternalId = `SLICE_STORE::V${SliceVersion}::${SlicerId}`;
+
+type SquareMerchantId = string;
+type SquareLocationId = string;
+
+export type SquareExternalId = `${SquareMerchantId}::${SquareLocationId}`;
 
 ///
 //// TYPES
@@ -26,48 +35,57 @@ export type SingleRecipientTipConfig =
 
 export type TipConfig = SingleRecipientTipConfig;
 
+//
+//// STORE CONFIGS
+//
+
 export type SliceStoreConfig = {
   id: UUID;
   __type: 'slice';
   /** The external ID of the slice store / */
-  externalId: SliceStoreId;
+  externalId: SliceExternalId;
   name?: string;
   location: Location;
   logo?: string;
   backgroundImage?: string;
   url?: string;
-  farmerAllocation?: [FarmerAllocation];
+  farmerAllocation?: FarmerAllocation[];
   tipConfig?: TipConfig;
 };
 
 export type SquareStoreConfig = {
   id: UUID;
   __type: 'square';
-  /** The merchant ID of the square store / */
-  externalId: string;
+  /** The merchant ID of the square store concatenated with the location ID */
+  externalId: SquareExternalId;
   name?: string;
-  location: Location;
+  location?: Location;
   logo?: string;
   backgroundImage?: string;
   url?: string;
-  farmerAllocation?: [FarmerAllocation];
+  farmerAllocation?: FarmerAllocation[];
   tipConfig?: TipConfig;
 };
 
 export type StoreConfig = SliceStoreConfig | SquareStoreConfig;
 
-type SquareDataSourceConfig = {
+//
+//// SHOPS
+//
+
+export type SquareShopSourceConfig = {
   type: 'square';
   merchantId: string;
+  locationId: string;
 };
 
-export type SliceDataSourceConfig = {
+export type SliceShopSourceConfig = {
   type: 'slice';
-  id: SliceStoreId;
+  id: SliceExternalId;
   version: number;
 };
 
-export type ShopSourceConfig = SliceDataSourceConfig | SquareDataSourceConfig;
+export type ShopSourceConfig = SliceShopSourceConfig | SquareShopSourceConfig;
 
 export type BaseShop = BaseEntity & {
   __entity: Entity.shop;
@@ -95,4 +113,26 @@ export type OnlineShop = BaseShop & {
   url: string;
 };
 
-export type Shop = Storefront | OnlineShop;
+type _Shop = Storefront | OnlineShop;
+
+export type Shop<T extends '_any' | ShopSourceConfig['type'] = '_any'> =
+  T extends '_any'
+    ? _Shop
+    : Omit<_Shop, '__sourceConfig'> & {
+        __sourceConfig: T extends 'square'
+          ? SquareShopSourceConfig
+          : SliceShopSourceConfig;
+      };
+
+//
+//// UTILITIES
+//
+
+/**
+ * @dev ensures T handles all shop types
+ */
+export type SatisfiesShopCompatibility<T> = T extends {
+  type: Shop['__type'];
+}
+  ? T
+  : never;

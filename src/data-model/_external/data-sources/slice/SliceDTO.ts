@@ -5,6 +5,7 @@ import { Order } from '@/data-model/order/OrderType';
 import {
   deriveShopIdFromSliceStoreId,
   EMPTY_MENU,
+  getSliceExternalIdFromSliceId,
 } from '@/data-model/shop/ShopDTO';
 import { Menu, Shop, StoreConfig } from '@/data-model/shop/ShopType';
 import { isAddressEql, USDC_ADDRESS_BASE } from '@/lib/ethereum';
@@ -17,24 +18,10 @@ import { buildMenuFromItems } from '../common';
 
 export const SLICE_VERSION = 1;
 
-export type SliceStoreId = `SLICE_STORE::V${number}::${number}`;
-
 /**
  * @dev the slice product cart has a dbId, but we want to derive our ids from this stable id
  */
 const SLICE_PRODUCT_ID_TO_DERIVE_FROM: keyof ProductCart = 'dbId';
-
-export const getSliceStoreIdFromSliceId = (sliceId: number): SliceStoreId =>
-  `SLICE_STORE::V${SLICE_VERSION}::${sliceId}`;
-
-export const getSlicerIdFromSliceStoreId = (
-  sliceStoreId: SliceStoreId,
-): number => {
-  const [, , sliceId] = sliceStoreId.split('::');
-  if (!sliceId) throw new Error('Fatal Error parsing slice store id!');
-
-  return parseInt(sliceId);
-};
 
 export function mapSliceVariantsToMods(variants: Variant[]): ItemMod[] {
   return variants.reduce<ItemMod[]>((acc, variant) => {
@@ -184,7 +171,7 @@ export const mapSliceStoreToShop = (
   __type: 'storefront',
   __sourceConfig: {
     type: 'slice',
-    id: getSliceStoreIdFromSliceId(sliceStore.id),
+    id: getSliceExternalIdFromSliceId(sliceStore.id),
     version: SLICE_VERSION,
   },
   id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
@@ -194,7 +181,7 @@ export const mapSliceStoreToShop = (
   },
   menu: EMPTY_MENU,
   label: sliceStore.name,
-  location: 'location' in manualConfig ? manualConfig.location : null,
+  location: manualConfig.location || null,
   backgroundImage: manualConfig.backgroundImage || sliceStore.image || '',
   logo: manualConfig.logo || sliceStore.image || '',
   url: manualConfig.url || sliceStore.slicerConfig?.storefrontUrl || '',

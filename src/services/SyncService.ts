@@ -1,6 +1,5 @@
 import {
   buildMenuFromSliceProducts,
-  getSlicerIdFromSliceStoreId,
   mapSliceStoreToShop,
 } from '@/data-model/_external/data-sources/slice/SliceDTO';
 import {
@@ -19,12 +18,13 @@ import FarmerService from './FarmerService';
 import ItemService from './ItemService';
 import ShopService from './ShopService';
 import { SquareService } from './SquareService';
+import { getSlicerIdFromSliceExternalId } from '@/data-model/shop/ShopDTO';
 
 export class SyncService {
   constructor() {}
 
   private async syncSliceStore(storeConfig: SliceStoreConfig) {
-    const slicerId: number = getSlicerIdFromSliceStoreId(
+    const slicerId: number = getSlicerIdFromSliceExternalId(
       storeConfig.externalId,
     );
     const [store] = await sliceKit.getStores({ slicerIds: [slicerId] });
@@ -53,7 +53,6 @@ export class SyncService {
 
     // build the shop
     const shop = mapSquareStoreToShop({
-      merchantId: storeConfig.externalId,
       squareStore: merchant,
       squareLocation: location,
       storeConfig,

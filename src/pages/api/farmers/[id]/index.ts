@@ -1,9 +1,9 @@
-import { withErrorHandling } from '@/lib/next';
+import { ApiRoute } from '@/lib/next';
 import FarmerService from '@/services/FarmerService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default withErrorHandling(async function (
+export default ApiRoute(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

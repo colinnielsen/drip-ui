@@ -1,7 +1,7 @@
 import { PrivyDID } from '@/data-model/_external/privy';
 import { mapUserToSavedUserViaPrivy } from '@/data-model/user/UserDTO';
 import { User } from '@/data-model/user/UserType';
-import { withErrorHandling } from '@/lib/next';
+import { ApiRoute } from '@/lib/next';
 import privy from '@/lib/privy';
 import { SESSION_COOKIE_NAME, setSessionId } from '@/lib/session';
 import { generateUUID, isUUID } from '@/lib/utils';
@@ -13,7 +13,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
  * @dev be aware that if the user is logged out of privy, they will _need to login directly
  * This is because the session token is the id of the user,
  */
-export default withErrorHandling(async function identify(
+export default ApiRoute(async function identify(
   req: NextApiRequest,
   res: NextApiResponse<User | { error: string }>,
 ) {

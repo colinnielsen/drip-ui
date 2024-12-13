@@ -1,11 +1,11 @@
-import { withErrorHandling } from '@/lib/next';
+import { ApiRoute } from '@/lib/next';
 import { getSessionId } from '@/lib/session';
 import ShopService, { includeDiscountsOnShop } from '@/services/ShopService';
 import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Address } from 'viem';
 
-export default withErrorHandling(async function (
+export default ApiRoute(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

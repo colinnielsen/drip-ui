@@ -152,7 +152,7 @@ const ConnectedState = ({
 
         <div className="grid md:grid-cols-2 gap-4 sm:grid-cols-1 max-w-2xl ">
           {squareLocations.map(location => (
-            <Card>
+            <Card key={location.id}>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <Avatar>

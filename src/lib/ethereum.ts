@@ -1,70 +1,16 @@
+import { ChainId } from '@/data-model/ethereum/EthereumType';
 import { createConfig } from '@wagmi/core';
-import { createPublicClient, getContract, http } from 'viem';
+import { Chain, createPublicClient, getContract, http } from 'viem';
 import { base } from 'viem/chains';
+import { USDC_CONFIG } from './contract-config/USDC';
+import { UnimplementedPathError } from './effect';
 
-export const USDC_ADDRESS_BASE =
-  '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913' as const;
+export const mapChainIdToViemChain = (chainId: ChainId): Chain => {
+  if (chainId === ChainId.BASE) return base;
 
-export const USDC_PARTIAL_ABI = [
-  {
-    constant: true,
-    inputs: [
-      {
-        name: '_owner',
-        type: 'address',
-      },
-    ],
-    name: 'balanceOf',
-    outputs: [
-      {
-        name: 'balance',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        name: '_owner',
-        type: 'address',
-      },
-      {
-        name: '_spender',
-        type: 'address',
-      },
-    ],
-    name: 'allowance',
-    outputs: [
-      {
-        name: 'remaining',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    name: 'transfer',
-    inputs: [
-      {
-        name: 'recipient',
-        type: 'address',
-      },
-      {
-        name: 'amount',
-        type: 'uint256',
-      },
-    ],
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-] as const;
+  let _: never = chainId;
+  throw new UnimplementedPathError(chainId);
+};
 
 export const BASE_RPC_CONFIG = {
   chains: [base],
@@ -73,11 +19,17 @@ export const BASE_RPC_CONFIG = {
   ),
 } as const;
 
+export const getRPCConfig = (chainId: ChainId) => {
+  if (chainId === ChainId.BASE) return BASE_RPC_CONFIG;
+  let _: never = chainId;
+  throw new UnimplementedPathError(chainId);
+};
+
 export const BASE_CLIENT = createPublicClient(BASE_RPC_CONFIG);
 
 export const USDC_INSTANCE = getContract({
-  abi: USDC_PARTIAL_ABI,
-  address: USDC_ADDRESS_BASE,
+  abi: USDC_CONFIG[ChainId.BASE].abi,
+  address: USDC_CONFIG[ChainId.BASE].address,
   client: BASE_CLIENT,
 });
 

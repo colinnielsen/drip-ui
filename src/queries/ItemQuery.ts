@@ -1,122 +1,71 @@
-// import { PriceLookup, useSlicePrices } from './SliceQuery';
+import { UUID } from '@/data-model/_common/type/CommonType';
+import { Item } from '@/data-model/item/ItemType';
+import { skipToken, useQuery } from '@tanstack/react-query';
+import { Address } from 'viem';
+import { useWalletAddress } from './EthereumQuery';
+import { useUserId } from './UserQuery';
+import { minutes } from '@/lib/utils';
 
-import { Unsaved } from '@/data-model/_common/type/CommonType';
-import { OrderItem } from '@/data-model/order/OrderType';
-import { UUID } from 'crypto';
-import { useShop } from './ShopQuery';
+const PRICE_QUOTE_STALE_TIME = minutes(2);
 
-export const useItemPriceWithDiscount = (
+function priceQuoteQueryKey({
+  userId,
+  wallet,
+  shopId,
+  itemId,
+  variantId,
+}: {
+  userId?: UUID;
+  wallet?: Address;
+  shopId?: UUID;
+  itemId?: UUID;
+  variantId?: UUID;
+} = {}): any[] {
+  return [
+    'price-quote',
+    `userId: ${userId}`,
+    `wallet: ${wallet}`,
+    `shopId: ${shopId}`,
+    `itemId: ${itemId}`,
+  ];
+}
+
+async function getPriceQuote(
+  userId: UUID,
+  address: Address,
   shopId: UUID,
-  orderItem: Unsaved<OrderItem>,
-) => {
-  return useShop({
-    id: shopId,
-    select(data) {
-      const item = [...Object.values(data.menu).flat()].find(
-        i => i.id === orderItem.item.id,
-      );
-      return {
-        item,
-        price: item?.price,
-        discountPrice: item?.discountPrice,
-      };
-    },
+  item: Item,
+  variantId?: UUID,
+) {
+  if (variantId) return item.variants.find(v => v.id === variantId)?.price;
+  return item.variants[0].price;
+}
+
+export const usePriceQuote = ({
+  shopId,
+  item,
+  variantId,
+}: {
+  shopId: UUID;
+  item: Item;
+  variantId?: UUID;
+}) => {
+  const { data: userId } = useUserId();
+  const address = useWalletAddress();
+
+  return useQuery({
+    queryKey: priceQuoteQueryKey({
+      userId,
+      wallet: address ?? undefined,
+      shopId,
+      itemId: item.id,
+      variantId,
+    }),
+    queryFn:
+      userId && address && shopId && item.id
+        ? () => getPriceQuote(userId, address, shopId, item, variantId)
+        : skipToken,
+    enabled: !!userId && !!address && !!shopId && !!item.id,
+    staleTime: PRICE_QUOTE_STALE_TIME,
   });
 };
-
-// const getItemPriceFromPriceLookup = (
-//   item: Item,
-//   priceLookup: PriceLookup,
-// ): ItemPrice => {
-//   const usualPrice = item.price;
-//   const discountedPrice = priceLookup[item.id].discountedPrice;
-
-//   const discountPercentage = usualPrice.eq(discountedPrice)
-//     ? 0
-//     : 100 -
-//       discountedPrice
-//         .mul(100)
-//         .div(usualPrice.toWei())
-//         .div(usualPrice.UNIT)
-//         .toWeiNumber();
-
-//   return {
-//     itemId: item.id,
-//     basePrice: usualPrice,
-//     discountPrice: discountedPrice,
-//     discountPercentage,
-//   };
-// };
-
-// const getItemPrices = async (shop: Shop, livePriceLookup: PriceLookup) => {
-//   const shopItems = uniqBy(
-//     Object.values(shop.menu).reduce(
-//       (acc, category) => [...acc, ...category],
-//       [],
-//     ),
-//     'id',
-//   );
-//   if (shop.__sourceConfig.type === 'slice')
-//     return {
-//       items: shopItems.map(i =>
-//         getItemPriceFromPriceLookup(i, livePriceLookup),
-//       ),
-//       priceLookup: livePriceLookup,
-//     };
-//   else throw new Error('other shop price lookups are not implented');
-// };
-
-// export const useItemPrices = <TData = ItemPrice[]>({
-//   shopId,
-//   select,
-// }: {
-//   shopId: UUID;
-//   select?: ({
-//     items,
-//     priceLookup,
-//   }: {
-//     items: ItemPrice[];
-//     priceLookup: PriceLookup;
-//   }) => TData;
-// }) => {
-//   const wallet = useConnectedWallet();
-//   const { data: shop } = useShop(shopId);
-
-//   const { data: slicePrices } = useSlicePrices(shop?.__sourceConfig);
-
-//   return useQuery({
-//     queryKey: [
-//       // item price for =>
-//       'item-prices',
-//       // -> for each wallet
-//       wallet?.address,
-//     ],
-//     queryFn:
-//       !!shop && !!wallet && !!slicePrices
-//         ? () => getItemPrices(shop, slicePrices)
-//         : skipToken,
-//     enabled: !!shopId && !!wallet,
-//     select,
-//   });
-// };
-
-// function itemPriceSelector(
-//   prices: ItemPrice[],
-//   priceLookup: PriceLookup,
-//   itemId: UUID,
-//   mods: UUID[]
-// ): ItemPrice | undefined {
-//   const itemPrice = prices.find(p => p.itemId === itemId);
-//   const itemPriceWithModPrices = priceLookup[itemId].modPrices.reduce((totalAdditionalCosts, modPrice) => {
-//     // if(modPrice.modId)
-//   }
-//   ,itemPrice)
-//   return itemPrice;
-// }
-
-// export const useItemPrice = (shopId: UUID, itemId: UUID, mods?: UUID[]) =>
-//   useItemPrices({
-//     shopId,
-//     select: ({ items, priceLookup }) =>
-//       itemPriceSelector(items, priceLookup, itemId),
-//   });

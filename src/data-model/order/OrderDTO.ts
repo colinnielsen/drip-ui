@@ -1,18 +1,44 @@
-import { err } from '@/lib/utils';
-import { addCurrencies } from '../_common/currency/currencyDTO';
-import { isUSDC, USDC } from '../_common/currency/USDC';
-import { Currency, Unsaved } from '../_common/type/CommonType';
-import { Shop } from '../shop/ShopType';
+import { Unsaved, UUID } from '@/data-model/_common/type/CommonType';
+import { genericError } from '@/lib/effect';
+import { Currency } from '../_common/currency';
 import {
-  Cart,
+  addCurrencies,
+  initCurrencyFromType,
+  subCurrencies,
+} from '../_common/currency/currencyDTO';
+import { Cart } from '../cart/CartType';
+import { EthAddress } from '../ethereum/EthereumType';
+import { ItemMod } from '../item/ItemMod';
+import { Item, ItemVariant } from '../item/ItemType';
+import { Shop } from '../shop/ShopType';
+import { AppliedDiscount } from './AppliedDiscount';
+import { LineItem, LineItemUniqueId } from './LineItemAggregate';
+import {
   ExternalOrderInfo,
+  NewOrder,
   Order,
-  OrderItem,
-  OrderSummary,
-  PaidOrder,
+  PaymentSummary,
 } from './OrderType';
-import { UUID } from 'crypto';
-import { Item, ItemMod } from '../item/ItemType';
+
+const EMPTY_SUMMARY = {
+  subtotal: null,
+  tax: null,
+  discount: null,
+  tip: null,
+  total: null,
+};
+
+/**
+ * @dev a deterministic id which represents the combo of this variant, mod, and variant
+ * @see {@link LineItem.uniqueId}
+ */
+export function mapVariantAndModsToUniqueId(
+  variant: ItemVariant,
+  deduplicatedMods: ItemMod[],
+): LineItemUniqueId {
+  const uniqueId = `${variant.id}_${deduplicatedMods.map(mod => mod.id).join('_')}`;
+  return uniqueId as LineItemUniqueId;
+}
 
 export const getOrderNumber = (order: Order): string | null => {
   return (
@@ -28,157 +54,285 @@ export const mapStatusToStatusLabel = (
   tense: 'present' | 'past' = 'present',
 ) => {
   switch (status) {
-    case '1-pending':
+    case '1-submitting':
       return tense === 'present' ? 'Pending' : 'Pending';
-    case '2-submitting':
+    case '2-in-progress':
       return tense === 'present' ? 'Pending' : 'Submitted';
-    case '3-in-progress':
+    case '3-complete':
       return 'In Progress';
-    case '4-complete':
-      return tense === 'present' ? 'Complete' : 'Completed';
     case 'cancelled':
+    case 'error':
       return tense === 'present' ? 'Cancelled' : 'Cancelled';
   }
+};
+
+export const deriveOrderIdentifierFromOrderId = (orderId: Order['id']) => {
+  return orderId.slice(0, 8);
 };
 
 export const createExternalOrderInfo = (
   sourceConfig: Shop['__sourceConfig'],
   data: Partial<ExternalOrderInfo>,
 ): ExternalOrderInfo => {
-  const externalOrderInfo: ExternalOrderInfo =
-    sourceConfig.type === 'slice'
-      ? {
-          __type: 'slice',
-          ...data,
-          orderId:
-            data.orderId ??
-            (() => {
-              throw new Error('orderId is required');
-            })(),
-        }
-      : err('sourceConfig type is not supported');
+  const externalOrderInfo = {
+    __type: sourceConfig.type,
+    orderId:
+      data.orderId ??
+      (() => {
+        throw new Error('orderId is required');
+      })(),
+    orderNumber: data.orderNumber,
+    status: data.status,
+  } satisfies ExternalOrderInfo;
 
   return externalOrderInfo;
 };
 
-export const getOrderItemCostFromPriceDict = (
-  priceDict: Record<UUID, Item | ItemMod>,
-  orderItem: Unsaved<OrderItem>,
-) => {
-  const item = priceDict[orderItem.item.id];
+// export const getOrderItemCostFromPriceDict = (
+//   priceDict: Record<UUID, Item | ItemMod>,
+//   lineItem: Unsaved<LineItem>,
+// ) => {
+//   const item = priceDict[lineItem.item.id];
 
-  return {
-    // add together the base price of the item and the mods
-    price: orderItem.mods.reduce<Currency>(
-      (acc, mod) => addCurrencies(acc, priceDict[mod.id].price ?? USDC.ZERO),
-      item.price,
-    ),
-    // add together the discount price of the item and the mods
-    discountPrice: orderItem.mods.reduce<Currency>(
-      (acc, mod) =>
-        addCurrencies(
-          acc,
-          priceDict[mod.id].discountPrice ??
-            priceDict[mod.id].price ??
-            USDC.ZERO,
-        ),
-      item.discountPrice ?? item.price,
-    ),
-  };
-};
+//   return {
+//     // add together the base price of the item and the mods
+//     price: lineItem.mods.reduce<Currency>(
+//       (acc, mod) => addCurrencies(acc, priceDict[mod.id].price ?? USDC.ZERO),
+//       item.price,
+//     ),
+//     // add together the discount price of the item and the mods
+//     discountPrice: lineItem.mods.reduce<Currency>(
+//       (acc, mod) =>
+//         addCurrencies(
+//           acc,
+//           priceDict[mod.id].discountPrice ??
+//             priceDict[mod.id].price ??
+//             USDC.ZERO,
+//         ),
+//       item.discountPrice ?? item.price,
+//     ),
+//   };
+// };
 
 /**
  * @dev get the total cost of an order item based on the mods selected
  */
-export const getOrderItemCost = (orderItem: OrderItem) => {
-  const priceDict = {
-    [orderItem.item.id]: orderItem.item,
-    ...orderItem.mods.reduce((acc, mod) => ({ ...acc, [mod.id]: mod }), {}),
-  };
+// export const getOrderItemCost = (orderItem: OrderItem) => {
+//   const priceDict = {
+//     [orderItem.item.id]: orderItem.item,
+//     ...orderItem.mods.reduce((acc, mod) => ({ ...acc, [mod.id]: mod }), {}),
+//   };
 
-  return getOrderItemCostFromPriceDict(priceDict, orderItem);
+//   return getOrderItemCostFromPriceDict(priceDict, orderItem);
+// };
+
+export const addLineItemPrices = (
+  lineItems: LineItem[],
+  type: 'subtotal' | 'total',
+): Currency => {
+  if (!lineItems.length) genericError('No line items');
+  if (!lineItems.every(li => li.total.is(lineItems[0].total)))
+    genericError('All line items must have the same currency');
+
+  const CURRENCY_ZERO = initCurrencyFromType(
+    lineItems[0].variant.price.__currencyType,
+    0n,
+  );
+
+  return lineItems.reduce<Currency>((acc, li) => {
+    return addCurrencies(acc, li[type].mul(li.quantity));
+  }, CURRENCY_ZERO);
 };
 
-/**
- * @dev if an `OrderItem` has the same id and the same mods, then it can be squashed with a quantity
- */
-export function collapseDuplicateItems(orderItems: OrderItem[]) {
-  const itemMap = new Map<string, [OrderItem, number]>();
+export function createLineItemAggregate({
+  item,
+  variant,
+  quantity,
+  mods,
+  discounts,
+}: {
+  item: Item;
+  variant: ItemVariant;
+  quantity: number;
+  mods?: ItemMod[];
+  discounts?: AppliedDiscount[];
+}): LineItem {
+  const CURRENCY_ZERO = initCurrencyFromType(variant.price.__currencyType, 0n);
+  // deduplicate mods
+  const deduplicatedMods: ItemMod[] = (function () {
+    if (!mods) return [];
 
-  orderItems.forEach(orderItem => {
-    const allIds = [
-      orderItem.item.id,
-      ...orderItem.mods.map(mod => mod.id),
-    ].sort();
-    const key = allIds.join('-');
-    if (itemMap.has(key)) itemMap.get(key)![1] += 1;
-    else itemMap.set(key, [orderItem, 1]);
-  });
+    return Object.values(
+      mods.reduce<Record<UUID, ItemMod>>((acc, mod) => {
+        const previousCount = acc[mod.id]?.quantity ?? 0;
+        const nextMod: ItemMod = { ...mod, quantity: previousCount + 1 };
+        acc[mod.id] = nextMod;
+        return acc;
+      }, {}),
+    );
+  })();
 
-  return Array.from(itemMap.values());
-}
+  const subtotal = (function () {
+    // base variant price
+    const variantPrice = variant.price;
+    // plus all the mods
+    const modPrice = deduplicatedMods.reduce<Currency>(
+      (acc, mod) =>
+        addCurrencies(
+          acc,
+          // take the mod price and multiply by the quantity
+          mod.price.mul(mod.quantity),
+        ),
+      CURRENCY_ZERO,
+    );
 
-export const getOrderSummary = (order: Order): OrderSummary => {
-  // if all order items have a paid price, then we can use the paid price
-  const total_noTip: USDC = order.orderItems.every(
-    orderItem => orderItem.paidPrice,
-  )
-    ? order.orderItems.reduce((acc, orderItem) => {
-        const paidForPrice = orderItem.paidPrice!;
+    // add together the variant price and the mod price and multiply by the mod price
+    const itemAndModPrice = addCurrencies(variantPrice, modPrice);
 
-        return acc.add(
-          isUSDC(paidForPrice) ? paidForPrice : paidForPrice.toUSDC(),
-        );
-      }, USDC.ZERO)
-    : // otherwise, we need to use the discount prices and add the mods individually
-      order.orderItems.reduce<USDC>((acc, orderItem) => {
-        const paidForPrice =
-          orderItem.item.discountPrice ?? orderItem.item.price;
+    // multiply by the quantity
+    const subtotal = itemAndModPrice.mul(quantity);
 
-        return acc
-          .add(isUSDC(paidForPrice) ? paidForPrice : paidForPrice.toUSDC())
-          .add(
-            orderItem.mods.reduce((acc, mod) => {
-              const modPrice = mod.discountPrice ?? mod.price;
-              return acc.add(isUSDC(modPrice) ? modPrice : modPrice.toUSDC());
-            }, USDC.ZERO),
-          );
-      }, USDC.ZERO);
+    return subtotal;
+  })();
 
-  const total_withTip = total_noTip.add(order.tip?.amount ?? USDC.ZERO);
+  const totalDiscount = (function () {
+    if (!discounts) return CURRENCY_ZERO;
+
+    return discounts.reduce<Currency>(
+      (acc, discount) => addCurrencies(acc, discount.amount),
+      CURRENCY_ZERO,
+    );
+  })();
+
+  const total = subCurrencies(subtotal, totalDiscount);
+
+  const uniqueId = mapVariantAndModsToUniqueId(variant, deduplicatedMods);
 
   return {
-    /**
-     * @dev subTotal is the total without the tip
-     */
-    subTotal: {
-      formatted: total_noTip.prettyFormat(),
-      usdc: total_noTip,
+    uniqueId,
+    item,
+    variant,
+    quantity,
+    mods: deduplicatedMods,
+    subtotal,
+    discounts,
+    totalDiscount,
+    total,
+  } satisfies LineItem;
+}
+
+// TODO
+export const mapOrderOrCartToPaymentSummary = (
+  cartOrOrder: Cart | Order | null | undefined,
+): PaymentSummary => {
+  if (!cartOrOrder) return EMPTY_SUMMARY;
+
+  if ('quotedTotalAmount' in cartOrOrder)
+    return {
+      subtotal: cartOrOrder.quotedSubtotal || null,
+      tax: cartOrOrder.quotedTaxAmount || null,
+      discount: cartOrOrder.quotedDiscountAmount || null,
+      tip: cartOrOrder.tip?.amount || null,
+      total: cartOrOrder.quotedTotalAmount || null,
+    };
+  else if ('totalAmount' in cartOrOrder)
+    return {
+      subtotal: cartOrOrder.subtotal || null,
+      tax: cartOrOrder.taxAmount || null,
+      discount: cartOrOrder.discountAmount || null,
+      tip: cartOrOrder.tip?.amount || null,
+      total: cartOrOrder.totalAmount || null,
+    };
+  else return EMPTY_SUMMARY;
+};
+
+export const mapCartToNewOrder = ({
+  cart,
+  tipRecipient,
+}: {
+  cart: Cart;
+  tipRecipient?: EthAddress;
+}): Unsaved<NewOrder> => {
+  const [
+    {
+      subtotal: { __currencyType },
     },
-    tip: order.tip
-      ? {
-          formatted: order.tip.amount.prettyFormat(),
-          usdc: order.tip.amount,
-        }
-      : null,
-    /**
-     * @dev total is the subtotal + tip
-     */
-    total: {
-      formatted: total_withTip.prettyFormat(),
-      usdc: total_withTip,
-    },
+  ] = cart.lineItems;
+  const CURRENCY_ZERO = initCurrencyFromType(__currencyType, 0n);
+
+  return {
+    timestamp: new Date(),
+    shop: cart.shop,
+    user: cart.user,
+    lineItems: cart.lineItems,
+    discounts: cart.discounts,
+    tip:
+      cart.tip && tipRecipient
+        ? { amount: cart.tip.amount, recipient: tipRecipient }
+        : null,
+    subtotal: cart.quotedSubtotal ?? CURRENCY_ZERO,
+    taxAmount: cart.quotedTaxAmount ?? CURRENCY_ZERO,
+    discountAmount: cart.quotedDiscountAmount ?? CURRENCY_ZERO,
+    totalAmount: cart.quotedTotalAmount ?? CURRENCY_ZERO,
+    status: '1-submitting',
+    payments: [],
   };
 };
 
-export const isPending = (o: Order): o is Cart => o.status === '1-pending';
+// // if all order items have a paid price, then we can use the paid price
+// const total_noTip = order.lineItems.every(orderItem => orderItem)
+//   ? order.lineItems.reduce((acc, orderItem) => {
+//       // const paidForPrice = orderItem.paidPrice;
 
-export const isInProgress = (o: Order) => o.status === '3-in-progress';
+//       return acc.add(
+//         isUSDC(paidForPrice) ? paidForPrice : paidForPrice?.toUSDC(),
+//       );
+//     }, USDC.ZERO)
+//   : // otherwise, we need to use the discount prices and add the mods individually
+//     order.lineItems.reduce<USDC>((acc, orderItem) => {
+//       const paidForPrice =
+//         orderItem.item.discountPrice ?? orderItem.item.price;
 
-export const isComplete = (o: Order) => o.status === '4-complete';
+//       return acc
+//         .add(isUSDC(paidForPrice) ? paidForPrice : paidForPrice.toUSDC())
+//         .add(
+//           orderItem.mods.reduce((acc, mod) => {
+//             const modPrice = mod.discountPrice ?? mod.price;
+//             return acc.add(isUSDC(modPrice) ? modPrice : modPrice.toUSDC());
+//           }, USDC.ZERO),
+//         );
+//     }, USDC.ZERO);
 
-export const isPaidOrder = (o: Order): o is PaidOrder =>
-  o.status !== '1-pending';
+// const total_withTip = total_noTip.add(order.tip?.amount ?? USDC.ZERO);
+
+// return {
+//   /**
+//    * @dev subTotal is the total without the tip
+//    */
+//   subTotal: {
+//     formatted: total_noTip.prettyFormat(),
+//     usdc: total_noTip,
+//   },
+//   tip: order.tip
+//     ? {
+//         formatted: order.tip.amount.prettyFormat(),
+//         usdc: order.tip.amount,
+//       }
+//     : null,
+//   /**
+//    * @dev total is the subtotal + tip
+//    */
+//   total: {
+//     formatted: total_withTip.prettyFormat(),
+//     usdc: total_withTip,
+//   },
+// };
+
+export const isInProgress = (o: Order) => o.status === '2-in-progress';
+
+export const isComplete = (o: Order) => o.status === '3-complete';
+
+export const isPaidOrder = (o: Order) => isInProgress(o);
 
 export const hasPaymentConfirmed = (o: Order) =>
-  o.status === '3-in-progress' || o.status === '4-complete';
+  isComplete(o) || isInProgress(o);

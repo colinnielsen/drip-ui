@@ -1,17 +1,25 @@
-import { Item, ItemMod } from '@/data-model/item/ItemType';
-import { collapseDuplicateItems } from '@/data-model/order/OrderDTO';
+import { Entity } from '@/data-model/__global/entities';
+import { Item } from '@/data-model/item/ItemType';
+import { ItemMod } from '@/data-model/item/ItemMod';
+import { createLineItemAggregate } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
-import { USDC_ADDRESS_BASE, isAddressEql } from '@/lib/ethereum';
+import {
+  deriveShopIdFromSliceStoreId,
+  EMPTY_MENU,
+  EMPTY_TIP_CONFIG,
+  getSliceExternalIdFromSliceId,
+} from '@/data-model/shop/ShopDTO';
+import { Menu, Shop, ShopConfig } from '@/data-model/shop/ShopType';
+import { genericError } from '@/lib/effect';
+import { isAddressEql, USDC_ADDRESS_BASE } from '@/lib/ethereum';
 import { err, generateUUID } from '@/lib/utils';
-import { ProductCart, Variant } from '@slicekit/core';
-import { USDC } from '../currency/USDC';
-import { Address } from 'viem';
-import { ETH } from '../currency/ETH';
-import { Currency } from './CommonType';
+import { ProductCart, SlicerBasics, Variant } from '@slicekit/core';
+import { ETH } from '../../../_common/currency/ETH';
+import { USDC } from '../../../_common/currency/USDC';
+import { buildMenuFromItems } from '../common';
+import { Currency } from '@/data-model/_common/currency';
 
 export const SLICE_VERSION = 1;
-
-export type SliceStoreId = `SLICE_STORE::V${number}::${number}`;
 
 /**
  * @dev the slice product cart has a dbId, but we want to derive our ids from this stable id
@@ -70,7 +78,10 @@ function determineAvailability(product: ProductCart): Item['availability'] {
 }
 
 export function deriveDripIdFromSliceProductId(product: ProductCart) {
-  return generateUUID(product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString());
+  return generateUUID(
+    'SLICE' + product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString() ||
+      genericError('no product id'),
+  );
 }
 
 export function getPriceFromSliceCart(
@@ -136,7 +147,7 @@ export function mapCartToSliceCart(
   cart: Order,
   sliceProducts: ProductCart[],
 ): ProductCart[] {
-  const sliceCart = collapseDuplicateItems(cart.orderItems).reduce<
+  const sliceCart = createLineItemAggregate({ variant: cart.lineItems }).reduce<
     ProductCart[]
   >((acc, [orderItem, quantity]) => {
     const sliceProduct = sliceProducts.find(
@@ -157,3 +168,36 @@ export function mapCartToSliceCart(
 
   return sliceCart;
 }
+
+export const mapSliceStoreToShop = (
+  sliceStore: SlicerBasics,
+  manualConfig: ShopConfig,
+): Shop => ({
+  __entity: Entity.shop,
+  __type: 'storefront',
+  __sourceConfig: {
+    type: 'slice',
+    id: getSliceExternalIdFromSliceId(sliceStore.id),
+    version: SLICE_VERSION,
+  },
+  id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
+  tipConfig: manualConfig.tipConfig || EMPTY_TIP_CONFIG,
+  menu: EMPTY_MENU,
+  label: sliceStore.name,
+  location: manualConfig.location || null,
+  backgroundImage: manualConfig.backgroundImage || sliceStore.image || '',
+  logo: manualConfig.logo || sliceStore.image || '',
+  url: manualConfig.url || sliceStore.slicerConfig?.storefrontUrl || '',
+  farmerAllocations: manualConfig.farmerAllocation || [],
+});
+
+export const buildMenuFromSliceProducts = async (
+  products: ProductCart[],
+): Promise<{ menu: Menu; items: Item[] }> => {
+  // map every slice product to an item object and save
+  const items = products.map(mapSliceProductCartToItem);
+
+  const menu = buildMenuFromItems(items);
+
+  return { menu, items };
+};

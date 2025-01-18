@@ -1,18 +1,16 @@
-import { Order } from '@/data-model/order/OrderType';
-import { Headline } from '../../ui/typography';
-import { Price } from '../../ui/icons';
+import { USDC } from '@/data-model/_common/currency/USDC';
+import { PaymentSummary } from '@/data-model/order/OrderType';
 import { Divider } from '../../ui/divider';
-import { useCartSummary } from '@/queries/OrderQuery';
+import { Price } from '../../ui/icons';
+import { Headline } from '../../ui/typography';
 
 export const FooterTotal = ({
-  cart,
+  summary,
   isLoading,
 }: {
-  cart: Order;
+  summary: PaymentSummary;
   isLoading?: boolean;
 }) => {
-  const cartSummary = useCartSummary();
-
   return (
     <>
       <Divider />
@@ -20,8 +18,8 @@ export const FooterTotal = ({
         <div className="flex justify-between">
           <Headline>Total</Headline>
           <Price
-            originalPrice={cartSummary?.total.usdc}
-            isLoading={isLoading || !cartSummary}
+            originalPrice={summary.total || USDC.ZERO}
+            isLoading={isLoading}
           />
         </div>
       </div>

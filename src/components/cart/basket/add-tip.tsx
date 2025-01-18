@@ -9,12 +9,13 @@ import {
   NestedDrawer,
 } from '@/components/ui/drawer';
 import { USDCInput } from '@/components/ui/usdc-input';
+import { Currency } from '@/data-model/_common/currency';
 import { USDC } from '@/data-model/_common/currency/USDC';
-import { Order, OrderSummary } from '@/data-model/order/OrderType';
+import { UUID } from '@/data-model/_common/type/CommonType';
+import { Cart } from '@/data-model/cart/CartType';
 import { cn } from '@/lib/utils';
-import { useCartSummary, useTipMutation } from '@/queries/OrderQuery';
+import { useTipMutation } from '@/queries/CartQuery';
 import { useShop } from '@/queries/ShopQuery';
-import { UUID } from 'crypto';
 import { useCallback, useMemo, useState } from 'react';
 import { Headline, Label3, Title1 } from '../../ui/typography';
 
@@ -53,36 +54,32 @@ const CUSTOM_OPTION = {
 export const TIP_OPTIONS = [...KNOWN_TIP_OPTIONS, CUSTOM_OPTION];
 
 const getTipAmountFromOption = (
-  orderSummary: OrderSummary,
+  cart: Cart,
   opt: (typeof KNOWN_TIP_OPTIONS)[number],
-): USDC => {
+): Currency => {
   if (opt.__type === 'fixed') return opt.value;
   if (opt.__type === 'percentage')
-    return orderSummary.subTotal.usdc.percentageOf({
+    return cart.quotedSubtotal!.percentageOf({
       percent: opt.percent,
     });
 
   throw new Error('Invalid tip option');
 };
 
-const getOptionFromTipAmount = (orderSummary: OrderSummary) => {
+const getOptionFromTipAmount = (cart: Cart) => {
   // if there's no tip or the tip amount is 0, return null
-  if (orderSummary.tip === null || orderSummary.tip.usdc.eq(USDC.ZERO))
-    return null;
+  if (!cart.tip || cart.tip.amount.wei === 0n) return null;
 
   const [, fixedOption] =
     KNOWN_TIP_OPTIONS.map(
-      opt => [getTipAmountFromOption(orderSummary, opt), opt] as const,
-    ).find(([amount]) => amount.eq(orderSummary.tip!.usdc)) || [];
+      opt => [getTipAmountFromOption(cart, opt), opt] as const,
+    ).find(([amount]) => amount.eq(cart.tip!.amount)) || [];
 
   if (!fixedOption) return CUSTOM_OPTION;
   return fixedOption;
 };
 
-const useTipButtons = (
-  cart: Order,
-  cartSummary: OrderSummary | null | undefined,
-) => {
+const useTipButtons = (cart: Cart) => {
   const mutation = useTipMutation();
 
   const setTip = useCallback(
@@ -90,20 +87,14 @@ const useTipButtons = (
       if (option?.__type === 'custom') return;
 
       await mutation.mutateAsync({
-        order: cart,
-        tip:
-          option && cartSummary
-            ? getTipAmountFromOption(cartSummary, option)
-            : null,
+        tip: option ? getTipAmountFromOption(cart, option) : null,
       });
     },
-    [mutation, cartSummary, cart],
+    [mutation.mutateAsync, cart],
   );
 
-  const selectedTip = useMemo(
-    () => (cartSummary ? getOptionFromTipAmount(cartSummary) : null),
-    [cartSummary],
-  );
+  const selectedTip = useMemo(() => getOptionFromTipAmount(cart), [cart]);
+
   const tipOptions = useMemo(
     () =>
       TIP_OPTIONS.map(option => ({
@@ -124,7 +115,7 @@ const TipDrawer = ({
   cart,
   tipOption,
 }: {
-  cart: Order;
+  cart: Cart;
   tipOption: ReturnType<typeof useTipButtons>['tipOptions'][number];
 }) => {
   const [tipAmount, setTipAmount] = useState<USDC>(
@@ -145,7 +136,6 @@ const TipDrawer = ({
             onClick={() =>
               mutation
                 .mutateAsync({
-                  order: cart,
                   tip: tipAmount,
                 })
                 .then(() => setTipAmount(USDC.ZERO))
@@ -163,7 +153,7 @@ function CustomTipButton({
   cart,
   tipOption,
 }: {
-  cart: Order;
+  cart: Cart;
   tipOption: (typeof TIP_OPTIONS)[number] & { isSelected: boolean };
 }) {
   const [open, setOpen] = useState(false);
@@ -196,13 +186,12 @@ export const AddTipSection = ({
   cart,
   shopId,
 }: {
-  cart: Order;
+  cart: Cart;
   shopId: UUID;
 }) => {
   const { data: shop } = useShop({ id: shopId });
 
-  const cartSummary = useCartSummary();
-  const { tipOptions, setTip } = useTipButtons(cart, cartSummary);
+  const { tipOptions, setTip } = useTipButtons(cart);
 
   if (!shop) return null;
 

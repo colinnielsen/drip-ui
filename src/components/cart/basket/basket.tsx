@@ -6,23 +6,19 @@ import {
   useCartDrawer,
 } from '@/components/ui/drawer';
 import { Title1 } from '@/components/ui/typography';
-import {
-  collapseDuplicateItems,
-  isPaidOrder,
-} from '@/data-model/order/OrderDTO';
-import { Order } from '@/data-model/order/OrderType';
+import { Cart } from '@/data-model/cart/CartType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { useShop } from '@/queries/ShopQuery';
 import { X } from 'lucide-react';
 import { Fragment } from 'react';
 import { AsCheckoutSlide } from '../checkout-slides';
-import { OrderConfirmation } from '../order-confirmation/order-confirmation';
 import { AddTipSection } from './add-tip';
-import { CartItem, LoadingCartItem } from './cart-item';
-import { FarmerCard } from './farmer-card';
+import { LineItemComponent, LoadingCartItem } from './cart-item';
 import { FooterTotal } from './footer-total';
 import { NextButton } from './next-button';
 import { CartSummary } from './summary';
+import { FarmerCard } from './farmer-card';
+import { mapOrderOrCartToPaymentSummary } from '@/data-model/order/OrderDTO';
 
 export const EmptyBasket = () => {
   const { setOpen } = useCartDrawer();
@@ -91,69 +87,64 @@ export const LoadingBasketSlide = () => {
   );
 };
 
-export default function Basket({ cart, shop }: { cart: Order; shop: Shop }) {
-  const orderItems = collapseDuplicateItems(cart.orderItems);
-  const isPaid = isPaidOrder(cart);
+export default function Basket({ cart, shop }: { cart: Cart; shop: Shop }) {
   const { setOpen } = useCartDrawer();
   const { isFetching } = useShop({ id: shop.id });
+  const summary = mapOrderOrCartToPaymentSummary(cart);
 
   return (
     <AsCheckoutSlide>
-      {isPaid ? (
-        <OrderConfirmation cart={cart} shop={shop} />
-      ) : (
+      <div className="flex justify-start w-full items-center px-6 py-4">
+        <DrawerClose asChild>
+          <button onClick={() => setOpen(false)}>
+            <X height={24} width={24} />
+          </button>
+        </DrawerClose>
+      </div>
+      <DrawerTitle>
+        <Title1 as="div" className="text-palette-foreground px-6">
+          {shop.label}
+        </Title1>
+      </DrawerTitle>
+      <div className="flex-grow" />
+      <div className="flex flex-col pt-4 divide-y divide-light-gray">
+        {cart.lineItems.map((lineItem, index) => (
+          <LineItemComponent
+            key={index}
+            {...{
+              lineItem: lineItem,
+              shopId: shop.id,
+              orderId: cart.id,
+              isLoading: isFetching,
+            }}
+          />
+        ))}
+      </div>
+
+      {shop.tipConfig.enabled && (
         <>
-          <div className="flex justify-start w-full items-center px-6 py-4">
-            <DrawerClose asChild>
-              <button onClick={() => setOpen(false)}>
-                <X height={24} width={24} />
-              </button>
-            </DrawerClose>
-          </div>
-          <DrawerTitle>
-            <Title1 as="div" className="text-palette-foreground px-6">
-              {shop.label}
-            </Title1>
-          </DrawerTitle>
-          <div className="flex-grow" />
-          <div className="flex flex-col gap-6 pt-4">
-            {orderItems.map(([orderItem, quantity], index) => (
-              <Fragment key={index}>
-                <CartItem
-                  {...{
-                    orderItem,
-                    quantity,
-                    shopId: shop.id,
-                    orderId: cart.id,
-                    isLoading: isFetching,
-                  }}
-                />
-                <Divider />
-              </Fragment>
-            ))}
-          </div>
-
-          {shop.tipConfig.enabled && (
-            <>
-              <AddTipSection cart={cart} shopId={shop.id} />
-              <Divider />
-            </>
-          )}
-
-          <CartSummary isLoading={isFetching} />
-
+          <AddTipSection cart={cart} shopId={shop.id} />
           <Divider />
-
-          <div className="p-6">
-            <FarmerCard {...{ order: cart, className: 'h-28' }} />
-          </div>
-
-          <DrawerFooter className="p-0 w-full sticky bottom-0 bg-background shadow-[4px_0px_60px_0px_rgba(0,0,0,0.10)]">
-            <FooterTotal cart={cart} isLoading={isFetching} />
-            <NextButton shopType={shop.__sourceConfig.type} />
-          </DrawerFooter>
         </>
       )}
+
+      <Divider />
+
+      <CartSummary
+        isLoading={isFetching}
+        hideTipIfZero={shop.tipConfig.enabled}
+      />
+
+      <Divider />
+
+      <div className="p-6">
+        <FarmerCard {...{ shopId: shop.id, className: 'h-28' }} />
+      </div>
+
+      <DrawerFooter className="p-0 w-full sticky bottom-0 bg-background shadow-[4px_0px_60px_0px_rgba(0,0,0,0.10)]">
+        <FooterTotal summary={summary} isLoading={isFetching} />
+        <NextButton shopType={shop.__sourceConfig.type} />
+      </DrawerFooter>
     </AsCheckoutSlide>
   );
 }

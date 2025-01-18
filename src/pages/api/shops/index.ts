@@ -1,8 +1,8 @@
-import { withErrorHandling } from '@/lib/next';
+import { ApiRoute } from '@/lib/next';
 import ShopService from '@/services/ShopService';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export default withErrorHandling(async function handler(
+export default ApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

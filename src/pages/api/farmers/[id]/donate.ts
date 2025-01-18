@@ -1,6 +1,6 @@
 import { rehydrateCurrency } from '@/data-model/_common/currency/currencyDTO';
 import { BASE_CLIENT } from '@/lib/ethereum';
-import { getAndValidateUserRequest, withErrorHandling } from '@/lib/next';
+import { getAndValidateUserRequest, ApiRoute } from '@/lib/next';
 import { isUUID, sleep } from '@/lib/utils';
 import FarmerService from '@/services/FarmerService';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -29,7 +29,7 @@ export const pollForSuccessfulTxReceiptOrThrow = async (
   return true;
 };
 
-export default withErrorHandling(async function (
+export default ApiRoute(async function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

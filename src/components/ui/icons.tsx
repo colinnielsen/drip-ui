@@ -1,19 +1,21 @@
 import { ETH } from '@/data-model/_common/currency/ETH';
 import { USDC } from '@/data-model/_common/currency/USDC';
-import { Currency } from '@/data-model/_common/type/CommonType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { cn } from '@/lib/utils';
 import { Clock11, Clock2, Clock5, Clock8, LucideProps } from 'lucide-react';
 import { Label2 } from './typography';
+import { Currency } from '@/data-model/_common/currency';
 
 export function Price<T extends Currency>({
   originalPrice,
   actualPrice,
   isLoading: _isLoading,
+  isAdditive,
 }: Partial<{
   originalPrice: T;
   actualPrice: T;
   isLoading: boolean;
+  isAdditive: boolean;
 }>) {
   const isLoading = !originalPrice || _isLoading;
   const isUSDC = originalPrice instanceof USDC || actualPrice instanceof USDC;
@@ -26,17 +28,18 @@ export function Price<T extends Currency>({
       actualPrice.lt(originalPrice));
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 text-primary-gray">
+      {isAdditive && '+'}
       {isUSDC && <UsdcSVG />}
       <Label2
         as="span"
         className={cn(
-          'font-normal text-sm',
+          'font-medium text-sm',
           isDiscounted ? 'line-through' : '',
           isLoading && 'animate-pulse',
         )}
       >
-        ${originalPrice?.prettyFormat?.()}
+        {originalPrice?.prettyFormat?.()}
       </Label2>
       {isDiscounted && !!actualPrice && (
         <Label2 as="span" className="text-sm text-green-500 font-medium">
@@ -46,6 +49,30 @@ export function Price<T extends Currency>({
     </div>
   );
 }
+
+export const PriceRange = ({
+  minPrice,
+  maxPrice,
+}: Partial<{
+  minPrice: Currency;
+  maxPrice: Currency;
+}>) => {
+  const isUSDC = minPrice instanceof USDC || maxPrice instanceof USDC;
+  const priceIsDifferent = minPrice?.wei !== maxPrice?.wei;
+
+  return (
+    <div className="flex items-center gap-1">
+      {isUSDC && <UsdcSVG />}
+      <Label2 as="span">${minPrice?.prettyFormat?.()}</Label2>
+      {priceIsDifferent && (
+        <>
+          <Label2 as="span">&mdash;</Label2>
+          <Label2 as="span">${maxPrice?.prettyFormat?.()}</Label2>
+        </>
+      )}
+    </div>
+  );
+};
 
 export function HomeSvg() {
   return (

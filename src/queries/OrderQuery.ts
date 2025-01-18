@@ -1,40 +1,20 @@
-import { USDC } from '@/data-model/_common/currency/USDC';
-import { Unsaved } from '@/data-model/_common/type/CommonType';
-import { mapCartToSliceCart } from '@/data-model/_common/type/SliceDTO';
-import { Item } from '@/data-model/item/ItemType';
-import {
-  getOrderItemCostFromPriceDict,
-  getOrderSummary,
-} from '@/data-model/order/OrderDTO';
-import {
-  Cart,
-  ExternalOrderInfo,
-  Order,
-  OrderItem,
-} from '@/data-model/order/OrderType';
-import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
-import {
-  axiosFetcher,
-  err,
-  generateUUID,
-  sortDateAsc,
-  uniqBy,
-} from '@/lib/utils';
+import { UUID } from '@/data-model/_common/type/CommonType';
+import { mapCartToSliceCart } from '@/data-model/_external/data-sources/slice/SliceDTO';
+import { ExternalOrderInfo, Order } from '@/data-model/order/OrderType';
+import { getSlicerIdFromSliceExternalId } from '@/data-model/shop/ShopDTO';
+import { axiosFetcher, err, sortDateAsc, uniqBy } from '@/lib/utils';
+import { PayRequest } from '@/pages/api/orders/pay';
 import {
   QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { UUID } from 'crypto';
-import _ from 'lodash';
-import { useMemo } from 'react';
-import { Address, Hash, zeroAddress } from 'viem';
+import { Address, Hash } from 'viem';
 import { useFarmer } from './FarmerQuery';
 import { useShop, useShopPriceDictionary } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
-import OrderService from '@/services/OrderService';
 
 //
 //// HELPERS
@@ -123,38 +103,38 @@ export const useRecentCart = () => {
   });
 };
 
-export const useCartSummary = () => {
-  const { data: cart } = useRecentCart();
-  const { data: shop } = useShop({ id: cart?.shop });
-  const allShopItems = useMemo(
-    () =>
-      Object.values(shop?.menu ?? {})
-        .flat()
-        .sort((a, b) => a.id.localeCompare(b.id))
-        .reduce<Record<UUID, Item>>((acc, item) => {
-          acc[item.id] = item;
-          return acc;
-        }, {}),
-    [shop?.menu],
-  );
+// export const useCartSummary = () => {
+//   const { data: cart } = useRecentCart();
+//   const { data: shop } = useShop({ id: cart?.shop });
+//   const allShopItems = useMemo(
+//     () =>
+//       Object.values(shop?.menu ?? {})
+//         .flat()
+//         .sort((a, b) => a.id.localeCompare(b.id))
+//         .reduce<Record<UUID, Item>>((acc, item) => {
+//           acc[item.id] = item;
+//           return acc;
+//         }, {}),
+//     [shop?.menu],
+//   );
 
-  const cartSummary = useMemo(() => {
-    if (!cart) return null;
-    const cartWithDiscountPrices: Order = {
-      ...cart,
-      orderItems: cart.orderItems.map(o => ({
-        ...o,
-        item: {
-          ...o.item,
-          discountPrice: allShopItems[o.item.id]?.discountPrice,
-        },
-      })),
-    };
-    return getOrderSummary(cartWithDiscountPrices);
-  }, [cart, allShopItems]);
+//   const cartSummary = useMemo(() => {
+//     if (!cart) return null;
+//     const cartWithDiscountPrices: Order = {
+//       ...cart,
+//       lineItems: cart.lineItems.map(o => ({
+//         ...o,
+//         item: {
+//           ...o.item,
+//           discountPrice: allShopItems[o.item.id]?.discountPrice,
+//         },
+//       })),
+//     };
+//     return getOrderSummary(cartWithDiscountPrices);
+//   }, [cart, allShopItems]);
 
-  return cartSummary;
-};
+//   return cartSummary;
+// };
 
 export const useCartId = () => {
   const { data: cart } = useRecentCart();
@@ -175,7 +155,7 @@ export const useCartInSliceFormat = ({
 
   const slicerId =
     shop?.__sourceConfig.type === 'slice'
-      ? getSlicerIdFromSliceStoreId(shop.__sourceConfig.id)
+      ? getSlicerIdFromSliceExternalId(shop.__sourceConfig.id)
       : undefined;
 
   return useSliceStoreProducts({
@@ -190,82 +170,6 @@ export const useCartInSliceFormat = ({
 //
 //// MUTATIONS
 //
-export const useAddToCart = ({ shopId }: { shopId: UUID }) => {
-  const queryClient = useQueryClient();
-  const { data: userId } = useUserId();
-  const { data: recentCart } = useRecentCart();
-  const cart = recentCart?.status === '1-pending' ? recentCart : null;
-
-  return useMutation({
-    mutationFn: async ({
-      orderItem,
-    }: {
-      orderItem: Unsaved<OrderItem[]> | Unsaved<OrderItem>;
-    }) => {
-      return axiosFetcher<Order>(
-        `/api/orders/order${cart ? `?orderId=${cart.id}` : ''}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: {
-            action: 'add',
-            shopId,
-            orderItems: Array.isArray(orderItem) ? orderItem : [orderItem],
-          },
-          withCredentials: true,
-        },
-      );
-    },
-    // onMutate: async () => {
-    //   const optimisticCart: Cart = {
-    //     id: cart?.id || generateUUID(),
-    //     orderItems: [
-    //       ...(cart?.orderItems || []),
-    //       ...itemArray.map(i => ({ id: generateUUID(), ...i })),
-    //     ],
-    //     user: userId!,
-    //     shop: shopId,
-    //     status: 'pending',
-    //     timestamp: cart?.timestamp || new Date().toISOString(),
-    //     tip: cart?.tip || null,
-    //   };
-
-    //   queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
-    //     // replace the cart if it already exists
-    //     if (!!cart)
-    //       return prev.map(o =>
-    //         o.id === optimisticCart.id ? optimisticCart : o,
-    //       );
-    //     // otherwise, unshift the cart on the front of the array
-    //     return [optimisticCart, ..._.cloneDeep(prev)];
-    //   });
-
-    //   return { optimisticCart, initialCart: cart };
-    // },
-    onSettled: (data, _) => {
-      queryClient.refetchQueries({
-        queryKey: [ORDERS_QUERY_KEY, userId!],
-      });
-      // if (!data) debugger;
-      // return queryClient.setQueryData(
-      //   [ORDERS_QUERY_KEY, userId!],
-      //   (prev: Order[]) => prev.map(o => (o.id === data.id ? data : o)),
-      // );
-    },
-    // onError: (_error, _, context) => {
-    //   queryClient.invalidateQueries({
-    //     queryKey: [ORDERS_QUERY_KEY, userId!],
-    //   });
-    // queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
-    //   if (context && context.initialCart)
-    //     return [context.initialCart, ...prev.slice(1)];
-    //   return prev.slice(1);
-    // });
-    // },
-  });
-};
 
 export const useRemoveItemFromCart = ({
   orderItemId,
@@ -348,61 +252,8 @@ export const useRemoveItemFromCart = ({
   });
 };
 
-export const useTipMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    scope: { id: 'tip' },
-
-    mutationFn: async ({ order, tip }: { order: Order; tip: USDC | null }) =>
-      await axiosFetcher<ReturnType<(typeof OrderService)['update']>>(
-        '/api/orders/order?orderId=' + order.id,
-        {
-          method: 'POST',
-          data: {
-            orderId: order.id,
-            action: 'tip',
-            tip: tip?.toUSD() ?? null,
-          },
-        },
-      ),
-    onMutate: async ({ order: originalOrder, tip }) => {
-      await queryClient.cancelQueries({
-        queryKey: [ORDERS_QUERY_KEY, originalOrder.user!],
-      });
-
-      const optimisticCart: Order = {
-        ...originalOrder,
-        tip: tip
-          ? {
-              amount: tip,
-              // set a dummy address
-              address: zeroAddress,
-            }
-          : null,
-      };
-      updateOrderInPlace(queryClient, optimisticCart);
-      return { originalOrder, optimisticCart };
-    },
-    onSettled: variable => {
-      queryClient.refetchQueries({
-        queryKey: [ORDERS_QUERY_KEY, variable?.id!],
-      });
-    },
-    // onError(error, _, ctx) {
-    //   console.error(error);
-    //   if (!ctx) return;
-    //   rollbackOrderUpdate(queryClient, ctx.originalOrder);
-    // },
-    // onSuccess: (result, { order }) => {
-    //   if (result === null) removeOrder(queryClient, order);
-    //   else updateOrderInPlace(queryClient, result);
-    // },
-  });
-};
-
-export const useFarmerAllocationFromOrder = (order: Order) => {
-  const { data: shop } = useShop({ id: order.shop });
+export const useFarmerAllocation = ({ shopId }: { shopId: UUID }) => {
+  const { data: shop } = useShop({ id: shopId });
   const allocation = shop?.farmerAllocations[0];
 
   const { data: farmer } = useFarmer(allocation?.farmer);
@@ -424,22 +275,15 @@ export const useAssocatePaymentToCart = () => {
     scope: { id: 'cart' },
     mutationFn: async (transactionHash: Hash) => {
       if (!cart || !priceDict) throw Error('No cart or price dict');
-      return axiosFetcher<Order>(`/api/orders/pay`, {
+      return axiosFetcher<Order, PayRequest>(`/api/orders/pay`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         data: {
+          type: 'slice',
           transactionHash,
           orderId: cart.id,
-          paidPrices: cart.orderItems.reduce(
-            (acc, o) => ({
-              ...acc,
-              // the user pays the discount price
-              [o.id]: getOrderItemCostFromPriceDict(priceDict, o).discountPrice,
-            }),
-            {},
-          ),
         },
         withCredentials: true,
       });

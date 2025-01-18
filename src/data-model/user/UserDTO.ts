@@ -1,5 +1,5 @@
 import { User as PrivyUser } from '@privy-io/server-auth';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { v5, validate as validateUUID } from 'uuid';
 import { PrivyDID } from '../_external/privy';
 import { SavedUser, SessionUser, User, WalletConnectorType } from './UserType';

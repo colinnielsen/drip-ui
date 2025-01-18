@@ -1,9 +1,11 @@
 import { createFarmer } from '@/data-model/farmer/FarmerDTO';
 import { Farmer } from '@/data-model/farmer/FarmerType';
-import { ManualStoreConfig } from '@/data-model/shop/ShopType';
-import { UUID } from 'crypto';
+import { SliceShopConfig } from '@/data-model/shop/ShopType';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { subDays } from 'date-fns';
 import { generateUUID } from './utils';
+import { Unsaved } from '@/data-model/_common/type/CommonType';
+import { getSliceExternalIdFromSliceId } from '@/data-model/shop/ShopDTO';
 
 export const STATIC_FARMER_DATA: Farmer[] = [
   createFarmer({
@@ -33,11 +35,10 @@ export const STATIC_FARMER_DATA: Farmer[] = [
   }),
 ];
 
-export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
+export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   {
     __type: 'slice',
-    sliceId: 799,
-    sliceVersion: 1,
+    externalId: getSliceExternalIdFromSliceId(799),
     location: {
       label: 'Montgomery, AL',
       address: '39 Dexter Ave suite 102, Montgomery, AL 36104',
@@ -57,8 +58,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   },
   {
     __type: 'slice',
-    sliceId: 827,
-    sliceVersion: 1,
+    externalId: getSliceExternalIdFromSliceId(827),
     location: {
       label: 'Oakland, CA',
       address: '377 2ND ST, OAKLAND, CA 94607',
@@ -78,8 +78,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   },
   {
     __type: 'slice',
-    sliceId: 766,
-    sliceVersion: 1,
+    externalId: getSliceExternalIdFromSliceId(766),
     name: 'Piccolo Caffe e Vino',
     logo: '/cafes/piccolo.webp',
     url: 'https://www.piccolocaffe.ca',
@@ -92,8 +91,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   },
   {
     __type: 'slice',
-    sliceId: 815,
-    sliceVersion: 1,
+    externalId: getSliceExternalIdFromSliceId(815),
     name: "Lion's Milk",
     logo: '/cafes/lions-milk.webp',
     url: 'https://www.lionsmilkbk.com/',
@@ -106,8 +104,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   },
   {
     __type: 'slice',
-    sliceId: 852,
-    sliceVersion: 1,
+    externalId: getSliceExternalIdFromSliceId(852),
     name: 'Noun Coffee',
     logo: '/cafes/noun.webp',
     url: 'https://noun.coffee/',
@@ -120,8 +117,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   },
   // {
   //   __type: 'slice',
-  //   sliceId: 877,
-  //   sliceVersion: 1,
+  //   externalId: getSliceStoreIdFromSliceId(877),
   //   name: 'poorboy coffee',
   //   logo: '/cafes/poorboy.webp',
   //   url: 'https://www.instagram.com/poorboy.coffee/?hl=en',
@@ -134,8 +130,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   // },
   {
     __type: 'slice',
-    sliceId: 425,
-    sliceVersion: 1,
+    externalId: getSliceExternalIdFromSliceId(425),
     name: 'Compass Coffee',
     logo: '/cafes/compass.webp',
     url: 'https://www.compasscoffee.com/',
@@ -148,8 +143,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   },
   {
     __type: 'slice',
-    sliceId: 974,
-    sliceVersion: 1,
+    externalId: getSliceExternalIdFromSliceId(974),
     name: 'Town Mouse',
     logo: '/cafes/town-mouse.webp',
     url: 'https://www.townmouse.de/',
@@ -162,8 +156,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   },
   {
     __type: 'slice',
-    sliceId: 1008,
-    sliceVersion: 1,
+    externalId: getSliceExternalIdFromSliceId(1008),
     name: "Menotti's Coffee",
     logo: '/cafes/menottis.webp',
     url: 'https://menottis.com/',
@@ -176,8 +169,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   },
   // {
   //   __type: 'slice',
-  //   sliceId: 805,
-  //   sliceVersion: 1,
+  //   externalId: getSliceStoreIdFromSliceId(805),
   //   location: {
   //     label: 'Bruxelles, Belgium',
   //     address: 'Mont des Arts, 1000 Bruxelles, Belgium',
@@ -202,8 +194,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
   // },
   {
     __type: 'slice',
-    sliceId: 769,
-    sliceVersion: 1,
+    externalId: getSliceExternalIdFromSliceId(769),
     location: {
       label: 'Denver, CO',
       address: "Colin's office",
@@ -211,7 +202,7 @@ export const ONBOARDED_SHOPS: ManualStoreConfig[] = [
     },
     tipConfig: {
       __type: 'single-recipient',
-      address: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
+      ethAddress: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
       enabled: true,
     },
     name: 'The Dev Cafe',

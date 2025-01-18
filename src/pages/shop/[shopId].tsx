@@ -1,10 +1,14 @@
 import FarmerCard from '@/components/shop-page/farmer-intro-card';
 import { ShopHeader, ShopHeaderDetails } from '@/components/shop-page/header';
 import { ItemList } from '@/components/shop-page/item-list';
-import { SLICE_VERSION } from '@/data-model/_common/type/SliceDTO';
-import { deriveShopIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
+import { SLICE_VERSION } from '@/data-model/_external/data-sources/slice/SliceDTO';
+import { deriveShopIdFromSquareStoreExternalId } from '@/data-model/_external/data-sources/square/SquareDTO';
+import {
+  deriveShopIdFromSliceStoreId,
+  EMPTY_MENU,
+  getSlicerIdFromSliceExternalId,
+} from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
-import { ONBOARDED_SHOPS } from '@/lib/static-data';
 import { rehydrateData } from '@/lib/utils';
 import { farmerQuery } from '@/queries/FarmerQuery';
 import { useShop } from '@/queries/ShopQuery';
@@ -15,7 +19,6 @@ import {
   QueryClient,
   dehydrate,
 } from '@tanstack/react-query';
-import { UUID } from 'crypto';
 import { GetStaticPaths, GetStaticProps } from 'next/types';
 import { useMemo } from 'react';
 
@@ -23,23 +26,34 @@ import { useMemo } from 'react';
 ///// STATIC SITE GENERATION
 ///
 
-const STATIC_PAGE_DATA = ONBOARDED_SHOPS.map(c => ({
-  __type: 'storefront',
-  id: deriveShopIdFromSliceStoreId(c.sliceId, SLICE_VERSION),
-  label: c.name,
-  backgroundImage: c.backgroundImage ?? '',
-  logo: c.logo ?? '',
-  location: 'location' in c ? c.location : null,
-}));
+const STATIC_PAGE_DATA = () =>
+  ShopService.findAllShopConfigs().then(configs =>
+    configs.map(c => ({
+      __type: 'storefront',
+      id:
+        c.__type === 'slice'
+          ? deriveShopIdFromSliceStoreId(
+              getSlicerIdFromSliceExternalId(c.externalId),
+              SLICE_VERSION,
+            )
+          : deriveShopIdFromSquareStoreExternalId(c.externalId),
+      label: c.name,
+      backgroundImage: c.backgroundImage ?? '',
+      logo: c.logo ?? '',
+      location: 'location' in c ? c.location : null,
+    })),
+  );
 
-export type StaticPageData = (typeof STATIC_PAGE_DATA)[number];
+export type StaticPageData = Awaited<
+  ReturnType<typeof STATIC_PAGE_DATA>
+>[number];
 
-export const getStaticPaths: GetStaticPaths<{ shopId: UUID }> = () => {
-  const paths = STATIC_PAGE_DATA.map(d => ({
+export const getStaticPaths = (async () => {
+  const paths = (await STATIC_PAGE_DATA()).map(d => ({
     params: { shopId: d.id },
   }));
-  return { paths, fallback: false };
-};
+  return { paths, fallback: true };
+}) satisfies GetStaticPaths;
 
 export const getStaticProps: GetStaticProps<{
   staticShop: StaticPageData;
@@ -47,7 +61,9 @@ export const getStaticProps: GetStaticProps<{
 }> = async ({ params }) => {
   if (!params?.shopId) throw Error('cannot find params');
 
-  const staticShop = STATIC_PAGE_DATA.find(l => l.id === params.shopId)!;
+  const staticShop = (await STATIC_PAGE_DATA()).find(
+    l => l.id === params.shopId,
+  )!;
   if (!staticShop) return { notFound: true };
 
   const queryClient = new QueryClient();
@@ -85,19 +101,15 @@ function DynamicShopPage(staticShop: StaticPageData) {
 
   if (error) return <div className="text-red-500">{error.message}</div>;
 
-  const emptyMenu = {
-    espresso: [],
-    coffee: [],
-    other: [],
-  };
-
-  const items = Object.entries(shop?.menu || emptyMenu)
+  const items = Object.entries(shop?.menu || EMPTY_MENU)
     .filter(([_, items]) => (isLoading ? true : items.length > 0))
     .sort((a, b) => a[0].localeCompare(b[0]));
 
+  const hasFarmerAllocation = shop?.farmerAllocations[0]?.farmer;
+
   return (
     <>
-      {shop?.farmerAllocations[0]?.farmer && (
+      {hasFarmerAllocation && (
         <FarmerCard
           farmer={shop?.farmerAllocations[0]?.farmer}
           allocationBPS={shop?.farmerAllocations[0]?.allocationBPS}
@@ -110,6 +122,7 @@ function DynamicShopPage(staticShop: StaticPageData) {
           No items available at this time
         </div>
       )}
+
       {items.map(([category, items]) => (
         <ItemList
           key={category}

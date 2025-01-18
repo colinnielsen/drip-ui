@@ -1,6 +1,5 @@
 import { useCheckoutContext } from '@/components/cart/context';
-import { getSlicerIdFromSliceStoreId } from '@/data-model/shop/ShopDTO';
-import { BASE_CLIENT, WAGMI_CONFIG, USDC_ADDRESS_BASE } from '@/lib/ethereum';
+import { BASE_CLIENT, USDC_ADDRESS_BASE, WAGMI_CONFIG } from '@/lib/ethereum';
 import { SLICE_ENTRYPOINT_ADDRESS, sliceKit } from '@/lib/slice';
 import { minutes } from '@/lib/utils';
 import {
@@ -26,6 +25,7 @@ import {
   useRecentCart,
 } from './OrderQuery';
 import { useShopSourceConfig } from './ShopQuery';
+import { getSlicerIdFromSliceExternalId } from '@/data-model/shop/ShopDTO';
 
 /**
  * @returns the slice keyed by productId
@@ -74,6 +74,9 @@ export const usePayAndOrder = ({
     spender: SLICE_ENTRYPOINT_ADDRESS,
   });
 
+  if (shopSourceConfig?.type !== 'slice')
+    throw new Error('Implementation Error: source config is not of type slice');
+
   const extraCosts: ExtraCostParamsOptional[] | undefined = useMemo(
     () =>
       dripCart?.tip && shopSourceConfig?.id
@@ -81,10 +84,10 @@ export const usePayAndOrder = ({
             {
               currency: dripCart.tip.amount.address,
               amount: dripCart.tip.amount.toWei(),
-              recipient: dripCart.tip.address,
+              recipient: dripCart.tip.recipient,
               description: 'Tip',
               slicerId: BigInt(
-                getSlicerIdFromSliceStoreId(shopSourceConfig.id),
+                getSlicerIdFromSliceExternalId(shopSourceConfig.id),
               ),
             },
           ]
@@ -127,6 +130,7 @@ export const usePayAndOrder = ({
 
     await wallet?.switchChain(base.id);
     const totalUsdcToPay = summary?.total.usdc.toWei();
+
     await handleCheckoutViem(BASE_CLIENT, walletClient, {
       capabilities: null,
       payProductsConfig: await payProductsConfig(WAGMI_CONFIG, {

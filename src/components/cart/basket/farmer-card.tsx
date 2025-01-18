@@ -1,24 +1,24 @@
 import dripCup2 from '@/assets/drip-cup-2.png';
-import { Order } from '@/data-model/order/OrderType';
-import { useFarmerAllocationFromOrder } from '@/queries/OrderQuery';
+import { InfoCard } from '@/components/ui/info-card';
+import { UUID } from '@/data-model/_common/type/CommonType';
+import { useFarmerAllocation } from '@/queries/OrderQuery';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Skeleton } from '../../ui/skeleton';
 import { Label1, Title2 } from '../../ui/typography';
-import { cn } from '@/lib/utils';
-import { InfoCard } from '@/components/ui/info-card';
-import Link from 'next/link';
 
 export const FarmerCard = ({
-  order,
+  shopId,
   showPics,
   className,
 }: {
-  order: Order;
+  shopId: UUID;
   showPics?: boolean;
   className?: string;
 }) => {
-  const data = useFarmerAllocationFromOrder(order);
+  const data = useFarmerAllocation({ shopId });
   if (!data) return null;
+
   const allocPercent = data.allocation.allocationBPS / 100;
 
   const left = !showPics ? (

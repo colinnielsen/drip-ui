@@ -1,16 +1,12 @@
-import { mapSliceProductCartToItem } from '@/data-model/_common/type/SliceDTO';
-import { Item, ItemCategory } from '@/data-model/item/ItemType';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import {
-  EMPTY_MENU,
-  getSlicerIdFromSliceStoreId,
+  deriveShopConfigIdFromExternalId,
   isStorefront,
+  mapShopSourceConfigToExternalId,
 } from '@/data-model/shop/ShopDTO';
-import { Shop } from '@/data-model/shop/ShopType';
-import { sliceKit } from '@/lib/slice';
+import { Shop, ShopConfig, ShopExternalId } from '@/data-model/shop/ShopType';
 import { rehydrateData } from '@/lib/utils';
 import { sql } from '@vercel/postgres';
-import { UUID } from 'crypto';
-import { Address } from 'viem';
 
 const findById = async (
   id: UUID,
@@ -29,7 +25,7 @@ const findAll = async ({ rehydrate = true } = {}): Promise<Shop[]> => {
 };
 
 const save = async (shop: Shop): Promise<Shop> => {
-  await sql`
+  const result = await sql`
     INSERT INTO shops (
       id,
       __type,
@@ -60,13 +56,13 @@ const save = async (shop: Shop): Promise<Shop> => {
       label = EXCLUDED.label,
       "backgroundImage" = EXCLUDED."backgroundImage",
       logo = EXCLUDED.logo,
-      url = EXCLUDED.url,
       "farmerAllocations" = EXCLUDED."farmerAllocations",
       menu = EXCLUDED.menu,
       location = EXCLUDED.location,
       "tipConfig" = EXCLUDED."tipConfig"
+    RETURNING *
   `;
-  return shop;
+  return result.rows[0] as Shop;
 };
 
 const remove = async (id: UUID): Promise<void> => {
@@ -78,55 +74,140 @@ const _rehydrate = (shop: Shop): Shop => {
   return rehydrateData(shop);
 };
 
-/**
- * @dev takes a shop and returns the shop with the `discountPrice` field set on the menu items
- * based on the current user's wallet address and current shop discounts
- */
-export const includeDiscountsOnShop = async (
-  shop: Shop,
-  {
-    walletAddress,
-    userId,
-  }: { walletAddress: Address | undefined; userId: string | undefined },
-): Promise<Shop> => {
-  // no op for other store types
-  if (shop.__sourceConfig.type !== 'slice') return shop;
+// /**
+//  * @dev takes a shop and returns the shop with the `discountPrice` field set on the menu items
+//  * based on the current user's wallet address and current shop discounts
+//  */
+// export const includeDiscountsOnShop = async (
+//   shop: Shop,
+//   {
+//     walletAddress,
+//     userId,
+//   }: { walletAddress: Address | undefined; userId: string | undefined },
+// ): Promise<Shop> => {
+//   // no op for other store types
+//   if (shop.__sourceConfig.type !== 'slice') return shop;
 
-  const slicerId = getSlicerIdFromSliceStoreId(shop.__sourceConfig.id);
-  console.debug('slicerId', slicerId);
-  const { cartProducts } = await sliceKit
-    .getStoreProducts({
-      slicerId,
-      buyer: walletAddress,
-    })
-    .catch(err => {
-      console.error('error getting store products', err);
-      return { cartProducts: [] };
-    });
+//   const slicerId = getSlicerIdFromSliceExternalId(shop.__sourceConfig.id);
+//   console.debug('slicerId', slicerId);
+//   const { cartProducts } = await sliceKit
+//     .getStoreProducts({
+//       slicerId,
+//       buyer: walletAddress,
+//     })
+//     .catch(err => {
+//       console.error('error getting store products', err);
+//       return { cartProducts: [] };
+//     });
 
-  const discountedItemById = cartProducts
-    .map(mapSliceProductCartToItem)
-    .reduce<Record<UUID, Item>>(
-      (acc, item) => ({
-        ...acc,
-        [item.id]: item,
-      }),
-      {},
-    );
+//   const discountedItemById = cartProducts
+//     .map(mapSliceProductCartToItem)
+//     .reduce<Record<UUID, Item>>(
+//       (acc, item) => ({
+//         ...acc,
+//         [item.id]: item,
+//       }),
+//       {},
+//     );
 
-  return {
-    ...shop,
-    menu: Object.entries(shop.menu).reduce<Shop['menu']>(
-      (acc, [category, items]) => ({
-        ...acc,
-        [category as ItemCategory]: items.map(item => ({
-          ...item,
-          discountPrice: discountedItemById[item.id]?.price || undefined,
-        })),
-      }),
-      EMPTY_MENU,
-    ),
-  };
+//   return {
+//     ...shop,
+//     menu: Object.entries(shop.menu).reduce<Shop['menu']>(
+//       (acc, [category, items]) => ({
+//         ...acc,
+//         [category satisfies ItemCategory]: items.map(item => ({
+//           ...item,
+//           discountPrice: discountedItemById[item.id]?.variants[0].price || undefined,
+//         })),
+//       }),
+//       EMPTY_MENU,
+//     ),
+//   };
+// };
+
+export const saveShopConfig = async (
+  config: Omit<ShopConfig, 'id'>,
+): Promise<ShopConfig> => {
+  const result = await sql`
+    INSERT INTO shop_configs (
+      id,
+      __type,
+      "externalId",
+      name,
+      location,
+      logo,
+      "backgroundImage",
+      url,
+      "farmerAllocation",
+      "fundRecipientConfig",
+      "tipConfig"
+    )
+    VALUES (
+      ${deriveShopConfigIdFromExternalId(config)},
+      ${config.__type},
+      ${config.externalId},
+      ${config.name},
+      ${JSON.stringify(config.location)},
+      ${config.logo},
+      ${config.backgroundImage},
+      ${config.url},
+      ${JSON.stringify(config.farmerAllocation)},
+      ${'fundRecipientConfig' in config ? JSON.stringify(config.fundRecipientConfig) : null},
+      ${'tipConfig' in config ? JSON.stringify(config.tipConfig) : null}
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      __type = EXCLUDED.__type,
+      "externalId" = EXCLUDED."externalId",
+      name = EXCLUDED.name,
+      location = EXCLUDED.location,
+      logo = EXCLUDED.logo,
+      "backgroundImage" = EXCLUDED."backgroundImage",
+      url = EXCLUDED.url,
+      "farmerAllocation" = EXCLUDED."farmerAllocation",
+      "fundRecipientConfig" = EXCLUDED."fundRecipientConfig",
+      "tipConfig" = EXCLUDED."tipConfig"
+    RETURNING *
+  `;
+  return result.rows[0] as ShopConfig;
+};
+
+const findAllShopConfigs = async (): Promise<ShopConfig[]> => {
+  const result = await sql`SELECT * FROM shop_configs`;
+  return result.rows as ShopConfig[];
+};
+
+const findShopConfigById = async (id: UUID): Promise<ShopConfig | null> => {
+  const result = await sql`SELECT * FROM shop_configs WHERE id = ${id}`;
+  return result.rows[0] as ShopConfig | null;
+};
+
+const findShopConfigByExternalId = async (
+  externalId: ShopExternalId,
+): Promise<ShopConfig | null> => {
+  const result =
+    await sql`SELECT * FROM shop_configs WHERE "externalId" = ${externalId}`;
+  return result.rows[0] as ShopConfig | null;
+};
+
+const findShopConfigByShopId = async (
+  shopId: Shop['id'],
+): Promise<ShopConfig | null> => {
+  const shop = await findById(shopId);
+  if (!shop) return null;
+  const shopConfig = await findShopConfigByExternalId(
+    mapShopSourceConfigToExternalId(shop.__sourceConfig),
+  );
+  if (!shopConfig) return null;
+
+  return shopConfig;
+};
+
+const findSquareShopConfigsByMerchantId = async (
+  merchantId: string,
+): Promise<ShopConfig[]> => {
+  const result =
+    await sql`SELECT * FROM shop_configs WHERE "externalId" LIKE ${`%${merchantId}%::%`}`;
+  return result.rows as ShopConfig[];
 };
 
 //
@@ -136,8 +217,13 @@ const shopService = {
   findById,
   findAll,
   save,
+  saveShopConfig,
+  findAllShopConfigs,
+  findShopConfigById,
+  findShopConfigByExternalId,
+  findShopConfigByShopId,
+  findSquareShopConfigsByMerchantId,
   remove,
-  includeDiscountsOnShop,
 };
 
 export default shopService;

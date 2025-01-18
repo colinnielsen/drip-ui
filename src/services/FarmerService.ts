@@ -8,7 +8,7 @@ import {
 } from '@/data-model/farmer/FarmerType';
 import { err, generateUUID } from '@/lib/utils';
 import { sql } from '@vercel/postgres';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { v4 } from 'uuid';
 
 const mapSavedFarmerMessageToFarmerMessage = (

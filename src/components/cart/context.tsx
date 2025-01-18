@@ -5,7 +5,6 @@ import { useUSDCBalance } from '@/queries/EthereumQuery';
 import {
   ORDERS_QUERY_KEY,
   useCartId,
-  useCartSummary,
   useRecentCart,
 } from '@/queries/OrderQuery';
 import { useUser } from '@/queries/UserQuery';
@@ -13,6 +12,9 @@ import { useWallets } from '@privy-io/react-auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useGoToSlide, useSlideInView } from '../ui/carousel';
+import { useCart } from '@/queries/CartQuery';
+import { USDC } from '@/data-model/_common/currency/USDC';
+import { UnimplementedPathError } from '@/lib/effect';
 
 // const SLIDE_MAP = {
 //   initializing: 1,
@@ -62,13 +64,10 @@ const useDetermineCheckoutStep = (): {
   const slideInView = useSlideInView();
   const { wallets, ready: privyReady } = useWallets();
   const { data: user, isLoading: isUserLoading } = useUser();
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useCart();
   const { data: balance, isLoading: isBalanceLoading } = useUSDCBalance({
-    pollingInterval:
-      slideInView === 0 && cart?.status === '1-pending' ? 6_000 : undefined,
+    pollingInterval: slideInView === 0 && cart ? 6_000 : undefined,
   });
-
-  const cartSummary = useCartSummary();
 
   // console.log({
   //   user,
@@ -76,15 +75,12 @@ const useDetermineCheckoutStep = (): {
   //   balance,
   //   cart,
   //   isBalanceLoading,
-  //   isCartLoading,
   //   isUserLoading,
-  //   balanceError,
-  //   cartError,
-  //   userError,
   // });
 
   // (shouldn't happen)
-  if (!privyReady || isUserLoading || !user || !cart || !cartSummary)
+
+  if (!privyReady || isUserLoading || !user || !cart)
     return {
       step: 'initializing',
     };
@@ -99,7 +95,10 @@ const useDetermineCheckoutStep = (): {
       step: 'initializing',
     };
 
-  const hasSufficientFunds = balance.gte(cartSummary.total.usdc);
+  if (!(cart.quotedTotalAmount instanceof USDC))
+    throw new UnimplementedPathError('Non-USDC checkout not implemented yet');
+
+  const hasSufficientFunds = balance.gte(cart.quotedTotalAmount);
   if (hasSufficientFunds) return { step: 'pay' };
   else return { step: 'get-usdc' };
 };
@@ -145,31 +144,29 @@ export const CheckoutProvider = ({
 }) => {
   const { step } = useDetermineCheckoutStep();
   const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
-  const cartId = useCartId();
-  const queryClient = useQueryClient();
   const goToSlide = useGoToSlide();
 
   const shouldPoll = useShouldPollForCartStatus(step, paymentStep);
 
-  useQuery({
-    queryKey: ['cart-status', cartId],
-    queryFn: () =>
-      axiosFetcher<Order>(`/api/orders/status`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: { orderId: cartId },
-      }).then(data => {
-        if (data.status === '3-in-progress') goToSlide?.(2);
-        return queryClient.setQueryData(
-          [ORDERS_QUERY_KEY, data.user],
-          (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
-        );
-      }),
-    enabled: shouldPoll && !!cartId,
-    refetchInterval: 3000,
-  });
+  // useQuery({
+  //   queryKey: ['cart-status', cartId],
+  //   queryFn: () =>
+  //     axiosFetcher<Order>(`/api/orders/status`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       data: { orderId: cartId },
+  //     }).then(data => {
+  //       if (data.status === '2-in-progress') goToSlide?.(2);
+  //       return queryClient.setQueryData(
+  //         [ORDERS_QUERY_KEY, data.user],
+  //         (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
+  //       );
+  //     }),
+  //   enabled: shouldPoll && !!cartId,
+  //   refetchInterval: 3000,
+  // });
 
   useEffect(() => {
     console.log({ checkoutStep: step });

@@ -27,7 +27,13 @@ export function NumberInput({
         {value === 1 && useTrashForDelete ? (
           <Trash2 height={16} strokeWidth={strokeWidth} />
         ) : (
-          <Minus height={16} strokeWidth={strokeWidth} />
+          <Minus
+            height={16}
+            strokeWidth={strokeWidth}
+            className={cn({
+              'text-primary-gray': value === 1,
+            })}
+          />
         )}
       </button>
       <div className="flex items-center justify-center grow">

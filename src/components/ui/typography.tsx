@@ -144,7 +144,7 @@ export const Body = ({
   className,
   children,
   ...rest
-}: TypographyProps) => (
+}: TypographyProps & { htmlFor?: string }) => (
   <Component
     className={cn(
       'text-[16px] leading-[19.4px] font-libreFranklin align-middle',

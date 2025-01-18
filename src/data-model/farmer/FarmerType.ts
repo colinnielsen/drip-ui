@@ -1,5 +1,5 @@
-import { UUID } from 'crypto';
-import { Currency } from '../_common/type/CommonType';
+import { UUID } from '@/data-model/_common/type/CommonType';
+import { Currency } from '../_common/currency';
 import { User } from '../user/UserType';
 
 /**

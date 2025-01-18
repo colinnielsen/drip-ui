@@ -31,7 +31,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment } from 'react';
 import { OrderItemDisplay } from '../basket/cart-item';
-import { OrderSummary } from '../basket/summary';
+import { CartSummary } from '../basket/summary';
 import { AsCheckoutSlide } from '../checkout-slides';
 
 export const OrderConfirmation = ({
@@ -208,7 +208,7 @@ export const OrderConfirmation = ({
           </div>
         </div>
 
-        <OrderSummary summary={summary} hideTipIfZero />
+        <CartSummary summary={summary} hideTipIfZero />
 
         <DialogFooter className="w-full px-6 pb-8">
           <DialogClose asChild>

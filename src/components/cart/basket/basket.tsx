@@ -6,6 +6,7 @@ import {
   useCartDrawer,
 } from '@/components/ui/drawer';
 import { Title1 } from '@/components/ui/typography';
+import { mapCartToPaymentSummary } from '@/data-model/cart/CartDTO';
 import { Cart } from '@/data-model/cart/CartType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { useShop } from '@/queries/ShopQuery';
@@ -14,11 +15,10 @@ import { Fragment } from 'react';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { AddTipSection } from './add-tip';
 import { LineItemComponent, LoadingCartItem } from './cart-item';
+import { FarmerCard } from './farmer-card';
 import { FooterTotal } from './footer-total';
 import { NextButton } from './next-button';
 import { CartSummary } from './summary';
-import { FarmerCard } from './farmer-card';
-import { mapOrderOrCartToPaymentSummary } from '@/data-model/order/OrderDTO';
 
 export const EmptyBasket = () => {
   const { setOpen } = useCartDrawer();
@@ -90,7 +90,7 @@ export const LoadingBasketSlide = () => {
 export default function Basket({ cart, shop }: { cart: Cart; shop: Shop }) {
   const { setOpen } = useCartDrawer();
   const { isFetching } = useShop({ id: shop.id });
-  const summary = mapOrderOrCartToPaymentSummary(cart);
+  const summary = mapCartToPaymentSummary(cart);
 
   return (
     <AsCheckoutSlide>
@@ -121,7 +121,7 @@ export default function Basket({ cart, shop }: { cart: Cart; shop: Shop }) {
         ))}
       </div>
 
-      {shop.tipConfig.enabled && (
+      {!!shop.tipConfig && (
         <>
           <AddTipSection cart={cart} shopId={shop.id} />
           <Divider />
@@ -130,10 +130,7 @@ export default function Basket({ cart, shop }: { cart: Cart; shop: Shop }) {
 
       <Divider />
 
-      <CartSummary
-        isLoading={isFetching}
-        hideTipIfZero={shop.tipConfig.enabled}
-      />
+      <CartSummary isLoading={isFetching} hideTipIfZero={!!shop.tipConfig} />
 
       <Divider />
 

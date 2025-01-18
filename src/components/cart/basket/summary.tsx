@@ -1,13 +1,12 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
-import { Cart } from '@/data-model/cart/CartType';
+import { mapCartToPaymentSummary } from '@/data-model/cart/CartDTO';
+import { PaymentSummary } from '@/data-model/order/OrderType';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/queries/CartQuery';
 import { Price } from '../../ui/icons';
 import { Body, Headline } from '../../ui/typography';
-import { Order, PaymentSummary } from '@/data-model/order/OrderType';
-import { mapOrderOrCartToPaymentSummary } from '@/data-model/order/OrderDTO';
 
-export const OrderSummary = ({
+export const CostSummary = ({
   summary,
   hideTipIfZero: hideTipIfZero = false,
   isLoading,
@@ -63,6 +62,6 @@ export const CartSummary = ({
 
   if (!cart) return null;
 
-  const summary = mapOrderOrCartToPaymentSummary(cart);
-  return <OrderSummary summary={summary} isLoading={isLoading} hideTipIfZero />;
+  const summary = mapCartToPaymentSummary(cart);
+  return <CostSummary summary={summary} isLoading={isLoading} hideTipIfZero />;
 };

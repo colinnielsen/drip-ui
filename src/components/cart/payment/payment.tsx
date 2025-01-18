@@ -1,12 +1,13 @@
 import coffeeGif from '@/assets/coffee-dive.gif';
 import { CTAButton, LoadingCTAButton } from '@/components/ui/button';
 import { useGoToSlide } from '@/components/ui/carousel';
-import { Drip, DripSmall, Label1, Mono } from '@/components/ui/typography';
-import { USDC } from '@/data-model/_common/currency/USDC';
+import { Drip, DripSmall, Label1 } from '@/components/ui/typography';
+import { mapCartToPaymentSummary } from '@/data-model/cart/CartDTO';
+import { mapOrderToPaymentSummary } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop, ShopSourceConfig } from '@/data-model/shop/ShopType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
-import { isDev } from '@/lib/utils';
+import { useCart } from '@/queries/CartQuery';
 import { useWalletAddress } from '@/queries/EthereumQuery';
 import { useCartInSliceFormat, useRecentCart } from '@/queries/OrderQuery';
 import { usePayAndOrder as useSlicePayAndOrder } from '@/queries/SliceQuery';
@@ -16,8 +17,6 @@ import { useMemo } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
-import { useCart } from '@/queries/CartQuery';
-import { mapOrderOrCartToPaymentSummary } from '@/data-model/order/OrderDTO';
 
 export const SlicePayButton = () => {
   const buyerAddress = useWalletAddress();
@@ -29,7 +28,7 @@ export const SlicePayButton = () => {
   const goToSlide = useGoToSlide();
   const { payAndOrder, ready } = useSlicePayAndOrder();
 
-  const cartSummary = mapOrderOrCartToPaymentSummary(cart);
+  const cartSummary = mapOrderToPaymentSummary(cart);
 
   if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress || !ready)
     return <LoadingCTAButton />;
@@ -57,7 +56,7 @@ export const SquarePayButton = () => {
   const goToSlide = useGoToSlide();
   const { ready, mutateAsync: payAndOrder } = useSquarePayAndOrder();
 
-  const cartSummary = mapOrderOrCartToPaymentSummary(cart);
+  const cartSummary = mapCartToPaymentSummary(cart);
   if (!ready) return <LoadingCTAButton />;
 
   const isFree = cartSummary?.total?.wei === 0n;

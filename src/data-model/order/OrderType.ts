@@ -32,6 +32,14 @@ export type PaymentInfo = {
   amount: Currency;
 };
 
+type FarmerDistribution = {
+  __type: 'farmer-distribution';
+  farmerId: UUID;
+  amount: Currency;
+};
+
+export type AdditionalDistribution = FarmerDistribution;
+
 //
 //// ORDER VARIATIONS
 //
@@ -67,6 +75,7 @@ export type _Order = {
    */
   status: '1-submitting' | '2-in-progress' | '3-complete';
   payments: PaymentInfo[];
+  additionalDistributions?: AdditionalDistribution[];
   externalOrderInfo?: ExternalOrderInfo;
 };
 

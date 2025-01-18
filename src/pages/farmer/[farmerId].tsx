@@ -1,9 +1,9 @@
-import { FarmerBio } from '@/components/farmer-page.tsx/bio';
-import { FarmerCampaigns } from '@/components/farmer-page.tsx/campaigns';
-import { FarmerHeader } from '@/components/farmer-page.tsx/header';
-import { FarmerMessageBoard } from '@/components/farmer-page.tsx/message-board';
-import { FarmerPosts } from '@/components/farmer-page.tsx/posts';
-import { FarmerSection } from '@/components/farmer-page.tsx/section';
+import { FarmerBio } from '@/components/farmer-page/bio';
+import { FarmerCampaigns } from '@/components/farmer-page/campaigns';
+import { FarmerHeader } from '@/components/farmer-page/header';
+import { FarmerMessageBoard } from '@/components/farmer-page/message-board';
+import { FarmerPosts } from '@/components/farmer-page/posts';
+import { FarmerSection } from '@/components/farmer-page/section';
 import { PageHeader } from '@/components/ui/page-header';
 import { PageWrapper } from '@/components/ui/page-wrapper';
 import { Farmer } from '@/data-model/farmer/FarmerType';

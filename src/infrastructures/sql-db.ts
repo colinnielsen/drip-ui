@@ -55,6 +55,7 @@ export const bootstrapSQLDB = async () => {
         "totalAmount" JSONB NOT NULL,
         "status" TEXT NOT NULL,
         "payments" JSONB,
+        "additonalDistributions" JSONB,
         "externalOrderInfo" JSONB,
         "errorDetails" JSONB,
         FOREIGN KEY ("shop") REFERENCES "shops" ("id"),

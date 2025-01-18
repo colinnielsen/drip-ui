@@ -1,7 +1,6 @@
 import { prettyFormatPrice } from '@/lib/utils';
-import { formatEther, formatUnits, parseUnits } from 'viem';
+import { formatEther, parseUnits } from 'viem';
 import { USDC } from './USDC';
-import { Currency } from '../type/CommonType';
 
 /**
  * the ETH value in Wei
@@ -216,7 +215,7 @@ export class ETH {
    * const eth2 = new ETH(1);
    * (eth1.eq(eth2)); // true
    */
-  eq(other: Currency): other is ETH {
+  eq(other: any): other is ETH {
     if (!this.is(other)) return false;
 
     return this.wei === other.wei;
@@ -250,7 +249,7 @@ export class ETH {
     return this.wei <= other.wei;
   }
 
-  is(other: Currency): other is ETH {
+  is(other: any): other is ETH {
     return this.__currencyType === other.__currencyType;
   }
 }

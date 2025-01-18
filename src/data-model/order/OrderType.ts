@@ -1,31 +1,10 @@
-import { UUID } from 'crypto';
-import { Item, ItemMod } from '../item/ItemType';
-import { Address, Hex } from 'viem';
+import { UUID } from '@/data-model/_common/type/CommonType';
+import { Hex } from 'viem';
+import { Currency } from '../_common/currency';
 import { USDC } from '../_common/currency/USDC';
-import { Currency } from '../_common/type/CommonType';
-
-export type OrderSummary = {
-  subTotal: {
-    formatted: string;
-    usdc: USDC;
-  };
-  tip: {
-    formatted: string;
-    usdc: USDC;
-  } | null;
-  total: {
-    formatted: string;
-    usdc: USDC;
-  };
-};
-
-export type OrderItem = {
-  id: UUID;
-  item: Item;
-  //quoted price?
-  paidPrice?: Currency;
-  mods: ItemMod[];
-};
+import { EthAddress } from '../ethereum/EthereumType';
+import { AppliedDiscount } from './AppliedDiscount';
+import { LineItem } from './LineItemAggregate';
 
 export type SliceOrderInfo = {
   __type: 'slice';
@@ -41,50 +20,96 @@ export type SquareOrderInfo = {
   status?: OrderStatus;
 };
 
+/**
+ * @dev Information relevant to the external service the order is created or pushed to.
+ *    e.g; a slice order id, a square transaction number
+ */
 export type ExternalOrderInfo = SliceOrderInfo | SquareOrderInfo;
 
-type _BaseOrder = {
+export type PaymentInfo = {
+  __type: 'onchain';
+  transactionHash: Hex;
+  amount: Currency;
+};
+
+//
+//// ORDER VARIATIONS
+//
+
+export type _Order = {
   id: UUID;
-  timestamp: string;
+  timestamp: Date;
   /** The id of the shop */
   shop: UUID;
   /** Id of the user who created the order */
   user: UUID;
   /** The items the user ordered */
-  orderItems: OrderItem[];
-  tip: {
+  lineItems: LineItem[];
+  /** all discounts applied on this order */
+  discounts?: AppliedDiscount[] | null;
+  /** the tip amount */
+  tip?: {
     amount: USDC;
-    address: Address;
+    recipient: EthAddress;
   } | null;
-};
-
-export type Cart = _BaseOrder & {
+  /** The additive price of all the line-items and their mods */
+  subtotal: Currency;
+  /** The amount of tax applied on the order */
+  taxAmount: Currency;
+  /** The total amount of discounts */
+  discountAmount: Currency;
+  /** The final total amount, meaning the subtotal + tip + tax - discounts */
+  totalAmount: Currency;
   /**
-   * - 1-pending: the order has not been paid for
+   * - 1-submitting: the order has been paid for and the tx is yet to confirm
+   * - 2-in-progress: the order has been paid for and the tx has been confirmed (the external service has received the order)
+   * - 3-complete: the order has been processed (in slice, this means the order was marked as complete by the POS or timed out)
    */
-  status: '1-pending';
-};
-
-export type PaidOrder = _BaseOrder & {
-  /**
-   * - 2-submitting: the order has been paid for and the tx is yet to confirm
-   * - 3-in-progress: the order has been paid for and the tx has been confirmed (the external service has received the order)
-   * - 4-complete: the order has been processed
-   */
-  status: '2-submitting' | '3-in-progress' | '4-complete';
-  transactionHash: Hex;
+  status: '1-submitting' | '2-in-progress' | '3-complete';
+  payments: PaymentInfo[];
   externalOrderInfo?: ExternalOrderInfo;
 };
 
-export type CancelledOrder = Omit<PaidOrder, 'status'> & {
+export type NewOrder = Omit<_Order, 'status'> & {
+  status: '1-submitting';
+};
+
+export type InProgressOrder = Omit<_Order, 'status'> & {
+  status: '2-in-progress';
+  payments: PaymentInfo[];
+  externalOrderInfo: ExternalOrderInfo;
+};
+
+// export type PaidOrder = InProgressOrder & {
+//   externalOrderInfo: ExternalOrderInfo;
+// }
+
+export type CancelledOrder = Omit<_Order, 'status'> & {
   status: 'cancelled';
 };
 
-export type ErroredOrder = Omit<PaidOrder, 'status'> & {
+export type ErroredOrder = Omit<_Order, 'status'> & {
   status: 'error';
-  errorMessage: string;
+  errorDetails: {
+    /*
+     * where the error originated from
+     */
+    origin: string;
+    message: string;
+  };
 };
 
-export type Order = Cart | PaidOrder | CancelledOrder | ErroredOrder;
+export type Order = _Order | NewOrder | CancelledOrder | ErroredOrder;
 
+//
+//// DERIVED TYPES
+///
 export type OrderStatus = Order['status'];
+
+export type PaymentSummary = {
+  subtotal: Currency | null;
+  tax: Currency | null;
+  discount: Currency | null;
+  tip: Currency | null;
+  total: Currency | null;
+};

@@ -1,4 +1,4 @@
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { PrivyDID } from '../_external/privy';
 
 export type SessionUser = {
@@ -20,6 +20,11 @@ export type WalletConnectorType =
   | `coinbase_wallet`
   | `embedded`;
 
+export type AuthServiceId = {
+  __type: 'privy';
+  id: PrivyDID;
+};
+
 export type SavedUser = {
   __type: 'user';
   id: UUID;
@@ -27,10 +32,7 @@ export type SavedUser = {
   /**
    * @dev the `authServiceId` is the user id from the external service used to verify the user
    */
-  authServiceId?: {
-    __type: 'privy';
-    id: PrivyDID;
-  };
+  authServiceId?: AuthServiceId;
   wallet: {
     __type: WalletConnectorType;
     address: `0x${string}`;

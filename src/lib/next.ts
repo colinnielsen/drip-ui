@@ -12,6 +12,13 @@ import { HTTPRouteHandlerErrors } from './effect';
 import { getSessionId } from './session';
 import { generateUUID, isUUID } from './utils';
 
+// serialize instructions for big int
+
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
 export const getAndValidateUserRequest = (req: NextApiRequest) => {
   const userId = getSessionId(req);
   if (!userId) throw new Error('User ID not found');
@@ -60,6 +67,8 @@ const getHTTPRouteHandlerErrorCode = (e: HTTPRouteHandlerErrors): number => {
       return 404;
     case 'DripServerError':
       return 500;
+    case 'UnauthorizedError':
+      return 401;
   }
 };
 
@@ -88,13 +97,18 @@ export const EffectfulApiRoute = (
       // catch all errors and return a 500
       catchAll(e => fail(res.status(getHTTPRouteHandlerErrorCode(e)).json(e))),
       // finally make sure uncaught errors do stop the program
-      catchAllDefect(e =>
-        fail(
-          res
-            .status(500)
-            .json({ type: '🚨 fatal uncaught error 🚨', error: e }),
-        ),
-      ),
+      catchAllDefect((e: any) => {
+        Console.error(e);
+        const wrappedError = new Error(e);
+
+        return fail(
+          res.status(500).json({
+            type: '🚨 fatal uncaught error 🚨',
+            message: wrappedError.message,
+            error: wrappedError,
+          }),
+        );
+      }),
     );
 
     return await runPromise(nextApiProgram);

@@ -33,27 +33,30 @@ export const bootstrapSQLDB = async () => {
         "id" UUID PRIMARY KEY,
         "__sourceConfig" JSONB,
         "name" TEXT NOT NULL,
-        "price" JSONB NOT NULL,
-        "currency" TEXT NOT NULL,
         "description" TEXT NOT NULL,
         "image" TEXT NOT NULL,
-        "availability" TEXT NOT NULL,
         "category" TEXT,
+        "variants" JSONB,
         "mods" JSONB
       );
     `;
   await sql`
       CREATE TABLE IF NOT EXISTS "orders" (
         "id" UUID PRIMARY KEY,
+        "timestamp" TIMESTAMP NOT NULL,
         "shop" UUID NOT NULL,
         "user" UUID NOT NULL,
-        "status" TEXT NOT NULL,
-        "timestamp" TIMESTAMP NOT NULL,
-        "orderItems" JSONB,
+        "lineItems" JSONB not NULL,
+        discounts JSONB,
         "tip" JSONB,
-        "transactionHash" TEXT,
+        "subtotal" JSONB NOT NULL,
+        "taxAmount" JSONB NOT NULL,
+        "discountAmount" JSONB NOT NULL,
+        "totalAmount" JSONB NOT NULL,
+        "status" TEXT NOT NULL,
+        "payments" JSONB,
         "externalOrderInfo" JSONB,
-        "errorMessage" TEXT,
+        "errorDetails" JSONB,
         FOREIGN KEY ("shop") REFERENCES "shops" ("id"),
         FOREIGN KEY ("user") REFERENCES "users" ("id")
       );
@@ -139,7 +142,7 @@ export const bootstrapSQLDB = async () => {
     `;
 
   await sql`
-    CREATE TABLE IF NOT EXISTS "store_configs" (
+    CREATE TABLE IF NOT EXISTS "shop_configs" (
         "id" UUID PRIMARY KEY,
         "__type" TEXT NOT NULL,
         "externalId" TEXT NOT NULL,
@@ -149,7 +152,8 @@ export const bootstrapSQLDB = async () => {
         "backgroundImage" TEXT,
         "url" TEXT,
         "farmerAllocation" JSONB,
-        "tipConfig" JSONB
+        "tipConfig" JSONB,
+        "fundRecipientConfig" JSONB
       );
     `;
   console.debug('database bootstrapped');
@@ -161,7 +165,7 @@ export const resetSQLDB = async () => {
     'orders',
     'shops',
     'square_connections',
-    'store_configs',
+    'shop_configs',
     'csrf_tokens',
     'items',
     'farmerposts',

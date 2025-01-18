@@ -1,8 +1,8 @@
-import { StoreConfig } from '@/data-model/shop/ShopType';
+import { ShopConfig } from '@/data-model/shop/ShopType';
 import { revalidatePathIfExists, ApiRoute } from '@/lib/next';
 import ShopService from '@/services/ShopService';
 import { SyncService } from '@/services/SyncService';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const syncService = new SyncService();
@@ -35,7 +35,7 @@ export default ApiRoute(async function (
     return res.status(405).json({ error: 'Method not allowed' });
 
   const externalId = req.body.externalId as
-    | StoreConfig['externalId']
+    | ShopConfig['externalId']
     | undefined;
 
   // if no external id is provided, sync all stores

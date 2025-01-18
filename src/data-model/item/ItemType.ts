@@ -1,88 +1,57 @@
-import { UUID } from 'crypto';
-import { Currency, SupportedCurrency } from '../_common/type/CommonType';
-
-export type ItemCategory = 'espresso' | 'coffee' | 'tea' | 'food';
-
-export type ItemPrice = {
-  itemId: UUID;
-  mods?: UUID[];
-  basePrice: Currency;
-  discountPrice?: Currency;
-  discountPercentage: number;
-};
-
-type ModSourceConfig =
-  | {
-      type: 'slice';
-      /**
-       * the variant id in the slice store
-       */
-      id: string;
-      version: number;
-    }
-  | {
-      type: 'square';
-      id: string;
-    };
+import { UUID } from '@/data-model/_common/type/CommonType';
+import { Currency } from '../_common/currency';
+import { ItemSourceConfig, ItemCategory } from './common';
+import { ItemMod } from './ItemMod';
 
 //
-//// OPTIONS
+//// VARIANT
 //
-type BaseMod = {
+
+/**
+ * @dev A variant is a specific configuration of an item.
+ * @important a user will select and buy this item. A
+ * @important a {@link LineItem} will represent `n` amount of selected {@link ItemVariant} with homogenous {@link ItemMod}
+ */
+export type ItemVariant = {
   id: UUID;
-  __sourceConfig: ModSourceConfig;
-  type: 'exclusive' | 'inclusive';
-  category: ItemCategory | null;
+  /** the configuration object for the platform the item came from: i.e., slice, square */
+  __sourceConfig: ItemSourceConfig;
+  /** e.g., "Large", "Medium", "Small" */
   name: string;
+  /** The image of the item */
+  image: string;
+  /** The description of the item */
+  description: string;
+  /** Price of this variant */
   price: Currency;
-  /**
-   * @dev if the mod is onsale, this should be the price the user pays
-   */
-  discountPrice?: Currency;
-  currency: SupportedCurrency;
-  isOptional: boolean;
+  /** The availability of the item */
+  availability?: 'onsite-only' | 'online-only' | 'delivery';
 };
-
-// export type NumericMod = BaseMod & {
-//   type: 'number';
-// };
-
-// export type BooleanMod = BaseMod & {
-//   type: 'boolean';
-// };
-
-export type ItemMod = BaseMod;
-
-type ItemSourceConfig =
-  | {
-      type: 'slice';
-      /**
-       * the product item id in the slice store
-       */
-      id: string;
-      version: number;
-    }
-  | {
-      type: 'square';
-      id: string;
-    };
 
 //
 //// ITEM
-///
+//
+
+/**
+ * @dev Every item will present itself in the shop page.
+ * @important a user does not select and buy an item, the buy a {@link ItemVariant}
+ * notes:
+ * - Each {@link Item} _must_ have at least one variant, and that variant contains the price of each item
+ * - Each {@link ItemVariant} _can_ have different selectable mods
+ * - When a user selects an item, they _must_ select a variant
+ */
 export type Item = {
   id: UUID;
-  __sourceConfig: ItemSourceConfig;
+  /** The name of the item */
   name: string;
-  price: Currency;
-  /**
-   * @dev if the item is onsale, this should be the price the user pays
-   */
-  discountPrice?: Currency;
-  currency: SupportedCurrency;
+  /** The description of the item */
   description: string;
+  /** The image of the item */
   image: string;
-  availability: 'onsite-only' | 'online-only' | 'delivery';
-  category: ItemCategory | null;
-  mods: ItemMod[];
+  /** The category of the item or an unknown string */
+  category: (ItemCategory & {}) | null;
+  /** @dev at least one variant is enforced */
+  variants: [ItemVariant, ...ItemVariant[]];
+  /** Mods that can be added on this item */
+  mods?: ItemMod[] | null;
 };

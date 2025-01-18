@@ -1,7 +1,7 @@
 import { createFarmer } from '@/data-model/farmer/FarmerDTO';
 import { Farmer } from '@/data-model/farmer/FarmerType';
-import { SliceStoreConfig } from '@/data-model/shop/ShopType';
-import { UUID } from 'crypto';
+import { SliceShopConfig } from '@/data-model/shop/ShopType';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { subDays } from 'date-fns';
 import { generateUUID } from './utils';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
@@ -35,7 +35,7 @@ export const STATIC_FARMER_DATA: Farmer[] = [
   }),
 ];
 
-export const ONBOARDED_SHOPS: Unsaved<SliceStoreConfig>[] = [
+export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   {
     __type: 'slice',
     externalId: getSliceExternalIdFromSliceId(799),
@@ -202,7 +202,7 @@ export const ONBOARDED_SHOPS: Unsaved<SliceStoreConfig>[] = [
     },
     tipConfig: {
       __type: 'single-recipient',
-      address: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
+      ethAddress: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
       enabled: true,
     },
     name: 'The Dev Cafe',

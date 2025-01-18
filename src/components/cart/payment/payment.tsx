@@ -8,11 +8,7 @@ import { Shop, ShopSourceConfig } from '@/data-model/shop/ShopType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { isDev } from '@/lib/utils';
 import { useWalletAddress } from '@/queries/EthereumQuery';
-import {
-  useCartInSliceFormat,
-  useCartSummary,
-  useRecentCart,
-} from '@/queries/OrderQuery';
+import { useCartInSliceFormat, useRecentCart } from '@/queries/OrderQuery';
 import { usePayAndOrder as useSlicePayAndOrder } from '@/queries/SliceQuery';
 import { usePayAndOrder as useSquarePayAndOrder } from '@/queries/SquareQuery';
 import Image from 'next/image';
@@ -20,6 +16,8 @@ import { useMemo } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
+import { useCart } from '@/queries/CartQuery';
+import { mapOrderOrCartToPaymentSummary } from '@/data-model/order/OrderDTO';
 
 export const SlicePayButton = () => {
   const buyerAddress = useWalletAddress();
@@ -30,12 +28,14 @@ export const SlicePayButton = () => {
   const { paymentStep } = useCheckoutContext();
   const goToSlide = useGoToSlide();
   const { payAndOrder, ready } = useSlicePayAndOrder();
-  const cartSummary = useCartSummary();
+
+  const cartSummary = mapOrderOrCartToPaymentSummary(cart);
 
   if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress || !ready)
     return <LoadingCTAButton />;
 
   const isLoading = paymentStep === 'awaiting-confirmation';
+  const isFree = cartSummary?.total?.wei === 0n;
   return (
     <>
       <CTAButton
@@ -45,25 +45,22 @@ export const SlicePayButton = () => {
         }}
         isLoading={isLoading}
       >
-        {!cartSummary || isLoading
-          ? ''
-          : cartSummary?.total.usdc.gt(USDC.ZERO)
-            ? 'pay'
-            : 'place order'}
+        {!cartSummary || isLoading ? '' : isFree ? 'pay' : 'place order'}
       </CTAButton>
     </>
   );
 };
 
 export const SquarePayButton = () => {
-  const cartSummary = useCartSummary();
-  const goToSlide = useGoToSlide();
   const { paymentStep } = useCheckoutContext();
+  const { data: cart } = useCart();
+  const goToSlide = useGoToSlide();
   const { ready, mutateAsync: payAndOrder } = useSquarePayAndOrder();
 
-  if (!cartSummary || !ready) return <LoadingCTAButton />;
+  const cartSummary = mapOrderOrCartToPaymentSummary(cart);
+  if (!ready) return <LoadingCTAButton />;
 
-  const isFree = cartSummary?.total.usdc.gt(USDC.ZERO);
+  const isFree = cartSummary?.total?.wei === 0n;
   const isLoading = paymentStep === 'awaiting-confirmation';
 
   const handleClick = async () => {
@@ -75,7 +72,7 @@ export const SquarePayButton = () => {
 
   return (
     <CTAButton onClick={handleClick} isLoading={isLoading}>
-      {!cartSummary ? '' : isFree ? 'pay' : 'place order'}
+      {!cartSummary ? '' : isFree ? 'place order' : 'pay'}
     </CTAButton>
   );
 };
@@ -87,6 +84,7 @@ export const PayButton = ({
 }) => {
   if (shopType === 'slice') return <SlicePayButton />;
   if (shopType === 'square') return <SquarePayButton />;
+
   let a: never = shopType;
   return a;
 };
@@ -168,15 +166,15 @@ export default function PaymentSlide({
         <div className="h-12" />
         <FarmerCard
           {...{
-            order: cart,
+            shopId: cart.shop,
             showPics: true,
             className: !isPaying ? 'opacity-0' : 'opacity-1',
           }}
         />
 
-        {isDev() && seconds > 50 && 'transactionHash' in cart && (
-          <Mono className="text-[8px] text-center">{cart.transactionHash}</Mono>
-        )}
+        {/* {isDev() && seconds > 50 && 'transactionHash' in cart && (
+          <Mono className="text-[8px] text-center">{cart}</Mono>
+        )} */}
       </div>
     </AsCheckoutSlide>
   );

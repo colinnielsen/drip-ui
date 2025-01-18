@@ -25,7 +25,7 @@ import {
   Title2,
 } from '@/components/ui/typography';
 import {
-  collapseDuplicateItems,
+  createLineItemAggregate,
   getOrderItemCost,
   getOrderNumber,
   getOrderSummary,
@@ -50,7 +50,7 @@ import {
 } from '@/queries/UserQuery';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 import Avatar from 'boring-avatars';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { format } from 'date-fns';
 import { ArrowLeft, LogOut } from 'lucide-react';
 import Image from 'next/image';
@@ -121,7 +121,7 @@ const OrderLineItem = ({
         {isPaidOrder(order) && order.externalOrderInfo?.orderNumber ? (
           <Label2>Order #{order.externalOrderInfo.orderNumber}</Label2>
         ) : null}
-        <Label2>{order.orderItems.length} items</Label2>
+        <Label2>{order.lineItems.length} items</Label2>
         <Label2>${orderSummary.total.formatted}</Label2>
         {order.status !== '4-complete' && (
           <Label2 className="flex items-center">
@@ -190,8 +190,8 @@ const OrderDetail = ({ order }: { order: OrderWithShop | null }) => {
           </div>
         </div>
         <div className="flex flex-col w-full py-2 divide-y divide-light-gray">
-          {order?.orderItems &&
-            collapseDuplicateItems(order.orderItems).map(
+          {order?.lineItems &&
+            createLineItemAggregate({ variant: order.lineItems }).map(
               ([orderItem, quantity], index) => {
                 const { price, discountPrice } = getOrderItemCost(orderItem);
                 return (

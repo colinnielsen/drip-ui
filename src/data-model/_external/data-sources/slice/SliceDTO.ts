@@ -1,20 +1,23 @@
 import { Entity } from '@/data-model/__global/entities';
-import { Item, ItemMod } from '@/data-model/item/ItemType';
-import { collapseDuplicateItems } from '@/data-model/order/OrderDTO';
+import { Item } from '@/data-model/item/ItemType';
+import { ItemMod } from '@/data-model/item/ItemMod';
+import { createLineItemAggregate } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import {
   deriveShopIdFromSliceStoreId,
   EMPTY_MENU,
+  EMPTY_TIP_CONFIG,
   getSliceExternalIdFromSliceId,
 } from '@/data-model/shop/ShopDTO';
-import { Menu, Shop, StoreConfig } from '@/data-model/shop/ShopType';
+import { Menu, Shop, ShopConfig } from '@/data-model/shop/ShopType';
+import { genericError } from '@/lib/effect';
 import { isAddressEql, USDC_ADDRESS_BASE } from '@/lib/ethereum';
 import { err, generateUUID } from '@/lib/utils';
 import { ProductCart, SlicerBasics, Variant } from '@slicekit/core';
 import { ETH } from '../../../_common/currency/ETH';
 import { USDC } from '../../../_common/currency/USDC';
-import { Currency } from '../../../_common/type/CommonType';
 import { buildMenuFromItems } from '../common';
+import { Currency } from '@/data-model/_common/currency';
 
 export const SLICE_VERSION = 1;
 
@@ -75,7 +78,10 @@ function determineAvailability(product: ProductCart): Item['availability'] {
 }
 
 export function deriveDripIdFromSliceProductId(product: ProductCart) {
-  return generateUUID(product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString());
+  return generateUUID(
+    'SLICE' + product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString() ||
+      genericError('no product id'),
+  );
 }
 
 export function getPriceFromSliceCart(
@@ -141,7 +147,7 @@ export function mapCartToSliceCart(
   cart: Order,
   sliceProducts: ProductCart[],
 ): ProductCart[] {
-  const sliceCart = collapseDuplicateItems(cart.orderItems).reduce<
+  const sliceCart = createLineItemAggregate({ variant: cart.lineItems }).reduce<
     ProductCart[]
   >((acc, [orderItem, quantity]) => {
     const sliceProduct = sliceProducts.find(
@@ -165,7 +171,7 @@ export function mapCartToSliceCart(
 
 export const mapSliceStoreToShop = (
   sliceStore: SlicerBasics,
-  manualConfig: StoreConfig,
+  manualConfig: ShopConfig,
 ): Shop => ({
   __entity: Entity.shop,
   __type: 'storefront',
@@ -175,10 +181,7 @@ export const mapSliceStoreToShop = (
     version: SLICE_VERSION,
   },
   id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
-  tipConfig: manualConfig.tipConfig || {
-    __type: 'single-recipient',
-    enabled: false,
-  },
+  tipConfig: manualConfig.tipConfig || EMPTY_TIP_CONFIG,
   menu: EMPTY_MENU,
   label: sliceStore.name,
   location: manualConfig.location || null,

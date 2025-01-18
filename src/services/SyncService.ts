@@ -7,10 +7,11 @@ import {
   mapSquareStoreToShop,
 } from '@/data-model/_external/data-sources/square/SquareDTO';
 import { Farmer } from '@/data-model/farmer/FarmerType';
+import { getSlicerIdFromSliceExternalId } from '@/data-model/shop/ShopDTO';
 import {
-  SliceStoreConfig,
-  SquareStoreConfig,
-  StoreConfig,
+  ShopConfig,
+  SliceShopConfig,
+  SquareShopConfig,
 } from '@/data-model/shop/ShopType';
 import { sliceKit } from '@/lib/slice';
 import { UUID } from 'node:crypto';
@@ -18,20 +19,23 @@ import FarmerService from './FarmerService';
 import ItemService from './ItemService';
 import ShopService from './ShopService';
 import { SquareService } from './SquareService';
-import { getSlicerIdFromSliceExternalId } from '@/data-model/shop/ShopDTO';
 
 export class SyncService {
   constructor() {}
 
-  private async syncSliceStore(storeConfig: SliceStoreConfig) {
+  //
+  // PRIVATE HELPER METHODS
+  //
+
+  private async syncSliceStore(shopConfig: SliceShopConfig) {
     const slicerId: number = getSlicerIdFromSliceExternalId(
-      storeConfig.externalId,
+      shopConfig.externalId,
     );
     const [store] = await sliceKit.getStores({ slicerIds: [slicerId] });
     const products = await sliceKit.getStoreProducts({ slicerId });
 
     // map the slice store to a shop object and save
-    const shop = mapSliceStoreToShop(store, storeConfig);
+    const shop = mapSliceStoreToShop(store, shopConfig);
 
     // build the menu and items
     const { menu, items } = await buildMenuFromSliceProducts(
@@ -46,16 +50,15 @@ export class SyncService {
     return savedShop.id;
   }
 
-  private async syncSquareStore(storeConfig: SquareStoreConfig) {
+  private async syncSquareStore(shopConfig: SquareShopConfig) {
     const { merchant, location } = await SquareService.fetchSquareStoreInfo(
-      storeConfig.externalId,
+      shopConfig.externalId,
     );
 
     // build the shop
     const shop = mapSquareStoreToShop({
-      squareStore: merchant,
       squareLocation: location,
-      storeConfig,
+      squareshopConfig: shopConfig,
     });
 
     const { menu, items } = await buildMenuFromSquareCatalog({
@@ -74,23 +77,22 @@ export class SyncService {
   // PUBLIC SYNC METHODS
   //
 
-  async syncStore(externalId: StoreConfig['externalId']): Promise<UUID> {
-    const storeConfig =
-      await ShopService.findStoreConfigByExternalId(externalId);
-    if (!storeConfig) throw new Error('Store config not found');
+  async syncStore(externalId: ShopConfig['externalId']): Promise<UUID> {
+    const shopConfig = await ShopService.findShopConfigByExternalId(externalId);
+    if (!shopConfig) throw new Error('Shop config not found');
 
-    if (storeConfig.__type === 'slice')
-      return await this.syncSliceStore(storeConfig);
-    else if (storeConfig.__type === 'square')
-      return await this.syncSquareStore(storeConfig);
+    if (shopConfig.__type === 'slice')
+      return await this.syncSliceStore(shopConfig);
+    else if (shopConfig.__type === 'square')
+      return await this.syncSquareStore(shopConfig);
 
-    let err: never = storeConfig;
+    let err: never = shopConfig;
     throw new Error('Invalid store config type');
   }
 
   async syncStores() {
-    for (const storeConfig of await ShopService.findAllStoreConfigs())
-      await this.syncStore(storeConfig.externalId);
+    for (const shopConfig of await ShopService.findAllShopConfigs())
+      await this.syncStore(shopConfig.externalId);
   }
 
   async syncFarmers(farmers: Farmer[]) {

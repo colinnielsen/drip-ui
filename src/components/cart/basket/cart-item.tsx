@@ -1,11 +1,8 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { USDC } from '@/data-model/_common/currency/USDC';
-import { Currency } from '@/data-model/_common/type/CommonType';
-import { getOrderItemCostFromPriceDict } from '@/data-model/order/OrderDTO';
-import { OrderItem } from '@/data-model/order/OrderType';
-import { useAddToCart, useRemoveItemFromCart } from '@/queries/OrderQuery';
-import { useShopPriceDictionary } from '@/queries/ShopQuery';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
+import { LineItem } from '@/data-model/order/LineItemAggregate';
+import { cn } from '@/lib/utils';
+import { useAddToCart, useDecrementLineItem } from '@/queries/CartQuery';
 import Image from 'next/image';
 import { ReactNode } from 'react';
 import { Price } from '../../ui/icons';
@@ -36,38 +33,46 @@ export function LoadingCartItem() {
 }
 
 export function OrderItemDisplay({
-  orderItem,
+  lineItem,
   rightSide,
-  originalPrice,
-  actualPrice,
+  // originalPrice,
+  // actualPrice,
   isLoading,
 }: {
-  orderItem: OrderItem;
-  originalPrice: Currency;
-  actualPrice: Currency;
+  lineItem: LineItem;
+  // originalPrice: Currency;
+  // actualPrice: Currency;
   rightSide?: ReactNode;
   isLoading?: boolean;
 }) {
   return (
-    <div className="flex items-start gap-4 w-full px-6">
+    <div className="flex items-start gap-4 w-full px-6 py-4">
       <div className="rounded-2xl overflow-hidden h-24 w-24 relative aspect-square">
         <Image
-          src={orderItem.item.image}
-          alt="coffee"
+          src={lineItem.item.image}
+          alt={lineItem.item.name}
           fill
           className="object-cover"
         />
       </div>
 
       <div className="flex flex-col gap-y-1">
-        <Headline>{orderItem.item.name}</Headline>
+        <Headline>{lineItem.item.name}</Headline>
         <div className="flex gap-y-1">
-          {orderItem.mods.map(m => (
-            <Label2 key={m.id}>{m.name}</Label2>
+          {[lineItem.variant, ...(lineItem.mods || [])]?.map((m, i) => (
+            <Label2 key={m.id} className={cn({ 'font-semibold': i === 0 })}>
+              {m.name}
+            </Label2>
           ))}
         </div>
 
-        <Price {...{ originalPrice, actualPrice, isLoading }} />
+        <Price
+          {...{
+            originalPrice: lineItem.subtotal,
+            actualPrice: lineItem.total,
+            isLoading,
+          }}
+        />
       </div>
       <div className="flex-grow" />
       {rightSide && <div className="flex-1 justify-end flex">{rightSide}</div>}
@@ -75,50 +80,48 @@ export function OrderItemDisplay({
   );
 }
 
-export function CartItem({
-  orderItem,
-  quantity,
-  orderId,
+export function LineItemComponent({
+  lineItem,
   shopId,
   isLoading,
 }: {
-  orderItem: OrderItem;
-  quantity: number;
-  orderId: UUID;
+  lineItem: LineItem;
   shopId: UUID;
   isLoading?: boolean;
 }) {
-  const { id, ...orderItemWithoutId } = orderItem;
-  const { data: priceDict } = useShopPriceDictionary(shopId);
-
   const { mutate: addAnother } = useAddToCart({
     shopId,
   });
-  const { mutate: removeItem } = useRemoveItemFromCart({
-    orderItemId: orderItem.id,
-    orderId,
-    shopId,
-  });
 
-  if (!priceDict) return <LoadingCartItem />;
+  const { mutate: removeItem } = useDecrementLineItem();
 
-  const { price, discountPrice } = priceDict
-    ? getOrderItemCostFromPriceDict(priceDict, orderItem)
-    : { price: new USDC(0), discountPrice: new USDC(0) };
+  // if (!priceDict) return <LoadingCartItem />;
+
+  const rightSide = (
+    <NumberInput
+      value={lineItem.quantity}
+      useTrashForDelete
+      onPlus={() =>
+        addAnother({
+          item: lineItem.item,
+          variant: lineItem.variant,
+          quantity: 1,
+          mods: lineItem.mods || [],
+        })
+      }
+      onMinus={() =>
+        removeItem({
+          lineItemUniqueId: lineItem.uniqueId,
+        })
+      }
+    />
+  );
 
   return (
     <OrderItemDisplay
-      {...{ originalPrice: price, actualPrice: discountPrice }}
-      orderItem={orderItem}
+      lineItem={lineItem}
       isLoading={isLoading}
-      rightSide={
-        <NumberInput
-          value={quantity}
-          useTrashForDelete
-          onPlus={() => addAnother({ orderItem: orderItemWithoutId })}
-          onMinus={removeItem}
-        />
-      }
+      rightSide={rightSide}
     />
   );
 }

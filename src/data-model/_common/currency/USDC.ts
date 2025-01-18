@@ -1,7 +1,8 @@
-import { parseUnits, USDC_ADDRESS_BASE } from '@/lib/ethereum';
+import { ChainId } from '@/data-model/ethereum/EthereumType';
+import { USDC_CONFIG } from '@/lib/contract-config/USDC';
+import { parseUnits } from '@/lib/ethereum';
 import { prettyFormatPrice } from '@/lib/utils';
 import { Address } from 'viem';
-import { Currency } from '../type/CommonType';
 
 export const isUSDC = (value: unknown): value is USDC => {
   return value instanceof USDC;
@@ -15,7 +16,7 @@ export class USDC {
   public __currencyType: 'USDC' = 'USDC';
   public wei: bigint;
 
-  public static readonly address: Address = USDC_ADDRESS_BASE;
+  public static readonly address: Address = USDC_CONFIG[ChainId.BASE].address;
   public readonly address: Address = USDC.address;
   public static readonly decimals: number = 6;
   public readonly decimals: number = USDC.decimals;
@@ -67,6 +68,17 @@ export class USDC {
    */
   static fromUSD(amountUSD: bigint | number | string | USDC): USDC {
     return new USDC(amountUSD);
+  }
+
+  /**
+   * @example
+   * const usdc = USDC.fromUSD(50);
+   * (usdc.wei); // 500000
+   * (usdc.prettyFormat()); // $0.50
+   */
+  static fromCents(cents: bigint | number | string): USDC {
+    const inUSD = Number(cents) / 100;
+    return new USDC(inUSD);
   }
 
   /**
@@ -222,7 +234,7 @@ export class USDC {
    * const usdc2 = new USDC(1);
    * (usdc1.eq(usdc2)); // true
    */
-  eq(other: Currency): other is USDC {
+  eq(other: any): other is USDC {
     if (!(other instanceof USDC)) return false;
 
     return this.wei === other.wei;
@@ -256,7 +268,7 @@ export class USDC {
     return this.wei <= other.wei;
   }
 
-  is(other: Currency): other is USDC {
+  is(other: any): other is USDC {
     return this.__currencyType === other.__currencyType;
   }
 }

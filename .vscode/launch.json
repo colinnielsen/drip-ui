@@ -10,7 +10,7 @@
     {
       "name": "Next.js: debug client-side",
       "type": "chrome",
-      "request": "launch",
+      "request": "attach",
       "url": "http://localhost:3000"
     },
     {

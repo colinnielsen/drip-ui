@@ -58,3 +58,19 @@ export const getDBSecret = (): string => {
   if (!secret) throw Error('undefined DB Secret');
   return secret;
 };
+
+export const getDripRelayerPrivateKey = (): string => {
+  notAllowedOnClient();
+
+  const key = process.env.DRIP_RELAYER_PK;
+  if (!key) throw Error('undefined Relayer Private Key');
+  return key;
+};
+
+export const getAlchemyKey = (): string => {
+  notAllowedOnClient();
+
+  const key = process.env.ALCHEMY_AA_KEY;
+  if (!key) throw Error('undefined Alchemy Key');
+  return key;
+};

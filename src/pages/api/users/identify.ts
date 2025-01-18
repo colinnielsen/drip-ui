@@ -6,7 +6,7 @@ import privy from '@/lib/privy';
 import { SESSION_COOKIE_NAME, setSessionId } from '@/lib/session';
 import { generateUUID, isUUID } from '@/lib/utils';
 import UserService from '@/services/UserService';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 /**

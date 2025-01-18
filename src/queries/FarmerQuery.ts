@@ -7,7 +7,7 @@ import {
 import { BASE_CLIENT, USDC_INSTANCE } from '@/lib/ethereum';
 import { axiosFetcher, minutes } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { useWalletClient } from './EthereumQuery';
 
 //

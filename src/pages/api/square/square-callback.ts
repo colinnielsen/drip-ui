@@ -10,7 +10,7 @@ import { getHostname, getProtocol } from '@/lib/utils';
 import { CSRFTokenService } from '@/services/CSRFTokenService';
 import { SquareService } from '@/services/SquareService';
 import axios, { AxiosError } from 'axios';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { z } from 'zod';
 

@@ -10,6 +10,7 @@ import Head from 'next/head';
 import '../styles/globals.css';
 import { CartDrawerContext } from '@/components/ui/drawer';
 import { useState } from 'react';
+import { Toaster } from '@/components/ui/toaster';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -68,6 +69,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <Component {...pageProps} />
             <Footer />
             <GlobalListeners />
+            <Toaster />
           </div>
         </CartDrawerContext.Provider>
       </ReactQueryClientProvider>

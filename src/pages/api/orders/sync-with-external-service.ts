@@ -1,10 +1,5 @@
-import {
-  DripServerError,
-  HTTPRouteHandlerErrors,
-  S,
-  UUID,
-  validateHTTPMethod,
-} from '@/lib/effect';
+import { DripServerError, HTTPRouteHandlerErrors } from '@/lib/effect';
+import { S, S_UUID, validateHTTPMethod } from '@/lib/effect/validation';
 import { EffectfulApiRoute } from '@/lib/next';
 import OrderService from '@/services/OrderService';
 import { pipe } from 'effect';
@@ -18,7 +13,7 @@ import {
 } from 'effect/Effect';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-const SyncWithExternalServiceSchema = S.Struct({ orderIds: S.Array(UUID) });
+const SyncWithExternalServiceSchema = S.Struct({ orderIds: S.Array(S_UUID) });
 
 export default EffectfulApiRoute(function (
   req: NextApiRequest,

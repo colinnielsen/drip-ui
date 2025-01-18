@@ -14,7 +14,6 @@ export const NextButton = ({
 
   return (
     <div className="px-6 pb-6 w-full min-h-20">
-      {/* <Dialog open={isOpen}> */}
       {step === 'initializing' ? (
         <LoadingCTAButton />
       ) : step === 'get-usdc' ? (

@@ -1,5 +1,16 @@
 import { Address, ApiError } from 'square';
 
+export type QueriedSquareLocation = {
+  id: string;
+  name: string;
+  address?: Address;
+  type: 'PHYSICAL' | 'MOBILE';
+  logoUrl: string;
+  businessName: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  added: boolean;
+};
+
 export enum SquareOrderFulfillmentState {
   /** Indicates that the fulfillment has been proposed */
   PROPOSED = 'PROPOSED',
@@ -54,14 +65,3 @@ export class SquareError extends Error {
     super(message + errorMessage);
   }
 }
-
-export type QueriedSquareLocation = {
-  id: string;
-  name: string;
-  address?: Address;
-  type: 'PHYSICAL' | 'MOBILE';
-  logoUrl: string;
-  businessName: string;
-  status: 'ACTIVE' | 'INACTIVE';
-  added: boolean;
-};

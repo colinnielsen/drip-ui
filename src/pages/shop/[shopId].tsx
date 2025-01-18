@@ -5,6 +5,7 @@ import { SLICE_VERSION } from '@/data-model/_external/data-sources/slice/SliceDT
 import { deriveShopIdFromSquareStoreExternalId } from '@/data-model/_external/data-sources/square/SquareDTO';
 import {
   deriveShopIdFromSliceStoreId,
+  EMPTY_MENU,
   getSlicerIdFromSliceExternalId,
 } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
@@ -26,7 +27,7 @@ import { useMemo } from 'react';
 ///
 
 const STATIC_PAGE_DATA = () =>
-  ShopService.findAllStoreConfigs().then(configs =>
+  ShopService.findAllShopConfigs().then(configs =>
     configs.map(c => ({
       __type: 'storefront',
       id:
@@ -100,19 +101,15 @@ function DynamicShopPage(staticShop: StaticPageData) {
 
   if (error) return <div className="text-red-500">{error.message}</div>;
 
-  const emptyMenu = {
-    espresso: [],
-    coffee: [],
-    other: [],
-  };
-
-  const items = Object.entries(shop?.menu || emptyMenu)
+  const items = Object.entries(shop?.menu || EMPTY_MENU)
     .filter(([_, items]) => (isLoading ? true : items.length > 0))
     .sort((a, b) => a[0].localeCompare(b[0]));
 
+  const hasFarmerAllocation = shop?.farmerAllocations[0]?.farmer;
+
   return (
     <>
-      {shop?.farmerAllocations[0]?.farmer && (
+      {hasFarmerAllocation && (
         <FarmerCard
           farmer={shop?.farmerAllocations[0]?.farmer}
           allocationBPS={shop?.farmerAllocations[0]?.allocationBPS}
@@ -125,6 +122,7 @@ function DynamicShopPage(staticShop: StaticPageData) {
           No items available at this time
         </div>
       )}
+
       {items.map(([category, items]) => (
         <ItemList
           key={category}

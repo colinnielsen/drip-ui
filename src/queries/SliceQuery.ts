@@ -84,7 +84,7 @@ export const usePayAndOrder = ({
             {
               currency: dripCart.tip.amount.address,
               amount: dripCart.tip.amount.toWei(),
-              recipient: dripCart.tip.address,
+              recipient: dripCart.tip.recipient,
               description: 'Tip',
               slicerId: BigInt(
                 getSlicerIdFromSliceExternalId(shopSourceConfig.id),

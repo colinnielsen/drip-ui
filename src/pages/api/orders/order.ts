@@ -1,9 +1,8 @@
-import { USDC } from '@/data-model/_common/currency/USDC';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { ApiRoute } from '@/lib/next';
 import { getSessionId } from '@/lib/session';
-import { err, isUUID } from '@/lib/utils';
+import { isUUID } from '@/lib/utils';
 import OrderService from '@/services/OrderService';
-import { UUID } from 'crypto';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default ApiRoute(async function (
@@ -25,8 +24,7 @@ export default ApiRoute(async function (
       return orderId
         ? handleGetOrder(res, orderId)
         : handleGetOrders(res, userId);
-    case 'POST':
-      return handleUpdateOrder(req, res, userId, orderId);
+    // handleUpdateOrder(req, res, userId, orderId);
     case 'DELETE':
       if (!isUUID(orderId))
         return res.status(400).json({ error: 'Invalid orderId' });
@@ -56,65 +54,65 @@ async function handleGetOrders(res: NextApiResponse, userId: UUID) {
   }
 }
 
-async function handleUpdateOrder(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  userId: UUID,
-  orderId?: UUID,
-) {
-  const { action } = req.body;
-  if (!action) return res.status(400).json({ error: 'Missing action' });
+// async function handleUpdateOrder(
+//   req: NextApiRequest,
+//   res: NextApiResponse,
+//   userId: UUID,
+//   orderId?: UUID,
+// ) {
+//   const { action } = req.body;
+//   if (!action) return res.status(400).json({ error: 'Missing action' });
 
-  const maybeOrder = orderId ? await OrderService.findById(orderId) : null;
+//   const maybeOrder = orderId ? await OrderService.findById(orderId) : null;
 
-  if (maybeOrder && maybeOrder.status !== '1-pending')
-    return res.status(400).json({ error: 'Order is not pending' });
+//   if (maybeOrder && maybeOrder.status !== '1-pending')
+//     return res.status(400).json({ error: 'Order is not pending' });
 
-  if (action === 'add') {
-    const { orderItems } = req.body;
-    if (!maybeOrder && orderId)
-      return res.status(400).json({ error: 'Order not found' });
+//   if (action === 'add') {
+//     const { orderItems } = req.body;
+//     if (!maybeOrder && orderId)
+//       return res.status(400).json({ error: 'Order not found' });
 
-    const updatedOrder = maybeOrder
-      ? // if the order exists already
-        await OrderService.update(maybeOrder.id, [
-          { __type: 'add', orderItem: orderItems },
-        ])
-      : // if the order does not exist, create a new one
-        await OrderService.save(
-          req.body.shopId || err('Missing shopId'),
-          userId,
-          orderItems,
-        );
-    return res.status(200).json(updatedOrder);
-  }
+//     const updatedOrder = maybeOrder
+//       ? // if the order exists already
+//         await OrderService.update(maybeOrder.id, [
+//           { __type: 'add', orderItem: orderItems },
+//         ])
+//       : // if the order does not exist, create a new one
+//         await OrderService.save(
+//           req.body.shopId || err('Missing shopId'),
+//           userId,
+//           orderItems,
+//         );
+//     return res.status(200).json(updatedOrder);
+//   }
 
-  if (action === 'delete') {
-    if (!maybeOrder) return res.status(500).json({ error: 'Order not found' });
+//   if (action === 'delete') {
+//     if (!maybeOrder) return res.status(500).json({ error: 'Order not found' });
 
-    const { orderItemId } = req.body;
-    const updatedOrder = await OrderService.update(maybeOrder.id, [
-      { __type: 'delete', orderItemId },
-    ]);
-    return res.status(200).json(updatedOrder);
-  }
+//     const { orderItemId } = req.body;
+//     const updatedOrder = await OrderService.update(maybeOrder.id, [
+//       { __type: 'delete', orderItemId },
+//     ]);
+//     return res.status(200).json(updatedOrder);
+//   }
 
-  if (action === 'tip') {
-    if (!maybeOrder) return res.status(400).json({ error: 'Order not found' });
+//   if (action === 'tip') {
+//     if (!maybeOrder) return res.status(400).json({ error: 'Order not found' });
 
-    const { tip } = req.body;
-    if (typeof tip === 'number' && tip < 0)
-      return res.status(400).json({ error: 'Invalid tip amount' });
+//     const { tip } = req.body;
+//     if (typeof tip === 'number' && tip < 0)
+//       return res.status(400).json({ error: 'Invalid tip amount' });
 
-    const updatedOrder = await OrderService.update(maybeOrder.id, [
-      { __type: 'tip', tip: tip ? { amount: USDC.fromUSD(tip) } : null },
-    ]);
+//     const updatedOrder = await OrderService.update(maybeOrder.id, [
+//       { __type: 'tip', tip: tip ? { amount: USDC.fromUSD(tip) } : null },
+//     ]);
 
-    return res.status(200).json(updatedOrder);
-  }
+//     return res.status(200).json(updatedOrder);
+//   }
 
-  return err('Invalid action');
-}
+//   return err('Invalid action');
+// }
 
 async function handleDeleteOrder(res: NextApiResponse, orderId: UUID) {
   const maybeOrder = await OrderService.findById(orderId);

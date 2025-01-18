@@ -21,18 +21,20 @@ export const useConnectedWallet = () => {
 export const useWalletClient = () => {
   const [client, setClient] = useState<WalletClient | null>(null);
   const wallet = useConnectedWallet();
+  const address = wallet?.address as Address | undefined;
 
   useEffect(() => {
     setClient(null);
     wallet?.getEthereumProvider().then(p => {
       const client = createWalletClient({
+        account: address,
         chain: base,
         transport: custom(p),
       });
 
       setClient(client);
     });
-  }, [wallet?.address]);
+  }, [address]);
 
   return client;
 };

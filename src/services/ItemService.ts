@@ -1,6 +1,6 @@
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { Item } from '@/data-model/item/ItemType';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { sql } from '@vercel/postgres';
 import { v4 } from 'uuid';
 
@@ -17,20 +17,17 @@ const findAll = async (): Promise<Item[]> => {
 const save = async (item: Unsaved<Item>): Promise<Item> => {
   const id = v4() as UUID;
   await sql`
-    INSERT INTO items (id, name, price, currency, description, image, availability, category, mods, "__sourceConfig")
-    VALUES (${id}, ${item.name}, ${JSON.stringify(item.price)}, ${item.currency}, ${item.description}, ${item.image}, ${item.availability}, ${item.category}, ${JSON.stringify(item.mods)}, ${JSON.stringify(item.__sourceConfig)})
+    INSERT INTO items (id, name, description, image, category, variants, mods)
+    VALUES (${id}, ${item.name}, ${item.description}, ${item.image}, ${item.category}, ${JSON.stringify(item.variants)}, ${JSON.stringify(item.mods)})
     ON CONFLICT (id) DO UPDATE SET
       name = EXCLUDED.name,
-      price = EXCLUDED.price,
-      currency = EXCLUDED.currency,
       description = EXCLUDED.description,
       image = EXCLUDED.image,
-      availability = EXCLUDED.availability,
       category = EXCLUDED.category,
-      mods = EXCLUDED.mods,
-      "__sourceConfig" = EXCLUDED."__sourceConfig"
+      variants = EXCLUDED.variants,
+      mods = EXCLUDED.mods
   `;
-  return { ...item, id } as Item;
+  return { ...item, id } satisfies Item;
 };
 
 const deleteItem = async (id: UUID): Promise<void> => {

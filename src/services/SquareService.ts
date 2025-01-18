@@ -1,13 +1,13 @@
+import { USDC } from '@/data-model/_common/currency/USDC';
 import { PersistanceLayer } from '@/data-model/_common/db/PersistanceType';
 import { deriveSquareConnectionIdFromMerchantId } from '@/data-model/_external/data-sources/square/SquareDTO';
 import { SquareError } from '@/data-model/_external/data-sources/square/SquareType';
-import { getOrderSummary } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import {
   getLocationIdFromSquareExternalId,
   getMerchantIdFromSquareExternalId,
 } from '@/data-model/shop/ShopDTO';
-import { SquareStoreConfig } from '@/data-model/shop/ShopType';
+import { SquareShopConfig } from '@/data-model/shop/ShopType';
 import {
   DecryptedSquareConnection,
   SquareConnection,
@@ -125,7 +125,7 @@ const fetchMerchant = async (merchantId: string) => {
 };
 
 const fetchSquareStoreInfo = async (
-  externalId: SquareStoreConfig['externalId'],
+  externalId: SquareShopConfig['externalId'],
 ): Promise<SquareStoreInfo> => {
   const [merchantId, locationId] = [
     getMerchantIdFromSquareExternalId(externalId),
@@ -164,7 +164,7 @@ const fetchCatalog = async (merchantId: string) => {
     const inventoryResponse =
       await squareClientWithAccessToken.catalogApi.listCatalog(
         cursor,
-        'ITEM,MODIFIER,IMAGE',
+        'ITEM,MODIFIER,IMAGE,CATEGORY',
       );
     catalogObjects.push(...(inventoryResponse.result.objects || []));
     if (!inventoryResponse.result.cursor) break;
@@ -212,14 +212,17 @@ const payForOrder = async ({
   merchantId: string;
   locationId: string;
 }) => {
-  if (order.status === '4-complete')
+  if (order.status === '3-complete')
     throw new Error('Order is already complete');
-  if (order.status === '1-pending') throw new Error('Order is pending');
+  if (order.status === '1-submitting') throw new Error('Order is pending');
 
   const squareClientWithAccessToken =
     await _getSquareClientFromMerchantId(merchantId);
 
-  const orderSummary = getOrderSummary(order);
+  const total =
+    order.totalAmount instanceof USDC
+      ? order.totalAmount.toCents()
+      : order.totalAmount.toUSDC().toCents();
 
   const response = await squareClientWithAccessToken.paymentsApi
     .createPayment({
@@ -229,15 +232,15 @@ const payForOrder = async ({
       locationId,
       sourceId: 'EXTERNAL',
       amountMoney: {
-        amount: orderSummary.subTotal.usdc.toCents(),
+        amount: total,
         currency: 'USD',
       },
       // will auto complete the order, sending it to the POS
       autocomplete: true,
       note: 'Drip Payment',
-      tipMoney: orderSummary.tip
+      tipMoney: order.tip
         ? {
-            amount: orderSummary.tip.usdc.toCents(),
+            amount: order.tip.amount.toCents(),
             currency: 'USD',
           }
         : undefined,

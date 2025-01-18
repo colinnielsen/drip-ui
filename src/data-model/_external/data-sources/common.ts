@@ -1,5 +1,6 @@
 import { Menu } from '@/data-model/shop/ShopType';
-import { Item, ItemCategory } from '../../item/ItemType';
+import { Item } from '../../item/ItemType';
+import { ItemCategory } from '@/data-model/item/common';
 
 const commonEspressoNames = [
   'espresso',

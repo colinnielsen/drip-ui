@@ -1,6 +1,6 @@
 import { ApiRoute } from '@/lib/next';
 import FarmerService from '@/services/FarmerService';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default ApiRoute(async function (

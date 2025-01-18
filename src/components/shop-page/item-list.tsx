@@ -1,10 +1,9 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { Item, ItemCategory } from '@/data-model/item/ItemType';
+import { UUID } from '@/data-model/_common/type/CommonType';
+import { Item } from '@/data-model/item/ItemType';
 import { cn } from '@/lib/utils';
-import { useUser } from '@/queries/UserQuery';
-import { UUID } from 'crypto';
-import { ItemWithSelector } from './item-popup';
 import { ClientOnly } from '../ui/client-only';
+import { ItemWithSelector } from './item-popup';
 
 export const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-5 w-full overflow-x-auto">
@@ -33,34 +32,27 @@ export function ItemList({
 }) {
   const isLoading = !shopId || !items;
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col">
-        <div className="py-3">
-          <h2 className="text-lg font-normal capitalize">{title}</h2>
-        </div>
-        <ItemSkeleton />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col">
       <div className="py-3">
         <h2 className="text-lg font-normal capitalize">{title}</h2>
       </div>
-      <div
-        className={cn(
-          'flex gap-5 w-full overflow-x-auto',
-          horizontal ? 'flex-row' : 'flex-col',
-        )}
-      >
-        <ClientOnly>
-          {items.map((item, index) => (
-            <ItemWithSelector key={index} item={item} shopId={shopId} />
-          ))}
-        </ClientOnly>
-      </div>
+      {isLoading ? (
+        <ItemSkeleton />
+      ) : (
+        <div
+          className={cn(
+            'flex gap-5 w-full overflow-x-auto',
+            horizontal ? 'flex-row' : 'flex-col',
+          )}
+        >
+          <ClientOnly>
+            {items.map((item, index) => (
+              <ItemWithSelector key={index} item={item} shopId={shopId} />
+            ))}
+          </ClientOnly>
+        </div>
+      )}
     </div>
   );
 }

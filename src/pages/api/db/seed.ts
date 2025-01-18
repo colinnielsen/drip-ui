@@ -21,10 +21,10 @@ export default ApiRoute(async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.query.reset) await resetSQLDB();
 
   await bootstrapSQLDB();
-  // save all store configs
+  // save all shop configs
   await Promise.all(
     ONBOARDED_SHOPS.map(
-      async storeConfig => await ShopService.saveStoreConfig(storeConfig),
+      async config => await ShopService.saveShopConfig(config),
     ),
   );
   await Promise.all([

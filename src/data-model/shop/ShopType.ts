@@ -1,9 +1,10 @@
 import { BaseEntity, Entity } from '@/data-model/__global/entities';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { Location } from '@/data-model/_common/type/LocationType';
-import { UUID } from 'crypto';
-import { Address } from 'viem';
+import { EthAddress } from '../ethereum/EthereumType';
 import { FarmerAllocation } from '../farmer/FarmerType';
-import { Item, ItemCategory } from '../item/ItemType';
+import { Item } from '../item/ItemType';
+import { ItemCategory } from '../item/common';
 
 type SliceVersion = 1;
 type SlicerId = number;
@@ -13,7 +14,10 @@ export type SliceExternalId = `SLICE_STORE::V${SliceVersion}::${SlicerId}`;
 type SquareMerchantId = string;
 type SquareLocationId = string;
 
-export type SquareExternalId = `${SquareMerchantId}::${SquareLocationId}`;
+export type SquareExternalId =
+  `SQUARE_STORE::${SquareMerchantId}::${SquareLocationId}`;
+
+export type ShopExternalId = SliceExternalId | SquareExternalId;
 
 ///
 //// TYPES
@@ -22,27 +26,21 @@ export type Menu = {
   [category in ItemCategory | 'other' | string]: Item[];
 };
 
-export type SingleRecipientTipConfig =
-  | {
-      __type: 'single-recipient';
-      enabled: false;
-    }
-  | {
-      __type: 'single-recipient';
-      enabled: true;
-      address: Address;
-    };
+export type SingleRecipientConfig = {
+  __type: 'single-recipient';
+  recipient: EthAddress;
+};
 
-export type TipConfig = SingleRecipientTipConfig;
+export type TipConfig = SingleRecipientConfig;
 
 //
-//// STORE CONFIGS
+//// SHOP CONFIGS
 //
 
-export type SliceStoreConfig = {
+export type SliceShopConfig = {
   id: UUID;
   __type: 'slice';
-  /** The external ID of the slice store / */
+  /** The external ID of the slice shop / */
   externalId: SliceExternalId;
   name?: string;
   location: Location;
@@ -53,10 +51,10 @@ export type SliceStoreConfig = {
   tipConfig?: TipConfig;
 };
 
-export type SquareStoreConfig = {
+export type SquareShopConfig = {
   id: UUID;
   __type: 'square';
-  /** The merchant ID of the square store concatenated with the location ID */
+  /** The merchant ID of the square shop concatenated with the location ID */
   externalId: SquareExternalId;
   name?: string;
   location?: Location;
@@ -65,9 +63,10 @@ export type SquareStoreConfig = {
   url?: string;
   farmerAllocation?: FarmerAllocation[];
   tipConfig?: TipConfig;
+  fundRecipientConfig?: SingleRecipientConfig;
 };
 
-export type StoreConfig = SliceStoreConfig | SquareStoreConfig;
+export type ShopConfig = SliceShopConfig | SquareShopConfig;
 
 //
 //// SHOPS
@@ -99,12 +98,12 @@ export type BaseShop = BaseEntity & {
   menu: Menu;
 };
 
-export type Storefront = BaseShop & {
+export type PhysicalShop = BaseShop & {
   __type: 'storefront';
   location: Location | null;
 };
 
-export type StorefrontWithLocation = Omit<Storefront, 'location'> & {
+export type PhysicalShopWithLocation = Omit<PhysicalShop, 'location'> & {
   location: Location;
 };
 
@@ -113,7 +112,7 @@ export type OnlineShop = BaseShop & {
   url: string;
 };
 
-type _Shop = Storefront | OnlineShop;
+type _Shop = PhysicalShop | OnlineShop;
 
 export type Shop<T extends '_any' | ShopSourceConfig['type'] = '_any'> =
   T extends '_any'

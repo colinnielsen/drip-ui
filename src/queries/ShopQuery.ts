@@ -1,10 +1,15 @@
-import { Item, ItemMod } from '@/data-model/item/ItemType';
-import { Shop } from '@/data-model/shop/ShopType';
+import { Item } from '@/data-model/item/ItemType';
+import { ItemMod } from '@/data-model/item/ItemMod';
+import { Shop, ShopConfig, ShopSourceConfig } from '@/data-model/shop/ShopType';
 import { axiosFetcher, minutes } from '@/lib/utils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { useWalletAddress } from './EthereumQuery';
 import { useUser } from './UserQuery';
+import {
+  deriveShopConfigIdFromExternalId,
+  mapShopSourceConfigToExternalId,
+} from '@/data-model/shop/ShopDTO';
 
 export const useShops = () =>
   useQuery({
@@ -25,24 +30,23 @@ export const useShop = <TData = Shop>({
     client.getQueryData<Shop[]>(['shop'])?.find(shop => shop.id === id) ??
     client.getQueryData<Shop>(['shop', id]);
 
-  const includeDiscounts = !!(user?.id || walletAddress);
-  const queryParams = includeDiscounts
-    ? `?includeDiscounts=true${user?.id ? `&userId=${user.id}` : ''}${walletAddress ? `&walletAddress=${walletAddress}` : ''}`
-    : '';
+  // const includeDiscounts = !!(user?.id || walletAddress);
+  // const queryParams = includeDiscounts
+  //   ? `?includeDiscounts=true${user?.id ? `&userId=${user.id}` : ''}${walletAddress ? `&walletAddress=${walletAddress}` : ''}`
+  //   : '';
 
   const shopQueryKey = [
     'shop',
     id,
-    ...(includeDiscounts ? [{ userId: user?.id, walletAddress }] : []),
+    // ...(includeDiscounts ? [{ userId: user?.id, walletAddress }] : []),
   ];
 
   return useQuery({
     queryKey: shopQueryKey,
-    queryFn: () => axiosFetcher<Shop>(`/api/shops/${id}${queryParams}`),
+    queryFn: () => axiosFetcher<Shop>(`/api/shops/${id}`), //${queryParams}
     enabled: !!id,
     select,
     initialData,
-    staleTime: 0,
   });
 };
 
@@ -52,21 +56,21 @@ export const useShopSourceConfig = (id?: UUID) =>
     select: shop => shop.__sourceConfig,
   });
 
-export const useShopPriceDictionary = (id: UUID) =>
-  useShop({
-    id,
-    select: shop =>
-      Object.values(shop.menu)
-        .flat()
-        .reduce<Record<UUID, Item | ItemMod>>(
-          (acc, item) => ({
-            ...acc,
-            [item.id]: item,
-            ...item.mods.reduce((acc, mod) => ({ ...acc, [mod.id]: mod }), {}),
-          }),
-          {},
-        ),
-  });
+// export const useShopPriceDictionary = (id: UUID) =>
+//   useShop({
+//     id,
+//     select: shop =>
+//       Object.values(shop.menu)
+//         .flat()
+//         .reduce<Record<UUID, Item | ItemMod>>(
+//           (acc, item) => ({
+//             ...acc,
+//             [item.id]: item,
+//             ...item.mods.reduce((acc, mod) => ({ ...acc, [mod.id]: mod }), {}),
+//           }),
+//           {},
+//         ),
+//   });
 
 // export const useListenForDiscountRetching = () => {
 //   const { refetch } = useShop();

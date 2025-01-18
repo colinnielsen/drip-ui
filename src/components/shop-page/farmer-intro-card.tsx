@@ -1,7 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFarmer } from '@/queries/FarmerQuery';
 import { MapPin } from '@phosphor-icons/react/dist/ssr';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import Image from 'next/image';
 import Link from 'next/link';
 

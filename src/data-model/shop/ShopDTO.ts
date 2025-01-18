@@ -1,15 +1,20 @@
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { generateUUID } from '@/lib/utils';
-import { UUID } from 'crypto';
+import { SLICE_VERSION } from '../_external/data-sources/slice/SliceDTO';
 import {
   Menu,
   OnlineShop,
   Shop,
+  ShopExternalId,
   SliceExternalId,
   SquareExternalId,
-  Storefront,
-  StorefrontWithLocation,
+  PhysicalShop,
+  PhysicalShopWithLocation,
+  TipConfig,
+  ShopSourceConfig,
 } from './ShopType';
-import { SLICE_VERSION } from '../_external/data-sources/slice/SliceDTO';
+import { mapToEthAddress } from '../ethereum/EthereumDTO';
+import { ChainId } from '../ethereum/EthereumType';
 
 // CONSTANTS
 // -----------------------------------------------------------------------------
@@ -25,16 +30,24 @@ export const EMPTY_MENU: Menu = {
   other: [],
 };
 
+export const EMPTY_TIP_CONFIG: TipConfig = {
+  __type: 'single-recipient',
+  recipient: mapToEthAddress(
+    ChainId.BASE,
+    '0x0000000000000000000000000000000000000000',
+  ),
+} as const;
+
 // HELPER FUNCTIONS
 // -----------------------------------------------------------------------------
 
-export const isStorefront = (shop: Shop): shop is Storefront => {
+export const isStorefront = (shop: Shop): shop is PhysicalShop => {
   return shop.__type === 'storefront';
 };
 
 export function isStorefrontWithLocation(
   shop: Shop,
-): shop is StorefrontWithLocation {
+): shop is PhysicalShopWithLocation {
   return isStorefront(shop) && shop.location !== null;
 }
 
@@ -48,6 +61,18 @@ export const isSquareShop = (shop: any): shop is Shop<'square'> => {
 
 // UTILITY FUNCTIONS
 // -----------------------------------------------------------------------------
+
+export const deriveShopConfigIdFromExternalId = (
+  param: ShopExternalId | { externalId: ShopExternalId },
+): UUID => {
+  const externalId = (function () {
+    if (typeof param === 'string') return param;
+    if (param.externalId) return param.externalId;
+    throw new Error('Invalid param type');
+  })();
+
+  return generateUUID(externalId);
+};
 
 //
 /// SLICE
@@ -79,12 +104,39 @@ export const getSqaureExternalId = ({
 }: {
   merchantId: string;
   locationId: string;
-}): SquareExternalId => `${merchantId}::${locationId}`;
+}): SquareExternalId => `SQUARE_STORE::${merchantId}::${locationId}`;
 
 export const getMerchantIdFromSquareExternalId = (
   externalId: SquareExternalId,
-): string => externalId.split('::')[0];
+): string => {
+  const [_prefix, merchantId, _locationId] = externalId.split('::');
+  if (!merchantId) throw new Error('Fatal Error parsing square merchant id!');
+
+  return merchantId;
+};
 
 export const getLocationIdFromSquareExternalId = (
   externalId: SquareExternalId,
-): string => externalId.split('::')[1];
+): string => {
+  const [_prefix, _merchantId, locationId] = externalId.split('::');
+  if (!locationId) throw new Error('Fatal Error parsing square location id!');
+
+  return locationId;
+};
+
+///
+///// COMMON
+
+export const mapShopSourceConfigToExternalId = (
+  shopSourceConfig: ShopSourceConfig,
+): ShopExternalId => {
+  if (shopSourceConfig.type === 'square')
+    return getSqaureExternalId({
+      merchantId: shopSourceConfig.merchantId,
+      locationId: shopSourceConfig.locationId,
+    });
+
+  if (shopSourceConfig.type === 'slice') return shopSourceConfig.id;
+
+  throw new Error('Invalid shop source config');
+};

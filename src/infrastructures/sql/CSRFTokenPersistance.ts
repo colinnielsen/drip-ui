@@ -4,7 +4,7 @@ import { mapSQLQueriedCSRFTokenToCSRFToken } from '@/data-model/csrf-tokens/CSRF
 import { CSRFToken } from '@/data-model/csrf-tokens/CSRFTokenType';
 import { generateUUID } from '@/lib/utils';
 import { sql } from '@vercel/postgres';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 
 const save = async (obj: Unsaved<CSRFToken>): Promise<CSRFToken> => {
   const saved = await sql`

@@ -4,11 +4,14 @@ export class BaseEffectError extends Error {
   originalTag: string | undefined;
 
   constructor(e: unknown) {
-    if (typeof e === 'string') super(e);
-    if (e instanceof Error) {
+    if (typeof e === 'string') {
+      super(e);
+    } else if (e instanceof Error) {
       super(e.message, { cause: (e?.cause as any)?.message || e.cause });
       Error.captureStackTrace(this, this.constructor);
-    } else super(String(e));
+    } else {
+      super(String(e));
+    }
   }
 
   toJSON() {
@@ -44,9 +47,21 @@ export class SQLExecutionError extends BaseEffectError {
   readonly _tag = 'SQLExecutionError';
 }
 
+export class MappingError extends BaseEffectError {
+  readonly _tag = 'MappingError';
+}
+
+export class OnChainExecutionError extends BaseEffectError {
+  readonly _tag = 'OnChainExecutionError';
+}
+
 //
 //// HTTP ERRORS
 ///
+export class UnauthorizedError extends BaseEffectError {
+  readonly _tag = 'UnauthorizedError';
+}
+
 export class BadRequestError extends BaseEffectError {
   readonly _tag = 'BadRequestError';
 }
@@ -79,8 +94,17 @@ export type HTTPRouteHandlerErrors =
   | ParseError
   | BadRequestError
   | NotFoundError
+  | UnauthorizedError
   | DripServerError;
+
+//
+//// 1-liner functions
+//
 
 export const genericError = (message: string | Error | unknown) => {
   throw new GenericError(message);
+};
+
+export const mappingError = (message: string | Error | unknown) => {
+  throw new MappingError(message);
 };

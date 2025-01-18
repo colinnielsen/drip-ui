@@ -16,18 +16,15 @@ import {
   Label2,
   Title2,
 } from '@/components/ui/typography';
+import { getSummariesFromOrderOrCart } from '@/data-model/cart/CartDTO';
 import {
-  collapseDuplicateItems,
-  getOrderItemCost,
+  createLineItemAggregate,
   isPaidOrder,
 } from '@/data-model/order/OrderDTO';
 import { Order } from '@/data-model/order/OrderType';
 import { isStorefront } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
-import {
-  useCartSummary,
-  useFarmerAllocationFromOrder,
-} from '@/queries/OrderQuery';
+import { useFarmerAllocationFromOrder } from '@/queries/OrderQuery';
 import { CarSimple } from '@phosphor-icons/react/dist/ssr';
 import { Newspaper, Timer, X } from 'lucide-react';
 import Image from 'next/image';
@@ -38,15 +35,15 @@ import { OrderSummary } from '../basket/summary';
 import { AsCheckoutSlide } from '../checkout-slides';
 
 export const OrderConfirmation = ({
-  cart,
+  order: cart,
   shop,
 }: {
-  cart: Order;
+  order: Order;
   shop: Shop;
 }) => {
   const { setOpen } = useCartDrawer();
-  const farmer = useFarmerAllocationFromOrder(cart);
-  const summary = useCartSummary();
+  const farmer = useFarmerAllocationFromOrder(order);
+  const summary = getSummariesFromOrderOrCart(order);
 
   const closeButton = (
     <div className="flex justify-start w-full items-center px-6 py-4">
@@ -182,7 +179,7 @@ export const OrderConfirmation = ({
         <div className="flex flex-col w-full gap-3.5 items-start">
           <Headline className="px-6">Order summary</Headline>
           <div className="flex flex-col gap-6 w-full">
-            {collapseDuplicateItems(cart.orderItems).map(
+            {createLineItemAggregate({ variant: cart.lineItems }).map(
               ([orderItem, quantity], index) => {
                 const { price, discountPrice } = getOrderItemCost(orderItem);
                 return (
@@ -226,7 +223,7 @@ export const OrderConfirmation = ({
 export function ConfirmationSlide({ cart, shop }: { cart: Order; shop: Shop }) {
   return (
     <AsCheckoutSlide>
-      <OrderConfirmation cart={cart} shop={shop} />
+      <OrderConfirmation order={cart} shop={shop} />
     </AsCheckoutSlide>
   );
 }

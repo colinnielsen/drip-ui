@@ -12,7 +12,7 @@ import {
 } from '@/data-model/square-connection/SquareConnectionType';
 import { encrypt } from '@/lib/encryption';
 import { sql } from '@vercel/postgres';
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 
 export type EncryptedSquareConnection = MinSquareConnection & {
   /**

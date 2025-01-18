@@ -1,4 +1,4 @@
-import { UUID } from 'crypto';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { isProd, isUUID } from './utils';
 

@@ -1,8 +1,9 @@
 import { ETH } from '@/data-model/_common/currency/ETH';
 import { USDC } from '@/data-model/_common/currency/USDC';
+import { rehydrateDripType } from '@/data-model/_common/type/CommonDTO';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import axios, { AxiosRequestConfig } from 'axios';
 import { clsx, type ClassValue } from 'clsx';
-import { UUID } from 'crypto';
 import { twMerge } from 'tailwind-merge';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import { formatUnits } from 'viem';
@@ -27,11 +28,15 @@ export const prettyFormatPrice = (
   return displayPrice;
 };
 
+/**
+ * @dev rehydrates any known class instances
+ */
 export function rehydrateData<T>(data: any): T {
   if (typeof data !== 'object' || data === null) return data;
   if (Array.isArray(data)) return data.map(rehydrateData) as T;
-  if (data.__dripType === 'USDC') return USDC.fromJSON(data) as T;
-  if (data.__dripType === 'ETH') return ETH.fromJSON(data) as T;
+  if ('__dripType' in data) return rehydrateDripType(data) as T;
+  if (data instanceof Date) return data as T;
+
   const result: any = {};
   for (const [key, value] of Object.entries(data))
     result[key] = rehydrateData(value);
@@ -39,12 +44,12 @@ export function rehydrateData<T>(data: any): T {
   return result as T;
 }
 
-export const axiosFetcher = async <T>(
+export const axiosFetcher = async <TResponse, TRequest = any>(
   url: string,
-  options?: AxiosRequestConfig,
-): Promise<T> => {
+  options?: AxiosRequestConfig<TRequest>,
+): Promise<TResponse> => {
   try {
-    const response = await axios<T>(url, {
+    const response = await axios<TResponse>(url, {
       withCredentials: true,
       transformResponse: (data: string) => {
         if (typeof data === 'string') {
@@ -157,4 +162,9 @@ export const uniqBy = <T extends Record<string, any>>(
       {} as Record<keyof T, T>,
     ),
   );
+};
+
+export const hasAtLeastOne = <T>(arr: T[]): arr is [T, ...T[]] => {
+  if (arr.length === 0) return false;
+  return true;
 };

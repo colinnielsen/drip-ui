@@ -67,20 +67,21 @@ export const OrderSummary = ({
         ) : null}
         <Label2>{order.lineItems.length} items</Label2>
         <Label2>${order.totalAmount.prettyFormat()}</Label2>
-        {order.status === '1-submitting' || order.status === '2-in-progress' ? (
-          <div className="flex items-center">
-            <Label2>
-              {mapOrderStatusToStatusLabel(order.status)}
-              {(order.status === '1-submitting' ||
-                order.status === '2-in-progress') && (
-                <AnimatedTimer
-                  height={14}
-                  className="inline stroke-primary-gray"
-                />
-              )}
-            </Label2>
-          </div>
-        ) : null}
+        {/* {order.status === '1-submitting' || order.status === '2-in-progress' ? ( */}
+        <div className="flex items-center">
+          <Label2>
+            {order.status === 'error' && '❌ '}
+            {order.status !== '3-complete' &&
+              mapOrderStatusToStatusLabel(order.status)}
+            {order.status === '1-submitting' ||
+            order.status === '2-in-progress' ? (
+              <AnimatedTimer
+                height={14}
+                className="inline stroke-primary-gray"
+              />
+            ) : null}
+          </Label2>
+        </div>
       </div>
 
       <div className="flex grow justify-end">

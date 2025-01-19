@@ -56,12 +56,14 @@ export const TIP_OPTIONS = [...KNOWN_TIP_OPTIONS, CUSTOM_OPTION];
 const getTipAmountFromOption = (
   cart: Cart,
   opt: (typeof KNOWN_TIP_OPTIONS)[number],
-): Currency => {
+): USDC => {
   if (opt.__type === 'fixed') return opt.value;
   if (opt.__type === 'percentage')
-    return cart.quotedSubtotal!.percentageOf({
-      percent: opt.percent,
-    });
+    return cart
+      .quotedSubtotal!.percentageOf({
+        percent: opt.percent,
+      })
+      .toUSDC();
 
   throw new Error('Invalid tip option');
 };
@@ -94,7 +96,6 @@ const useTipButtons = (cart: Cart) => {
   );
 
   const selectedTip = useMemo(() => getOptionFromTipAmount(cart), [cart]);
-
   const tipOptions = useMemo(
     () =>
       TIP_OPTIONS.map(option => ({

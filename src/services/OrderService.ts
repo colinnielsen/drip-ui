@@ -10,8 +10,10 @@ import { Cart } from '@/data-model/cart/CartType';
 import {
   createExternalOrderInfo,
   mapCartToNewOrder,
+  needsSyncing,
 } from '@/data-model/order/OrderDTO';
 import {
+  CompletedOrder,
   ErroredOrder,
   ExternalOrderInfo,
   InProgressOrder,
@@ -67,6 +69,7 @@ import { ChainId, USDCAuthorization } from '@/data-model/ethereum/EthereumType';
 import { USDC_CONFIG } from '@/lib/contract-config/USDC';
 import { privateKeyToAccount } from 'viem/accounts';
 import { getDripRelayerPrivateKey } from '@/lib/constants';
+import { sliceKit } from '@/lib/slice';
 
 // export type UpdateOrderOperation =
 //   | { __type: 'add'; orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[] }
@@ -356,42 +359,51 @@ const addExternalOrderInfo = async (
   return o as Order;
 };
 
-// async function _syncSliceOrder(order: InProgressOrder) {
-//   const timeSince = differenceInMinutes(new Date(), new Date(order.timestamp));
-//   const itsBeen5Minutes = timeSince > 5;
+async function _syncSliceOrder(order: InProgressOrder) {
+  const timeSince = differenceInMinutes(new Date(), new Date(order.timestamp));
+  const itsBeen5Minutes = timeSince > 5;
 
-//   const sliceOrders = await sliceKit
-//     .getOrder({
-//       transactionHash: order.transactionHash,
-//     })
-//     .then(o => o.order.slicerOrders)
-//     .catch(e => {
-//       throw Error(`Error fetching order from slice: ${e}`);
-//     });
-//   if (!sliceOrders.length) throw Error('slice order not found');
-//   const [sliceOrder] = sliceOrders;
-//   const orderNumber = sliceOrder.refOrderId;
-//   const status: SliceOrderStatus = sliceOrder.status;
-//   const newOrderStatus: Order['status'] =
-//     status === 'Completed' || itsBeen5Minutes
-//       ? '4-complete'
-//       : status === 'Canceled'
-//         ? 'cancelled'
-//         : order.status;
+  const [payment] = order.payments;
 
-//   const result = await sql`UPDATE
-//         orders
-//         SET "externalOrderInfo" = ${JSON.stringify({
-//           ...order.externalOrderInfo!,
-//           orderNumber,
-//           status: newOrderStatus,
-//         })},
-//       "status" = ${newOrderStatus}
-//       WHERE id = ${order.id}
-//       RETURNING *`;
+  if (!payment || !('transactionHash' in payment))
+    throw Error(
+      '_syncSliceOrder: expected slice order to have an associated payment with a transactionHash',
+    );
 
-//   return result.rows[0] as PaidOrder;
-// }
+  const sliceOrders = await sliceKit
+    .getOrder({
+      transactionHash: payment.transactionHash,
+    })
+    .then(o => o.order.slicerOrders)
+    .catch(e => {
+      throw Error(`Error fetching order from slice: ${e}`);
+    });
+
+  if (!sliceOrders.length) throw Error('slice order not found');
+
+  const [sliceOrder] = sliceOrders;
+  const orderNumber = sliceOrder.refOrderId;
+  const status = sliceOrder.status;
+  const newOrderStatus: Order['status'] =
+    status === 'Completed' || itsBeen5Minutes
+      ? '3-complete'
+      : status === 'Canceled'
+        ? 'cancelled'
+        : order.status;
+
+  const result = await sql`UPDATE
+        orders
+        SET "externalOrderInfo" = ${JSON.stringify({
+          ...order.externalOrderInfo!,
+          orderNumber,
+          status: newOrderStatus,
+        })},
+      "status" = ${newOrderStatus}
+      WHERE id = ${order.id}
+      RETURNING *`;
+
+  return result.rows[0] as InProgressOrder | CompletedOrder;
+}
 
 async function _syncSquareOrder(order: InProgressOrder) {
   const timeSince = differenceInMinutes(new Date(), new Date(order.timestamp));
@@ -417,11 +429,9 @@ async function _syncSquareOrder(order: InProgressOrder) {
     squareOrder.fulfillments?.[0]?.state,
   );
 
-  const newOrderStatus =
+  const newOrderStatus: Order['status'] =
     // override the order status if it's been a while
-    squreOrderStatus === '2-in-progress' && itsBeen5Minutes
-      ? '4-complete'
-      : squreOrderStatus;
+    needsSyncing(order) && itsBeen5Minutes ? '3-complete' : squreOrderStatus;
 
   const result = await sql`
     UPDATE
@@ -436,17 +446,16 @@ async function _syncSquareOrder(order: InProgressOrder) {
     RETURNING *
   `;
 
-  return result.rows[0] as InProgressOrder;
+  return result.rows[0] as InProgressOrder | CompletedOrder;
 }
 
 const syncOrderWithExternalService = async (
   order: InProgressOrder,
-): Promise<InProgressOrder> => {
+): Promise<InProgressOrder | Order> => {
   if (!order.externalOrderInfo) throw Error('externalOrderInfo not found');
 
   if (order.externalOrderInfo.__type === 'slice')
-    throw Error('slice not implemented');
-  // return await _syncSliceOrder(order);
+    return await _syncSliceOrder(order);
   else if (order.externalOrderInfo.__type === 'square')
     return await _syncSquareOrder(order);
 
@@ -730,7 +739,7 @@ const syncWithExternalService = async (orderIds: UUID[]): Promise<Order[]> => {
   );
 
   const orders = result.rows.filter(
-    o => 'externalOrderInfo' in o && o.status === '2-in-progress',
+    o => 'externalOrderInfo' in o && needsSyncing(o),
   ) as InProgressOrder[];
   if (!orders.length) return result.rows as Order[];
 

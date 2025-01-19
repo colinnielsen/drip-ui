@@ -12,9 +12,10 @@ import {
 } from '@tanstack/react-query';
 import { Address, Hash } from 'viem';
 import { useFarmer } from './FarmerQuery';
-import { useShop, useShopPriceDictionary } from './ShopQuery';
+import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
+import { needsSyncing } from '@/data-model/order/OrderDTO';
 
 //
 //// HELPERS
@@ -78,7 +79,7 @@ export const useIncompleteOrders = () => {
   return useQuery(
     orderQuery(userId, orders =>
       orders.filter(
-        o => o.status === '3-in-progress' || o.status === '2-submitting',
+        o => o.status === '1-submitting' || o.status === '2-in-progress',
       ),
     ),
   );
@@ -342,29 +343,28 @@ export const useAssocateExternalOrderInfoToCart = () => {
 export const usePollExternalServiceForOrderCompletion = (
   incompleteOrders: Order[],
 ) => {
-  const pendingOrders = incompleteOrders.filter(o => o.status !== '4-complete');
+  const ordersToSync = incompleteOrders.filter(needsSyncing);
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
 
   return useQuery({
     queryKey: [
       ORDERS_QUERY_KEY,
-      ...pendingOrders.map(o => o.id),
+      ...ordersToSync.map(o => o.id),
       'status-check',
     ],
     queryFn: async () =>
       axiosFetcher<Order[]>(`/api/orders/sync-with-external-service`, {
         method: 'POST',
-        data: { orderIds: pendingOrders.map(o => o.id) },
+        data: { orderIds: ordersToSync.map(o => o.id) },
       }).then(result => {
-        const remainingInProgress = result.filter(
-          o => o.status !== '4-complete',
-        );
+        const remainingToBeSynced = result.filter(needsSyncing);
+
         queryClient.setQueryData(
           [ORDERS_QUERY_KEY, userId],
           (oldOrders: Order[]) => uniqBy([...oldOrders, ...result], 'id'),
         );
-        if (remainingInProgress.length < incompleteOrders.length) {
+        if (remainingToBeSynced.length < incompleteOrders.length) {
           queryClient.refetchQueries({
             queryKey: [ORDERS_QUERY_KEY, userId],
           });
@@ -373,6 +373,6 @@ export const usePollExternalServiceForOrderCompletion = (
         return result;
       }),
     refetchInterval: 8_000,
-    enabled: pendingOrders.length > 0,
+    enabled: ordersToSync.length > 0,
   });
 };

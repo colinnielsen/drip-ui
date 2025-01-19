@@ -20,7 +20,7 @@ import {
   PaymentSummary,
 } from './OrderType';
 
-const EMPTY_SUMMARY = {
+export const EMPTY_SUMMARY: PaymentSummary = {
   subtotal: null,
   tax: null,
   discount: null,
@@ -41,15 +41,10 @@ export function mapVariantAndModsToUniqueId(
 }
 
 export const getOrderNumber = (order: Order): string | null => {
-  return (
-    ('externalOrderInfo' in order &&
-      order.externalOrderInfo?.__type === 'slice' &&
-      order.externalOrderInfo.orderNumber) ||
-    null
-  );
+  return order.externalOrderInfo?.orderNumber || null;
 };
 
-export const mapStatusToStatusLabel = (
+export const mapOrderStatusToStatusLabel = (
   status: Order['status'],
   tense: 'present' | 'past' = 'present',
 ) => {
@@ -57,12 +52,13 @@ export const mapStatusToStatusLabel = (
     case '1-submitting':
       return tense === 'present' ? 'Pending' : 'Pending';
     case '2-in-progress':
-      return tense === 'present' ? 'Pending' : 'Submitted';
+      return tense === 'present' ? 'In Progress' : 'In Progress';
     case '3-complete':
-      return 'In Progress';
+      return tense === 'present' ? 'Complete' : 'Completed';
     case 'cancelled':
-    case 'error':
       return tense === 'present' ? 'Cancelled' : 'Cancelled';
+    case 'error':
+      return tense === 'present' ? 'Error' : 'Errored';
   }
 };
 
@@ -221,29 +217,17 @@ export function createLineItemAggregate({
   } satisfies LineItem;
 }
 
-// TODO
-export const mapOrderOrCartToPaymentSummary = (
-  cartOrOrder: Cart | Order | null | undefined,
+export const mapOrderToPaymentSummary = (
+  cartOrOrder: Order | null | undefined,
 ): PaymentSummary => {
   if (!cartOrOrder) return EMPTY_SUMMARY;
-
-  if ('quotedTotalAmount' in cartOrOrder)
-    return {
-      subtotal: cartOrOrder.quotedSubtotal || null,
-      tax: cartOrOrder.quotedTaxAmount || null,
-      discount: cartOrOrder.quotedDiscountAmount || null,
-      tip: cartOrOrder.tip?.amount || null,
-      total: cartOrOrder.quotedTotalAmount || null,
-    };
-  else if ('totalAmount' in cartOrOrder)
-    return {
-      subtotal: cartOrOrder.subtotal || null,
-      tax: cartOrOrder.taxAmount || null,
-      discount: cartOrOrder.discountAmount || null,
-      tip: cartOrOrder.tip?.amount || null,
-      total: cartOrOrder.totalAmount || null,
-    };
-  else return EMPTY_SUMMARY;
+  return {
+    subtotal: cartOrOrder.subtotal || null,
+    tax: cartOrOrder.taxAmount || null,
+    discount: cartOrOrder.discountAmount || null,
+    tip: cartOrOrder.tip?.amount || null,
+    total: cartOrOrder.totalAmount || null,
+  };
 };
 
 export const mapCartToNewOrder = ({

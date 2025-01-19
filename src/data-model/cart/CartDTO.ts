@@ -9,8 +9,13 @@ import {
 import { AllExist, UUID } from '../_common/type/CommonType';
 import { ItemMod } from '../item/ItemMod';
 import { Item, ItemVariant } from '../item/ItemType';
-import { addLineItemPrices, createLineItemAggregate } from '../order/OrderDTO';
+import {
+  addLineItemPrices,
+  createLineItemAggregate,
+  EMPTY_SUMMARY,
+} from '../order/OrderDTO';
 import { Cart } from './CartType';
+import { PaymentSummary } from '../order/OrderType';
 
 export const calculateCartTotals = (
   cart: Cart,
@@ -104,5 +109,16 @@ export const buildInitialFromLineItem = ({
     quotedTaxAmount: taxAmount,
     quotedDiscountAmount: discountAmount,
     quotedTotalAmount: total,
+  };
+};
+
+export const mapCartToPaymentSummary = (cart?: Cart | null): PaymentSummary => {
+  if (!cart) return EMPTY_SUMMARY;
+  return {
+    subtotal: cart.quotedSubtotal || null,
+    tax: cart.quotedTaxAmount || null,
+    discount: cart.quotedDiscountAmount || null,
+    tip: cart.tip?.amount || null,
+    total: cart.quotedTotalAmount || null,
   };
 };

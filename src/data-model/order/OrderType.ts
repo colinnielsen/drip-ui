@@ -89,12 +89,12 @@ export type InProgressOrder = Omit<_Order, 'status'> & {
   externalOrderInfo: ExternalOrderInfo;
 };
 
-// export type PaidOrder = InProgressOrder & {
-//   externalOrderInfo: ExternalOrderInfo;
-// }
-
 export type CancelledOrder = Omit<_Order, 'status'> & {
   status: 'cancelled';
+};
+
+export type CompletedOrder = Omit<_Order, 'status'> & {
+  status: '3-complete';
 };
 
 export type ErroredOrder = Omit<_Order, 'status'> & {

@@ -72,7 +72,7 @@ const validatePayload = (
           )
             return fail(
               new BadRequestError(
-                'Discount amount cannot be equal to subtotal, tax, or total',
+                'Error: The cart quoted to the user differs from the calculation on the server',
               ),
             );
 

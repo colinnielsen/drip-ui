@@ -202,12 +202,18 @@ export const useTipMutation = () => {
   return useMutation({
     scope: { id: 'tip' },
     mutationFn: async ({ tip }: { tip: USDC | null }) => {
-      const prevCart = await await LocalStorageCartPersistance.get();
+      const prevCart = await LocalStorageCartPersistance.get();
       if (!prevCart) throw new Error('No cart found');
+
+      const totals = calculateCartTotals({
+        ...prevCart,
+        tip: tip ? { amount: tip } : null,
+      });
 
       const nextCart: Cart = {
         ...prevCart,
         tip: tip ? { amount: tip } : null,
+        ...totals,
       };
 
       await LocalStorageCartPersistance.save(nextCart);

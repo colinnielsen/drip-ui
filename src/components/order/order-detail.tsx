@@ -32,6 +32,8 @@ export const OrderDetail = ({
   shopLabel: string;
   onClose: () => void;
 }) => {
+  if (order?.status === 'error') console.error(order.errorDetails);
+
   return (
     <DrawerContent className="">
       <div className="flex flex-col h-screen overflow-scroll">
@@ -73,6 +75,11 @@ export const OrderDetail = ({
                   .slice(0, -1)}
             </Label2>
           </div>
+          {order?.status === 'error' && (
+            <Label2 className="text-red-500 px-6">
+              {order.errorDetails?.message}
+            </Label2>
+          )}
         </div>
         <div className="flex flex-col w-full py-2 divide-y divide-light-gray">
           {order?.lineItems &&

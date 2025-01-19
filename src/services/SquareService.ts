@@ -202,6 +202,7 @@ const createOrder = async (merchantId: string, order: SquareOrder) => {
  * Takes a Drip order and pays for it on square.
  * @notice Sends the order to the POS
  * @see {@link https://developer.squareup.com/reference/square/payments-api/create-payment|Square Docs}
+ * @dev !NOTE: The order this creates in Square will not include the onchain tip
  */
 const payForOrder = async ({
   order,
@@ -219,10 +220,11 @@ const payForOrder = async ({
   const squareClientWithAccessToken =
     await _getSquareClientFromMerchantId(merchantId);
 
-  const total =
-    order.totalAmount instanceof USDC
+  const total: bigint =
+    (order.totalAmount instanceof USDC
       ? order.totalAmount.toCents()
-      : order.totalAmount.toUSDC().toCents();
+      : order.totalAmount.toUSDC().toCents()) -
+    (order.tip?.amount.toCents() ?? 0n);
 
   const response = await squareClientWithAccessToken.paymentsApi
     .createPayment({

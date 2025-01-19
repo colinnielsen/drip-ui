@@ -1,38 +1,17 @@
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { CTAButton, SecondaryButton } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { PlusSvg } from '@/components/ui/icons';
+import { CTAButton } from '@/components/ui/button';
 import { Body, Title1, Title2 } from '@/components/ui/typography';
 import { UUID } from '@/data-model/_common/type/CommonType';
-import {
-  mapEthAddressToAddress,
-  mapToEthAddress,
-} from '@/data-model/ethereum/EthereumDTO';
-import { ChainId, EthAddress } from '@/data-model/ethereum/EthereumType';
-import {
-  getLocationIdFromSquareExternalId,
-  getSqaureExternalId,
-} from '@/data-model/shop/ShopDTO';
+import { EthAddress } from '@/data-model/ethereum/EthereumType';
+import { getSqaureExternalId } from '@/data-model/shop/ShopDTO';
 import { SquareShopConfig } from '@/data-model/shop/ShopType';
 import { SQUARE_AUTHORIZATION_ERRORS } from '@/lib/squareClient';
 import { ShopConfigRequest } from '@/pages/api/shops/shop-config';
 import { SquareConnectionResponse } from '@/pages/api/square/square-connection';
 import { Spinner } from '@phosphor-icons/react/dist/ssr';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
-import { isAddress } from 'viem';
-import { z } from 'zod';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
 import SquareLocation from './SquareLocation';
 
 const getSquareConnectionStatus = async () => {
@@ -55,9 +34,7 @@ const useSquareConnectionStatus = () =>
 
 const AuthorizationResponses = () => {
   const searchParams = useSearchParams();
-  const error = z
-    .enum(SQUARE_AUTHORIZATION_ERRORS)
-    .safeParse(searchParams.get('error'));
+  const error = JSON.parse(searchParams.get('error') || '');
 
   if (!error.success) return null;
 

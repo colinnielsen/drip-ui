@@ -153,6 +153,10 @@ export class USDC {
     return USDC.fromWei((this.wei * USDC.UNIT) / divisor);
   }
 
+  toUSDC(): USDC {
+    return this;
+  }
+
   /**
    * @example
    * const usdc = new USDC(1);

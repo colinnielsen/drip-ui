@@ -312,11 +312,16 @@ export const mapCartToNewOrder = ({
 //   },
 // };
 
+export const isSubmitting = (o: Order) => o.status === '1-submitting';
+
 export const isInProgress = (o: Order) => o.status === '2-in-progress';
 
 export const isComplete = (o: Order) => o.status === '3-complete';
 
 export const isPaidOrder = (o: Order) => isInProgress(o);
+
+export const needsSyncing = ({ status }: Order) =>
+  status === '1-submitting' || status === '2-in-progress';
 
 export const hasPaymentConfirmed = (o: Order) =>
   isComplete(o) || isInProgress(o);

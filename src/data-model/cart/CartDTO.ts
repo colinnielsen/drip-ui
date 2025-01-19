@@ -37,7 +37,6 @@ export const calculateCartTotals = (
 
   if (!cart.lineItems.length)
     return {
-      ...cart,
       quotedSubtotal: CURRENCY_ZERO,
       quotedTaxAmount: CURRENCY_ZERO,
       quotedDiscountAmount: CURRENCY_ZERO,

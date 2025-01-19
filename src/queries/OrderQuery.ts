@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-query';
 import { Address, Hash } from 'viem';
 import { useFarmer } from './FarmerQuery';
-import { useShop, useShopPriceDictionary } from './ShopQuery';
+import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
 import { needsSyncing } from '@/data-model/order/OrderDTO';
@@ -359,7 +359,7 @@ export const usePollExternalServiceForOrderCompletion = (
         data: { orderIds: ordersToSync.map(o => o.id) },
       }).then(result => {
         const remainingToBeSynced = result.filter(needsSyncing);
-        console.log(remainingToBeSynced);
+
         queryClient.setQueryData(
           [ORDERS_QUERY_KEY, userId],
           (oldOrders: Order[]) => uniqBy([...oldOrders, ...result], 'id'),

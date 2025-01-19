@@ -71,7 +71,8 @@ export const OrderSummary = ({
         <div className="flex items-center">
           <Label2>
             {order.status === 'error' && '❌ '}
-            {mapOrderStatusToStatusLabel(order.status)}
+            {order.status !== '3-complete' &&
+              mapOrderStatusToStatusLabel(order.status)}
             {order.status === '1-submitting' ||
             order.status === '2-in-progress' ? (
               <AnimatedTimer

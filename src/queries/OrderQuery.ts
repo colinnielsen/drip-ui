@@ -16,6 +16,9 @@ import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
 import { needsSyncing } from '@/data-model/order/OrderDTO';
+import { useCart } from './CartQuery';
+import { LineItem } from '@/data-model/order/LineItemAggregate';
+import { Cart } from '@/data-model/cart/CartType';
 
 //
 //// HELPERS
@@ -85,22 +88,27 @@ export const useIncompleteOrders = () => {
   );
 };
 
-const cartSelector = (orders: Order[]) =>
+const recentOrderSelector = (orders: Order[]) =>
   orders
     .sort((a, b) => sortDateAsc(a.timestamp, b.timestamp))
     .find(
       o =>
-        (o.status !== '4-complete' &&
+        (o.status !== '3-complete' &&
           o.status !== 'cancelled' &&
-          new Date(o.timestamp).getTime() > Date.now() - 4 * 60 * 60 * 1000) ||
-        (o.status === '4-complete' &&
-          new Date(o.timestamp).getTime() > Date.now() - 10 * 60 * 1000),
+          +new Date(o.timestamp) > Date.now() - 10 * 60 * 1000) ||
+        (o.status === '3-complete' &&
+          +new Date(o.timestamp) > Date.now() - 60 * 60 * 1000),
     ) ?? null;
 
-export const useRecentCart = () => {
+/**
+ * @returns a recently placed order:
+ * - either the most recent pending order within 10 minutes
+ * - or your last complete order from within 1 hour
+ */
+export const useRecentOrder = () => {
   const { data: userId } = useUserId();
   return useQuery({
-    ...orderQuery(userId, cartSelector),
+    ...orderQuery(userId, recentOrderSelector),
   });
 };
 
@@ -138,7 +146,7 @@ export const useRecentCart = () => {
 // };
 
 export const useCartId = () => {
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useRecentOrder();
   return cart?.id;
 };
 
@@ -151,7 +159,7 @@ export const useCartInSliceFormat = ({
   buyerAddress?: Address | null | undefined;
 }) => {
   const buyerAddress = _buyer ?? undefined;
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useRecentOrder();
   const { data: shop } = useShop({ id: cart?.shop });
 
   const slicerId =
@@ -173,17 +181,17 @@ export const useCartInSliceFormat = ({
 //
 
 export const useRemoveItemFromCart = ({
-  orderItemId,
+  lineItemUniqueId,
   orderId,
   shopId,
 }: {
-  orderItemId: UUID;
+  lineItemUniqueId: LineItem['uniqueId'];
   orderId: UUID;
   shopId: UUID;
 }) => {
   const queryClient = useQueryClient();
   const { data: userId } = useUserId();
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useCart();
 
   return useMutation({
     scope: { id: 'cart' },
@@ -193,26 +201,37 @@ export const useRemoveItemFromCart = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        data: { action: 'delete', orderItemId, shopId },
+        data: { action: 'delete', lineItemUniqueId, shopId },
         withCredentials: true,
       }),
     onMutate() {
-      if (!cart || cart.status !== '1-pending') throw Error('cart not pending');
+      if (!cart) return null;
+
       const willEraseCart =
-        cart?.orderItems.length === 1 && cart.orderItems[0].id === orderItemId;
+        cart.lineItems.length === 1 &&
+        cart.lineItems[0].uniqueId === lineItemUniqueId &&
+        cart.lineItems[0].quantity === 1;
+
+      const willRemoveLineItem =
+        cart.lineItems.find(li => li.uniqueId === lineItemUniqueId)!
+          .quantity === 1;
 
       const optimisticCart: Cart | null = willEraseCart
         ? null
         : {
             ...cart,
-            orderItems: cart.orderItems.filter(o => o.id !== orderItemId),
+            lineItems: willRemoveLineItem
+              ? // if this operation will remove the line item, then filter out the item with the matching id
+                cart.lineItems.filter(o => o.uniqueId !== lineItemUniqueId)
+              : // otherwise, just decrement the line item
+                cart.lineItems.map<LineItem>(li =>
+                  li.uniqueId !== lineItemUniqueId
+                    ? li
+                    : { ...li, quantity: li.quantity - 1 },
+                ),
           };
 
-      queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
-        if (willEraseCart || !optimisticCart)
-          return prev.filter(o => o.id !== cart.id);
-        return prev.map(o => (o.id === optimisticCart.id ? optimisticCart : o));
-      });
+      setCart;
 
       return { optimisticCart, prevCart: cart };
     },
@@ -269,7 +288,7 @@ export const useFarmerAllocation = ({ shopId }: { shopId: UUID }) => {
 export const useAssocatePaymentToCart = () => {
   const queryClient = useQueryClient();
 
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useRecentOrder();
   const { data: priceDict } = useShopPriceDictionary(cart?.shop!);
 
   return useMutation({
@@ -307,7 +326,7 @@ export const useAssocatePaymentToCart = () => {
 export const useAssocateExternalOrderInfoToCart = () => {
   const queryClient = useQueryClient();
 
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useRecentOrder();
 
   return useMutation({
     scope: { id: 'cart' },

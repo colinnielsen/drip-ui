@@ -1,20 +1,13 @@
-import { Order } from '@/data-model/order/OrderType';
-import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
-import { axiosFetcher } from '@/lib/utils';
-import { useUSDCBalance } from '@/queries/EthereumQuery';
-import {
-  ORDERS_QUERY_KEY,
-  useCartId,
-  useRecentCart,
-} from '@/queries/OrderQuery';
-import { useUser } from '@/queries/UserQuery';
-import { useWallets } from '@privy-io/react-auth';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useGoToSlide, useSlideInView } from '../ui/carousel';
-import { useCart } from '@/queries/CartQuery';
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { UnimplementedPathError } from '@/lib/effect';
+import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
+import { useCart } from '@/queries/CartQuery';
+import { useUSDCBalance } from '@/queries/EthereumQuery';
+import { useRecentOrder } from '@/queries/OrderQuery';
+import { useUser } from '@/queries/UserQuery';
+import { useWallets } from '@privy-io/react-auth';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useSlideInView } from '../ui/carousel';
 
 // const SLIDE_MAP = {
 //   initializing: 1,
@@ -32,12 +25,17 @@ export type SliceCheckoutStep =
   | 'get-usdc'
   | 'pay';
 
-type PaymentStep = 'idle' | 'awaiting-confirmation' | 'success' | 'error';
+type PaymentStep =
+  | 'idle'
+  | 'awaiting-confirmation'
+  | 'paying'
+  | 'success'
+  | 'error';
 
 type CheckoutCtx = {
   step: SliceCheckoutStep;
   paymentStep: PaymentStep;
-  setPaymentStep: (step: PaymentStep) => void;
+  setPaymentStep: React.Dispatch<React.SetStateAction<PaymentStep>>;
 };
 
 const initial = {
@@ -103,33 +101,32 @@ const useDetermineCheckoutStep = (): {
   else return { step: 'get-usdc' };
 };
 
-const useShouldPollForCartStatus = (
+const useShouldPollForOrderStatus = (
   checkoutStep: SliceCheckoutStep,
   paymentStep: PaymentStep,
 ) => {
-  const { data: cart } = useRecentCart();
-  const cartId = cart?.id;
+  const { data: order } = useRecentOrder();
+  const orderId = order?.id;
   const slideInView = useSlideInView();
   const secondsSinceMount = useSecondsSinceMount();
   const [secondsWhenPaid, setSecondsWhenPaid] = useState(0);
   const waitforatleastseconds = 4;
 
   const shouldPoll =
-    cartId &&
+    orderId &&
     slideInView === 1 &&
     !!secondsWhenPaid &&
     secondsWhenPaid + waitforatleastseconds < secondsSinceMount;
 
   useEffect(() => {
-    if (!cartId || slideInView !== 1 || paymentStep !== 'success') return;
+    if (!orderId || slideInView !== 1 || paymentStep !== 'success') return;
 
     if (secondsWhenPaid === 0) setSecondsWhenPaid(secondsSinceMount);
   }, [
-    cartId,
+    orderId,
     checkoutStep,
     paymentStep,
     slideInView,
-    cart?.status,
     secondsWhenPaid,
     secondsSinceMount,
   ]);
@@ -144,9 +141,8 @@ export const CheckoutProvider = ({
 }) => {
   const { step } = useDetermineCheckoutStep();
   const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
-  const goToSlide = useGoToSlide();
 
-  const shouldPoll = useShouldPollForCartStatus(step, paymentStep);
+  const shouldPoll = useShouldPollForOrderStatus(step, paymentStep);
 
   // useQuery({
   //   queryKey: ['cart-status', cartId],

@@ -226,3 +226,18 @@ export const useTipMutation = () => {
     },
   });
 };
+
+export const useDeleteCartMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ cartId }: { cartId: Cart['id'] }) => {
+      await LocalStorageCartPersistance.remove(cartId);
+    },
+    onSuccess: (_, { cartId }) => {
+      queryClient.invalidateQueries({
+        queryKey: CART_QUERY_KEY(cartId),
+      });
+    },
+  });
+};

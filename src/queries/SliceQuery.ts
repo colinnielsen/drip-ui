@@ -1,5 +1,5 @@
 import { useCheckoutContext } from '@/components/cart/context';
-import { BASE_CLIENT, USDC_ADDRESS_BASE, WAGMI_CONFIG } from '@/lib/ethereum';
+import { BASE_CLIENT, WAGMI_CONFIG } from '@/lib/ethereum';
 import { SLICE_ENTRYPOINT_ADDRESS, sliceKit } from '@/lib/slice';
 import { minutes } from '@/lib/utils';
 import {
@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { Address, zeroAddress } from 'viem';
 import { base } from 'viem/chains';
+import { useCart } from './CartQuery';
 import {
   useConnectedWallet,
   useUSDCAllowance,
@@ -21,11 +22,11 @@ import {
   useAssocateExternalOrderInfoToCart,
   useAssocatePaymentToCart,
   useCartInSliceFormat,
-  useCartSummary,
-  useRecentCart,
 } from './OrderQuery';
 import { useShopSourceConfig } from './ShopQuery';
-import { getSlicerIdFromSliceExternalId } from '@/data-model/shop/ShopDTO';
+import { USDC_CONFIG } from '@/lib/contract-config/USDC';
+import { ChainId } from '@/data-model/ethereum/EthereumType';
+import { USDC } from '@/data-model/_common/currency/USDC';
 
 /**
  * @returns the slice keyed by productId
@@ -62,14 +63,13 @@ export const usePayAndOrder = ({
   const walletClient = useWalletClient();
   const address = wallet?.address as Address;
 
-  const { data: dripCart } = useRecentCart();
+  const { data: dripCart } = useCart();
   const { data: sliceCart } = useCartInSliceFormat({ buyerAddress: address });
   const { data: shopSourceConfig } = useShopSourceConfig(dripCart?.shop);
   const { mutateAsync: associatePayment } = useAssocatePaymentToCart();
   const { mutateAsync: associateExternalOrderInfo } =
     useAssocateExternalOrderInfoToCart();
   const { setPaymentStep } = useCheckoutContext();
-  const summary = useCartSummary();
   const { data: allowance } = useUSDCAllowance({
     spender: SLICE_ENTRYPOINT_ADDRESS,
   });
@@ -81,15 +81,16 @@ export const usePayAndOrder = ({
     () =>
       dripCart?.tip && shopSourceConfig?.id
         ? [
-            {
-              currency: dripCart.tip.amount.address,
-              amount: dripCart.tip.amount.toWei(),
-              recipient: dripCart.tip.recipient,
-              description: 'Tip',
-              slicerId: BigInt(
-                getSlicerIdFromSliceExternalId(shopSourceConfig.id),
-              ),
-            },
+            // TODO: fix tipping
+            // {
+            //   currency: dripCart.tip.amount.address,
+            //   amount: dripCart.tip.amount.toWei(),
+            //   recipient: mapEthAddressToAddress(dripCart.),
+            //   description: 'Tip',
+            //   slicerId: BigInt(
+            //     getSlicerIdFromSliceExternalId(shopSourceConfig.id),
+            //   ),
+            // },
           ]
         : undefined,
     [dripCart?.tip, shopSourceConfig?.id],
@@ -97,7 +98,7 @@ export const usePayAndOrder = ({
 
   const onError = useCallback(
     (error: { orderId: string; hash: `0x${string}` }) => {
-      console.log({ sliceError: error });
+      console.log({ sliceError: error, orderId: error.orderId });
       setPaymentStep('error');
     },
     [setPaymentStep],
@@ -121,15 +122,15 @@ export const usePayAndOrder = ({
     !!walletClient &&
     !!sliceCart &&
     !!address &&
-    !!summary &&
-    !!allowance;
+    !!allowance &&
+    !!dripCart?.quotedTotalAmount;
 
   const payAndOrder = async () => {
     if (!ready) throw new Error('No wallet connected');
     setPaymentStep('awaiting-confirmation');
 
     await wallet?.switchChain(base.id);
-    const totalUsdcToPay = summary?.total.usdc.toWei();
+    const totalUsdcToPay = dripCart.quotedTotalAmount?.toWei();
 
     await handleCheckoutViem(BASE_CLIENT, walletClient, {
       capabilities: null,
@@ -150,19 +151,26 @@ export const usePayAndOrder = ({
       cart: sliceCart,
       totalPrices: [
         {
-          currency: { address: USDC_ADDRESS_BASE, decimals: 6, symbol: 'USDC' },
-          total: totalUsdcToPay,
+          currency: {
+            address: USDC_CONFIG[ChainId.BASE].address,
+            decimals: USDC.decimals,
+            symbol: 'USDC',
+          },
+          total: totalUsdcToPay ?? 0n,
         },
       ],
       allowances: [
         {
-          currency: { address: USDC_ADDRESS_BASE, decimals: 6, symbol: 'USDC' },
+          currency: {
+            address: USDC_CONFIG[ChainId.BASE].address,
+            decimals: USDC.decimals,
+            symbol: 'USDC',
+          },
           allowance: allowance.toWei(),
         },
       ],
-    }).catch(error => console.error(error));
+    });
   };
 
-  if (!wallet) throw new Error('No wallet connected');
-  else return { payAndOrder, ready };
+  return { payAndOrder, ready };
 };

@@ -1,9 +1,11 @@
 import { cn } from '@/lib/utils';
+import { Skeleton } from './skeleton';
+import React from 'react';
 
 interface TypographyProps {
   children: React.ReactNode;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof JSX.IntrinsicElements | typeof Skeleton;
 }
 
 export const Drip = ({

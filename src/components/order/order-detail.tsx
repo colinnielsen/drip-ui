@@ -35,7 +35,7 @@ export const OrderDetail = ({
   if (order?.status === 'error') console.error(order.errorDetails);
 
   return (
-    <DrawerContent className="">
+    <DrawerContent className="" aria-describedby={'order description'}>
       <div className="flex flex-col h-screen overflow-scroll">
         <DrawerHeader className="h-14 flex items-center justify-evenly py-4 px-6">
           <div className="w-full">

@@ -8,6 +8,8 @@ import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel';
 import { useCartDrawer } from '../ui/drawer';
 import BasketSlide, { EmptyBasket } from './basket/basket';
 import { CheckoutProvider } from './context';
+import { ConfirmationSlide } from './order-confirmation/order-confirmation';
+import PaymentSlide from './payment/payment';
 
 /**
  * @dev hoc for wrapping a page in a CarouselItem for the checkout flow
@@ -56,13 +58,11 @@ export default function CheckoutSlides({
     >
       <CarouselContent className="h-full">
         <CheckoutProvider>
-          {/* // <LoadingBasketSlide /> */}
-
           <BasketSlide cart={cart} shop={shop} />
 
-          {/* <PaymentSlide cart={cart} shop={shop} />
+          <PaymentSlide cart={cart} shop={shop} />
 
-          <ConfirmationSlide cart={cart} shop={shop} /> */}
+          <ConfirmationSlide />
         </CheckoutProvider>
       </CarouselContent>
       {/* <div className="absolute top-7 right-20">

@@ -1,19 +1,24 @@
 import coffeeGif from '@/assets/coffee-dive.gif';
+import coffeeStill from '@/assets/coffee-still.png';
 import { CTAButton, LoadingCTAButton } from '@/components/ui/button';
-import { useGoToSlide } from '@/components/ui/carousel';
+import {
+  useGoToSlide,
+  useNextSlide,
+  usePreviousSlide,
+} from '@/components/ui/carousel';
 import { Drip, DripSmall, Label1 } from '@/components/ui/typography';
 import { mapCartToPaymentSummary } from '@/data-model/cart/CartDTO';
+import { Cart } from '@/data-model/cart/CartType';
 import { mapOrderToPaymentSummary } from '@/data-model/order/OrderDTO';
-import { Order } from '@/data-model/order/OrderType';
 import { Shop, ShopSourceConfig } from '@/data-model/shop/ShopType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { useCart } from '@/queries/CartQuery';
 import { useWalletAddress } from '@/queries/EthereumQuery';
-import { useCartInSliceFormat, useRecentCart } from '@/queries/OrderQuery';
+import { useCartInSliceFormat, useRecentOrder } from '@/queries/OrderQuery';
 import { usePayAndOrder as useSlicePayAndOrder } from '@/queries/SliceQuery';
 import { usePayAndOrder as useSquarePayAndOrder } from '@/queries/SquareQuery';
 import Image from 'next/image';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
@@ -23,7 +28,7 @@ export const SlicePayButton = () => {
   const { isFetching: sliceCartIsLoading } = useCartInSliceFormat({
     buyerAddress,
   });
-  const { isFetching: cartIsLoading, data: cart } = useRecentCart();
+  const { isFetching: cartIsLoading, data: cart } = useRecentOrder();
   const { paymentStep } = useCheckoutContext();
   const goToSlide = useGoToSlide();
   const { payAndOrder, ready } = useSlicePayAndOrder();
@@ -56,19 +61,21 @@ export const SquarePayButton = () => {
   const goToSlide = useGoToSlide();
   const { ready, mutateAsync: payAndOrder } = useSquarePayAndOrder();
 
-  const cartSummary = mapCartToPaymentSummary(cart);
   if (!ready) return <LoadingCTAButton />;
 
+  const cartSummary = mapCartToPaymentSummary(cart);
   const isFree = cartSummary?.total?.wei === 0n;
   const isLoading = paymentStep === 'awaiting-confirmation';
 
   const handleClick = async () => {
-    goToSlide?.(1);
-    await payAndOrder().catch(() => {
-      goToSlide?.(0);
-    });
+    if (!goToSlide) return;
+    goToSlide(1);
+    await payAndOrder()
+      // square-type orders will only create the order if the payment is complete
+      // so we can advance to the "order-confirmation" slide
+      .then(() => goToSlide(2))
+      .catch(() => goToSlide(0));
   };
-
   return (
     <CTAButton onClick={handleClick} isLoading={isLoading}>
       {!cartSummary ? '' : isFree ? 'place order' : 'pay'}
@@ -92,43 +99,66 @@ export default function PaymentSlide({
   cart,
   shop,
 }: {
-  cart: Order;
+  cart: Cart;
   shop: Shop;
 }) {
-  const { paymentStep } = useCheckoutContext();
-  // const walletClient = useWalletClient();
+  const { paymentStep, setPaymentStep } = useCheckoutContext();
   const seconds = useSecondsSinceMount();
+  const [hasBeen4SecondsSincePrompted, setHasBeen4SecondsSincePrompted] =
+    useState(false);
 
   const dots = Array.from({ length: seconds % 4 }, () => '.');
-  const isPaying = paymentStep === 'success';
+  const isPaying = paymentStep === 'paying';
 
   const headerText = useMemo(() => {
-    // if (!isPaying) return 'grinding the beans';
+    if (paymentStep === 'awaiting-confirmation') return 'getting ready';
     return 'your order is brewing';
-  }, [isPaying]);
+  }, [paymentStep]);
 
   const subTitle = useMemo(() => {
+    if (hasBeen4SecondsSincePrompted)
+      return "(we've prompted your wallet for payment)";
     // if (!isPaying) return '(we will prompt your wallet soon)';
     return null;
-  }, [isPaying]);
+  }, [hasBeen4SecondsSincePrompted]);
 
   const icon = useMemo(() => {
-    return coffeeGif;
-    // if (isPaying)
-    // return coffeeStill;
+    if (isPaying) return coffeeGif;
+    return coffeeStill;
   }, [isPaying]);
+
+  const errorNotification = (
+    <div className="flex flex-col items-center justify-center gap-4 w-full">
+      <DripSmall>oops</DripSmall>
+      <Label1 className="text-primary-gray">
+        something went wrong, let&apos;s try again
+      </Label1>
+      <PayButton shopType={shop.__sourceConfig.type} />
+    </div>
+  );
+
+  // useEffect(() => {
+  //   let interval: NodeJS.Timeout;
+
+  //   if (paymentStep === 'awaiting-confirmation') {
+  //     interval = setTimeout(() => {
+  //       setPaymentStep(currentStep => {
+  //         if (currentStep === 'awaiting-confirmation') {
+  //           setHasBeen4SecondsSincePrompted(true);
+  //           return currentStep;
+  //         }
+  //         return currentStep;
+  //       });
+  //     }, 4000);
+  //   }
+  //   return () => interval && clearInterval(interval);
+  // }, [paymentStep]);
 
   return (
     <AsCheckoutSlide>
       <div className="h-full bg-background flex flex-col items-center justify-center px-6 gap-4 py-6 w-full">
         {paymentStep === 'error' ? (
-          <div className="flex flex-col items-center justify-center gap-4 w-full">
-            <DripSmall>oops</DripSmall>
-            <Label1 className="text-primary-gray">
-              something went wrong, let&apos;s try again
-            </Label1>
-            <PayButton shopType={shop.__sourceConfig.type} />
-          </div>
+          errorNotification
         ) : (
           <>
             <div className="flex items-center justify-center h-[280px] w-[280px] overflow-clip">

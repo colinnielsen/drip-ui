@@ -16,6 +16,9 @@ import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
 import { needsSyncing } from '@/data-model/order/OrderDTO';
+import { useCart } from './CartQuery';
+import { LineItem } from '@/data-model/order/LineItemAggregate';
+import { Cart } from '@/data-model/cart/CartType';
 
 //
 //// HELPERS
@@ -85,22 +88,27 @@ export const useIncompleteOrders = () => {
   );
 };
 
-const cartSelector = (orders: Order[]) =>
+const recentOrderSelector = (orders: Order[]) =>
   orders
     .sort((a, b) => sortDateAsc(a.timestamp, b.timestamp))
     .find(
       o =>
-        (o.status !== '4-complete' &&
+        (o.status !== '3-complete' &&
           o.status !== 'cancelled' &&
-          new Date(o.timestamp).getTime() > Date.now() - 4 * 60 * 60 * 1000) ||
-        (o.status === '4-complete' &&
-          new Date(o.timestamp).getTime() > Date.now() - 10 * 60 * 1000),
+          +new Date(o.timestamp) > Date.now() - 10 * 60 * 1000) ||
+        (o.status === '3-complete' &&
+          +new Date(o.timestamp) > Date.now() - 60 * 60 * 1000),
     ) ?? null;
 
-export const useRecentCart = () => {
+/**
+ * @returns a recently placed order:
+ * - either the most recent pending order within 10 minutes
+ * - or your last complete order from within 1 hour
+ */
+export const useRecentOrder = () => {
   const { data: userId } = useUserId();
   return useQuery({
-    ...orderQuery(userId, cartSelector),
+    ...orderQuery(userId, recentOrderSelector),
   });
 };
 
@@ -138,7 +146,7 @@ export const useRecentCart = () => {
 // };
 
 export const useCartId = () => {
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useRecentOrder();
   return cart?.id;
 };
 
@@ -151,7 +159,7 @@ export const useCartInSliceFormat = ({
   buyerAddress?: Address | null | undefined;
 }) => {
   const buyerAddress = _buyer ?? undefined;
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useCart();
   const { data: shop } = useShop({ id: cart?.shop });
 
   const slicerId =
@@ -172,87 +180,6 @@ export const useCartInSliceFormat = ({
 //// MUTATIONS
 //
 
-export const useRemoveItemFromCart = ({
-  orderItemId,
-  orderId,
-  shopId,
-}: {
-  orderItemId: UUID;
-  orderId: UUID;
-  shopId: UUID;
-}) => {
-  const queryClient = useQueryClient();
-  const { data: userId } = useUserId();
-  const { data: cart } = useRecentCart();
-
-  return useMutation({
-    scope: { id: 'cart' },
-    mutationFn: async () =>
-      axiosFetcher<Order | null>(`/api/orders/order?orderId=${orderId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: { action: 'delete', orderItemId, shopId },
-        withCredentials: true,
-      }),
-    onMutate() {
-      if (!cart || cart.status !== '1-pending') throw Error('cart not pending');
-      const willEraseCart =
-        cart?.orderItems.length === 1 && cart.orderItems[0].id === orderItemId;
-
-      const optimisticCart: Cart | null = willEraseCart
-        ? null
-        : {
-            ...cart,
-            orderItems: cart.orderItems.filter(o => o.id !== orderItemId),
-          };
-
-      queryClient.setQueryData([ORDERS_QUERY_KEY, userId!], (prev: Order[]) => {
-        if (willEraseCart || !optimisticCart)
-          return prev.filter(o => o.id !== cart.id);
-        return prev.map(o => (o.id === optimisticCart.id ? optimisticCart : o));
-      });
-
-      return { optimisticCart, prevCart: cart };
-    },
-    onSettled: variable => {
-      queryClient.refetchQueries({
-        queryKey: [ORDERS_QUERY_KEY, variable?.id!],
-      });
-    },
-    // onSuccess: (result, _vars, { optimisticCart }) => {
-    //   queryClient.invalidateQueries({
-    //     queryKey: [ORDERS_QUERY_KEY, userId!],
-    //   });
-    //   // // if the item is removed we're successful
-    //   // if (!result || !optimisticCart) return;
-
-    //   // // otherwise sync the orders with the result by replacing the optimistic cart with the result from the backend
-    //   // return queryClient.setQueryData(
-    //   //   [ORDERS_QUERY_KEY, userId],
-    //   //   (prev: Order[]) =>
-    //   //     prev.map(o => (o.id === optimisticCart.id ? result : o)),
-    //   // );
-    // },
-    // onError: (_error, _variables, context) => {
-    //   if (!context) return;
-    //   queryClient.invalidateQueries({
-    //     queryKey: [ORDERS_QUERY_KEY, userId!],
-    //   });
-    // queryClient.setQueryData([ORDERS_QUERY_KEY, userId], (old: Order[]) => {
-    //   const wasDeleteOperation = context.optimisticCart === null;
-    //   // put the cart back if it was deleted
-    //   if (wasDeleteOperation) return [context.prevCart, ..._.cloneDeep(old)];
-    //   // otherwise, put the prev cart back in place
-    //   return old.map(o =>
-    //     o.id === context.optimisticCart!.id ? context.prevCart : o,
-    //   );
-    // });
-    // },
-  });
-};
-
 export const useFarmerAllocation = ({ shopId }: { shopId: UUID }) => {
   const { data: shop } = useShop({ id: shopId });
   const allocation = shop?.farmerAllocations[0];
@@ -269,7 +196,7 @@ export const useFarmerAllocation = ({ shopId }: { shopId: UUID }) => {
 export const useAssocatePaymentToCart = () => {
   const queryClient = useQueryClient();
 
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useRecentOrder();
   const { data: priceDict } = useShopPriceDictionary(cart?.shop!);
 
   return useMutation({
@@ -307,7 +234,7 @@ export const useAssocatePaymentToCart = () => {
 export const useAssocateExternalOrderInfoToCart = () => {
   const queryClient = useQueryClient();
 
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useRecentOrder();
 
   return useMutation({
     scope: { id: 'cart' },

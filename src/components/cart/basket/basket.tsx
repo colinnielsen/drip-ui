@@ -89,7 +89,6 @@ export const LoadingBasketSlide = () => {
 
 export default function Basket({ cart, shop }: { cart: Cart; shop: Shop }) {
   const { setOpen } = useCartDrawer();
-  const { isFetching } = useShop({ id: shop.id });
   const summary = mapCartToPaymentSummary(cart);
 
   return (
@@ -115,7 +114,7 @@ export default function Basket({ cart, shop }: { cart: Cart; shop: Shop }) {
               lineItem: lineItem,
               shopId: shop.id,
               orderId: cart.id,
-              isLoading: isFetching,
+              isLoading: false,
             }}
           />
         ))}
@@ -130,7 +129,7 @@ export default function Basket({ cart, shop }: { cart: Cart; shop: Shop }) {
 
       <Divider />
 
-      <CartSummary isLoading={isFetching} hideTipIfZero={!!shop.tipConfig} />
+      <CartSummary hideTipIfZero={!!shop.tipConfig} />
 
       <Divider />
 
@@ -139,7 +138,7 @@ export default function Basket({ cart, shop }: { cart: Cart; shop: Shop }) {
       </div>
 
       <DrawerFooter className="p-0 w-full sticky bottom-0 bg-background shadow-[4px_0px_60px_0px_rgba(0,0,0,0.10)]">
-        <FooterTotal summary={summary} isLoading={isFetching} />
+        <FooterTotal summary={summary} isLoading={false} />
         <NextButton shopType={shop.__sourceConfig.type} />
       </DrawerFooter>
     </AsCheckoutSlide>

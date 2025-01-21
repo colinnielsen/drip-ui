@@ -5,21 +5,21 @@ import {
   DrawerTrigger,
   useCartDrawer,
 } from '@/components/ui/drawer';
+import { Cart } from '@/data-model/cart/CartType';
 import { Order } from '@/data-model/order/OrderType';
 import { Shop } from '@/data-model/shop/ShopType';
+import { usePrevious } from '@/lib/hooks/utility-hooks';
 import { cn, sleep } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
-import { useRecentCart } from '@/queries/OrderQuery';
+import { useCart } from '@/queries/CartQuery';
 import { useShop } from '@/queries/ShopQuery';
 import { CheckCircle, ShoppingCart } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatedTimer } from '../ui/icons';
 import { Headline, Label2 } from '../ui/typography';
 import CheckoutSlides from './checkout-slides';
-import { useCart } from '@/queries/CartQuery';
-import { Cart } from '@/data-model/cart/CartType';
 import { OrderConfirmation } from './order-confirmation/order-confirmation';
-import { usePrevious } from '@/lib/hooks/utility-hooks';
+import { useRecentOrder } from '@/queries/OrderQuery';
 
 type FooterData =
   | { type: 'cart'; cart: Cart; shop: Shop }
@@ -121,12 +121,32 @@ const useCartOpenAndCloseListener = (type?: FooterData['type']) => {
 };
 
 const useCartAndShopInfo = (): FooterData | null => {
-  const { data: cart } = useCart();
-  const { data: shop } = useShop({ id: cart?.shop });
+  const { data: cart, isLoading: cartIsLoading } = useCart();
+  const { data: recentOrder, isLoading: recentOrderLoading } = useRecentOrder();
+  const {
+    data: cartShop,
+    // isLoading: cartShopLoading
+  } = useShop({
+    id: cart?.shop,
+  });
+  const {
+    data: orderShop,
+    // isLoading: orderShopLoading
+  } = useShop({
+    id: recentOrder?.shop,
+  });
 
-  if (!cart || !shop) return null;
+  if (cartIsLoading || recentOrderLoading) return null;
+  if (cart) {
+    if (!cartShop) return null;
+    return { type: 'cart', shop: cartShop, cart };
+  }
+  if (recentOrder) {
+    if (!orderShop) return null;
+    return { type: 'pending-order', shop: orderShop, order: recentOrder };
+  }
 
-  return { type: 'cart', cart, shop };
+  return null;
 };
 
 export default function StatusFooter() {
@@ -172,7 +192,9 @@ export default function StatusFooter() {
         {data?.type === 'cart' ? (
           <CheckoutSlides {...data} />
         ) : data?.type === 'pending-order' ? (
-          <OrderConfirmation {...data} />
+          <div className="flex flex-col w-screen h-screen overflow-y-scroll overflow-x-clip">
+            <OrderConfirmation {...data} />
+          </div>
         ) : null}
       </DrawerContent>
     </Drawer>

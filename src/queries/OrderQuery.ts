@@ -159,7 +159,7 @@ export const useCartInSliceFormat = ({
   buyerAddress?: Address | null | undefined;
 }) => {
   const buyerAddress = _buyer ?? undefined;
-  const { data: cart } = useRecentOrder();
+  const { data: cart } = useCart();
   const { data: shop } = useShop({ id: cart?.shop });
 
   const slicerId =
@@ -179,98 +179,6 @@ export const useCartInSliceFormat = ({
 //
 //// MUTATIONS
 //
-
-export const useRemoveItemFromCart = ({
-  lineItemUniqueId,
-  orderId,
-  shopId,
-}: {
-  lineItemUniqueId: LineItem['uniqueId'];
-  orderId: UUID;
-  shopId: UUID;
-}) => {
-  const queryClient = useQueryClient();
-  const { data: userId } = useUserId();
-  const { data: cart } = useCart();
-
-  return useMutation({
-    scope: { id: 'cart' },
-    mutationFn: async () =>
-      axiosFetcher<Order | null>(`/api/orders/order?orderId=${orderId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: { action: 'delete', lineItemUniqueId, shopId },
-        withCredentials: true,
-      }),
-    onMutate() {
-      if (!cart) return null;
-
-      const willEraseCart =
-        cart.lineItems.length === 1 &&
-        cart.lineItems[0].uniqueId === lineItemUniqueId &&
-        cart.lineItems[0].quantity === 1;
-
-      const willRemoveLineItem =
-        cart.lineItems.find(li => li.uniqueId === lineItemUniqueId)!
-          .quantity === 1;
-
-      const optimisticCart: Cart | null = willEraseCart
-        ? null
-        : {
-            ...cart,
-            lineItems: willRemoveLineItem
-              ? // if this operation will remove the line item, then filter out the item with the matching id
-                cart.lineItems.filter(o => o.uniqueId !== lineItemUniqueId)
-              : // otherwise, just decrement the line item
-                cart.lineItems.map<LineItem>(li =>
-                  li.uniqueId !== lineItemUniqueId
-                    ? li
-                    : { ...li, quantity: li.quantity - 1 },
-                ),
-          };
-
-      setCart;
-
-      return { optimisticCart, prevCart: cart };
-    },
-    onSettled: variable => {
-      queryClient.refetchQueries({
-        queryKey: [ORDERS_QUERY_KEY, variable?.id!],
-      });
-    },
-    // onSuccess: (result, _vars, { optimisticCart }) => {
-    //   queryClient.invalidateQueries({
-    //     queryKey: [ORDERS_QUERY_KEY, userId!],
-    //   });
-    //   // // if the item is removed we're successful
-    //   // if (!result || !optimisticCart) return;
-
-    //   // // otherwise sync the orders with the result by replacing the optimistic cart with the result from the backend
-    //   // return queryClient.setQueryData(
-    //   //   [ORDERS_QUERY_KEY, userId],
-    //   //   (prev: Order[]) =>
-    //   //     prev.map(o => (o.id === optimisticCart.id ? result : o)),
-    //   // );
-    // },
-    // onError: (_error, _variables, context) => {
-    //   if (!context) return;
-    //   queryClient.invalidateQueries({
-    //     queryKey: [ORDERS_QUERY_KEY, userId!],
-    //   });
-    // queryClient.setQueryData([ORDERS_QUERY_KEY, userId], (old: Order[]) => {
-    //   const wasDeleteOperation = context.optimisticCart === null;
-    //   // put the cart back if it was deleted
-    //   if (wasDeleteOperation) return [context.prevCart, ..._.cloneDeep(old)];
-    //   // otherwise, put the prev cart back in place
-    //   return old.map(o =>
-    //     o.id === context.optimisticCart!.id ? context.prevCart : o,
-    //   );
-    // });
-    // },
-  });
-};
 
 export const useFarmerAllocation = ({ shopId }: { shopId: UUID }) => {
   const { data: shop } = useShop({ id: shopId });

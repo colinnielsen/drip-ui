@@ -18,6 +18,7 @@ import { ETH } from '../../../_common/currency/ETH';
 import { USDC } from '../../../_common/currency/USDC';
 import { buildMenuFromItems } from '../common';
 import { Currency } from '@/data-model/_common/currency';
+import { Cart } from '@/data-model/cart/CartType';
 
 export const SLICE_VERSION = 1;
 
@@ -144,24 +145,23 @@ export const mapSliceProductCartToItem = (product: ProductCart): Item => {
 };
 
 export function mapCartToSliceCart(
-  cart: Order,
+  cart: Cart,
   sliceProducts: ProductCart[],
 ): ProductCart[] {
-  const sliceCart = createLineItemAggregate({ variant: cart.lineItems }).reduce<
-    ProductCart[]
-  >((acc, [orderItem, quantity]) => {
+  const sliceCart = cart.lineItems.reduce<ProductCart[]>((acc, li) => {
     const sliceProduct = sliceProducts.find(
-      product => deriveDripIdFromSliceProductId(product) === orderItem.item.id,
+      product => deriveDripIdFromSliceProductId(product) === li.item.id,
     );
 
     if (!sliceProduct) throw Error('slice product not found');
-    const variant = orderItem.mods?.[0]?.__sourceConfig.id;
+    const variant = li.mods?.[0]?.__sourceConfig.id;
+
     return [
       ...acc,
       {
         ...sliceProduct!,
-        quantity,
-        externalVariantId: +variant,
+        quantity: li.quantity,
+        externalVariantId: variant ? +variant : undefined,
       },
     ];
   }, []);

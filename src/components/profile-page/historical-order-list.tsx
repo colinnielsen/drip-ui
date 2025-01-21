@@ -4,7 +4,7 @@ import { Headline } from '@/components/ui/typography';
 import { UUID } from '@/data-model/_common/type/CommonType';
 import { Shop } from '@/data-model/shop/ShopType';
 import { axiosFetcher } from '@/lib/utils';
-import { useOrders, useRecentCart } from '@/queries/OrderQuery';
+import { useOrders, useRecentOrder } from '@/queries/OrderQuery';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { OrderDetail } from '../order/order-detail';
@@ -13,17 +13,19 @@ import { OrderSummary, SkeletonOrderSummary } from '../order/order-summary';
 export const HistoricalOrderList = () => {
   const client = useQueryClient();
   const { data: orders } = useOrders();
-  const { data: cart } = useRecentCart();
+  const { data: cart } = useRecentOrder();
   const shopQueries = useQueries({
-    queries: (orders ?? []).map(order => ({
-      queryKey: ['shop', order.shop],
-      queryFn: () => axiosFetcher<Shop>(`/api/shops/${order.shop}`),
-      initialData:
-        client
-          .getQueryData<Shop[]>(['shop'])
-          ?.find(shop => shop.id === order.shop) ??
-        client.getQueryData<Shop>(['shop', order.shop]),
-    })),
+    queries: [...new Set((orders ?? []).map(order => order.shop))].map(
+      shopId => ({
+        queryKey: ['shop', shopId],
+        queryFn: () => axiosFetcher<Shop>(`/api/shops/${shopId}`),
+        initialData:
+          client
+            .getQueryData<Shop[]>(['shop'])
+            ?.find(shop => shop.id === shopId) ??
+          client.getQueryData<Shop>(['shop', shopId]),
+      }),
+    ),
   });
 
   const [selectedOrderId, setSelectedOrder] = useState<UUID | null>(null);
@@ -84,16 +86,17 @@ export const HistoricalOrderList = () => {
             >
               <div className="flex flex-col gap-4">
                 {orders && shopQueries.every(query => query.isSuccess)
-                  ? shopQueries.map((query, i) => {
-                      const shop = query.data;
-                      const order = orders[i];
+                  ? orders.map((order, i) => {
+                      const shop = shopQueries.find(
+                        s => s.data.id === order.shop,
+                      )?.data;
 
                       if (order.id === cart?.id) return <></>;
                       if (!shop || !order)
                         return <SkeletonOrderSummary key={i} />;
                       return (
                         <OrderSummary
-                          key={order.id}
+                          key={order.id + i}
                           order={order}
                           shopLabel={shop.label}
                           shopLogo={shop.logo}

@@ -1,8 +1,8 @@
 import { Entity } from '@/data-model/__global/entities';
-import { Item } from '@/data-model/item/ItemType';
-import { ItemMod } from '@/data-model/item/ItemMod';
-import { createLineItemAggregate } from '@/data-model/order/OrderDTO';
-import { Order } from '@/data-model/order/OrderType';
+import { Currency } from '@/data-model/_common/currency';
+import { Cart } from '@/data-model/cart/CartType';
+import { ChainId } from '@/data-model/ethereum/EthereumType';
+import { Item, ItemVariant } from '@/data-model/item/ItemType';
 import {
   deriveShopIdFromSliceStoreId,
   EMPTY_MENU,
@@ -10,49 +10,39 @@ import {
   getSliceExternalIdFromSliceId,
 } from '@/data-model/shop/ShopDTO';
 import { Menu, Shop, ShopConfig } from '@/data-model/shop/ShopType';
-import { genericError } from '@/lib/effect';
-import { isAddressEql, USDC_ADDRESS_BASE } from '@/lib/ethereum';
-import { err, generateUUID } from '@/lib/utils';
-import { ProductCart, SlicerBasics, Variant } from '@slicekit/core';
+import { USDC_CONFIG } from '@/lib/contract-config/USDC';
+import { genericError, mappingError } from '@/lib/effect';
+import { isAddressEql } from '@/lib/ethereum';
+import { generateUUID, hasAtLeastOne } from '@/lib/utils';
+import {
+  ExternalProduct,
+  ProductCart as SliceProduct,
+  SlicerBasics as SliceStore,
+  Variant as SliceVariant,
+} from '@slicekit/core';
+import { zeroAddress } from 'viem';
 import { ETH } from '../../../_common/currency/ETH';
 import { USDC } from '../../../_common/currency/USDC';
-import { buildMenuFromItems } from '../common';
-import { Currency } from '@/data-model/_common/currency';
-import { Cart } from '@/data-model/cart/CartType';
+import {
+  buildMenuFromItems,
+  deriveCategoryFromItemName,
+  deriveDefaultImageFromItemName,
+} from '../common';
 
 export const SLICE_VERSION = 1;
 
 /**
  * @dev the slice product cart has a dbId, but we want to derive our ids from this stable id
  */
-const SLICE_PRODUCT_ID_TO_DERIVE_FROM: keyof ProductCart = 'dbId';
+const SLICE_PRODUCT_ID_TO_DERIVE_FROM: keyof SliceProduct = 'dbId';
+/**
+ * @dev the slice variant has an id, but we want to derive our ids from this stable id
+ */
+const SLICE_VARIANT_ID_TO_DERIVE_FROM: keyof SliceVariant = 'id';
 
-export function mapSliceVariantsToMods(variants: Variant[]): ItemMod[] {
-  return variants.reduce<ItemMod[]>((acc, variant) => {
-    if (variant.isActive === false) return acc;
-
-    const uuid = generateUUID(variant.id.toString());
-    const name = variant.variant;
-
-    const mod: ItemMod = {
-      id: uuid,
-      __sourceConfig: {
-        type: 'slice',
-        id: variant.id.toString(),
-        version: SLICE_VERSION,
-      },
-      name,
-      type: 'exclusive',
-      price: USDC.ZERO,
-      currency: 'usdc',
-      isOptional: true,
-      category: null,
-    };
-    return [...acc, mod];
-  }, []);
-}
-
-function determineCategory(product: ProductCart): Item['category'] {
+function mapSliceProductToItemCategory(
+  product: SliceProduct,
+): Item['category'] {
   if (product?.category?.name)
     return product?.category?.name as Item['category'];
 
@@ -63,92 +53,99 @@ function determineCategory(product: ProductCart): Item['category'] {
     if (maybeCategpry) return maybeCategpry as Item['category'];
   }
 
-  return null;
+  return deriveCategoryFromItemName(product.name);
 }
 
-function determineAvailability(product: ProductCart): Item['availability'] {
-  const { isOnsite, isDelivery } = product;
-  if (!isOnsite && !isDelivery) return 'online-only';
-  if (!!isOnsite && !isDelivery) return 'onsite-only';
-  if (!isOnsite && !!isDelivery) return 'delivery';
-  if (isOnsite) return 'onsite-only';
-
-  return err(
-    `Unknown availability - slice likely has some bad data. Store ${product.slicerId} - Product ${product.dbId}`,
+export function deriveDripIdFromSliceVariantId(variant: SliceVariant) {
+  return generateUUID(
+    `SLICE_VARIANT:${variant[SLICE_VARIANT_ID_TO_DERIVE_FROM] || genericError('no product id')}`,
   );
 }
 
-export function deriveDripIdFromSliceProductId(product: ProductCart) {
+export function deriveDripIdFromSliceProductId(product: SliceProduct) {
   return generateUUID(
-    'SLICE' + product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString() ||
-      genericError('no product id'),
+    `SLICE_ITEM:${product[SLICE_PRODUCT_ID_TO_DERIVE_FROM] || genericError(`no DB id found on slice store ${product.slicerId} for item ${product.name}`)}`,
+  );
+}
+
+export function deriveDripIdFromSliceExternalProduct(product: ExternalProduct) {
+  return generateUUID(
+    `SLICE_EXTERNAL_PRODUCT:${product.id || genericError(`no id found on slice store ${product.provider}`)}`,
   );
 }
 
 export function getPriceFromSliceCart(
   currencyAddress: string,
   priceString_wei: string,
-): {
-  currency: 'eth' | 'usdc';
-  price: Currency;
-} {
-  const currency = isAddressEql(currencyAddress, USDC_ADDRESS_BASE)
-    ? 'usdc'
-    : 'eth';
+): Currency | null {
+  if (isAddressEql(zeroAddress, currencyAddress))
+    return ETH.fromWei(priceString_wei);
+  if (isAddressEql(USDC_CONFIG[ChainId.BASE].address, currencyAddress))
+    return USDC.fromWei(priceString_wei);
 
-  const price =
-    currency === 'eth'
-      ? ETH.fromWei(priceString_wei)
-      : currency === 'usdc'
-        ? USDC.fromWei(priceString_wei)
-        : (() => {
-            throw Error('Unknown currency');
-          })();
-
-  return {
-    currency,
-    price,
-  };
+  return null;
 }
 
-export const mapSliceProductCartToItem = (product: ProductCart): Item => {
-  const uuid = deriveDripIdFromSliceProductId(product);
+export const mapSliceProductCartToItem = (
+  product: SliceProduct,
+): Item | null => {
+  const price: Currency =
+    getPriceFromSliceCart(product.currency.address, product.basePrice) ||
+    mappingError(
+      `no price found on slice store ${product.slicerId} for ${product.name}`,
+    );
 
-  const { currency, price } = getPriceFromSliceCart(
-    product.currency.address,
-    product.basePrice,
-  );
+  // skip items without external products
+  if (!product.externalProduct) return null;
 
-  const variants = product.externalProduct?.providerVariants ?? [];
-  const hasVariants = variants.length > 0;
+  const productVariants = (product.externalProduct?.providerVariants ?? [])
+    .map<ItemVariant | null>(v => {
+      if (v.isActive !== undefined && !v.isActive) return null;
 
-  return {
-    id: uuid,
+      return {
+        id: deriveDripIdFromSliceVariantId(v),
+        __sourceConfig: {
+          type: 'slice',
+          id: v.id.toString(),
+          version: SLICE_VERSION,
+        },
+        name: v.variant,
+        description: '',
+        image: deriveDefaultImageFromItemName(v.variant),
+        // all slice variants have the same price
+        price: price,
+      };
+    })
+    .filter(v => !!v);
+
+  const baseVariant: ItemVariant = {
+    id: deriveDripIdFromSliceExternalProduct(product.externalProduct),
     __sourceConfig: {
       type: 'slice',
-      id:
-        product[SLICE_PRODUCT_ID_TO_DERIVE_FROM]?.toString() ||
-        err(
-          `no external product on store ${product.slicerId} - product ${product.dbId}`,
-        ),
+      id: product.externalProduct.id.toString(),
       version: SLICE_VERSION,
     },
-    description: product.description,
-    image: product.images[0] || '/drip.png',
-    name: product.name,
-    price,
-    currency,
-    availability: determineAvailability(product),
-    category: determineCategory(product),
-    mods: hasVariants ? mapSliceVariantsToMods(variants) : [],
+    name: product.externalProduct.providerVariantName || product.name,
+    description: product.description || '',
+    image: product.images[0] || deriveDefaultImageFromItemName(product.name),
+    price: price,
   };
+
+  return {
+    id: deriveDripIdFromSliceProductId(product),
+    description: product.description || '',
+    image: product.images[0] || deriveDefaultImageFromItemName(product.name),
+    name: product.name,
+    variants: hasAtLeastOne(productVariants) ? productVariants : [baseVariant],
+    category: mapSliceProductToItemCategory(product),
+  } satisfies Item;
 };
 
 export function mapCartToSliceCart(
   cart: Cart,
-  sliceProducts: ProductCart[],
-): ProductCart[] {
-  const sliceCart = cart.lineItems.reduce<ProductCart[]>((acc, li) => {
+  sliceProducts: SliceProduct[],
+): SliceProduct[] {
+  const sliceCart = cart.lineItems.reduce<SliceProduct[]>((acc, li) => {
     const sliceProduct = sliceProducts.find(
       product => deriveDripIdFromSliceProductId(product) === li.item.id,
     );
@@ -170,32 +167,39 @@ export function mapCartToSliceCart(
 }
 
 export const mapSliceStoreToShop = (
-  sliceStore: SlicerBasics,
+  sliceStore: SliceStore,
   manualConfig: ShopConfig,
-): Shop => ({
-  __entity: Entity.shop,
-  __type: 'storefront',
-  __sourceConfig: {
-    type: 'slice',
-    id: getSliceExternalIdFromSliceId(sliceStore.id),
-    version: SLICE_VERSION,
-  },
-  id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
-  tipConfig: manualConfig.tipConfig || EMPTY_TIP_CONFIG,
-  menu: EMPTY_MENU,
-  label: sliceStore.name,
-  location: manualConfig.location || null,
-  backgroundImage: manualConfig.backgroundImage || sliceStore.image || '',
-  logo: manualConfig.logo || sliceStore.image || '',
-  url: manualConfig.url || sliceStore.slicerConfig?.storefrontUrl || '',
-  farmerAllocations: manualConfig.farmerAllocation || [],
-});
+): Shop => {
+  sliceStore.slicerConfig?.bannerImage;
+  return {
+    id: deriveShopIdFromSliceStoreId(sliceStore.id, SLICE_VERSION),
+    __entity: Entity.shop,
+    __type: 'storefront',
+    __sourceConfig: {
+      type: 'slice',
+      id: getSliceExternalIdFromSliceId(sliceStore.id),
+      version: SLICE_VERSION,
+    },
+    tipConfig: manualConfig.tipConfig || EMPTY_TIP_CONFIG,
+    menu: EMPTY_MENU,
+    label: sliceStore.name,
+    location: manualConfig.location || null,
+    backgroundImage:
+      manualConfig.backgroundImage ||
+      sliceStore.slicerConfig?.bannerImage ||
+      sliceStore.image ||
+      '',
+    logo: manualConfig.logo || sliceStore.image || '',
+    url: manualConfig.url || sliceStore.slicerConfig?.storefrontUrl || '',
+    farmerAllocations: manualConfig.farmerAllocation || [],
+  };
+};
 
 export const buildMenuFromSliceProducts = async (
-  products: ProductCart[],
+  products: SliceProduct[],
 ): Promise<{ menu: Menu; items: Item[] }> => {
   // map every slice product to an item object and save
-  const items = products.map(mapSliceProductCartToItem);
+  const items = products.map(mapSliceProductCartToItem).filter(i => !!i);
 
   const menu = buildMenuFromItems(items);
 

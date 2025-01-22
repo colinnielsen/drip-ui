@@ -197,12 +197,12 @@ export const useAssocatePaymentToCart = () => {
   const queryClient = useQueryClient();
 
   const { data: cart } = useRecentOrder();
-  const { data: priceDict } = useShopPriceDictionary(cart?.shop!);
 
   return useMutation({
     scope: { id: 'cart' },
     mutationFn: async (transactionHash: Hash) => {
-      if (!cart || !priceDict) throw Error('No cart or price dict');
+      if (!cart) throw Error('No cart');
+
       return axiosFetcher<Order, PayRequest>(`/api/orders/pay`, {
         method: 'POST',
         headers: {

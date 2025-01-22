@@ -67,8 +67,12 @@ export const deriveShopIdFromSquareStoreExternalId = (
 /**
  * @dev the item id in the drip db will be derived from the itemId in square, and the `SQUARE_ITEM` prefix
  */
-export function deriveDripIdFromSquareItemId(itemId: string): UUID {
-  return generateUUID(`SQUARE_ITEM:${itemId}`);
+export function deriveDripIdFromSquareVariantId(variant: CatalogObject): UUID {
+  return generateUUID(`SQUARE_VARIANT:${variant.id}`);
+}
+
+export function deriveDripIdFromSquareItemId(item: CatalogObject): UUID {
+  return generateUUID(`SQUARE_ITEM:${item.id}`);
 }
 
 /**
@@ -388,7 +392,7 @@ const buildItemsFromCatalogObjects = (
               return null;
 
             return {
-              id: deriveDripIdFromSquareItemId(variationCatalogObject.id),
+              id: deriveDripIdFromSquareVariantId(variationCatalogObject),
               __sourceConfig: {
                 type: 'square',
                 id: variationCatalogObject.id,
@@ -414,7 +418,7 @@ const buildItemsFromCatalogObjects = (
 
       // then build up the item
       const item: Item = {
-        id: deriveDripIdFromSquareItemId(catalogObject.id),
+        id: deriveDripIdFromSquareItemId(catalogObject),
         name:
           catalogObject.itemData?.name ||
           mappingError('expected square item name'),

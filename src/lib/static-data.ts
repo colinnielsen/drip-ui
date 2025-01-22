@@ -1,4 +1,3 @@
-import { createFarmer } from '@/data-model/farmer/FarmerDTO';
 import { Farmer } from '@/data-model/farmer/FarmerType';
 import { SliceShopConfig } from '@/data-model/shop/ShopType';
 import { UUID } from '@/data-model/_common/type/CommonType';
@@ -6,9 +5,11 @@ import { subDays } from 'date-fns';
 import { generateUUID } from './utils';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { getSliceExternalIdFromSliceId } from '@/data-model/shop/ShopDTO';
+import { mapToEthAddress } from '@/data-model/ethereum/EthereumDTO';
+import { ChainId } from '@/data-model/ethereum/EthereumType';
 
 export const STATIC_FARMER_DATA: Farmer[] = [
-  createFarmer({
+  {
     id: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
     name: 'Marco Oviedo',
     pfp: '/marco-pfp.png',
@@ -32,7 +33,7 @@ export const STATIC_FARMER_DATA: Farmer[] = [
     bio: "My wife and I run a farm in the beautiful Costa region of Costa Rica. Our family coffee farm has been running the past two generations. My wife and I decided to build a micro mill, giving us more control over processing and production. We're using innovative technologies to save our family farm.",
     bioImages: ['/marco-1.jpg', '/marco-2.jpg', '/marco-3.jpg'],
     ethAddress: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
-  }),
+  },
 ];
 
 export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
@@ -202,8 +203,10 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
     },
     tipConfig: {
       __type: 'single-recipient',
-      ethAddress: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
-      enabled: true,
+      recipient: mapToEthAddress(
+        ChainId.BASE,
+        '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
+      ),
     },
     name: 'The Dev Cafe',
     logo: '/drip.png',

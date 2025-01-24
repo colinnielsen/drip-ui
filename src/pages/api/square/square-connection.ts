@@ -1,5 +1,5 @@
 import { QueriedSquareLocation } from '@/data-model/_external/data-sources/square/SquareType';
-import { getLocationIdFromSquareExternalId } from '@/data-model/shop/ShopDTO';
+import { mapSquareExternalIdToLocationId } from '@/data-model/shop/ShopDTO';
 import { SquareShopConfig } from '@/data-model/shop/ShopType';
 import { MinSquareConnection } from '@/data-model/square-connection/SquareConnectionType';
 import { ApiRoute } from '@/lib/next';
@@ -57,7 +57,7 @@ export default ApiRoute(async function handler(
             (l.status as 'ACTIVE' | 'INACTIVE') ||
             err('Location status not found'),
           added: squareshopConfigs.some(
-            c => getLocationIdFromSquareExternalId(c.externalId) === l.id,
+            c => mapSquareExternalIdToLocationId(c.externalId) === l.id,
           ),
         }))
         .sort((a, b) =>

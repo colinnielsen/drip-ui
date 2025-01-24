@@ -29,6 +29,18 @@ export const CostSummary = ({
         />
       </div>
 
+      {summary.discount && summary.discount.gt(0) && (
+        <div className={cn('flex justify-between items-center h-5 font-light')}>
+          <Body>Discount 🎉</Body>
+          <Price
+            originalPrice={summary.discount.flip()}
+            isLoading={isLoading}
+            isSubtractive
+            className="text-green-500"
+          />
+        </div>
+      )}
+
       {(summary.tip || !hideTipIfZero) && (
         <div
           className={cn('flex justify-between items-center h-5', {

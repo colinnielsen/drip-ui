@@ -11,7 +11,7 @@ import { EthAddress } from '../ethereum/EthereumType';
 import { ItemMod } from '../item/ItemMod';
 import { Item, ItemVariant } from '../item/ItemType';
 import { Shop } from '../shop/ShopType';
-import { AppliedDiscount } from './AppliedDiscount';
+import { Discount } from '../discount/DiscountType';
 import { LineItem, LineItemUniqueId } from './LineItemAggregate';
 import {
   ExternalOrderInfo,
@@ -36,8 +36,10 @@ export function mapVariantAndModsToUniqueId(
   variant: ItemVariant,
   deduplicatedMods: ItemMod[],
 ): LineItemUniqueId {
-  const uniqueId = `${variant.id}_${deduplicatedMods.map(mod => mod.id).join('_')}`;
-  return uniqueId as LineItemUniqueId;
+  const uniqueId = LineItemUniqueId(
+    `${variant.id}_${deduplicatedMods.map(mod => mod.id).join('_')}`,
+  );
+  return uniqueId;
 }
 
 export const getOrderNumber = (order: Order): string | null => {
@@ -134,10 +136,10 @@ export const addLineItemPrices = (
     lineItems[0].variant.price.__currencyType,
     0n,
   );
-
-  return lineItems.reduce<Currency>((acc, li) => {
-    return addCurrencies(acc, li[type].mul(li.quantity));
-  }, CURRENCY_ZERO);
+  return lineItems.reduce<Currency>(
+    (acc, li) => addCurrencies(acc, li[type]),
+    CURRENCY_ZERO,
+  );
 };
 
 export function createLineItemAggregate({
@@ -151,7 +153,7 @@ export function createLineItemAggregate({
   variant: ItemVariant;
   quantity: number;
   mods?: ItemMod[];
-  discounts?: AppliedDiscount[];
+  discounts?: Discount[];
 }): LineItem {
   const CURRENCY_ZERO = initCurrencyFromType(variant.price.__currencyType, 0n);
   // deduplicate mods

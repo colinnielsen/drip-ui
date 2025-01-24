@@ -77,16 +77,15 @@ export const deriveShopConfigIdFromExternalId = (
 //
 /// SLICE
 
-export const deriveShopIdFromSliceStoreId = (
+export const mapSliceStoreIdToShopId = (
   sliceId: number,
   sliceVersion: number,
-): UUID => generateUUID(`SLICE_V${sliceVersion}::${sliceId}`);
+): Shop['id'] => generateUUID(`SLICE_V${sliceVersion}::${sliceId}`);
 
-export const getSliceExternalIdFromSliceId = (
-  sliceId: number,
-): SliceExternalId => `SLICE_STORE::V${SLICE_VERSION}::${sliceId}`;
+export const mapSliceIdToSliceExternalId = (sliceId: number): SliceExternalId =>
+  `SLICE_STORE::V${SLICE_VERSION}::${sliceId}`;
 
-export const getSlicerIdFromSliceExternalId = (
+export const mapSliceExternalIdToSliceId = (
   sliceExternalId: SliceExternalId,
 ): number => {
   const [, , sliceId] = sliceExternalId.split('::');
@@ -98,7 +97,7 @@ export const getSlicerIdFromSliceExternalId = (
 //
 /// SQUARE
 
-export const getSqaureExternalId = ({
+export const mapToSqaureExternalId = ({
   merchantId,
   locationId,
 }: {
@@ -106,7 +105,7 @@ export const getSqaureExternalId = ({
   locationId: string;
 }): SquareExternalId => `SQUARE_STORE::${merchantId}::${locationId}`;
 
-export const getMerchantIdFromSquareExternalId = (
+export const mapSquareExternalIdToMerchantIdFrom = (
   externalId: SquareExternalId,
 ): string => {
   const [_prefix, merchantId, _locationId] = externalId.split('::');
@@ -115,7 +114,7 @@ export const getMerchantIdFromSquareExternalId = (
   return merchantId;
 };
 
-export const getLocationIdFromSquareExternalId = (
+export const mapSquareExternalIdToLocationId = (
   externalId: SquareExternalId,
 ): string => {
   const [_prefix, _merchantId, locationId] = externalId.split('::');
@@ -131,7 +130,7 @@ export const mapShopSourceConfigToExternalId = (
   shopSourceConfig: ShopSourceConfig,
 ): ShopExternalId => {
   if (shopSourceConfig.type === 'square')
-    return getSqaureExternalId({
+    return mapToSqaureExternalId({
       merchantId: shopSourceConfig.merchantId,
       locationId: shopSourceConfig.locationId,
     });

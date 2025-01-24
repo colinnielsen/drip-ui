@@ -1,6 +1,7 @@
 import * as S from 'effect/Schema';
 import { S_UUID } from './base';
 import { S_CurrenciesUnion, S_USDC } from './currency';
+import { DiscountId } from '@/data-model/discount/DiscountDTO';
 
 // Source Config Schema
 const ItemSourceConfigSchema = S.Union(
@@ -53,9 +54,9 @@ const ItemSchema = S.Struct({
   mods: S.optional(S.NullOr(S.mutable(S.Array(ItemModSchema)))),
 });
 
-// AppliedDiscount Schema
-const AppliedDiscountSchema = S.Struct({
-  discountId: S_UUID,
+// Discount Schema
+const DiscountSchema = S.Struct({
+  id: S.String.pipe(S.fromBrand(DiscountId)),
   name: S.String,
   amount: S_CurrenciesUnion,
   type: S.Union(S.Literal('PERCENTAGE'), S.Literal('FIXED')),
@@ -75,7 +76,7 @@ const LineItemSchema = S.Struct({
   quantity: S.Number,
   mods: S.optional(S.NullOr(S.mutable(S.Array(ItemModSchema)))),
   subtotal: S_CurrenciesUnion,
-  discounts: S.optional(S.NullOr(S.mutable(S.Array(AppliedDiscountSchema)))),
+  discounts: S.optional(S.NullOr(S.mutable(S.Array(DiscountSchema)))),
   totalDiscount: S.optional(S.NullOr(S_CurrenciesUnion)),
   total: S_CurrenciesUnion,
 });
@@ -87,7 +88,7 @@ export const CartSchema = S.Struct({
   shop: S_UUID,
   user: S_UUID,
   lineItems: S.mutable(S.Array(LineItemSchema)).pipe(S.minLength(1)),
-  discounts: S.optional(S.NullOr(S.mutable(S.Array(AppliedDiscountSchema)))),
+  discounts: S.optional(S.NullOr(S.mutable(S.Array(DiscountSchema)))),
   tip: S.optional(
     S.NullOr(
       S.Struct({

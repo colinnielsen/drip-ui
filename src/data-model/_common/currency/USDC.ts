@@ -8,6 +8,8 @@ export const isUSDC = (value: unknown): value is USDC => {
   return value instanceof USDC;
 };
 
+type InputType = bigint | number | string;
+
 /**
  * the USDC value in Wei
  * @example 1 USDC = 10^6 Wei
@@ -238,7 +240,7 @@ export class USDC {
    * const usdc2 = new USDC(1);
    * (usdc1.eq(usdc2)); // true
    */
-  eq(other: any): other is USDC {
+  eq(other: any): boolean {
     if (!(other instanceof USDC)) return false;
 
     return this.wei === other.wei;
@@ -250,11 +252,15 @@ export class USDC {
    * const usdc2 = new USDC(2);
    * (usdc1.gt(usdc2)); // false
    */
-  gt(other: USDC): boolean {
+  gt(_other: InputType | USDC): boolean {
+    const other = new USDC(_other);
+
     return this.wei > other.wei;
   }
 
-  gte(other: USDC): boolean {
+  gte(_other: InputType | USDC): boolean {
+    const other = new USDC(_other);
+
     return this.wei >= other.wei;
   }
 
@@ -264,16 +270,24 @@ export class USDC {
    * const usdc2 = new USDC(2);
    * (usdc1.lt(usdc2)); // true
    */
-  lt(other: USDC): boolean {
+  lt(_other: InputType | USDC): boolean {
+    const other = new USDC(_other);
+
     return this.wei < other.wei;
   }
 
-  lte(other: USDC): boolean {
+  lte(_other: InputType | USDC): boolean {
+    const other = new USDC(_other);
+
     return this.wei <= other.wei;
   }
 
   is(other: any): other is USDC {
     return this.__currencyType === other.__currencyType;
+  }
+
+  flip() {
+    return USDC.fromWei(-this.wei);
   }
 }
 

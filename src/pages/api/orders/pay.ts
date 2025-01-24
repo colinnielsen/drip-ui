@@ -7,11 +7,11 @@ import {
   hydrateClassInstancesFromJSONBody,
   UnauthorizedError,
 } from '@/lib/effect';
+import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import { S, validateHTTPMethod } from '@/lib/effect/validation';
 import { S_Hex, S_UUID } from '@/lib/effect/validation/base';
 import { CartSchema } from '@/lib/effect/validation/cart';
 import { S_USDCAuthorization } from '@/lib/effect/validation/ethereum';
-import { EffectfulApiRoute } from '@/lib/next';
 import { getSessionId } from '@/lib/session';
 import OrderService from '@/services/OrderService';
 import { Effect, Either, pipe } from 'effect';
@@ -85,7 +85,7 @@ const validatePayload = (
       }),
   );
 
-export default EffectfulApiRoute(function (
+const PayRoute = EffectfulApiRoute(function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -123,3 +123,5 @@ export default EffectfulApiRoute(function (
 
   return routePipeline;
 }, 'orders/pay');
+
+export default PayRoute;

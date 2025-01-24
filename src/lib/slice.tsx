@@ -18,8 +18,13 @@ import { axiosFetcher } from './utils';
 import { createConfig } from '@wagmi/core';
 import { base } from 'viem/chains';
 import { getSliceSubgraphApiKey } from './constants';
+import { BaseEffectError } from './effect';
 
 export const SLICE_CART_LOCAL_STORAGE_KEY = 'cart';
+
+export class SliceKitError extends BaseEffectError {
+  readonly _tag = 'SliceKitError';
+}
 
 /**
  * @dev the address to approve USDC for to spend across slice stores

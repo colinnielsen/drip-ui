@@ -1,24 +1,19 @@
 import coffeeGif from '@/assets/coffee-dive.gif';
 import coffeeStill from '@/assets/coffee-still.png';
-import { CTAButton, LoadingCTAButton } from '@/components/ui/button';
-import {
-  useGoToSlide,
-  useNextSlide,
-  usePreviousSlide,
-} from '@/components/ui/carousel';
+import { Button, CTAButton, LoadingCTAButton } from '@/components/ui/button';
+import { useGoToSlide, usePreviousSlide } from '@/components/ui/carousel';
 import { Drip, DripSmall, Label1 } from '@/components/ui/typography';
 import { mapCartToPaymentSummary } from '@/data-model/cart/CartDTO';
 import { Cart } from '@/data-model/cart/CartType';
-import { mapOrderToPaymentSummary } from '@/data-model/order/OrderDTO';
 import { Shop, ShopSourceConfig } from '@/data-model/shop/ShopType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { useCart } from '@/queries/CartQuery';
 import { useWalletAddress } from '@/queries/EthereumQuery';
-import { useCartInSliceFormat, useRecentOrder } from '@/queries/OrderQuery';
+import { useCartInSliceFormat } from '@/queries/OrderQuery';
 import { usePayAndOrder as useSlicePayAndOrder } from '@/queries/SliceQuery';
 import { usePayAndOrder as useSquarePayAndOrder } from '@/queries/SquareQuery';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FarmerCard } from '../basket/farmer-card';
 import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
@@ -28,12 +23,12 @@ export const SlicePayButton = () => {
   const { isFetching: sliceCartIsLoading } = useCartInSliceFormat({
     buyerAddress,
   });
-  const { isFetching: cartIsLoading, data: cart } = useRecentOrder();
+  const { isFetching: cartIsLoading, data: cart } = useCart();
   const { paymentStep } = useCheckoutContext();
   const goToSlide = useGoToSlide();
   const { payAndOrder, ready } = useSlicePayAndOrder();
 
-  const cartSummary = mapOrderToPaymentSummary(cart);
+  const cartSummary = mapCartToPaymentSummary(cart);
 
   if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress || !ready)
     return <LoadingCTAButton />;
@@ -49,7 +44,7 @@ export const SlicePayButton = () => {
         }}
         isLoading={isLoading}
       >
-        {!cartSummary || isLoading ? '' : isFree ? 'pay' : 'place order'}
+        {!cartSummary || isLoading ? '' : isFree ? 'place order' : 'pay'}
       </CTAButton>
     </>
   );
@@ -103,6 +98,7 @@ export default function PaymentSlide({
   shop: Shop;
 }) {
   const { paymentStep, setPaymentStep } = useCheckoutContext();
+  const prevSlide = usePreviousSlide();
   const seconds = useSecondsSinceMount();
   const [hasBeen4SecondsSincePrompted, setHasBeen4SecondsSincePrompted] =
     useState(false);
@@ -133,7 +129,17 @@ export default function PaymentSlide({
       <Label1 className="text-primary-gray">
         something went wrong, let&apos;s try again
       </Label1>
-      <PayButton shopType={shop.__sourceConfig.type} />
+
+      <div className="flex gap-2 w-full items-center">
+        <Button
+          variant={'secondary'}
+          onClick={() => prevSlide?.()}
+          className="aspect-square"
+        >
+          👈
+        </Button>
+        <PayButton shopType={shop.__sourceConfig.type} />
+      </div>
     </div>
   );
 

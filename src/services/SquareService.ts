@@ -1,11 +1,11 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { PersistanceLayer } from '@/data-model/_common/db/PersistanceType';
-import { deriveSquareConnectionIdFromMerchantId } from '@/data-model/_external/data-sources/square/SquareDTO';
+import { mapSquareMerchantIdToSquareConnectionId } from '@/data-model/_external/data-sources/square/SquareDTO';
 import { SquareError } from '@/data-model/_external/data-sources/square/SquareType';
 import { Order } from '@/data-model/order/OrderType';
 import {
-  getLocationIdFromSquareExternalId,
-  getMerchantIdFromSquareExternalId,
+  mapSquareExternalIdToLocationId,
+  mapSquareExternalIdToMerchantIdFrom,
 } from '@/data-model/shop/ShopDTO';
 import { SquareShopConfig } from '@/data-model/shop/ShopType';
 import {
@@ -61,7 +61,7 @@ const findSquareConnectionByMerchantId = async (
   merchantId: string,
 ): Promise<DecryptedSquareConnection | null> => {
   const connection = await SquareConnectionPersistance.findById(
-    deriveSquareConnectionIdFromMerchantId(merchantId),
+    mapSquareMerchantIdToSquareConnectionId(merchantId),
   );
   return connection;
 };
@@ -128,8 +128,8 @@ const fetchSquareStoreInfo = async (
   externalId: SquareShopConfig['externalId'],
 ): Promise<SquareStoreInfo> => {
   const [merchantId, locationId] = [
-    getMerchantIdFromSquareExternalId(externalId),
-    getLocationIdFromSquareExternalId(externalId),
+    mapSquareExternalIdToMerchantIdFrom(externalId),
+    mapSquareExternalIdToLocationId(externalId),
   ];
 
   const squareClientWithAccessToken =

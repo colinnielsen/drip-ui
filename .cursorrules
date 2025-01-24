@@ -1,0 +1,58 @@
+# Code Implementation
+- Start with prompt analysis and pseudocode planning
+- Use comments for logic explanation, not code description
+- Provide complete, functional code with minimal placeholders
+- Prioritize readability over optimization
+- Reference files to be modified
+- Challenge assumptions and show complete thought process
+
+# TypeScript & React Guidelines
+- Use TypeScript's advanced features (generics, utility types, mapped types, tagged unions, branded types)
+- Write explicit, declarative code with functional patterns
+- Use descriptive names with auxiliary verbs (isLoading, hasError)
+- Follow SOLID principles and DRY
+- Avoid nesting and reduce bracket usage
+- Use types instead of interfaces
+- Avoid enums and any types
+
+# Project Structure
+- Group code into logical modules (components, lib, types, utils, services, queries, data-models)
+- Separate business logic from UI
+- Use index files for clean imports
+
+# React & Next.js Specifics
+- Use Next.js 14 Pages Router (no App Router)
+- Use Shadcn UI components from components/ui/*
+- Implement Skeleton components for loading states
+- Use react-query for data fetching
+- Mobile-first with Tailwind CSS
+- Ensure accessibility with ARIA attributes
+
+# Effect.js Usage
+- Use for server-side operations instead of promises
+- Use pipe function and operators
+- Use tryPromise for promise-throwing calls
+- Use fail, succeed, map, flatMap for error handling
+- Prefer .then over .map
+- Use createEffectService for service wrapping
+
+# Security
+- Validate inputs server-side with Effect Schema
+- Sanitize frontend inputs
+- Use environment variables for sensitive data
+- Enforce HTTPS and CORS
+
+# Core Dependencies
+- effect, @effect/platform-node: Server-side type-safe operations
+- next, react: Core framework (Pages Router)
+- @tanstack/react-query: Data fetching
+- viem: Ethereum interactions
+- @slicekit/core: Slice POS integration
+- square: Payment processing
+- @vercel/postgres: Main database
+- @privy-io/*: Authentication
+
+# Data Sources
+- Slice: On-chain POS system for items/shop data
+- Square: Traditional payment processing and item management
+- Item source config stored in Item.__sourceConfig

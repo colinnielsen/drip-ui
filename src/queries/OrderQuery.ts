@@ -1,7 +1,8 @@
 import { UUID } from '@/data-model/_common/type/CommonType';
 import { mapCartToSliceCart } from '@/data-model/_external/data-sources/slice/SliceDTO';
+import { needsSyncing } from '@/data-model/order/OrderDTO';
 import { ExternalOrderInfo, Order } from '@/data-model/order/OrderType';
-import { getSlicerIdFromSliceExternalId } from '@/data-model/shop/ShopDTO';
+import { mapSliceExternalIdToSliceId } from '@/data-model/shop/ShopDTO';
 import { axiosFetcher, err, sortDateAsc, uniqBy } from '@/lib/utils';
 import { PayRequest } from '@/pages/api/orders/pay';
 import {
@@ -11,14 +12,11 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { Address, Hash } from 'viem';
+import { useCart } from './CartQuery';
 import { useFarmer } from './FarmerQuery';
 import { useShop } from './ShopQuery';
 import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
-import { needsSyncing } from '@/data-model/order/OrderDTO';
-import { useCart } from './CartQuery';
-import { LineItem } from '@/data-model/order/LineItemAggregate';
-import { Cart } from '@/data-model/cart/CartType';
 
 //
 //// HELPERS
@@ -154,22 +152,21 @@ export const useCartId = () => {
  * @dev the user's current cart, mapped to a usable slicekit cart
  */
 export const useCartInSliceFormat = ({
-  buyerAddress: _buyer,
+  buyerAddress,
 }: {
   buyerAddress?: Address | null | undefined;
 }) => {
-  const buyerAddress = _buyer ?? undefined;
   const { data: cart } = useCart();
   const { data: shop } = useShop({ id: cart?.shop });
 
   const slicerId =
     shop?.__sourceConfig.type === 'slice'
-      ? getSlicerIdFromSliceExternalId(shop.__sourceConfig.id)
+      ? mapSliceExternalIdToSliceId(shop.__sourceConfig.id)
       : undefined;
 
   return useSliceStoreProducts({
     slicerId,
-    buyer: buyerAddress,
+    buyer: buyerAddress ?? undefined,
     select: cartProducts => {
       return !cart ? [] : mapCartToSliceCart(cart, cartProducts);
     },

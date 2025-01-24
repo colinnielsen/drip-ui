@@ -2,11 +2,11 @@ import FarmerCard from '@/components/shop-page/farmer-intro-card';
 import { ShopHeader, ShopHeaderDetails } from '@/components/shop-page/header';
 import { ItemList } from '@/components/shop-page/item-list';
 import { SLICE_VERSION } from '@/data-model/_external/data-sources/slice/SliceDTO';
-import { deriveShopIdFromSquareStoreExternalId } from '@/data-model/_external/data-sources/square/SquareDTO';
+import { mapSquareStoreExternalIdToShopId } from '@/data-model/_external/data-sources/square/SquareDTO';
 import {
-  deriveShopIdFromSliceStoreId,
+  mapSliceStoreIdToShopId,
   EMPTY_MENU,
-  getSlicerIdFromSliceExternalId,
+  mapSliceExternalIdToSliceId,
 } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
 import { rehydrateData } from '@/lib/utils';
@@ -32,11 +32,11 @@ const STATIC_PAGE_DATA = () =>
       __type: 'storefront',
       id:
         c.__type === 'slice'
-          ? deriveShopIdFromSliceStoreId(
-              getSlicerIdFromSliceExternalId(c.externalId),
+          ? mapSliceStoreIdToShopId(
+              mapSliceExternalIdToSliceId(c.externalId),
               SLICE_VERSION,
             )
-          : deriveShopIdFromSquareStoreExternalId(c.externalId),
+          : mapSquareStoreExternalIdToShopId(c.externalId),
       label: c.name,
       backgroundImage: c.backgroundImage ?? '',
       logo: c.logo ?? '',

@@ -1,8 +1,8 @@
 import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { mapSquareLocationToLocation } from '@/data-model/_external/data-sources/square/SquareDTO';
 import {
-  getSliceExternalIdFromSliceId,
-  getSqaureExternalId,
+  mapSliceIdToSliceExternalId,
+  mapToSqaureExternalId,
 } from '@/data-model/shop/ShopDTO';
 import { ShopConfig, SquareShopConfig } from '@/data-model/shop/ShopType';
 import {
@@ -11,6 +11,7 @@ import {
   NotFoundError,
   SQLExecutionError,
 } from '@/lib/effect';
+import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import {
   S,
   S_UUID,
@@ -18,7 +19,6 @@ import {
   validateSessionToken,
 } from '@/lib/effect/validation';
 import { S_EthAddress } from '@/lib/effect/validation/ethereum';
-import { EffectfulApiRoute } from '@/lib/next';
 import shopService from '@/services/ShopService';
 import { SquareService, SquareServiceError } from '@/services/SquareService';
 import { Effect, pipe } from 'effect';
@@ -98,7 +98,7 @@ export default EffectfulApiRoute(function (
             if (body.type === 'square' && body.action === 'update') {
               const existingShopConfig =
                 await shopService.findShopConfigByExternalId(
-                  getSqaureExternalId({
+                  mapToSqaureExternalId({
                     merchantId: body.merchantId,
                     locationId: body.locationId,
                   }),
@@ -137,11 +137,11 @@ export default EffectfulApiRoute(function (
         __type: data.type,
         externalId:
           data.type === 'square'
-            ? getSqaureExternalId({
+            ? mapToSqaureExternalId({
                 merchantId: data.merchantId,
                 locationId: data.locationId,
               })
-            : getSliceExternalIdFromSliceId(data.shopId),
+            : mapSliceIdToSliceExternalId(data.shopId),
         name: data.name || data?.squareLocation?.name || undefined,
         backgroundImage:
           data.backgroundImage ||

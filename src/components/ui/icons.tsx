@@ -1,21 +1,25 @@
+import { Currency } from '@/data-model/_common/currency';
 import { ETH } from '@/data-model/_common/currency/ETH';
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { cn } from '@/lib/utils';
 import { Clock11, Clock2, Clock5, Clock8, LucideProps } from 'lucide-react';
 import { Label2 } from './typography';
-import { Currency } from '@/data-model/_common/currency';
 
 export function Price<T extends Currency>({
   originalPrice,
   actualPrice,
   isLoading: _isLoading,
   isAdditive,
+  isSubtractive,
+  className,
 }: Partial<{
   originalPrice: T;
   actualPrice: T;
   isLoading: boolean;
   isAdditive: boolean;
+  isSubtractive: boolean;
+  className: string;
 }>) {
   const isLoading = !originalPrice || _isLoading;
   const isUSDC = originalPrice instanceof USDC || actualPrice instanceof USDC;
@@ -28,15 +32,17 @@ export function Price<T extends Currency>({
       actualPrice.lt(originalPrice));
 
   return (
-    <div className="flex items-center gap-1 text-primary-gray">
+    <div className={cn('flex items-center gap-1 text-primary-gray')}>
       {isAdditive && '+'}
+      {isSubtractive && '-'}
       {isUSDC && <UsdcSVG />}
       <Label2
-        as="span"
+        as={'span'}
         className={cn(
           'font-medium text-sm',
           isDiscounted ? 'line-through' : '',
           isLoading && 'animate-pulse',
+          className,
         )}
       >
         {originalPrice?.prettyFormat?.()}

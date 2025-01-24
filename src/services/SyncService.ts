@@ -7,7 +7,7 @@ import {
   mapSquareStoreToShop,
 } from '@/data-model/_external/data-sources/square/SquareDTO';
 import { Farmer } from '@/data-model/farmer/FarmerType';
-import { getSlicerIdFromSliceExternalId } from '@/data-model/shop/ShopDTO';
+import { mapSliceExternalIdToSliceId } from '@/data-model/shop/ShopDTO';
 import {
   ShopConfig,
   SliceShopConfig,
@@ -28,9 +28,7 @@ export class SyncService {
   //
 
   private async syncSliceStore(shopConfig: SliceShopConfig) {
-    const slicerId: number = getSlicerIdFromSliceExternalId(
-      shopConfig.externalId,
-    );
+    const slicerId: number = mapSliceExternalIdToSliceId(shopConfig.externalId);
     const [store] = await sliceKit.getStores({ slicerIds: [slicerId] });
     const products = await sliceKit.getStoreProducts({ slicerId });
 

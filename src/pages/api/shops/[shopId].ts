@@ -1,9 +1,8 @@
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { ApiRoute } from '@/lib/next';
 import { getSessionId } from '@/lib/session';
 import ShopService from '@/services/ShopService';
-import { UUID } from '@/data-model/_common/type/CommonType';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Address } from 'viem';
 
 export default ApiRoute(async function (
   req: NextApiRequest,

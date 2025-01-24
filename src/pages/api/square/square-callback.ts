@@ -12,7 +12,13 @@ import { SquareService } from '@/services/SquareService';
 import axios, { AxiosError } from 'axios';
 import { UUID } from '@/data-model/_common/type/CommonType';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { z } from 'zod';
+import * as S from 'effect/Schema';
+
+const SquareCallbackSchema = S.Struct({
+  response_type: S.Literal('code'),
+  code: S.String,
+  state: S.String,
+});
 
 const handleErrorCase = (
   res: NextApiResponse,
@@ -28,22 +34,16 @@ const handleAllowCase = async (
   userId: UUID,
 ) => {
   // 1. Parse the parameters that are returned in the seller authorization response.
-  const parsed = z
-    .object({
-      response_type: z.literal('code'),
-      code: z.string(),
-      state: z.string(),
-    })
-    .safeParse(req.query);
+  const parsed = S.decodeUnknownOption(SquareCallbackSchema)(req.query);
 
-  if (!parsed.success)
+  if (parsed._tag === 'None')
     return handleErrorCase(
       res,
       'invalid_request',
       'failed to parse the authorization response',
     );
 
-  const { code, state } = parsed.data;
+  const { code, state } = parsed.value;
 
   const CSRFToken = await CSRFTokenService.findByUserId(userId);
 

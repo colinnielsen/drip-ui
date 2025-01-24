@@ -1,7 +1,7 @@
 import { Currency } from '../_common/currency';
 import { USDC } from '../_common/currency/USDC';
 import { UUID } from '../_common/type/CommonType';
-import { AppliedDiscount } from '../order/AppliedDiscount';
+import { Discount } from '../discount/DiscountType';
 import { LineItem } from '../order/LineItemAggregate';
 
 export type Cart = {
@@ -14,7 +14,7 @@ export type Cart = {
   /** The items the user ordered */
   lineItems: LineItem[];
   /** all discounts applied on this cart */
-  discounts?: AppliedDiscount[] | null;
+  discounts?: Discount[] | null;
   /** the tip amount */
   tip?: {
     amount: USDC;

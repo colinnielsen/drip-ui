@@ -1,4 +1,4 @@
-import { bootstrapSQLDB, resetSQLDB } from '@/infrastructures/sql-db';
+import { bootstrapSQLDB, resetSQLDB } from '@/infrastructures/sql/sql-db';
 import { getDBSecret } from '@/lib/constants';
 import { revalidatePathIfExists, ApiRoute } from '@/lib/next';
 import { ONBOARDED_SHOPS, STATIC_FARMER_DATA } from '@/lib/static-data';

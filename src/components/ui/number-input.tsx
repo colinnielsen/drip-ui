@@ -4,12 +4,14 @@ import { HTMLAttributes } from 'react';
 import { Label2 } from './typography';
 
 export function NumberInput({
+  disabled,
   onPlus,
   onMinus,
   value,
   useTrashForDelete,
   className,
 }: {
+  disabled?: boolean;
   onPlus: () => void;
   onMinus: () => void;
   value: number;
@@ -23,7 +25,7 @@ export function NumberInput({
         className,
       )}
     >
-      <button onClick={onMinus}>
+      <button onClick={onMinus} disabled={disabled}>
         {value === 1 && useTrashForDelete ? (
           <Trash2 height={16} strokeWidth={strokeWidth} />
         ) : (

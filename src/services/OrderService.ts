@@ -1,12 +1,12 @@
-import { Currency } from '@/data-model/_common/currency';
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { Unsaved, UUID } from '@/data-model/_common/type/CommonType';
 import {
-  deriveOrderStatusFromSquareOrderFulfillmentState,
-  deriveOrderStatusFromSquareOrderState,
   mapOrderToSquareOrder,
+  mapSquareOrderFulfillmentStateToOrderStatus,
+  mapSquareOrderStateToOrderStatus,
 } from '@/data-model/_external/data-sources/square/SquareDTO';
 import { Cart } from '@/data-model/cart/CartType';
+import { ChainId, USDCAuthorization } from '@/data-model/ethereum/EthereumType';
 import {
   createExternalOrderInfo,
   mapCartToNewOrder,
@@ -21,11 +21,9 @@ import {
   Order,
   OrderStatus,
 } from '@/data-model/order/OrderType';
-import {
-  Shop,
-  ShopSourceConfig,
-  SquareShopSourceConfig,
-} from '@/data-model/shop/ShopType';
+import { Shop, SquareShopSourceConfig } from '@/data-model/shop/ShopType';
+import { getDripRelayerPrivateKey } from '@/lib/constants';
+import { USDC_CONFIG } from '@/lib/contract-config/USDC';
 import {
   BaseEffectError,
   genericError,
@@ -37,15 +35,15 @@ import {
 } from '@/lib/effect/errors';
 import {
   BASE_CLIENT,
-  BASE_RPC_CONFIG,
   getRPCConfig,
   mapChainIdToViemChain,
 } from '@/lib/ethereum';
+import { sliceKit } from '@/lib/slice';
 import { generateUUID, rehydrateData } from '@/lib/utils';
 import { PayRequest } from '@/pages/api/orders/pay';
 import { sql } from '@vercel/postgres';
 import { differenceInMinutes } from 'date-fns';
-import { Effect, Fiber, pipe } from 'effect';
+import { Effect, pipe } from 'effect';
 import { UnknownException } from 'effect/Cause';
 import {
   all,
@@ -58,18 +56,10 @@ import {
   tryPromise,
 } from 'effect/Effect';
 import { Address, createWalletClient, Hash, Hex } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { getTransactionReceipt } from 'viem/actions';
 import ShopService from './ShopService';
 import { SquareService, SquareServiceError } from './SquareService';
-import {
-  getSqaureExternalId,
-  mapShopSourceConfigToExternalId,
-} from '@/data-model/shop/ShopDTO';
-import { ChainId, USDCAuthorization } from '@/data-model/ethereum/EthereumType';
-import { USDC_CONFIG } from '@/lib/contract-config/USDC';
-import { privateKeyToAccount } from 'viem/accounts';
-import { getDripRelayerPrivateKey } from '@/lib/constants';
-import { sliceKit } from '@/lib/slice';
 
 // export type UpdateOrderOperation =
 //   | { __type: 'add'; orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[] }
@@ -425,7 +415,7 @@ async function _syncSquareOrder(order: InProgressOrder) {
     orderId,
   });
 
-  const squreOrderStatus = deriveOrderStatusFromSquareOrderFulfillmentState(
+  const squreOrderStatus = mapSquareOrderFulfillmentStateToOrderStatus(
     squareOrder.fulfillments?.[0]?.state,
   );
 
@@ -642,7 +632,7 @@ function _payForSquareOrder({
           createdSquareOrder.id ||
           genericError('Square order id not present in createOrder response'),
         orderNumber: createdSquareOrder.ticketName || '',
-        status: deriveOrderStatusFromSquareOrderState(createdSquareOrder.state),
+        status: mapSquareOrderStateToOrderStatus(createdSquareOrder.state),
       } satisfies ExternalOrderInfo;
 
       const nextOrder = {

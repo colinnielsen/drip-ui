@@ -1,6 +1,6 @@
 import { PersistanceLayer } from '@/data-model/_common/db/PersistanceType';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
-import { deriveSquareConnectionIdFromMerchantId } from '@/data-model/_external/data-sources/square/SquareDTO';
+import { mapSquareMerchantIdToSquareConnectionId } from '@/data-model/_external/data-sources/square/SquareDTO';
 import {
   decryptSquareConnection,
   isDecryptedSquareConnection,
@@ -44,7 +44,7 @@ const save = async (
         )
         VALUES
         (
-        ${deriveSquareConnectionIdFromMerchantId(connection.merchantId)},
+        ${mapSquareMerchantIdToSquareConnectionId(connection.merchantId)},
         ${connection.userId},
         ${connection.merchantId},
         ${connection.businessName},

@@ -4,13 +4,10 @@ import {
   mapSliceProductIdToItemId,
   mapSliceProductToCurrency,
 } from '@/data-model/_external/data-sources/slice/SliceDTO';
+import { mapToDiscountQuote } from '@/data-model/discount/DiscountDTO';
+import { Discount, DiscountQuote } from '@/data-model/discount/DiscountType';
 import { isItemId } from '@/data-model/item/ItemDTO';
 import { ItemId } from '@/data-model/item/ItemType';
-import {
-  Discount,
-  DiscountId,
-  DiscountQuote,
-} from '@/data-model/discount/DiscountType';
 import { mapSliceExternalIdToSliceId } from '@/data-model/shop/ShopDTO';
 import { SliceShopConfig, SquareShopConfig } from '@/data-model/shop/ShopType';
 import {
@@ -19,32 +16,22 @@ import {
   HTTPRouteHandlerErrors,
   hydrateClassInstancesFromJSONBody,
   notNullEffect,
+  RedisError,
   UnimplementedPathError,
 } from '@/lib/effect';
+import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import {
   S,
   S_Address,
   S_UUID,
   validateHTTPMethod,
 } from '@/lib/effect/validation';
-import { EffectfulApiRoute } from '@/lib/effect/next-api';
-import { withRedisCache } from '@/lib/redis';
+import { withRedisCacheEffect } from '@/lib/redis';
 import { sliceKit, SliceKitError } from '@/lib/slice';
-import { err, generateUUID } from '@/lib/utils';
+import { err } from '@/lib/utils';
 import { effectfulShopService } from '@/services/ShopService';
 import { Effect, pipe } from 'effect';
-import {
-  all,
-  andThen,
-  catchAll,
-  fail,
-  succeed,
-  tryPromise,
-} from 'effect/Effect';
-import {
-  mapToDiscountId,
-  mapToDiscountQuote,
-} from '@/data-model/discount/DiscountDTO';
+import { all, andThen, catchAll, fail, succeed } from 'effect/Effect';
 
 const SingleQuoteRequest = S.Struct({
   type: S.Literal('single'),
@@ -73,27 +60,26 @@ export type QuoteResponse = DiscountQuote[];
 const handleSliceQuote = (
   req: QuoteRequest,
   shopConfig: SliceShopConfig,
-): Effect.Effect<DiscountQuote[], SliceKitError | GenericError, never> => {
+): Effect.Effect<
+  DiscountQuote[],
+  SliceKitError | GenericError | RedisError,
+  never
+> => {
   return pipe(
     { ...req, shopConfig },
     d =>
-      tryPromise({
-        try: async () =>
-          await Promise.all([
-            // fetch non-discount prices
-            await withRedisCache(sliceKit.getStoreProducts)({
-              slicerId: mapSliceExternalIdToSliceId(d.shopConfig.externalId),
-            }),
-            // fetch discount prices
-            await withRedisCache(sliceKit.getStoreProducts)({
-              slicerId: mapSliceExternalIdToSliceId(d.shopConfig.externalId),
-              ...(d.userWalletAddress && { buyer: d.userWalletAddress }),
-              dynamicPricing: true,
-            }),
-            d,
-          ]),
-        catch: e => new SliceKitError(e),
-      }),
+      all([
+        withRedisCacheEffect(sliceKit.getStoreProducts)({
+          slicerId: mapSliceExternalIdToSliceId(d.shopConfig.externalId),
+        }),
+        withRedisCacheEffect(sliceKit.getStoreProducts)({
+          slicerId: mapSliceExternalIdToSliceId(d.shopConfig.externalId),
+          ...(d.userWalletAddress && { buyer: d.userWalletAddress }),
+          dynamicPricing: true,
+        }),
+        succeed(d),
+      ]),
+
     andThen(([originalPrices, discountPrices, request]) => {
       const originalPriceLookup = originalPrices.cartProducts?.reduce<
         Record<ItemId, Currency | null>

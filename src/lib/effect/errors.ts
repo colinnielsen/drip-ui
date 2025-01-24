@@ -1,5 +1,9 @@
 import { ParseError } from 'effect/ParseResult';
 
+export type ErrorWithTag = {
+  _tag: string;
+} & Error;
+
 export class BaseEffectError extends Error {
   originalTag: string | undefined;
 
@@ -31,6 +35,10 @@ export class BaseEffectError extends Error {
 
 export class GenericError extends BaseEffectError {
   readonly _tag = 'GenericError';
+}
+
+export class RedisError extends BaseEffectError {
+  readonly _tag = 'RedisError';
 }
 /**
  * Error thrown by the JSON.parse() call

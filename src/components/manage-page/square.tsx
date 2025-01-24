@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import SquareLocation from './SquareLocation';
+import SquareLocation from './square-location';
 
 const getSquareConnectionStatus = async () => {
   const response = await axios

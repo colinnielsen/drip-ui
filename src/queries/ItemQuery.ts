@@ -1,71 +1,66 @@
+import { Currency } from '@/data-model/_common/currency';
+import {
+  addCurrencies,
+  initCurrencyZero,
+  subCurrencies,
+} from '@/data-model/_common/currency/currencyDTO';
 import { UUID } from '@/data-model/_common/type/CommonType';
-import { Item } from '@/data-model/item/ItemType';
-import { skipToken, useQuery } from '@tanstack/react-query';
-import { Address } from 'viem';
-import { useWalletAddress } from './EthereumQuery';
-import { useUserId } from './UserQuery';
-import { minutes } from '@/lib/utils';
+import { Item, ItemId } from '@/data-model/item/ItemType';
+import { DiscountQuote } from '@/data-model/discount/DiscountType';
+import { pipe } from 'effect';
+import { useShopDiscounts } from './ShopQuery';
 
-const PRICE_QUOTE_STALE_TIME = minutes(2);
+const itemSelector = (itemId: ItemId) => (discounts: DiscountQuote[]) =>
+  discounts.filter(discount => discount.itemId === itemId);
 
-function priceQuoteQueryKey({
-  userId,
-  wallet,
+export const useItemDiscountQuotes = ({
   shopId,
   itemId,
-  variantId,
 }: {
-  userId?: UUID;
-  wallet?: Address;
-  shopId?: UUID;
-  itemId?: UUID;
-  variantId?: UUID;
-} = {}): any[] {
-  return [
-    'price-quote',
-    `userId: ${userId}`,
-    `wallet: ${wallet}`,
-    `shopId: ${shopId}`,
-    `itemId: ${itemId}`,
-  ];
-}
+  shopId: UUID;
+  itemId: ItemId;
+}) => {
+  return useShopDiscounts({
+    shopId,
+    select: itemSelector(itemId),
+  });
+};
 
-async function getPriceQuote(
-  userId: UUID,
-  address: Address,
-  shopId: UUID,
-  item: Item,
-  variantId?: UUID,
-) {
-  if (variantId) return item.variants.find(v => v.id === variantId)?.price;
-  return item.variants[0].price;
-}
+const addDiscounts = (discounts: DiscountQuote[]): Currency => {
+  const currencyZero = initCurrencyZero(discounts[0]?.discount.amount);
 
-export const usePriceQuote = ({
+  return discounts.reduce(
+    (acc, discount) => addCurrencies(acc, discount.discount.amount),
+    currencyZero,
+  );
+};
+
+export const useItemPriceWithDiscounts = <
+  TData = { originalPrice: Currency; discountedPrice: Currency },
+>({
   shopId,
   item,
-  variantId,
+  select,
 }: {
   shopId: UUID;
   item: Item;
-  variantId?: UUID;
+  select?: (data: {
+    originalPrice: Currency;
+    discountedPrice: Currency;
+  }) => TData;
 }) => {
-  const { data: userId } = useUserId();
-  const address = useWalletAddress();
-
-  return useQuery({
-    queryKey: priceQuoteQueryKey({
-      userId,
-      wallet: address ?? undefined,
-      shopId,
-      itemId: item.id,
-      variantId,
-    }),
-    queryFn:
-      userId && address && shopId && item.id
-        ? () => getPriceQuote(userId, address, shopId, item, variantId)
-        : skipToken,
-    enabled: !!userId && !!address && !!shopId && !!item.id,
-    staleTime: PRICE_QUOTE_STALE_TIME,
+  return useShopDiscounts({
+    shopId,
+    select: d =>
+      pipe(
+        d,
+        itemSelector(item.id),
+        addDiscounts,
+        d => ({
+          originalPrice: item.variants[0].price,
+          discountedPrice: subCurrencies(item.variants[0].price, d),
+        }),
+        d => select?.(d) || d,
+      ),
   });
 };

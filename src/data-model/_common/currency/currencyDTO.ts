@@ -48,5 +48,8 @@ export const initCurrencyFromType = (
   throw new Error('Invalid currency type');
 };
 
-export const initCurrencyZero = (type: Currency['__currencyType']) =>
-  initCurrencyFromType(type, 0n);
+export const initCurrencyZero = (type: Currency['__currencyType'] | Currency) =>
+  initCurrencyFromType(
+    typeof type === 'object' ? type.__currencyType : type,
+    0n,
+  );

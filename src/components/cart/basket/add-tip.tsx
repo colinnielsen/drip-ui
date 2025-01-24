@@ -18,6 +18,10 @@ import { useTipMutation } from '@/queries/CartQuery';
 import { useShop } from '@/queries/ShopQuery';
 import { useCallback, useMemo, useState } from 'react';
 import { Headline, Label3, Title1 } from '../../ui/typography';
+import {
+  initCurrencyZero,
+  subCurrencies,
+} from '@/data-model/_common/currency/currencyDTO';
 
 //
 //// UTILS
@@ -58,9 +62,13 @@ const getTipAmountFromOption = (
   opt: (typeof KNOWN_TIP_OPTIONS)[number],
 ): USDC => {
   if (opt.__type === 'fixed') return opt.value;
+  const CURRENCY_ZERO = initCurrencyZero(cart.quotedSubtotal!.__currencyType);
   if (opt.__type === 'percentage')
-    return cart
-      .quotedSubtotal!.percentageOf({
+    return subCurrencies(
+      cart.quotedSubtotal!,
+      cart.quotedDiscountAmount || CURRENCY_ZERO,
+    )!
+      .percentageOf({
         percent: opt.percent,
       })
       .toUSDC();

@@ -11,6 +11,7 @@ import {
   hydrateClassInstancesFromJSONBody,
   NotFoundError,
 } from '@/lib/effect';
+import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import {
   S,
   S_Address,
@@ -18,7 +19,6 @@ import {
   S_UUID,
   validateHTTPMethod,
 } from '@/lib/effect/validation';
-import { EffectfulApiRoute } from '@/lib/next';
 import shopService from '@/services/ShopService';
 import { pipe } from 'effect';
 import {

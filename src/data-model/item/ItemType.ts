@@ -1,11 +1,14 @@
-import { UUID } from '@/data-model/_common/type/CommonType';
+import { Brand } from 'effect';
 import { Currency } from '../_common/currency';
-import { ItemSourceConfig, ItemCategory } from './common';
+import { ItemCategory, ItemSourceConfig } from './common';
 import { ItemMod } from './ItemMod';
 
 //
 //// VARIANT
 //
+
+export type ItemVariantId = string & Brand.Brand<'ItemVariantId'>;
+export const ItemVariantId = Brand.nominal<ItemVariantId>();
 
 /**
  * @dev A variant is a specific configuration of an item.
@@ -13,7 +16,7 @@ import { ItemMod } from './ItemMod';
  * @important a {@link LineItem} will represent `n` amount of selected {@link ItemVariant} with homogenous {@link ItemMod}
  */
 export type ItemVariant = {
-  id: UUID;
+  id: ItemVariantId;
   /** the configuration object for the platform the item came from: i.e., slice, square */
   __sourceConfig: ItemSourceConfig;
   /** e.g., "Large", "Medium", "Small" */
@@ -32,6 +35,9 @@ export type ItemVariant = {
 //// ITEM
 //
 
+export type ItemId = string & Brand.Brand<'ItemId'>;
+export const ItemId = Brand.nominal<ItemId>();
+
 /**
  * @dev Every item will present itself in the shop page.
  * @important a user does not select and buy an item, the buy a {@link ItemVariant}
@@ -41,7 +47,7 @@ export type ItemVariant = {
  * - When a user selects an item, they _must_ select a variant
  */
 export type Item = {
-  id: UUID;
+  id: ItemId;
   /** The name of the item */
   name: string;
   /** The description of the item */

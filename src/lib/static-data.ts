@@ -1,14 +1,15 @@
-import { createFarmer } from '@/data-model/farmer/FarmerDTO';
 import { Farmer } from '@/data-model/farmer/FarmerType';
 import { SliceShopConfig } from '@/data-model/shop/ShopType';
 import { UUID } from '@/data-model/_common/type/CommonType';
 import { subDays } from 'date-fns';
 import { generateUUID } from './utils';
 import { Unsaved } from '@/data-model/_common/type/CommonType';
-import { getSliceExternalIdFromSliceId } from '@/data-model/shop/ShopDTO';
+import { mapSliceIdToSliceExternalId } from '@/data-model/shop/ShopDTO';
+import { mapToEthAddress } from '@/data-model/ethereum/EthereumDTO';
+import { ChainId } from '@/data-model/ethereum/EthereumType';
 
 export const STATIC_FARMER_DATA: Farmer[] = [
-  createFarmer({
+  {
     id: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
     name: 'Marco Oviedo',
     pfp: '/marco-pfp.png',
@@ -32,13 +33,13 @@ export const STATIC_FARMER_DATA: Farmer[] = [
     bio: "My wife and I run a farm in the beautiful Costa region of Costa Rica. Our family coffee farm has been running the past two generations. My wife and I decided to build a micro mill, giving us more control over processing and production. We're using innovative technologies to save our family farm.",
     bioImages: ['/marco-1.jpg', '/marco-2.jpg', '/marco-3.jpg'],
     ethAddress: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
-  }),
+  },
 ];
 
 export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   {
     __type: 'slice',
-    externalId: getSliceExternalIdFromSliceId(799),
+    externalId: mapSliceIdToSliceExternalId(799),
     location: {
       label: 'Montgomery, AL',
       address: '39 Dexter Ave suite 102, Montgomery, AL 36104',
@@ -58,7 +59,7 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   },
   {
     __type: 'slice',
-    externalId: getSliceExternalIdFromSliceId(827),
+    externalId: mapSliceIdToSliceExternalId(827),
     location: {
       label: 'Oakland, CA',
       address: '377 2ND ST, OAKLAND, CA 94607',
@@ -78,7 +79,7 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   },
   {
     __type: 'slice',
-    externalId: getSliceExternalIdFromSliceId(766),
+    externalId: mapSliceIdToSliceExternalId(766),
     name: 'Piccolo Caffe e Vino',
     logo: '/cafes/piccolo.webp',
     url: 'https://www.piccolocaffe.ca',
@@ -91,7 +92,7 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   },
   {
     __type: 'slice',
-    externalId: getSliceExternalIdFromSliceId(815),
+    externalId: mapSliceIdToSliceExternalId(815),
     name: "Lion's Milk",
     logo: '/cafes/lions-milk.webp',
     url: 'https://www.lionsmilkbk.com/',
@@ -104,7 +105,7 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   },
   {
     __type: 'slice',
-    externalId: getSliceExternalIdFromSliceId(852),
+    externalId: mapSliceIdToSliceExternalId(852),
     name: 'Noun Coffee',
     logo: '/cafes/noun.webp',
     url: 'https://noun.coffee/',
@@ -130,7 +131,7 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   // },
   {
     __type: 'slice',
-    externalId: getSliceExternalIdFromSliceId(425),
+    externalId: mapSliceIdToSliceExternalId(425),
     name: 'Compass Coffee',
     logo: '/cafes/compass.webp',
     url: 'https://www.compasscoffee.com/',
@@ -143,7 +144,7 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   },
   {
     __type: 'slice',
-    externalId: getSliceExternalIdFromSliceId(974),
+    externalId: mapSliceIdToSliceExternalId(974),
     name: 'Town Mouse',
     logo: '/cafes/town-mouse.webp',
     url: 'https://www.townmouse.de/',
@@ -156,7 +157,7 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   },
   {
     __type: 'slice',
-    externalId: getSliceExternalIdFromSliceId(1008),
+    externalId: mapSliceIdToSliceExternalId(1008),
     name: "Menotti's Coffee",
     logo: '/cafes/menottis.webp',
     url: 'https://menottis.com/',
@@ -194,7 +195,7 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   // },
   {
     __type: 'slice',
-    externalId: getSliceExternalIdFromSliceId(769),
+    externalId: mapSliceIdToSliceExternalId(769),
     location: {
       label: 'Denver, CO',
       address: "Colin's office",
@@ -202,8 +203,10 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
     },
     tipConfig: {
       __type: 'single-recipient',
-      ethAddress: '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
-      enabled: true,
+      recipient: mapToEthAddress(
+        ChainId.BASE,
+        '0xb8c18E036d46c5FB94d7DeBaAeD92aFabe65EE61',
+      ),
     },
     name: 'The Dev Cafe',
     logo: '/drip.png',

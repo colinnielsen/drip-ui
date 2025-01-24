@@ -2,9 +2,8 @@ import { CTAButton } from '@/components/ui/button';
 import { Body, Title1, Title2 } from '@/components/ui/typography';
 import { UUID } from '@/data-model/_common/type/CommonType';
 import { EthAddress } from '@/data-model/ethereum/EthereumType';
-import { getSqaureExternalId } from '@/data-model/shop/ShopDTO';
+import { mapToSqaureExternalId } from '@/data-model/shop/ShopDTO';
 import { SquareShopConfig } from '@/data-model/shop/ShopType';
-import { SQUARE_AUTHORIZATION_ERRORS } from '@/lib/squareClient';
 import { ShopConfigRequest } from '@/pages/api/shops/shop-config';
 import { SquareConnectionResponse } from '@/pages/api/square/square-connection';
 import { Spinner } from '@phosphor-icons/react/dist/ssr';
@@ -12,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import SquareLocation from './SquareLocation';
+import SquareLocation from './square-location';
 
 const getSquareConnectionStatus = async () => {
   const response = await axios
@@ -53,7 +52,7 @@ const syncSquareLocation = async (merchantId: string, locationId: string) =>
     .post<{
       shopId: UUID;
     }>('/api/shops/sync?type=square', {
-      externalId: getSqaureExternalId({ merchantId, locationId }),
+      externalId: mapToSqaureExternalId({ merchantId, locationId }),
     })
     .then(res => res.data.shopId);
 
@@ -121,7 +120,7 @@ const ConnectedState = ({
             const config = squareShopConfigs.find(
               config =>
                 config.externalId ===
-                getSqaureExternalId({
+                mapToSqaureExternalId({
                   merchantId: connection.merchantId,
                   locationId: location.id,
                 }),

@@ -16,7 +16,10 @@ import { ItemMod } from '@/data-model/item/ItemMod';
 import { Item, ItemVariant } from '@/data-model/item/ItemType';
 import { cn } from '@/lib/utils';
 import { useAddToCart, useCart } from '@/queries/CartQuery';
-import { usePriceQuote } from '@/queries/ItemQuery';
+import {
+  useItemDiscountQuotes,
+  useItemPriceWithDiscounts,
+} from '@/queries/ItemQuery';
 import { useShop } from '@/queries/ShopQuery';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useState } from 'react';
@@ -45,12 +48,32 @@ function AddToBasketButton({
 }) {
   const { mutate } = useAddToCart({
     shopId,
+    item,
   });
+
+  const { isFetching: isFetchingDiscounts, data: discountQuotes } =
+    useItemDiscountQuotes({
+      shopId,
+      itemId: item.id,
+    });
+
+  const discounts = discountQuotes?.map(dq => dq.discount) ?? [];
 
   return (
     <DrawerFooter className="bottom-0 sticky bg-white shadow-drawer-secondary">
       <DrawerClose asChild>
-        <CTAButton onClick={e => mutate({ item, variant, quantity, mods })}>
+        <CTAButton
+          disabled={isFetchingDiscounts || !discountQuotes}
+          onClick={e =>
+            mutate({
+              item,
+              variant,
+              quantity,
+              mods,
+              discounts,
+            })
+          }
+        >
           Add to Cart
         </CTAButton>
       </DrawerClose>
@@ -58,28 +81,48 @@ function AddToBasketButton({
   );
 }
 
-export const AddButton = ({ shopId, item }: { shopId: UUID; item: Item }) => {
+export const QuickAddPlusButton = ({
+  shopId,
+  item,
+}: {
+  shopId: UUID;
+  item: Item;
+}) => {
+  const { isFetching: isFetchingDiscounts, data: discountQuotes } =
+    useItemDiscountQuotes({
+      shopId,
+      itemId: item.id,
+    });
+
   const { mutate } = useAddToCart({
     shopId,
+    item,
   });
 
   const shouldOpenOptionSelection = item.variants.length > 1;
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     // if we do not stop the event propagation, the drawer will not open
-    if (shouldOpenOptionSelection) return;
+    if (shouldOpenOptionSelection || !discountQuotes) return;
     else {
       e.stopPropagation();
-      mutate({ item, variant: item.variants[0], quantity: 1, mods: [] });
+      mutate({
+        item,
+        variant: item.variants[0],
+        quantity: 1,
+        mods: [],
+        discounts: discountQuotes.map(dq => dq.discount),
+      });
     }
   };
 
   return (
     <button
+      disabled={isFetchingDiscounts}
       className="absolute bottom-0 right-0 w-14 h-14 rounded-full flex justify-center items-center"
       onClick={handleClick}
     >
-      <div className="bg-white rounded-full flex justify-center items-center w-7 h-7 active:bg-neutral-200 drop-shadow-md">
+      <div className="bg-white rounded-full flex justify-center items-center w-7 h-7 active:bg-neutral-200 drop-shadow-md disabled:bg-neutral-200">
         <PlusSvg />
       </div>
     </button>
@@ -238,6 +281,12 @@ function ItemDetailsDrawer({
   setQuantity: Dispatch<SetStateAction<number>>;
 }) {
   const { data: shop } = useShop({ id: shopId });
+  const { data: priceQuote, isFetching: isFetchingPriceQuote } =
+    useItemPriceWithDiscounts({
+      shopId,
+      item,
+    });
+
   const [variant, setVariant] = useState(item.variants[0]);
   const [selectedMods, setSelectedMods] = useState<ItemMod[]>([]);
 
@@ -250,11 +299,13 @@ function ItemDetailsDrawer({
     return acc;
   }, {} as ModSection);
 
+  const lowestPrice = priceQuote?.discountedPrice ?? item.variants.at(0)!.price;
+  const highestPrice =
+    priceQuote?.discountedPrice ?? item.variants.at(-1)!.price;
+
   return (
     <DrawerContent>
-      <DrawerDescription className="hidden md:block">
-        {item.name}
-      </DrawerDescription>
+      <DrawerDescription className="hidden">{item.name}</DrawerDescription>
       <div className="min-h-[75vh] flex flex-col overflow-scroll gap-o divide-y divide-light-gray">
         <DrawerHeader className="p-0 rounded-t-xl gap-0">
           <div className="min-h-64 relative rounded-t-xl overflow-clip">
@@ -279,10 +330,15 @@ function ItemDetailsDrawer({
               </Title1>
             </DrawerTitle>
 
-            <PriceRange
-              minPrice={item.variants.at(0)!.price}
-              maxPrice={item.variants.at(-1)!.price}
-            />
+            {isSingleVariant ? (
+              <Price
+                originalPrice={item.variants.at(0)!.price}
+                actualPrice={priceQuote?.discountedPrice}
+                isLoading={isFetchingPriceQuote}
+              />
+            ) : (
+              <PriceRange minPrice={lowestPrice} maxPrice={highestPrice} />
+            )}
 
             <NumberInput
               onPlus={() => setQuantity(quantity + 1)}
@@ -377,14 +433,13 @@ function ItemDetailsDrawer({
   );
 }
 
-function ItemPreview({ shopId, item }: { shopId: UUID; item: Item }) {
+function ItemCard({ shopId, item }: { shopId: UUID; item: Item }) {
   const { data: cart } = useCart();
-  const { data: priceQuote, isFetching: isFetchingPriceQuote } = usePriceQuote({
-    shopId,
-    item,
-    // quote the user with the first selectable variant
-    variantId: item.variants[0].id,
-  });
+  const { data: priceQuote, isFetching: isFetchingPriceQuote } =
+    useItemPriceWithDiscounts({
+      shopId,
+      item,
+    });
 
   const { image, name } = item;
   const cartIsLoading = cart === undefined;
@@ -409,7 +464,7 @@ function ItemPreview({ shopId, item }: { shopId: UUID; item: Item }) {
           {cartIsLoading ? (
             <Skeleton className="bg-gray-200 rounded-full h-7 w-7 flex justify-center items-center absolute bottom-4 right-2 hover:bg-neutral-200 active:bg-neutral-300 active:scale-95 drop-shadow-md" />
           ) : canAddToCart ? (
-            <AddButton
+            <QuickAddPlusButton
               {...{
                 shopId,
                 item,
@@ -422,7 +477,7 @@ function ItemPreview({ shopId, item }: { shopId: UUID; item: Item }) {
           <Price
             {...{
               originalPrice: item.variants[0].price,
-              actualPrice: priceQuote,
+              actualPrice: priceQuote?.discountedPrice,
               isLoading: isFetchingPriceQuote,
             }}
           />
@@ -449,7 +504,7 @@ export function ItemWithSelector({
   return (
     <Drawer onClose={reset}>
       {/* the little square icon, with a quick add button */}
-      <ItemPreview item={item} shopId={shopId} />
+      <ItemCard item={item} shopId={shopId} />
 
       {/* the item details expansion drawer */}
       <ItemDetailsDrawer

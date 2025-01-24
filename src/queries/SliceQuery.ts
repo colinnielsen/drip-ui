@@ -27,6 +27,7 @@ import { useShopSourceConfig } from './ShopQuery';
 import { USDC_CONFIG } from '@/lib/contract-config/USDC';
 import { ChainId } from '@/data-model/ethereum/EthereumType';
 import { USDC } from '@/data-model/_common/currency/USDC';
+import { useErrorToast } from '@/lib/hooks/use-toast';
 
 /**
  * @returns the slice keyed by productId
@@ -63,6 +64,7 @@ export const usePayAndOrder = ({
   const walletClient = useWalletClient();
   const address = wallet?.address as Address;
 
+  const errorToast = useErrorToast();
   const { data: dripCart } = useCart();
   const { data: sliceCart } = useCartInSliceFormat({ buyerAddress: address });
   const { data: shopSourceConfig } = useShopSourceConfig(dripCart?.shop);
@@ -74,7 +76,7 @@ export const usePayAndOrder = ({
     spender: SLICE_ENTRYPOINT_ADDRESS,
   });
 
-  if (shopSourceConfig?.type !== 'slice')
+  if (shopSourceConfig && shopSourceConfig?.type !== 'slice')
     throw new Error('Implementation Error: source config is not of type slice');
 
   const extraCosts: ExtraCostParamsOptional[] | undefined = useMemo(
@@ -97,8 +99,9 @@ export const usePayAndOrder = ({
   );
 
   const onError = useCallback(
-    (error: { orderId: string; hash: `0x${string}` }) => {
-      console.log({ sliceError: error, orderId: error.orderId });
+    (error: any) => {
+      errorToast('slice checkout failed!');
+      console.log(error);
       setPaymentStep('error');
     },
     [setPaymentStep],
@@ -144,9 +147,10 @@ export const usePayAndOrder = ({
       referrer: zeroAddress,
       onError: onError,
       onSuccess: onSliceSuccess,
+      // checkoutSessionId
       buyer: address,
       setLoadingState: console.debug,
-      //@ts-ignore
+      // @ts-ignore
       buyerInfo: null,
       cart: sliceCart,
       totalPrices: [

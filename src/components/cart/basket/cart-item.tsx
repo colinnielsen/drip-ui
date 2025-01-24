@@ -35,19 +35,15 @@ export function LoadingCartItem() {
 export function OrderItemDisplay({
   lineItem,
   rightSide,
-  // originalPrice,
-  // actualPrice,
   isLoading,
 }: {
   lineItem: LineItem;
-  // originalPrice: Currency;
-  // actualPrice: Currency;
   rightSide?: ReactNode;
   isLoading?: boolean;
 }) {
   return (
     <div className="flex items-start gap-4 w-full px-6 py-4">
-      <div className="rounded-2xl overflow-hidden h-24 w-24 relative aspect-square">
+      <div className="rounded-2xl overflow-hidden min-h-24 min-w-24 relative aspect-square">
         <Image
           src={lineItem.item.image}
           alt={lineItem.item.name}
@@ -91,11 +87,10 @@ export function LineItemComponent({
 }) {
   const { mutate: addAnother } = useAddToCart({
     shopId,
+    item: lineItem.item,
   });
 
   const { mutate: removeItem } = useDecrementLineItem();
-
-  // if (!priceDict) return <LoadingCartItem />;
 
   const rightSide = (
     <NumberInput
@@ -107,6 +102,7 @@ export function LineItemComponent({
           variant: lineItem.variant,
           quantity: 1,
           mods: lineItem.mods || [],
+          discounts: [],
         })
       }
       onMinus={() =>

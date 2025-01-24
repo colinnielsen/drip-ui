@@ -1,21 +1,24 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { UUID } from '@/data-model/_common/type/CommonType';
 import {
-  buildInitialFromLineItem,
+  addLineItemToCart,
   calculateCartTotals,
+  decrementLineItemQuantity,
 } from '@/data-model/cart/CartDTO';
 import { Cart } from '@/data-model/cart/CartType';
 import { ItemMod } from '@/data-model/item/ItemMod';
 import { Item, ItemVariant } from '@/data-model/item/ItemType';
+import { Discount } from '@/data-model/discount/DiscountType';
 import {
   LineItem,
   LineItemUniqueId,
 } from '@/data-model/order/LineItemAggregate';
 import { createLineItemAggregate } from '@/data-model/order/OrderDTO';
 import { LocalStorageCartPersistance } from '@/infrastructures/local-storage/CartPersistance';
+import { useErrorToast } from '@/lib/hooks/use-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { pipe } from 'effect';
 import { useUserId } from './UserQuery';
+import { useItemPriceWithDiscounts } from './ItemQuery';
 
 //
 //// QUERIES
@@ -40,51 +43,27 @@ export const useCart = () => {
 //// MUTATIONS
 //
 
-const addLineItemToCart = (cart: Cart, lineItem: LineItem): Cart => {
-  // see if the line item already exists
-  const existingLineItemIndex = cart.lineItems.findIndex(
-    existing => existing.uniqueId === lineItem.uniqueId,
-  );
-
-  // if it doesn't exist, push it to the list
-  if (existingLineItemIndex === -1)
-    return {
-      ...cart,
-      lineItems: [...cart.lineItems, lineItem],
-    };
-
-  // if it does exist, update the quantity
-  const updatedLineItems = cart.lineItems.map(existing =>
-    existing.uniqueId === lineItem.uniqueId
-      ? {
-          ...existing,
-          quantity: existing.quantity + lineItem.quantity,
-        }
-      : existing,
-  );
-
-  const updatedCart = {
-    ...cart,
-    lineItems: updatedLineItems,
-  };
-
-  const updatedCartWithPrices = {
-    ...updatedCart,
-    ...calculateCartTotals(updatedCart),
-  };
-
-  return updatedCartWithPrices satisfies Cart;
-};
-
 const validateLineItem = (lineItem: LineItem) => {
   if (lineItem.quantity < 1) throw new Error('Quantity must be positive');
   // Add more validation as needed
   return lineItem;
 };
 
-export const useAddToCart = ({ shopId }: { shopId: UUID }) => {
+export const useAddToCart = ({
+  shopId,
+  item,
+}: {
+  shopId: UUID;
+  item: Item;
+}) => {
   const { data: userId } = useUserId();
+  const errorToast = useErrorToast();
   const queryClient = useQueryClient();
+
+  const { isFetching: isFetchingPriceQuote } = useItemPriceWithDiscounts({
+    shopId,
+    item,
+  });
 
   return useMutation({
     mutationFn: async ({
@@ -92,12 +71,16 @@ export const useAddToCart = ({ shopId }: { shopId: UUID }) => {
       variant,
       quantity,
       mods,
+      discounts,
     }: {
       item: Item;
       variant: ItemVariant;
       quantity: number;
       mods: ItemMod[];
+      discounts: Discount[];
     }) => {
+      if (isFetchingPriceQuote)
+        throw new Error('price quote is still fetching');
       if (!userId) throw new Error('User ID is required');
       if (quantity < 1) throw new Error('Quantity must be positive');
 
@@ -107,6 +90,7 @@ export const useAddToCart = ({ shopId }: { shopId: UUID }) => {
           variant,
           quantity,
           mods,
+          discounts,
         }),
       );
 
@@ -115,16 +99,16 @@ export const useAddToCart = ({ shopId }: { shopId: UUID }) => {
       if (prevCart && prevCart.shop !== shopId)
         throw new Error('Cannot add items from different shops to cart');
 
-      const nextCart =
+      const nextCart = addLineItemToCart(
         prevCart === null
-          ? buildInitialFromLineItem({
-              shopId,
-              item,
-              userId: userId!,
-              variant,
-              mods,
-            })
-          : addLineItemToCart(prevCart, lineItem);
+          ? { type: 'create' as const, newLineItem: lineItem, shopId, userId }
+          : {
+              type: 'update' as const,
+              newLineItem: lineItem,
+              cart: prevCart,
+            },
+      );
+
       await LocalStorageCartPersistance.save(nextCart);
 
       // Invalidate cart query after successful mutation
@@ -133,6 +117,10 @@ export const useAddToCart = ({ shopId }: { shopId: UUID }) => {
       });
 
       return nextCart;
+    },
+    onError(error) {
+      console.log(error);
+      errorToast(error);
     },
   });
 };
@@ -150,37 +138,7 @@ export const useDecrementLineItem = () => {
 
       if (!cart) return null;
 
-      const nextCart: Cart | null = pipe(
-        // pipe over cart
-        cart,
-        // add the new lineitems
-        c => ({
-          ...c,
-          lineItems: c.lineItems
-            .map(lineItem => {
-              if (lineItem.uniqueId !== lineItemUniqueId) return lineItem;
-              // if the quantity is 1, remove the line item, because the next quantity will be 0
-              if (lineItem.quantity === 1) return null;
-
-              return {
-                ...lineItem,
-                quantity: lineItem.quantity - 1,
-              };
-            })
-            .filter(li => !!li),
-        }),
-        // recalc the cartTotal
-        c =>
-          ({
-            ...c,
-            ...calculateCartTotals(c),
-          }) satisfies Cart,
-        // if the lineItems are empty, return null
-        cartWithUpdatedTotals =>
-          cartWithUpdatedTotals.lineItems.length === 0
-            ? null
-            : cartWithUpdatedTotals,
-      );
+      const nextCart = decrementLineItemQuantity(cart, lineItemUniqueId);
 
       nextCart === null
         ? await LocalStorageCartPersistance.remove(cart.id)

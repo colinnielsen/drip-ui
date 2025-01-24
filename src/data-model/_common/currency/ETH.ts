@@ -2,6 +2,7 @@ import { prettyFormatPrice } from '@/lib/utils';
 import { formatEther, parseUnits } from 'viem';
 import { USDC } from './USDC';
 
+type InputType = bigint | number | string | ETH;
 /**
  * the ETH value in Wei
  * @example 1 ETH = 10^18 Wei
@@ -215,7 +216,7 @@ export class ETH {
    * const eth2 = new ETH(1);
    * (eth1.eq(eth2)); // true
    */
-  eq(other: any): other is ETH {
+  eq(other: any): boolean {
     if (!this.is(other)) return false;
 
     return this.wei === other.wei;
@@ -227,11 +228,15 @@ export class ETH {
    * const eth2 = new ETH(2);
    * (eth1.gt(eth2)); // false
    */
-  gt(other: ETH): boolean {
+  gt(_other: InputType): boolean {
+    const other = new ETH(_other);
+
     return this.wei > other.wei;
   }
 
-  gte(other: ETH): boolean {
+  gte(_other: InputType): boolean {
+    const other = new ETH(_other);
+
     return this.wei >= other.wei;
   }
 
@@ -241,15 +246,23 @@ export class ETH {
    * const eth2 = new ETH(2);
    * (eth1.lt(eth2)); // true
    */
-  lt(other: ETH): boolean {
+  lt(_other: InputType): boolean {
+    const other = new ETH(_other);
+
     return this.wei < other.wei;
   }
 
-  lte(other: ETH): boolean {
+  lte(_other: InputType): boolean {
+    const other = new ETH(_other);
+
     return this.wei <= other.wei;
   }
 
   is(other: any): other is ETH {
     return this.__currencyType === other.__currencyType;
+  }
+
+  flip() {
+    return ETH.fromWei(-this.wei);
   }
 }

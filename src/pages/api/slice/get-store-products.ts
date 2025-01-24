@@ -1,4 +1,5 @@
 import { ApiRoute } from '@/lib/next';
+import { withRedisCache } from '@/lib/redis';
 import { sliceKit } from '@/lib/slice';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -8,8 +9,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return;
   }
 
-  await sliceKit
-    .getStoreProducts(req.body)
+  await withRedisCache(sliceKit.getStoreProducts)({
+    slicerId: req.body.slicerId,
+    buyer: req.body.buyer,
+    dynamicPricing: true,
+  })
     .then(r => res.status(200).json(r))
     .catch(error => {
       console.log('error', error.message);

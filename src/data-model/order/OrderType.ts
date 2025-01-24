@@ -3,7 +3,7 @@ import { Hex } from 'viem';
 import { Currency } from '../_common/currency';
 import { USDC } from '../_common/currency/USDC';
 import { EthAddress } from '../ethereum/EthereumType';
-import { AppliedDiscount } from './AppliedDiscount';
+import { Discount } from '../discount/DiscountType';
 import { LineItem } from './LineItemAggregate';
 
 export type SliceOrderInfo = {
@@ -54,7 +54,7 @@ export type _Order = {
   /** The items the user ordered */
   lineItems: LineItem[];
   /** all discounts applied on this order */
-  discounts?: AppliedDiscount[] | null;
+  discounts?: Discount[] | null;
   /** the tip amount */
   tip?: {
     amount: USDC;

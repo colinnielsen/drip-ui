@@ -194,7 +194,6 @@ export const useErrorToast = () => {
   const { toast } = useToast();
 
   return (error: any) => {
-    console.error(error);
     toast({
       title: 'Error',
       variant: 'destructive',

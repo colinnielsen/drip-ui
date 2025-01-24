@@ -1,19 +1,24 @@
 import { Entity } from '@/data-model/__global/entities';
 import { Currency } from '@/data-model/_common/currency';
 import { USDC } from '@/data-model/_common/currency/USDC';
-import { Unsaved, UUID } from '@/data-model/_common/type/CommonType';
+import { Unsaved } from '@/data-model/_common/type/CommonType';
 import { Location } from '@/data-model/_common/type/LocationType';
 import { ItemCategory } from '@/data-model/item/common';
 import { ItemMod } from '@/data-model/item/ItemMod';
-import { Item, ItemVariant } from '@/data-model/item/ItemType';
+import {
+  Item,
+  ItemId,
+  ItemVariant,
+  ItemVariantId,
+} from '@/data-model/item/ItemType';
 import { Order, OrderStatus } from '@/data-model/order/OrderType';
 import {
   DEFAULT_BACKGROUND_IMAGE,
   DEFAULT_SHOP_LOGO,
   EMPTY_MENU,
   EMPTY_TIP_CONFIG,
-  getMerchantIdFromSquareExternalId,
   isSquareShop,
+  mapSquareExternalIdToMerchantIdFrom,
 } from '@/data-model/shop/ShopDTO';
 import {
   Menu,
@@ -54,78 +59,10 @@ type ImageLookup = Record<string, CatalogImage>;
 const ZERO_SQUARE_MONEY: Money = { amount: 0n, currency: 'USD' };
 
 //
-//// ID / ENUM DERIVATION
-///
-
-/**
- * @dev the id of the shop in the drip DB will be derived from the square external id
- */
-export const deriveShopIdFromSquareStoreExternalId = (
-  squareExternalId: SquareExternalId,
-): UUID => generateUUID(`${squareExternalId}`);
-
-/**
- * @dev the item id in the drip db will be derived from the itemId in square, and the `SQUARE_ITEM` prefix
- */
-export function deriveDripIdFromSquareItemId(itemId: string): UUID {
-  return generateUUID(`SQUARE_ITEM:${itemId}`);
-}
-
-/**
- * @dev a square connection should map 1:1 with a merchant, therefore we can use the merchantId to derive the connection info
- */
-export function deriveSquareConnectionIdFromMerchantId(
-  merchantId: SquareConnection['merchantId'],
-): UUID {
-  return generateUUID('SQUARE_CONNECTION' + merchantId);
-}
-
-/**
- * @throws on empty state variable
- */
-export const deriveOrderStatusFromSquareOrderState = (
-  state: SquareOrder['state'],
-): OrderStatus => {
-  if (!state) throw Error('Square order state is undefined');
-
-  const _state = state as SquareOrderStatus;
-  if (_state === SquareOrderStatus.OPEN) return '2-in-progress';
-  if (_state === SquareOrderStatus.DRAFT) return '2-in-progress';
-
-  if (_state === SquareOrderStatus.COMPLETED) return '3-complete';
-  if (_state === SquareOrderStatus.CANCELED) return 'cancelled';
-
-  let n: never = _state;
-  throw Error(`unimplemented square order state: ${state}`);
-};
-
-/**
- * @throws on empty state variable
- */
-export const deriveOrderStatusFromSquareOrderFulfillmentState = (
-  state: Fulfillment['state'],
-): OrderStatus => {
-  if (!state) throw Error('Square order state is undefined');
-
-  const _state = state as SquareOrderFulfillmentState;
-  switch (_state) {
-    case SquareOrderFulfillmentState.PROPOSED:
-    case SquareOrderFulfillmentState.RESERVED:
-      return '2-in-progress';
-    case SquareOrderFulfillmentState.PREPARED:
-    case SquareOrderFulfillmentState.COMPLETED:
-      return '3-complete';
-    case SquareOrderFulfillmentState.CANCELED:
-    case SquareOrderFulfillmentState.FAILED:
-      return 'cancelled';
-  }
-};
-
-//
 //// UTILITY FUNCTIONS
 ///
 
-function getItemCategoryFromSquareItem(
+function mapSquareItemToItemCategory(
   squareCatalogObject: CatalogObject,
   categoryMap: Record<string, CatalogCategory>,
 ): ItemCategory | null {
@@ -163,6 +100,79 @@ function getImageDataFromSquareCatalogObject(
 //
 //// MAPPING FUNCTIONS
 ///
+
+//
+//// ID / ENUM MAPPERS
+
+/**
+ * @dev the id of the shop in the drip DB will be derived from the square external id
+ */
+export const mapSquareStoreExternalIdToShopId = (
+  squareExternalId: SquareExternalId,
+): Shop['id'] => generateUUID(`${squareExternalId}`);
+
+/**
+ * @dev the item id in the drip db will be derived from the itemId in square, and the `SQUARE_ITEM` prefix
+ */
+export function mapSquareVariantToItemVariantId(
+  variant: CatalogObject,
+): ItemVariant['id'] {
+  return ItemVariantId(generateUUID(`SQUARE_VARIANT:${variant.id}`));
+}
+
+export function deriveItemIdFromSquareItem(item: CatalogObject): Item['id'] {
+  return ItemId(generateUUID(`SQUARE_ITEM:${item.id}`));
+}
+
+/**
+ * @dev a square connection should map 1:1 with a merchant, therefore we can use the merchantId to derive the connection info
+ */
+export function mapSquareMerchantIdToSquareConnectionId(
+  merchantId: SquareConnection['merchantId'],
+): SquareConnection['id'] {
+  return generateUUID('SQUARE_CONNECTION' + merchantId);
+}
+
+/**
+ * @throws on empty state variable
+ */
+export const mapSquareOrderStateToOrderStatus = (
+  state: SquareOrder['state'],
+): OrderStatus => {
+  if (!state) throw Error('Square order state is undefined');
+
+  const _state = state as SquareOrderStatus;
+  if (_state === SquareOrderStatus.OPEN) return '2-in-progress';
+  if (_state === SquareOrderStatus.DRAFT) return '2-in-progress';
+
+  if (_state === SquareOrderStatus.COMPLETED) return '3-complete';
+  if (_state === SquareOrderStatus.CANCELED) return 'cancelled';
+
+  let n: never = _state;
+  throw Error(`unimplemented square order state: ${state}`);
+};
+
+/**
+ * @throws on empty state variable
+ */
+export const mapSquareOrderFulfillmentStateToOrderStatus = (
+  state: Fulfillment['state'],
+): OrderStatus => {
+  if (!state) throw Error('Square order state is undefined');
+
+  const _state = state as SquareOrderFulfillmentState;
+  switch (_state) {
+    case SquareOrderFulfillmentState.PROPOSED:
+    case SquareOrderFulfillmentState.RESERVED:
+      return '2-in-progress';
+    case SquareOrderFulfillmentState.PREPARED:
+    case SquareOrderFulfillmentState.COMPLETED:
+      return '3-complete';
+    case SquareOrderFulfillmentState.CANCELED:
+    case SquareOrderFulfillmentState.FAILED:
+      return 'cancelled';
+  }
+};
 
 export const mapSquareMoneyToCurrency = ({
   amount: amountCents,
@@ -304,7 +314,7 @@ export const mapSquareStoreToShop = ({
   })();
 
   // extract the merchant id from the externalId
-  const merchantId: string = getMerchantIdFromSquareExternalId(
+  const merchantId: string = mapSquareExternalIdToMerchantIdFrom(
     squareshopConfig.externalId,
   );
 
@@ -313,7 +323,7 @@ export const mapSquareStoreToShop = ({
     genericError(`Missing location id on squareStore ${squareshopConfig.name}`);
 
   return {
-    id: deriveShopIdFromSquareStoreExternalId(squareshopConfig.externalId),
+    id: mapSquareStoreExternalIdToShopId(squareshopConfig.externalId),
     __entity: Entity.shop,
     __type: 'storefront',
     __sourceConfig: {
@@ -388,7 +398,7 @@ const buildItemsFromCatalogObjects = (
               return null;
 
             return {
-              id: deriveDripIdFromSquareItemId(variationCatalogObject.id),
+              id: mapSquareVariantToItemVariantId(variationCatalogObject),
               __sourceConfig: {
                 type: 'square',
                 id: variationCatalogObject.id,
@@ -414,13 +424,13 @@ const buildItemsFromCatalogObjects = (
 
       // then build up the item
       const item: Item = {
-        id: deriveDripIdFromSquareItemId(catalogObject.id),
+        id: deriveItemIdFromSquareItem(catalogObject),
         name:
           catalogObject.itemData?.name ||
           mappingError('expected square item name'),
         description: catalogObject.itemData?.description || '',
         image: getImageDataFromSquareCatalogObject(imageLookup, catalogObject),
-        category: getItemCategoryFromSquareItem(catalogObject, categories),
+        category: mapSquareItemToItemCategory(catalogObject, categories),
         variants: hasAtLeastOne(variants)
           ? variants
           : mappingError('expected at least one variant'),

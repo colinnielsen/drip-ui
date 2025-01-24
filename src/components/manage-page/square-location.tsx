@@ -9,30 +9,30 @@ import {
 } from '@/components/ui/card';
 import { PlusSvg } from '@/components/ui/icons';
 import { Body } from '@/components/ui/typography';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import { QueriedSquareLocation } from '@/data-model/_external/data-sources/square/SquareType';
 import {
   mapEthAddressToAddress,
   mapToEthAddress,
 } from '@/data-model/ethereum/EthereumDTO';
 import { ChainId, EthAddress } from '@/data-model/ethereum/EthereumType';
-import { MinSquareConnection } from '@/data-model/square-connection/SquareConnectionType';
-import { UUID } from '@/data-model/_common/type/CommonType';
+import { mapToSqaureExternalId } from '@/data-model/shop/ShopDTO';
 import { SquareShopConfig } from '@/data-model/shop/ShopType';
+import { MinSquareConnection } from '@/data-model/square-connection/SquareConnectionType';
+import { useErrorToast } from '@/lib/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { ShopConfigRequest } from '@/pages/api/shops/shop-config';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { useState } from 'react';
 import { isAddress } from 'viem';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import axios from 'axios';
-import { ShopConfigRequest } from '@/pages/api/shops/shop-config';
-import { getSqaureExternalId } from '@/data-model/shop/ShopDTO';
-import { cn } from '@/lib/utils';
-import { useErrorToast } from '@/lib/hooks/use-toast';
 
 const syncSquareLocation = async (merchantId: string, locationId: string) =>
   await axios
     .post<{ shopId: UUID }>('/api/shops/sync?type=square', {
-      externalId: getSqaureExternalId({ merchantId, locationId }),
+      externalId: mapToSqaureExternalId({ merchantId, locationId }),
     })
     .then(res => res.data.shopId);
 

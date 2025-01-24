@@ -5,6 +5,7 @@ import {
   mapShopSourceConfigToExternalId,
 } from '@/data-model/shop/ShopDTO';
 import { Shop, ShopConfig, ShopExternalId } from '@/data-model/shop/ShopType';
+import { createEffectService } from '@/lib/effect';
 import { rehydrateData } from '@/lib/utils';
 import { sql } from '@vercel/postgres';
 
@@ -227,3 +228,5 @@ const shopService = {
 };
 
 export default shopService;
+
+export const effectfulShopService = createEffectService(shopService);

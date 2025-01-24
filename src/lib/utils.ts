@@ -132,6 +132,10 @@ export const err = (msg: string, logObject?: any): never => {
   throw new Error(msg);
 };
 
+export const wontHappen = (): never => {
+  return 0 as never;
+};
+
 export const deleteCookie = (name: string) => {
   if (typeof document !== 'undefined') {
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;

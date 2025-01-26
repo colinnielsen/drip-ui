@@ -33,7 +33,8 @@ const useSquareConnectionStatus = () =>
 
 const AuthorizationResponses = () => {
   const searchParams = useSearchParams();
-  const error = JSON.parse(searchParams.get('error') || '');
+
+  const error = JSON.parse(searchParams.get('error') || '{}');
 
   if (!error.success) return null;
 

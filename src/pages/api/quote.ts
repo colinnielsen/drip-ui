@@ -15,7 +15,7 @@ import {
   GenericError,
   HTTPRouteHandlerErrors,
   hydrateClassInstancesFromJSONBody,
-  notNullEffect,
+  existsOrNotFoundErr,
   RedisError,
   UnimplementedPathError,
 } from '@/lib/effect';
@@ -182,7 +182,7 @@ export default EffectfulApiRoute((req, res) => {
       all([
         effectfulShopService
           .findShopConfigByShopId(reqBody.shopId)
-          .pipe(notNullEffect),
+          .pipe(existsOrNotFoundErr),
 
         succeed(reqBody),
       ]),

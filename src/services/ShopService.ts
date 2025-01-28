@@ -1,4 +1,4 @@
-import { UUID } from '@/data-model/_common/type/CommonType';
+import { Unsaved, UUID } from '@/data-model/_common/type/CommonType';
 import {
   deriveShopConfigIdFromExternalId,
   isStorefront,
@@ -127,7 +127,7 @@ const _rehydrate = (shop: Shop): Shop => {
 // };
 
 export const saveShopConfig = async (
-  config: Omit<ShopConfig, 'id'>,
+  config: Unsaved<ShopConfig>,
 ): Promise<ShopConfig> => {
   const result = await sql`
     INSERT INTO shop_configs (
@@ -190,9 +190,9 @@ const findShopConfigByExternalId = async (
   return result.rows[0] as ShopConfig | null;
 };
 
-const findShopConfigByShopId = async (
+const findShopConfigByShopId = async <T extends ShopConfig>(
   shopId: Shop['id'],
-): Promise<ShopConfig | null> => {
+): Promise<T | null> => {
   const shop = await findById(shopId);
   if (!shop) return null;
   const shopConfig = await findShopConfigByExternalId(
@@ -200,7 +200,7 @@ const findShopConfigByShopId = async (
   );
   if (!shopConfig) return null;
 
-  return shopConfig;
+  return shopConfig as T;
 };
 
 const findSquareShopConfigsByMerchantId = async (

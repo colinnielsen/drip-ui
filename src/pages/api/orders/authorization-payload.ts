@@ -1,6 +1,6 @@
 import {
+  mapEthAddressToChainId,
   mapToUnsignedUSDCAcuthorization,
-  splitEthAddress,
 } from '@/data-model/ethereum/EthereumDTO';
 import { ChainId, USDCAuthorization } from '@/data-model/ethereum/EthereumType';
 import { USDC_CONFIG } from '@/lib/contract-config/USDC';
@@ -19,6 +19,7 @@ import {
   S_UUID,
   validateHTTPMethod,
 } from '@/lib/effect/validation';
+import { getDripRelayerAddress } from '@/lib/ethereum';
 import shopService from '@/services/ShopService';
 import { pipe } from 'effect';
 import {
@@ -89,9 +90,12 @@ export default EffectfulApiRoute(function (
           ),
         );
 
-      const [network, recipient] = splitEthAddress(
+      const network = mapEthAddressToChainId(
         shopConfig.fundRecipientConfig.recipient,
       );
+
+      // funds are sent to the drip relayer
+      const recipient = getDripRelayerAddress();
 
       const USDCConfig = USDC_CONFIG[network];
 

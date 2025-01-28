@@ -1,3 +1,9 @@
+import { Currency } from '@/data-model/_common/currency';
+import {
+  addCurrencies,
+  initCurrencyFromType,
+  subCurrencies,
+} from '@/data-model/_common/currency/currencyDTO';
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { Unsaved, UUID } from '@/data-model/_common/type/CommonType';
 import {
@@ -6,7 +12,12 @@ import {
   mapSquareOrderStateToOrderStatus,
 } from '@/data-model/_external/data-sources/square/SquareDTO';
 import { Cart } from '@/data-model/cart/CartType';
-import { ChainId, USDCAuthorization } from '@/data-model/ethereum/EthereumType';
+import { mapEthAddressToAddress } from '@/data-model/ethereum/EthereumDTO';
+import {
+  ChainId,
+  EthAddress,
+  USDCAuthorization,
+} from '@/data-model/ethereum/EthereumType';
 import {
   createExternalOrderInfo,
   mapCartToNewOrder,
@@ -20,9 +31,9 @@ import {
   NewOrder,
   Order,
   OrderStatus,
+  PaymentInfo,
 } from '@/data-model/order/OrderType';
 import { Shop, SquareShopSourceConfig } from '@/data-model/shop/ShopType';
-import { getDripRelayerPrivateKey } from '@/lib/constants';
 import { USDC_CONFIG } from '@/lib/contract-config/USDC';
 import {
   BaseEffectError,
@@ -35,7 +46,7 @@ import {
 } from '@/lib/effect/errors';
 import {
   BASE_CLIENT,
-  getRPCConfig,
+  getDripRelayerClient,
   mapChainIdToViemChain,
 } from '@/lib/ethereum';
 import { sliceKit } from '@/lib/slice';
@@ -43,7 +54,7 @@ import { generateUUID, rehydrateData } from '@/lib/utils';
 import { PayRequest } from '@/pages/api/orders/pay';
 import { sql } from '@vercel/postgres';
 import { differenceInMinutes } from 'date-fns';
-import { Effect, pipe } from 'effect';
+import { Console, Effect, Fiber, pipe } from 'effect';
 import { UnknownException } from 'effect/Cause';
 import {
   all,
@@ -53,12 +64,13 @@ import {
   flatMap,
   map,
   succeed,
+  tap,
   tryPromise,
 } from 'effect/Effect';
-import { Address, createWalletClient, Hash, Hex } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
+import { RuntimeFiber } from 'effect/Fiber';
+import { Address, Hash, Hex } from 'viem';
 import { getTransactionReceipt } from 'viem/actions';
-import ShopService from './ShopService';
+import { effectfulShopService } from './ShopService';
 import { SquareService, SquareServiceError } from './SquareService';
 
 // export type UpdateOrderOperation =
@@ -242,55 +254,157 @@ const simulateUSDCWithdrawal = (
   });
 };
 
-const payForOrderViaUSDCAuthorization = (
-  chainId: ChainId,
-  order: Unsaved<NewOrder>,
-  authorization: USDCAuthorization,
-): Effect.Effect<
-  { txHash: Hex; amount: bigint; to: Address },
+class FundSplitTransferError extends BaseEffectError {
+  readonly _tag = 'FundSplitTransferError';
+}
+
+const payForOrderViaUSDCAuthorization = ({
+  chainId,
+  order,
+  authorization,
+  orderRecipient,
+}: {
+  chainId: ChainId;
+  order: Unsaved<NewOrder>;
+  authorization: USDCAuthorization;
+  orderRecipient: EthAddress;
+}): Effect.Effect<
+  { txHash: Hex; amount: Currency; to: Address },
   OnChainExecutionError
 > => {
+  const relayer = getDripRelayerClient(chainId);
+
+  const tipAmount = order.tip?.amount || USDC.ZERO;
+  const totalMinusTip = subCurrencies(order.totalAmount, tipAmount);
+  const usdcConfig = USDC_CONFIG[ChainId.BASE];
+
+  if (
+    !addCurrencies(tipAmount, totalMinusTip).eq(
+      USDC.fromWei(authorization.value),
+    )
+  ) {
+    throw new OnChainExecutionError(
+      'tip amount and total minus tip do not add up to the order total',
+    );
+  }
+
   return pipe(
-    { chainId, order, authorization },
-    ({ authorization, chainId, order }) => ({
-      relayer: createWalletClient({
-        ...getRPCConfig(chainId),
-        name: 'Drip Relayer Client',
-        account: privateKeyToAccount(`0x${getDripRelayerPrivateKey()}`),
-      }),
-      usdcConfig: USDC_CONFIG[ChainId.BASE],
-      authorization,
-      order,
-    }),
-    ({
-      relayer,
-      authorization: {
-        from,
-        to,
-        nonce,
-        signature,
-        validAfter,
-        validBefore,
-        value,
-      },
-      usdcConfig,
-    }) =>
+    all([
+      // pull funds to the relayer
       tryPromise({
-        try: async () =>
-          await relayer.writeContract({
-            abi: usdcConfig.abi,
-            chain: mapChainIdToViemChain(chainId),
-            address: usdcConfig.address,
-            functionName: 'transferWithAuthorization',
-            args: [from, to, value, validAfter, validBefore, nonce, signature],
-          }),
+        try: async () => {
+          console.log('sending transferWithAuthorization');
+          return await relayer
+            .writeContract({
+              abi: usdcConfig.abi,
+              chain: mapChainIdToViemChain(chainId),
+              address: usdcConfig.address,
+              functionName: 'transferWithAuthorization',
+              args: [
+                authorization.from,
+                authorization.to,
+                authorization.value,
+                authorization.validAfter,
+                authorization.validBefore,
+                authorization.nonce,
+                authorization.signature,
+              ],
+            })
+            .then(async tx => {
+              console.log('waiting for transaction receipt');
+              return relayer
+                .waitForTransactionReceipt({ hash: tx })
+                .catch(e => {
+                  throw new OnChainExecutionError(
+                    `failed to wait for transaction receipt: ${e.message}`,
+                  );
+                });
+            });
+        },
         catch: e => new OnChainExecutionError(e),
       }),
-    andThen(txHash => ({
-      txHash,
-      amount: authorization.value,
-      to: authorization.to,
-    })),
+      all(
+        [
+          // transfer the tip if there is one
+          order.tip
+            ? tryPromise({
+                try: async () => {
+                  console.log('sending tip txs');
+                  return await relayer.writeContract({
+                    abi: usdcConfig.abi,
+                    chain: mapChainIdToViemChain(chainId),
+                    address: usdcConfig.address,
+                    functionName: 'transfer',
+                    args: [
+                      mapEthAddressToAddress(order.tip!.recipient),
+                      order.tip!.amount.wei,
+                    ],
+                  });
+                },
+                catch: e => new FundSplitTransferError(e),
+              })
+            : succeed(null),
+          // transfer to the shop recipient
+          tryPromise({
+            try: async () => {
+              console.log('sending shop xfer txs');
+              return await relayer.writeContract({
+                abi: usdcConfig.abi,
+                chain: mapChainIdToViemChain(chainId),
+                address: usdcConfig.address,
+                functionName: 'transfer',
+                args: [
+                  mapEthAddressToAddress(orderRecipient),
+                  totalMinusTip.wei,
+                ],
+              });
+            },
+            catch: e => new FundSplitTransferError(e),
+          }),
+        ],
+        { concurrency: 'unbounded' },
+      ),
+    ]),
+    // return out the funds
+    andThen(([receipt]) => {
+      console.log('finished xfers 🎉');
+      return {
+        txHash: receipt.transactionHash,
+        amount: initCurrencyFromType(
+          order.totalAmount['__currencyType'],
+          authorization.value,
+        ),
+        to: authorization.to,
+      };
+    }),
+    // if the transfer fails, return the funds back to the sender
+    catchTag('FundSplitTransferError', e =>
+      pipe(
+        e,
+        e =>
+          all([
+            succeed(e),
+            tryPromise({
+              try: async () =>
+                await relayer.writeContract({
+                  abi: usdcConfig.abi,
+                  chain: mapChainIdToViemChain(chainId),
+                  address: usdcConfig.address,
+                  functionName: 'transfer',
+                  args: [authorization.from, authorization.value],
+                }),
+              catch: e => new OnChainExecutionError(e),
+            }),
+          ]),
+        andThen(([e]) =>
+          fail(
+            new OnChainExecutionError(
+              `failed but returned funds back to sender: \n original error: ${e.message}`,
+            ),
+          ),
+        ),
+      ),
+    ),
   );
   // return pipe(
   //   // load the shop config
@@ -517,82 +631,109 @@ function _payForSquareOrder({
   never
 > {
   let savedOrderId: UUID;
+  let USDCWithdrawalFiber: RuntimeFiber<
+    {
+      txHash: Hex;
+      amount: Currency;
+      to: Address;
+    },
+    OnChainExecutionError
+  >;
 
   const pipeline = pipe(
     cart,
-    // load the shops tip recipient data if there's a tip
+    // Load shop and configuration data
     cart =>
-      all([
-        succeed({ cart, usdcAuthorization }),
-        tryPromise({
-          try: async () =>
-            await ShopService.findById(cart.shop).then(
-              s =>
-                (s as Shop<'square'>) ||
-                (function () {
-                  throw new NotFoundError('Shop not found');
-                })(),
+      all(
+        [
+          succeed({ cart, usdcAuthorization }),
+          effectfulShopService
+            .findById(cart.shop)
+            .pipe(
+              andThen(shop =>
+                shop
+                  ? succeed(shop as Shop<'square'>)
+                  : fail(new NotFoundError('Shop not found')),
+              ),
             ),
-          catch: e => new SQLExecutionError(e),
-        }),
-      ]),
-    // map the cart to a new order
-    map(([{ cart, usdcAuthorization }, shop]) => ({
-      newOrder: mapCartToNewOrder({
+          effectfulShopService
+            .findShopConfigByShopId(cart.shop)
+            .pipe(
+              andThen(shopConfig =>
+                shopConfig?.__type === 'square' &&
+                shopConfig.fundRecipientConfig
+                  ? succeed(shopConfig)
+                  : fail(
+                      new NotFoundError(
+                        "Shop not found or doesn't have a fund recipient config",
+                      ),
+                    ),
+              ),
+            ),
+        ],
+        { concurrency: 'unbounded' },
+      ),
+    // Transform cart into a new order
+    map(([{ cart, usdcAuthorization }, shop, shopConfig]) => ({
+      unsavedOrder: mapCartToNewOrder({
         cart,
         tipRecipient: shop.tipConfig.recipient,
       }),
+      shopConfig,
       shop,
       cart,
       usdcAuthorization,
     })),
-    andThen(({ newOrder, shop, cart, usdcAuthorization }) =>
+    // Simulate and initiate USDC withdrawal
+    andThen(({ unsavedOrder, shop, shopConfig, cart, usdcAuthorization }) =>
       all([
-        succeed({ newOrder, shop, cart }),
+        succeed({ unsavedOrder, shop, cart }),
         // try and simulate the withdrawal
-        simulateUSDCWithdrawal(usdcAuthorization),
-        // if it passes, run the withdraw on a new thread
-        Effect.fork(
-          payForOrderViaUSDCAuthorization(
-            ChainId.BASE,
-            newOrder,
-            usdcAuthorization,
-          ),
+        simulateUSDCWithdrawal(usdcAuthorization).pipe(
+          tap(success => Console.log('simulation success', success)),
+          andThen(success => succeed(success)),
+        ),
+        // if simulation passes, run the withdraw on a new thread
+        Effect.forkDaemon(
+          payForOrderViaUSDCAuthorization({
+            chainId: ChainId.BASE,
+            order: unsavedOrder,
+            authorization: usdcAuthorization,
+            orderRecipient:
+              shopConfig.__type === 'square'
+                ? shopConfig.fundRecipientConfig!.recipient!
+                : genericError("shouldn't happen"),
+          }),
         ),
       ]),
     ),
-    // save the order
-    andThen(([{ shop, newOrder }, _simulationSuccess, usdcWithdrawalFiber]) =>
-      all(
-        [
-          succeed({ shop, cart }),
-          tryPromise({
-            try: () =>
-              save(newOrder).then(savedOrder => {
-                savedOrderId = savedOrder.id;
-                return savedOrder;
-              }),
-            catch: e => new SQLExecutionError(e),
-          }),
-          // reconcile the fiber
-          usdcWithdrawalFiber,
-        ],
-        { concurrency: 'unbounded' },
-      ),
-    ),
-    andThen(([{ shop }, savedOrder, paymentDetails]) => {
-      return {
-        shop,
-        order: savedOrder,
-        squareOrder: mapOrderToSquareOrder(shop, savedOrder),
-        paymentDetails,
-      };
+    // Store the fiber reference for later reconciliation
+    tap(([, , fiber]) => {
+      USDCWithdrawalFiber = fiber;
     }),
-    andThen(({ order, shop, squareOrder, paymentDetails }) =>
+    // Persist the order in the database
+    andThen(([{ shop, unsavedOrder }]) =>
+      all([
+        succeed({ shop, cart }),
+        tryPromise({
+          try: () => save(unsavedOrder),
+          catch: e => new SQLExecutionError(e),
+        }),
+      ]),
+    ),
+    tap(() => Console.debug('saved order')),
+    // Capture the saved order ID
+    tap(([, order]) => (savedOrderId = order.id)),
+    // Prepare and create the order in Square
+    andThen(([{ shop }, savedOrder]) => ({
+      shop,
+      order: savedOrder,
+      squareOrder: mapOrderToSquareOrder(shop, savedOrder),
+    })),
+    andThen(({ order, shop, squareOrder }) =>
       all(
         [
           succeed({ shop, order, squareOrder }),
-          // create the order in square
           tryPromise({
             try: () =>
               SquareService.createOrder(
@@ -601,30 +742,12 @@ function _payForSquareOrder({
               ),
             catch: e => new SquareServiceError(e),
           }),
-          // update the order to include the payment
-          tryPromise({
-            try: () =>
-              save({
-                ...order,
-                payments: [
-                  ...order.payments,
-                  {
-                    __type: 'onchain',
-                    amount: paymentDetails.amount,
-                    transactionHash: paymentDetails.txHash,
-                  },
-                ],
-              }).then(savedOrder => {
-                savedOrderId = savedOrder.id;
-                return savedOrder;
-              }),
-            catch: e => new SQLExecutionError(e),
-          }),
         ],
         { concurrency: 'unbounded' },
       ),
     ),
-    // update the order object
+    tap(() => Console.log('created square order')),
+    // Update order with external information
     andThen(([{ shop, order }, createdSquareOrder]) => {
       const externalOrderInfo = {
         __type: 'square',
@@ -646,15 +769,55 @@ function _payForSquareOrder({
         order: nextOrder,
       };
     }),
+    // Reconcile withdrawal and update order with payment details
+    tap(({ order }) =>
+      Effect.forkDaemon(
+        pipe(
+          Fiber.join(USDCWithdrawalFiber),
+          tap(() => Console.log('reconciled withdrawal fiber')),
+          andThen(paymentDetails => {
+            const nextOrder: InProgressOrder = {
+              ...order,
+              payments: [
+                ...order.payments,
+                {
+                  __type: 'onchain',
+                  amount: paymentDetails.amount,
+                  transactionHash: paymentDetails.txHash,
+                } satisfies PaymentInfo,
+              ],
+            };
+            return tryPromise({
+              try: () => save(nextOrder),
+              catch: e => new SQLExecutionError(e),
+            });
+          }),
+          tap(() => Console.log('saved order with payment')),
+          catchTag('OnChainExecutionError', e => {
+            const erroredOrder: ErroredOrder = {
+              ...order,
+              status: 'error',
+              errorDetails: {
+                origin: e.originalTag || e._tag,
+                message: e.message,
+              },
+            };
+            return tryPromise({
+              try: () => save(erroredOrder),
+              catch: e => new SQLExecutionError(e),
+            });
+          }),
+        ),
+      ),
+    ),
+    // Finalize the order and process payment
     andThen(({ order, shop }) =>
       all(
         [
-          // save the updated order in the sql db
           tryPromise({
             try: () => save<InProgressOrder>(order),
             catch: e => new SQLExecutionError(e),
           }),
-          // pay for the order using type "EXTERNAL"
           tryPromise({
             try: async () =>
               SquareService.payForOrder({
@@ -668,10 +831,11 @@ function _payForSquareOrder({
         { concurrency: 2 },
       ),
     ),
-    // return out the order
+    tap(() => Console.log('paid for square order')),
+    tap(() => Console.log('returning order')),
+    // Return the final order
     andThen(([order]) => order),
-
-    // error handling
+    // Handle errors and update order status accordingly
     catchTag('SquareServiceError', squareServiceError =>
       tryPromise({
         try: async () => {

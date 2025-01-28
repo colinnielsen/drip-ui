@@ -10,6 +10,9 @@ export default function ManagePage() {
           <TabsList>
             <TabsTrigger value="square">Square</TabsTrigger>
             <TabsTrigger value="slice">Slice</TabsTrigger>
+            <TabsTrigger value="toast" disabled>
+              Toast (coming soon)
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="square">
             <SquareConnectionManager />

@@ -1,7 +1,17 @@
 import { ChainId } from '@/data-model/ethereum/EthereumType';
 import { createConfig } from '@wagmi/core';
-import { Chain, createPublicClient, getContract, http } from 'viem';
+import {
+  Chain,
+  createPublicClient,
+  createWalletClient,
+  getContract,
+  http,
+  nonceManager,
+  publicActions,
+} from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
+import { getDripRelayerPrivateKey } from './constants';
 import { USDC_CONFIG } from './contract-config/USDC';
 import { UnimplementedPathError } from './effect';
 
@@ -24,6 +34,21 @@ export const getRPCConfig = (chainId: ChainId) => {
   let _: never = chainId;
   throw new UnimplementedPathError(chainId);
 };
+
+export const getDripRelayerClient = (chainId: ChainId) => {
+  const dripAccount = privateKeyToAccount(`0x${getDripRelayerPrivateKey()}`, {
+    nonceManager,
+  });
+
+  return createWalletClient({
+    ...getRPCConfig(chainId),
+    name: 'Drip Relayer Client',
+    account: dripAccount,
+  }).extend(publicActions);
+};
+
+export const getDripRelayerAddress = () =>
+  privateKeyToAccount(`0x${getDripRelayerPrivateKey()}`).address;
 
 export const BASE_CLIENT = createPublicClient(BASE_RPC_CONFIG);
 

@@ -9,13 +9,21 @@ import {
 } from '@/lib/effect';
 import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import { S, validateHTTPMethod } from '@/lib/effect/validation';
-import { S_Hex, S_UUID } from '@/lib/effect/validation/base';
+import { S_Hex } from '@/lib/effect/validation/base';
 import { CartSchema } from '@/lib/effect/validation/cart';
 import { S_USDCAuthorization } from '@/lib/effect/validation/ethereum';
+import { BASE_CLIENT } from '@/lib/ethereum';
 import { getSessionId } from '@/lib/session';
 import OrderService from '@/services/OrderService';
 import { Effect, Either, pipe } from 'effect';
-import { andThen, catchAll, fail, succeed } from 'effect/Effect';
+import {
+  andThen,
+  catchAll,
+  catchTag,
+  fail,
+  succeed,
+  tryPromise,
+} from 'effect/Effect';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const PaySchema = S.Union(
@@ -26,8 +34,10 @@ const PaySchema = S.Union(
   }),
   S.Struct({
     type: S.Literal('slice'),
-    orderId: S_UUID,
+    sliceOrderId: S.String,
     transactionHash: S_Hex,
+    totalPaidWei: S.BigInt,
+    cart: CartSchema,
   }),
 );
 
@@ -81,9 +91,26 @@ const validatePayload = (
 
           return succeed(squarePayload);
         },
-        // slice cart is very simple and is validated by the schema
         onRight(right) {
-          return succeed(right);
+          return pipe(
+            right,
+            // ensure the transaction exists onchain
+            slicePayload =>
+              tryPromise(() =>
+                BASE_CLIENT.waitForTransactionReceipt({
+                  hash: slicePayload.transactionHash,
+                }),
+              ),
+            andThen(receipt =>
+              // and it was succesful
+              receipt.status === 'success'
+                ? succeed(right)
+                : fail(new BadRequestError('Tx not successful')),
+            ),
+            catchTag('UnknownException', () =>
+              fail(new BadRequestError('Tx hash not found onchain')),
+            ),
+          );
         },
       }),
   );

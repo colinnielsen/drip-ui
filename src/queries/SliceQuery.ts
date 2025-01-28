@@ -1,33 +1,63 @@
-import { useCheckoutContext } from '@/components/cart/context';
+import { PaymentStep, useCheckoutContext } from '@/components/cart/context';
+import { USDC } from '@/data-model/_common/currency/USDC';
+import { mapCartToSliceCart } from '@/data-model/_external/data-sources/slice/SliceDTO';
+import { mapEthAddressToAddress } from '@/data-model/ethereum/EthereumDTO';
+import { ChainId } from '@/data-model/ethereum/EthereumType';
+import { Order } from '@/data-model/order/OrderType';
+import { mapSliceExternalIdToSliceId } from '@/data-model/shop/ShopDTO';
+import { USDC_CONFIG } from '@/lib/contract-config/USDC';
 import { BASE_CLIENT, WAGMI_CONFIG } from '@/lib/ethereum';
+import { useErrorToast } from '@/lib/hooks/use-toast';
 import { SLICE_ENTRYPOINT_ADDRESS, sliceKit } from '@/lib/slice';
-import { minutes } from '@/lib/utils';
+import { axiosFetcher, minutes } from '@/lib/utils';
+import { PayRequest } from '@/pages/api/orders/pay';
 import {
   ExtraCostParamsOptional,
   ProductCart,
   handleCheckoutViem,
   payProductsConfig,
 } from '@slicekit/core';
-import { useQuery } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Dispatch, SetStateAction, useCallback } from 'react';
 import { Address, zeroAddress } from 'viem';
 import { base } from 'viem/chains';
-import { useCart } from './CartQuery';
+import { CART_QUERY_KEY, useCart, useDeleteCartMutation } from './CartQuery';
 import {
   useConnectedWallet,
   useUSDCAllowance,
   useWalletClient,
 } from './EthereumQuery';
-import {
-  useAssocateExternalOrderInfoToCart,
-  useAssocatePaymentToCart,
-  useCartInSliceFormat,
-} from './OrderQuery';
-import { useShopSourceConfig } from './ShopQuery';
-import { USDC_CONFIG } from '@/lib/contract-config/USDC';
-import { ChainId } from '@/data-model/ethereum/EthereumType';
-import { USDC } from '@/data-model/_common/currency/USDC';
-import { useErrorToast } from '@/lib/hooks/use-toast';
+import { ORDERS_QUERY_KEY } from './OrderQuery';
+import { useShop } from './ShopQuery';
+
+//
+//// QUERIES
+///
+
+/**
+ * @dev the user's current cart, mapped to a usable slicekit cart
+ */
+export const useCartInSliceFormat = ({
+  buyerAddress,
+}: {
+  buyerAddress?: Address | null | undefined;
+}) => {
+  const { data: cart } = useCart();
+  const { data: shop } = useShop({ id: cart?.shop });
+
+  const slicerId =
+    shop?.__sourceConfig.type === 'slice'
+      ? mapSliceExternalIdToSliceId(shop.__sourceConfig.id)
+      : undefined;
+
+  return useSliceStoreProducts({
+    slicerId,
+    buyer: buyerAddress ?? undefined,
+    // just select over the cartProducts and map them to an array of selected slice products
+    select: cartProducts =>
+      !cart ? [] : mapCartToSliceCart(cart, cartProducts),
+  });
+};
 
 /**
  * @returns the slice keyed by productId
@@ -55,52 +85,58 @@ export const useSliceStoreProducts = <TData = ProductCart[]>({
     select: select ? data => select(data.cartProducts) : undefined,
   });
 
-export const usePayAndOrder = ({
-  onSuccess,
-}: {
-  onSuccess?: () => void;
-} = {}) => {
+//
+//// MUTATIONS
+///
+
+const handleLoadingState = (
+  state: 'Purchasing' | 'Approve USDC' | 'Approving' | string,
+  setPaymentStep: Dispatch<SetStateAction<PaymentStep>>,
+) => {
+  console.log('state', state);
+  if (state === 'Approving') setPaymentStep('success');
+  if (state === 'Purchasing') setTimeout(() => setPaymentStep('success'), 800);
+};
+
+export const usePayAndOrder = () => {
+  const queryClient = useQueryClient();
+  const deleteCartMutation = useDeleteCartMutation();
   const wallet = useConnectedWallet();
   const walletClient = useWalletClient();
   const address = wallet?.address as Address;
 
-  const errorToast = useErrorToast();
-  const { data: dripCart } = useCart();
-  const { data: sliceCart } = useCartInSliceFormat({ buyerAddress: address });
-  const { data: shopSourceConfig } = useShopSourceConfig(dripCart?.shop);
-  const { mutateAsync: associatePayment } = useAssocatePaymentToCart();
-  const { mutateAsync: associateExternalOrderInfo } =
-    useAssocateExternalOrderInfoToCart();
   const { setPaymentStep } = useCheckoutContext();
+
+  const { data: dripCart } = useCart();
+  const { data: shop } = useShop({ id: dripCart?.shop });
+  const { data: sliceCart, isFetching: sliceCartIsFetching } =
+    useCartInSliceFormat({ buyerAddress: address });
   const { data: allowance } = useUSDCAllowance({
     spender: SLICE_ENTRYPOINT_ADDRESS,
   });
 
-  if (shopSourceConfig && shopSourceConfig?.type !== 'slice')
-    throw new Error('Implementation Error: source config is not of type slice');
+  const errorToast = useErrorToast();
 
-  const extraCosts: ExtraCostParamsOptional[] | undefined = useMemo(
-    () =>
-      dripCart?.tip && shopSourceConfig?.id
-        ? [
-            // TODO: fix tipping
-            // {
-            //   currency: dripCart.tip.amount.address,
-            //   amount: dripCart.tip.amount.toWei(),
-            //   recipient: mapEthAddressToAddress(dripCart.),
-            //   description: 'Tip',
-            //   slicerId: BigInt(
-            //     getSlicerIdFromSliceExternalId(shopSourceConfig.id),
-            //   ),
-            // },
-          ]
-        : undefined,
-    [dripCart?.tip, shopSourceConfig?.id],
-  );
+  const extraCosts: ExtraCostParamsOptional[] | undefined =
+    dripCart?.tip &&
+    shop?.tipConfig.recipient &&
+    shop.__sourceConfig.type === 'slice'
+      ? [
+          {
+            currency: dripCart.tip.amount.address,
+            amount: dripCart.tip.amount.toWei(),
+            recipient: mapEthAddressToAddress(shop.tipConfig.recipient),
+            description: 'Tip',
+            slicerId: BigInt(
+              mapSliceExternalIdToSliceId(shop.__sourceConfig.id),
+            ),
+          },
+        ]
+      : undefined;
 
   const onError = useCallback(
     (error: any) => {
-      errorToast('slice checkout failed!');
+      errorToast('slice checkout failed! \n' + error);
       console.log(error);
       setPaymentStep('error');
     },
@@ -109,15 +145,46 @@ export const usePayAndOrder = ({
 
   const onSliceSuccess = useCallback(
     async ({ hash, orderId }: { orderId: string; hash: `0x${string}` }) => {
+      if (!dripCart)
+        throw new Error('No cart in usePayAndOrder (should not happen)');
+
       setPaymentStep('success');
-      await associatePayment(hash);
-      await associateExternalOrderInfo({
-        __type: 'slice',
-        orderId,
+
+      const order = await axiosFetcher<Order, PayRequest>(`/api/orders/pay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          type: 'slice',
+          transactionHash: hash,
+          cart: dripCart,
+          totalPaidWei: dripCart.quotedTotalAmount?.toWei() ?? 0n,
+          sliceOrderId: orderId,
+        },
+        withCredentials: true,
       });
-      onSuccess?.();
+
+      // delete the cart
+      await deleteCartMutation.mutateAsync({ cartId: dripCart.id });
+      // add the order to the orders
+      queryClient.setQueryData(
+        [ORDERS_QUERY_KEY, order.user],
+        (orders: Order[]) => {
+          console.log('orders', orders);
+          return [order, ...(orders || [])];
+        },
+      );
+
+      // refetch both the orders and the cart
+      queryClient.refetchQueries({
+        queryKey: [ORDERS_QUERY_KEY, order.user],
+      });
+      queryClient.refetchQueries({
+        queryKey: CART_QUERY_KEY(),
+      });
     },
-    [associateExternalOrderInfo, associatePayment, onSuccess, setPaymentStep],
+    [setPaymentStep, dripCart, queryClient, deleteCartMutation],
   );
 
   const ready =
@@ -126,7 +193,14 @@ export const usePayAndOrder = ({
     !!sliceCart &&
     !!address &&
     !!allowance &&
-    !!dripCart?.quotedTotalAmount;
+    !!dripCart?.quotedTotalAmount &&
+    !sliceCartIsFetching;
+
+  const buttonText = !ready
+    ? ''
+    : dripCart.quotedTotalAmount?.wei === 0n
+      ? 'place order'
+      : 'pay';
 
   const payAndOrder = async () => {
     if (!ready) throw new Error('No wallet connected');
@@ -147,9 +221,8 @@ export const usePayAndOrder = ({
       referrer: zeroAddress,
       onError: onError,
       onSuccess: onSliceSuccess,
-      // checkoutSessionId
       buyer: address,
-      setLoadingState: console.debug,
+      setLoadingState: s => handleLoadingState(s, setPaymentStep),
       // @ts-ignore
       buyerInfo: null,
       cart: sliceCart,
@@ -176,5 +249,5 @@ export const usePayAndOrder = ({
     });
   };
 
-  return { payAndOrder, ready };
+  return { payAndOrder, ready, buttonText };
 };

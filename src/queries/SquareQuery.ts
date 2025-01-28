@@ -11,7 +11,6 @@ import {
   AuthorizationPayloadResponse,
 } from '@/pages/api/orders/authorization-payload';
 import { PayRequest } from '@/pages/api/orders/pay';
-import { useWallets } from '@privy-io/react-auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CART_QUERY_KEY, useCart, useDeleteCartMutation } from './CartQuery';
 import { useConnectedWallet, useWalletClient } from './EthereumQuery';
@@ -20,7 +19,6 @@ import { ORDERS_QUERY_KEY } from './OrderQuery';
 export const usePayAndOrder = () => {
   const wallet = useConnectedWallet();
   const walletClient = useWalletClient();
-  const wallets = useWallets();
   const queryClient = useQueryClient();
   const errorToast = useErrorToast();
 

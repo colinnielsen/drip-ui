@@ -1,21 +1,10 @@
 import { UUID } from '@/data-model/_common/type/CommonType';
-import { mapCartToSliceCart } from '@/data-model/_external/data-sources/slice/SliceDTO';
 import { needsSyncing } from '@/data-model/order/OrderDTO';
-import { ExternalOrderInfo, Order } from '@/data-model/order/OrderType';
-import { mapSliceExternalIdToSliceId } from '@/data-model/shop/ShopDTO';
-import { axiosFetcher, err, sortDateAsc, uniqBy } from '@/lib/utils';
-import { PayRequest } from '@/pages/api/orders/pay';
-import {
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
-import { Address, Hash } from 'viem';
-import { useCart } from './CartQuery';
+import { Order } from '@/data-model/order/OrderType';
+import { axiosFetcher, sortDateAsc, uniqBy } from '@/lib/utils';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFarmer } from './FarmerQuery';
 import { useShop } from './ShopQuery';
-import { useSliceStoreProducts } from './SliceQuery';
 import { useUserId } from './UserQuery';
 
 //
@@ -110,69 +99,6 @@ export const useRecentOrder = () => {
   });
 };
 
-// export const useCartSummary = () => {
-//   const { data: cart } = useRecentCart();
-//   const { data: shop } = useShop({ id: cart?.shop });
-//   const allShopItems = useMemo(
-//     () =>
-//       Object.values(shop?.menu ?? {})
-//         .flat()
-//         .sort((a, b) => a.id.localeCompare(b.id))
-//         .reduce<Record<UUID, Item>>((acc, item) => {
-//           acc[item.id] = item;
-//           return acc;
-//         }, {}),
-//     [shop?.menu],
-//   );
-
-//   const cartSummary = useMemo(() => {
-//     if (!cart) return null;
-//     const cartWithDiscountPrices: Order = {
-//       ...cart,
-//       lineItems: cart.lineItems.map(o => ({
-//         ...o,
-//         item: {
-//           ...o.item,
-//           discountPrice: allShopItems[o.item.id]?.discountPrice,
-//         },
-//       })),
-//     };
-//     return getOrderSummary(cartWithDiscountPrices);
-//   }, [cart, allShopItems]);
-
-//   return cartSummary;
-// };
-
-export const useCartId = () => {
-  const { data: cart } = useRecentOrder();
-  return cart?.id;
-};
-
-/**
- * @dev the user's current cart, mapped to a usable slicekit cart
- */
-export const useCartInSliceFormat = ({
-  buyerAddress,
-}: {
-  buyerAddress?: Address | null | undefined;
-}) => {
-  const { data: cart } = useCart();
-  const { data: shop } = useShop({ id: cart?.shop });
-
-  const slicerId =
-    shop?.__sourceConfig.type === 'slice'
-      ? mapSliceExternalIdToSliceId(shop.__sourceConfig.id)
-      : undefined;
-
-  return useSliceStoreProducts({
-    slicerId,
-    buyer: buyerAddress ?? undefined,
-    select: cartProducts => {
-      return !cart ? [] : mapCartToSliceCart(cart, cartProducts);
-    },
-  });
-};
-
 //
 //// MUTATIONS
 //
@@ -188,80 +114,6 @@ export const useFarmerAllocation = ({ shopId }: { shopId: UUID }) => {
     farmer,
     allocation,
   };
-};
-
-export const useAssocatePaymentToCart = () => {
-  const queryClient = useQueryClient();
-
-  const { data: cart } = useRecentOrder();
-
-  return useMutation({
-    scope: { id: 'cart' },
-    mutationFn: async (transactionHash: Hash) => {
-      if (!cart) throw Error('No cart');
-
-      return axiosFetcher<Order, PayRequest>(`/api/orders/pay`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          type: 'slice',
-          transactionHash,
-          orderId: cart.id,
-        },
-        withCredentials: true,
-      });
-    },
-    onSettled: variable => {
-      queryClient.refetchQueries({
-        queryKey: [ORDERS_QUERY_KEY, variable?.id!],
-      });
-    },
-    // onSuccess: data => {
-    // return queryClient.setQueryData(
-    //   [ORDERS_QUERY_KEY, data.user ?? err('expected userId')],
-    //   (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
-    // );
-    // },
-    retry: 3,
-  });
-};
-
-export const useAssocateExternalOrderInfoToCart = () => {
-  const queryClient = useQueryClient();
-
-  const { data: cart } = useRecentOrder();
-
-  return useMutation({
-    scope: { id: 'cart' },
-    mutationFn: async (externalOrderInfo: ExternalOrderInfo) => {
-      return axiosFetcher<Order>(`/api/orders/add-external-order-info`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          orderId:
-            cart?.id || err('No cart in useAssocateExternalOrderInfoToCart'),
-          externalOrderInfo,
-        },
-        withCredentials: true,
-      });
-    },
-    onSettled: variable => {
-      queryClient.refetchQueries({
-        queryKey: [ORDERS_QUERY_KEY, variable?.id!],
-      });
-    },
-    // onSuccess: data => {
-    //   return queryClient.setQueryData(
-    //     [ORDERS_QUERY_KEY, data.user ?? err('expected userId')],
-    //     (orders: Order[]) => orders.map(o => (o.id === data.id ? data : o)),
-    //   );
-    // },
-    retry: 3,
-  });
 };
 
 export const usePollExternalServiceForOrderCompletion = (

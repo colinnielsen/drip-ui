@@ -3,7 +3,9 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { HomeSvg, MapSvg, ProfileSvg } from './ui/icons';
 
-const LazyCartFooter = dynamic(() => import('./cart/footer'), { ssr: false });
+const LazyCartFooter = dynamic(() => import('./cart/status-footer'), {
+  ssr: false,
+});
 
 export function Footer() {
   return (

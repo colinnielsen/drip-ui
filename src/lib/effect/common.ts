@@ -12,7 +12,9 @@ import {
 /**
  * @dev wrap any service GET function with a not null check
  */
-export const notNullEffect = <R, E, C>(e: Effect.Effect<R | null, E, C>) =>
+export const existsOrNotFoundErr = <R, E, C>(
+  e: Effect.Effect<R | null, E, C>,
+) =>
   pipe(
     e,
     andThen(e => (e ? succeed(e) : fail(new NotFoundError('Not found')))),

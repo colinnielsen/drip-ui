@@ -39,16 +39,19 @@ const validatePayload = (
 ): Effect.Effect<PayRequest, UnauthorizedError | BadRequestError> =>
   pipe(
     body,
-    b => (b.type === 'square' ? Either.left(b) : Either.right(b)),
-    b =>
-      Either.match(b, {
+    body => (body.type === 'square' ? Either.left(body) : Either.right(body)),
+    body =>
+      Either.match(body, {
         // validate square cart
         onLeft(squarePayload) {
           const { cart } = squarePayload;
           const userId = getSessionId(req);
           // validate userid === requestee
-          if (!userId || cart.user !== userId)
-            return fail(new UnauthorizedError('Unauthorized'));
+          if (!userId) return fail(new UnauthorizedError('no user id found'));
+          if (cart.user !== userId)
+            return fail(
+              new UnauthorizedError('user id does not match cart user'),
+            );
 
           // ensure correct totals
           const {

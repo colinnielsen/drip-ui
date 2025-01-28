@@ -1,6 +1,9 @@
 import { useCheckoutContext } from '@/components/cart/context';
 import { isUSDC, USDC } from '@/data-model/_common/currency/USDC';
+import { ChainId } from '@/data-model/ethereum/EthereumType';
 import { Order } from '@/data-model/order/OrderType';
+import { USDC_CONFIG } from '@/lib/contract-config/USDC';
+import { BASE_CLIENT } from '@/lib/ethereum';
 import { useErrorToast } from '@/lib/hooks/use-toast';
 import { axiosFetcher } from '@/lib/utils';
 import {
@@ -8,14 +11,11 @@ import {
   AuthorizationPayloadResponse,
 } from '@/pages/api/orders/authorization-payload';
 import { PayRequest } from '@/pages/api/orders/pay';
+import { useWallets } from '@privy-io/react-auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CART_QUERY_KEY, useCart, useDeleteCartMutation } from './CartQuery';
 import { useConnectedWallet, useWalletClient } from './EthereumQuery';
 import { ORDERS_QUERY_KEY } from './OrderQuery';
-import { BASE_CLIENT, USDC_INSTANCE } from '@/lib/ethereum';
-import { ChainId } from '@/data-model/ethereum/EthereumType';
-import { USDC_CONFIG } from '@/lib/contract-config/USDC';
-import { useWallets } from '@privy-io/react-auth';
 
 export const usePayAndOrder = () => {
   const wallet = useConnectedWallet();
@@ -52,7 +52,7 @@ export const usePayAndOrder = () => {
           payee: wallet.address as `0x${string}`,
         },
       });
-      console.log(wallets);
+
       const signature = await walletClient.signTypedData({
         domain,
         types,
@@ -68,7 +68,7 @@ export const usePayAndOrder = () => {
 
       const { address, abi } = USDC_CONFIG[ChainId.BASE];
 
-      const t = await BASE_CLIENT.simulateContract({
+      await BASE_CLIENT.simulateContract({
         address,
         abi,
         functionName: 'transferWithAuthorization',
@@ -121,8 +121,8 @@ export const usePayAndOrder = () => {
       });
     },
     onError(error) {
+      if (error.name !== 'UserRejectedRequestError') errorToast(error);
       setPaymentStep('error');
-      errorToast(error);
     },
   });
 

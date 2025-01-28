@@ -114,8 +114,8 @@ export type OnlineShop = BaseShop & {
 
 type _Shop = PhysicalShop | OnlineShop;
 
-export type Shop<T extends '_any' | ShopSourceConfig['type'] = '_any'> =
-  T extends '_any'
+export type Shop<T extends undefined | ShopSourceConfig['type'] = undefined> =
+  T extends undefined
     ? _Shop
     : Omit<_Shop, '__sourceConfig'> & {
         __sourceConfig: T extends 'square'

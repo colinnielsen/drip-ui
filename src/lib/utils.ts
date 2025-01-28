@@ -91,22 +91,34 @@ export function isDev() {
   return process.env.NODE_ENV === 'development';
 }
 
-export const getProtocol = (): 'http' | 'https' => {
-  return (
-    (typeof window !== 'undefined'
-      ? (window?.location?.protocol.replace(':', '') as 'http' | 'https')
-      : undefined) ?? 'http'
-  );
+type Protocol = 'http' | 'https';
+
+export const getProtocol = (): Protocol => {
+  // Force HTTPS on Vercel
+  if (process.env.VERCEL) return 'https';
+
+  // For local development
+  if (process.env.NODE_ENV === 'development') return 'http';
+
+  // For all other production environments, default to HTTPS
+  return 'https';
 };
 
 /**
  * @returns `www.drip.com` || `drip.com` || `localhost:1234`
  */
 export const getHostname = () => {
-  return process.env.VERCEL_ENV === 'production'
-    ? process.env.VERCEL_URL
-    : (typeof window !== 'undefined' ? window?.location?.hostname : '') ||
-        'localhost:3000';
+  // Production environment on Vercel
+  if (process.env.VERCEL_ENV === 'production') return 'drip-ui.vercel.app';
+
+  // Preview/Development environments on Vercel
+  if (process.env.VERCEL_URL) return process.env.VERCEL_URL;
+
+  // Local development
+  return (
+    (typeof window !== 'undefined' ? window?.location?.hostname : '') ??
+    'localhost:3000'
+  );
 };
 
 export const sleep = async (ms?: number) =>

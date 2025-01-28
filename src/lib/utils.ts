@@ -103,11 +103,10 @@ export const getProtocol = (): 'http' | 'https' => {
  * @returns `www.drip.com` || `drip.com` || `localhost:1234`
  */
 export const getHostname = () => {
-  return (
-    process.env.VERCEL_URL ||
-    (typeof window !== 'undefined' ? window?.location?.hostname : '') ||
-    'localhost:3000'
-  );
+  return process.env.VERCEL_ENV === 'production'
+    ? process.env.VERCEL_URL
+    : (typeof window !== 'undefined' ? window?.location?.hostname : '') ||
+        'localhost:3000';
 };
 
 export const sleep = async (ms?: number) =>

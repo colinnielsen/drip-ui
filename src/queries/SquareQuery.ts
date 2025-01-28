@@ -98,11 +98,11 @@ export const usePayAndOrder = () => {
 
       return { cart, order };
     },
-    onSuccess: ({ cart, order: returnedOrder }) => {
+    onSuccess: async ({ cart, order: returnedOrder }) => {
       setPaymentStep('success');
 
       // delete the cart
-      deleteCartMutation.mutateAsync({ cartId: cart.id });
+      await deleteCartMutation.mutateAsync({ cartId: cart.id });
 
       // add the order to the orders
       queryClient.setQueryData(

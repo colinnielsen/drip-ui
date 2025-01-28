@@ -192,9 +192,9 @@ export const useDeleteCartMutation = () => {
     mutationFn: async ({ cartId }: { cartId: Cart['id'] }) => {
       await LocalStorageCartPersistance.remove(cartId);
     },
-    onSuccess: (_, { cartId }) => {
+    onSuccess: _ => {
       queryClient.invalidateQueries({
-        queryKey: CART_QUERY_KEY(cartId),
+        queryKey: CART_QUERY_KEY(),
       });
     },
   });

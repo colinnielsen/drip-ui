@@ -43,7 +43,7 @@ export const useItemPriceWithDiscounts = <
   select,
 }: {
   shopId: UUID;
-  item: Item;
+  item?: Item;
   select?: (data: {
     originalPrice: Currency;
     discountedPrice: Currency;
@@ -51,14 +51,15 @@ export const useItemPriceWithDiscounts = <
 }) => {
   return useShopDiscounts({
     shopId,
-    select: d =>
+    enabled: !!item,
+    select: quotes =>
       pipe(
-        d,
-        itemSelector(item.id),
+        quotes,
+        itemSelector(item!.id),
         addDiscounts,
         d => ({
-          originalPrice: item.variants[0].price,
-          discountedPrice: subCurrencies(item.variants[0].price, d),
+          originalPrice: item!.variants[0].price,
+          discountedPrice: subCurrencies(item!.variants[0].price, d),
         }),
         d => select?.(d) || d,
       ),

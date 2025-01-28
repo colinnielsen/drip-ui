@@ -25,7 +25,7 @@ export type SliceCheckoutStep =
   | 'get-usdc'
   | 'pay';
 
-type PaymentStep =
+export type PaymentStep =
   | 'idle'
   | 'awaiting-confirmation'
   | 'paying'

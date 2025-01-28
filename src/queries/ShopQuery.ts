@@ -36,12 +36,18 @@ export const useShop = <TData = Shop>({
 
 export const useShopDiscounts = <TData = DiscountQuote[]>({
   shopId,
+  enabled,
   select,
-}: { shopId?: UUID; select?: (data: DiscountQuote[]) => TData } = {}) => {
+}: {
+  shopId?: UUID;
+  enabled?: boolean;
+  select?: (data: DiscountQuote[]) => TData;
+} = {}) => {
   const connectedWallet = useWalletAddress() ?? undefined;
   const { data: user, isLoading: userIsLoading } = useUser();
 
-  const ready = !userIsLoading && !!shopId;
+  const ready = !userIsLoading && !!shopId && enabled;
+
   return useQuery({
     queryKey: ['discounts', shopId, connectedWallet, user?.id],
     queryFn: ready

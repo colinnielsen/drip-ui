@@ -72,6 +72,7 @@ import { Address, Hash, Hex } from 'viem';
 import { getTransactionReceipt } from 'viem/actions';
 import { effectfulShopService } from './ShopService';
 import { SquareService, SquareServiceError } from './SquareService';
+import { existsOrNotFoundErr } from '@/lib/effect';
 
 // export type UpdateOrderOperation =
 //   | { __type: 'add'; orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[] }
@@ -406,61 +407,6 @@ const payForOrderViaUSDCAuthorization = ({
       ),
     ),
   );
-  // return pipe(
-  //   // load the shop config
-  //   tryPromise({
-  //     try: async () =>
-  //       await ShopService.findShopConfigByExternalId(
-  //         mapShopSourceConfigToExternalId(shopSourceConfig),
-  //       ).then(
-  //         s =>
-  //           s ||
-  //           (function () {
-  //             throw new NotFoundError('Shop not found');
-  //           })(),
-  //       ),
-  //     catch: e => new SQLExecutionError(e),
-  //   }),
-  //   flatMap(shopConfig => {
-  //     if (!('fundRecipientConfig' in shopConfig) || !shopConfig.fundRecipientConfig)
-  //       return fail(new UnimplementedPathError('Shop tip config not found'));
-  //     // TODO here:
-  //     const recipient = shopConfig.fundRecipientConfig.recipient;
-  //     return succeed({ txHash: '0x1234', amountPaid: amountToXfer });
-  //   }),
-  // );
-};
-
-const addExternalOrderInfo = async (
-  orderId: UUID,
-  data: ExternalOrderInfo,
-): Promise<Order> => {
-  const query = await sql`
-    SELECT orders.*, shops."__sourceConfig"
-    FROM orders
-    JOIN shops ON orders.shop = shops.id
-    WHERE orders.id = ${orderId}
-  `;
-
-  const order = query.rows[0] as Order & {
-    __sourceConfig: Shop['__sourceConfig'];
-  };
-
-  if (!order) throw Error('Order not found');
-
-  const externalOrderInfo = createExternalOrderInfo(order.__sourceConfig, {
-    ...order.externalOrderInfo,
-    ...data,
-  });
-
-  const result = await sql`UPDATE orders
-    SET
-    "externalOrderInfo" = ${JSON.stringify(externalOrderInfo)}
-    WHERE id = ${orderId}
-    RETURNING *
-  `;
-  const o = result.rows[0];
-  return o as Order;
 };
 
 async function _syncSliceOrder(order: InProgressOrder) {
@@ -568,47 +514,63 @@ const syncOrderWithExternalService = async (
 };
 
 const _payForSliceOrder = ({
-  orderId,
+  sliceOrderId,
   transactionHash,
+  totalPaidWei,
+  cart,
 }: {
-  orderId: UUID;
+  sliceOrderId: string;
   transactionHash: Hash;
-}) => {
+  totalPaidWei: bigint;
+  cart: Cart;
+}): Effect.Effect<
+  InProgressOrder,
+  SQLExecutionError | NotFoundError | GenericError,
+  never
+> => {
   const pipeline = pipe(
-    // pipe over the order id
-    orderId,
-    // query for the order
-    orderId =>
-      tryPromise({
-        try: () => findById(orderId),
-        catch: e => new SQLExecutionError(String(e)),
-      }),
-    // assert the order exists
-    flatMap(o => (o ? succeed(o) : fail(new NotFoundError('Order not found')))),
-    // add the paid prices to the object
-    map<Order, NewOrder>(o => ({
-      ...o,
-      payments: [{ __type: 'onchain', amount: USDC.ZERO, transactionHash }],
-      status: '1-submitting',
-    })),
-    // update the order
-    flatMap(o =>
-      tryPromise({
-        try: () =>
-          sql`UPDATE orders
-          SET
-          "payments" = ${JSON.stringify(o.payments)},
-          "status" = ${o.status}
-          WHERE id = ${orderId}
-          RETURNING *
-        `.then(
-            r =>
-              (r.rows[0] as Order) ||
-              new NotFoundError('Order not returned properly'),
+    // load the shop
+    effectfulShopService.findById(cart.shop).pipe(existsOrNotFoundErr),
+    // map the cart to a new order
+    andThen(({ tipConfig }) => {
+      const externalOrderInfo = {
+        __type: 'slice',
+        orderId: sliceOrderId,
+        // orderNumber: '',
+        status: '2-in-progress',
+      } satisfies ExternalOrderInfo;
+
+      const payments = [
+        {
+          __type: 'onchain',
+          amount: initCurrencyFromType(
+            cart.quotedTotalAmount!['__currencyType'],
+            totalPaidWei,
           ),
-        catch: e => new SQLExecutionError(String(e)),
+          transactionHash,
+        } satisfies PaymentInfo,
+      ];
+
+      const order = {
+        ...mapCartToNewOrder({
+          cart,
+          tipRecipient: tipConfig.recipient,
+        }),
+        status: '2-in-progress',
+        externalOrderInfo,
+        payments,
+      } satisfies Unsaved<InProgressOrder>;
+
+      return order;
+    }),
+    // save the order
+    andThen(order =>
+      tryPromise({
+        try: () => save<InProgressOrder>(order),
+        catch: e => new SQLExecutionError(e),
       }),
     ),
+    tap(() => Console.debug('saved order')),
   );
 
   return pipeline;
@@ -967,9 +929,7 @@ const migrate = async ({
 const orderService = {
   findById,
   save,
-  // update,
   pay,
-  addExternalOrderInfo,
   syncWithExternalService,
   checkStatus,
   delete: deleteOrder,

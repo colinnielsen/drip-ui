@@ -12,6 +12,7 @@ import { usePrevious } from '@/lib/hooks/utility-hooks';
 import { cn, sleep } from '@/lib/utils';
 import { CSS_FONT_CLASS_CONFIG } from '@/pages/_app';
 import { useCart } from '@/queries/CartQuery';
+import { useRecentOrder } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
 import { CheckCircle, ShoppingCart } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -19,7 +20,6 @@ import { AnimatedTimer } from '../ui/icons';
 import { Headline, Label2 } from '../ui/typography';
 import CheckoutSlides from './checkout-slides';
 import { OrderConfirmation } from './order-confirmation/order-confirmation';
-import { useRecentOrder } from '@/queries/OrderQuery';
 
 type FooterData =
   | { type: 'cart'; cart: Cart; shop: Shop }
@@ -31,7 +31,12 @@ export const FooterButtonTrigger = (props: FooterData) => {
   const [label, headline] =
     props.type === 'cart'
       ? ['Pickup store', shop?.label]
-      : ['Order #', props.order?.externalOrderInfo?.orderNumber];
+      : [
+          props.order?.externalOrderInfo?.orderNumber
+            ? `Order #${props.order?.externalOrderInfo?.orderNumber}`
+            : '',
+          shop?.label,
+        ];
 
   const [cartItemCount, setCartItemCount] = useState(0);
   const cartIconRef = useRef<HTMLDivElement>(null);
@@ -149,7 +154,7 @@ const useCartAndShopInfo = (): FooterData | null => {
   return null;
 };
 
-export default function StatusFooter() {
+export default function StatusBar() {
   const [ready, setIsReady] = useState(false);
   const data = useCartAndShopInfo();
   useCartOpenAndCloseListener(data?.type);

@@ -8,8 +8,6 @@ import { Cart } from '@/data-model/cart/CartType';
 import { Shop, ShopSourceConfig } from '@/data-model/shop/ShopType';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { useCart } from '@/queries/CartQuery';
-import { useWalletAddress } from '@/queries/EthereumQuery';
-import { useCartInSliceFormat } from '@/queries/OrderQuery';
 import { usePayAndOrder as useSlicePayAndOrder } from '@/queries/SliceQuery';
 import { usePayAndOrder as useSquarePayAndOrder } from '@/queries/SquareQuery';
 import Image from 'next/image';
@@ -19,22 +17,13 @@ import { AsCheckoutSlide } from '../checkout-slides';
 import { useCheckoutContext } from '../context';
 
 export const SlicePayButton = () => {
-  const buyerAddress = useWalletAddress();
-  const { isFetching: sliceCartIsLoading } = useCartInSliceFormat({
-    buyerAddress,
-  });
-  const { isFetching: cartIsLoading, data: cart } = useCart();
   const { paymentStep } = useCheckoutContext();
   const goToSlide = useGoToSlide();
-  const { payAndOrder, ready } = useSlicePayAndOrder();
+  const { payAndOrder, ready, buttonText } = useSlicePayAndOrder();
 
-  const cartSummary = mapCartToPaymentSummary(cart);
-
-  if (sliceCartIsLoading || cartIsLoading || !cart || !buyerAddress || !ready)
-    return <LoadingCTAButton />;
-
+  if (!ready) return <LoadingCTAButton />;
   const isLoading = paymentStep === 'awaiting-confirmation';
-  const isFree = cartSummary?.total?.wei === 0n;
+
   return (
     <>
       <CTAButton
@@ -44,7 +33,7 @@ export const SlicePayButton = () => {
         }}
         isLoading={isLoading}
       >
-        {!cartSummary || isLoading ? '' : isFree ? 'place order' : 'pay'}
+        {isLoading ? '' : buttonText}
       </CTAButton>
     </>
   );

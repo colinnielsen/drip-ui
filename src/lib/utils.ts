@@ -1,5 +1,3 @@
-import { ETH } from '@/data-model/_common/currency/ETH';
-import { USDC } from '@/data-model/_common/currency/USDC';
 import { rehydrateDripType } from '@/data-model/_common/type/CommonDTO';
 import { UUID } from '@/data-model/_common/type/CommonType';
 import axios, { AxiosRequestConfig } from 'axios';
@@ -44,6 +42,44 @@ export function rehydrateData<T>(data: any): T {
   return result as T;
 }
 
+/**
+ * Recursively transforms BigInt values to strings in any data structure
+ * @param data - Any data structure that might contain BigInt values
+ * @returns - Same structure with BigInt values converted to strings
+ */
+const safeTransformBigIntsInRequestData = <TData>(data: TData): TData => {
+  // Handle BigInt
+  if (typeof data === 'bigint') return data.toString() as unknown as TData;
+
+  // Handle null/undefined
+  if (data == null) return data;
+
+  // Handle Date objects
+  if (data instanceof Date) return data;
+
+  // Handle arrays
+  if (Array.isArray(data)) {
+    return data.map(item => safeTransformBigIntsInRequestData(item)) as TData;
+  }
+
+  // Handle plain objects only, preserve class instances
+  if (
+    data !== null &&
+    typeof data === 'object' &&
+    Object.getPrototypeOf(data) === Object.prototype
+  ) {
+    return Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [
+        key,
+        safeTransformBigIntsInRequestData(value),
+      ]),
+    ) as TData;
+  }
+
+  // Return everything else as-is (including class instances)
+  return data;
+};
+
 export const axiosFetcher = async <TResponse, TRequest = any>(
   url: string,
   options?: AxiosRequestConfig<TRequest>,
@@ -51,12 +87,16 @@ export const axiosFetcher = async <TResponse, TRequest = any>(
   try {
     const response = await axios<TResponse>(url, {
       withCredentials: true,
+      // collapse bigints into numbers
       transformResponse: (data: string) => {
         if (typeof data === 'string') {
           return rehydrateData(JSON.parse(data));
         } else return data;
       },
       ...options,
+      data: options?.data
+        ? safeTransformBigIntsInRequestData(options.data)
+        : undefined,
     });
     return response.data;
   } catch (error) {

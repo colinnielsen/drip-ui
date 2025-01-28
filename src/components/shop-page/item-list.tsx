@@ -3,7 +3,9 @@ import { UUID } from '@/data-model/_common/type/CommonType';
 import { Item } from '@/data-model/item/ItemType';
 import { cn } from '@/lib/utils';
 import { ClientOnly } from '../ui/client-only';
-import { ItemWithSelector } from './item-popup';
+import { Drawer } from '../ui/drawer';
+import { ItemDetailsProvider, useItemDetails } from './item-details-context';
+import { ItemCard, ItemDetailsDrawer } from './item-popup';
 
 export const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-5 w-full overflow-x-auto">
@@ -18,6 +20,19 @@ export const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
     ))}
   </div>
 );
+
+const ItemDrawer = ({ items, shopId }: { items: Item[]; shopId: UUID }) => {
+  const { open } = useItemDetails();
+
+  return (
+    <Drawer open={open}>
+      {items.map((item, index) => (
+        <ItemCard key={index + item.id} item={item} shopId={shopId} />
+      ))}
+      <ItemDetailsDrawer />
+    </Drawer>
+  );
+};
 
 export function ItemList({
   title,
@@ -47,9 +62,9 @@ export function ItemList({
           )}
         >
           <ClientOnly>
-            {items.map((item, index) => (
-              <ItemWithSelector key={index} item={item} shopId={shopId} />
-            ))}
+            <ItemDetailsProvider shopId={shopId}>
+              <ItemDrawer items={items} shopId={shopId} />
+            </ItemDetailsProvider>
           </ClientOnly>
         </div>
       )}

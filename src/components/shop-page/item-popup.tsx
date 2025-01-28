@@ -1,6 +1,5 @@
 import { CTAButton } from '@/components/ui/button';
 import {
-  Drawer,
   DrawerClose,
   DrawerContent,
   DrawerDescription,
@@ -11,6 +10,7 @@ import {
 } from '@/components/ui/drawer';
 import { subCurrencies } from '@/data-model/_common/currency/currencyDTO';
 import { UUID } from '@/data-model/_common/type/CommonType';
+import { deriveDefaultImageFromItemName } from '@/data-model/_external/data-sources/common';
 import { ItemCategory } from '@/data-model/item/common';
 import { ItemMod } from '@/data-model/item/ItemMod';
 import { Item, ItemVariant } from '@/data-model/item/ItemType';
@@ -22,13 +22,14 @@ import {
 } from '@/queries/ItemQuery';
 import { useShop } from '@/queries/ShopQuery';
 import Image from 'next/image';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PlusSvg, Price, PriceRange } from '../ui/icons';
 import { Label } from '../ui/label';
 import { NumberInput } from '../ui/number-input';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Skeleton } from '../ui/skeleton';
 import { Body, Headline, Title1 } from '../ui/typography';
+import { useItemDetails } from './item-details-context';
 
 type CategorySections = ItemCategory | '__misc__';
 type ModSection = { [key in CategorySections]: ItemMod[] };
@@ -46,6 +47,7 @@ function AddToBasketButton({
   quantity: number;
   mods: ItemMod[];
 }) {
+  const { setOpen } = useItemDetails();
   const { mutate } = useAddToCart({
     shopId,
     item,
@@ -61,7 +63,7 @@ function AddToBasketButton({
 
   return (
     <DrawerFooter className="bottom-0 sticky bg-white shadow-drawer-secondary">
-      <DrawerClose asChild>
+      <DrawerClose asChild onClick={() => setOpen(false)}>
         <CTAButton
           disabled={isFetchingDiscounts || !discountQuotes}
           onClick={e =>
@@ -269,49 +271,62 @@ export const QuickAddPlusButton = ({
 //   );
 // }
 
-function ItemDetailsDrawer({
-  item,
-  shopId,
-  quantity,
-  setQuantity,
-}: {
-  item: Item;
-  shopId: UUID;
-  quantity: number;
-  setQuantity: Dispatch<SetStateAction<number>>;
-}) {
+const LogMount = () => {
+  useEffect(() => {
+    console.log('mounted');
+    return () => {
+      console.log('unmounted');
+    };
+  }, []);
+  return null;
+};
+
+export function ItemDetailsDrawer() {
+  const { selectedItem, shopId } = useItemDetails();
+  const [variantZero] = selectedItem?.variants ?? [];
+
+  const [quantity, setQuantity] = useState(1);
+
   const { data: shop } = useShop({ id: shopId });
   const { data: priceQuote, isFetching: isFetchingPriceQuote } =
     useItemPriceWithDiscounts({
       shopId,
-      item,
+      item: selectedItem || undefined,
     });
 
-  const [variant, setVariant] = useState(item.variants[0]);
+  const [variant, setVariant] = useState(variantZero) ?? variantZero;
   const [selectedMods, setSelectedMods] = useState<ItemMod[]>([]);
 
-  const isSingleVariant = item.variants.length === 1;
+  const isSingleVariant = selectedItem?.variants.length === 1;
 
-  const modCategories = item.mods?.reduce((acc, mod) => {
+  const modCategories = selectedItem?.mods?.reduce((acc, mod) => {
     if (!acc[mod?.category || '__misc__'])
       acc[mod?.category || '__misc__'] = [];
     acc[mod.category || '__misc__'].push(mod);
     return acc;
   }, {} as ModSection);
 
-  const lowestPrice = priceQuote?.discountedPrice ?? item.variants.at(0)!.price;
+  const lowestPrice =
+    priceQuote?.discountedPrice ?? selectedItem?.variants.at(0)!.price;
   const highestPrice =
-    priceQuote?.discountedPrice ?? item.variants.at(-1)!.price;
+    priceQuote?.discountedPrice ?? selectedItem?.variants.at(-1)!.price;
+
+  useEffect(() => {
+    setVariant(selectedItem?.variants[0] || undefined);
+    setQuantity(1);
+  }, [selectedItem]);
 
   return (
     <DrawerContent>
-      <DrawerDescription className="hidden">{item.name}</DrawerDescription>
-      <div className="min-h-[75vh] flex flex-col overflow-scroll gap-o divide-y divide-light-gray">
+      <DrawerDescription className="hidden">
+        {selectedItem?.name}
+      </DrawerDescription>
+      <div className="h-[90vh] flex flex-col overflow-scroll gap-o divide-y divide-light-gray">
         <DrawerHeader className="p-0 rounded-t-xl gap-0">
           <div className="min-h-64 relative rounded-t-xl overflow-clip">
             <Image
-              src={item.image}
-              alt={item.name}
+              src={selectedItem?.image ?? deriveDefaultImageFromItemName(null)}
+              alt={selectedItem?.name ?? 'loading...'}
               fill
               className="object-cover"
               quality={30}
@@ -326,13 +341,14 @@ function ItemDetailsDrawer({
                   '!text-[32px] !font-garamond !leading-[36.9px] !align-middle !font-normal !text-left',
                 )}
               >
-                {item.name} {isSingleVariant ? `- ${variant.name}` : null}
+                {selectedItem?.name}{' '}
+                {isSingleVariant ? `- ${variant?.name}` : null}
               </Title1>
             </DrawerTitle>
 
             {isSingleVariant ? (
               <Price
-                originalPrice={item.variants.at(0)!.price}
+                originalPrice={selectedItem.variants.at(0)!.price}
                 actualPrice={priceQuote?.discountedPrice}
                 isLoading={isFetchingPriceQuote}
               />
@@ -348,10 +364,10 @@ function ItemDetailsDrawer({
           </div>
         </DrawerHeader>
 
-        {item.description && (
+        {selectedItem?.description && (
           <div className="flex flex-col px-4 py-6 gap-y-2.5">
             <Headline>Description</Headline>
-            <Body className="text-left">{item.description}</Body>
+            <Body className="text-left">{selectedItem.description}</Body>
           </div>
         )}
 
@@ -372,20 +388,21 @@ function ItemDetailsDrawer({
           )}
         </div>
 
-        {!isSingleVariant && (
+        {selectedItem && !isSingleVariant && variant && (
           <div className="flex px-6 py-6 flex-col">
             <Headline>Variations</Headline>
+            <LogMount />
             <RadioGroup
               defaultValue={variant.id}
               onValueChange={variantId =>
-                setVariant(item.variants.find(v => v.id === variantId)!)
+                setVariant(selectedItem.variants.find(v => v.id === variantId)!)
               }
               className="divide-y divide-light-gray gap-0"
             >
-              {item.variants.map((variant, i) => {
+              {selectedItem?.variants.map((variant, i) => {
                 const priceDiff = subCurrencies(
                   variant.price,
-                  item.variants[0].price,
+                  selectedItem.variants[0].price,
                 );
                 return (
                   <div className="flex space-x-2 items-center py-4" key={i}>
@@ -421,19 +438,22 @@ function ItemDetailsDrawer({
 
         <div className="flex-grow" />
 
-        <AddToBasketButton
-          item={item}
-          shopId={shopId}
-          variant={variant}
-          quantity={quantity}
-          mods={selectedMods}
-        />
+        {selectedItem && variant && (
+          <AddToBasketButton
+            item={selectedItem}
+            shopId={shopId}
+            variant={variant}
+            quantity={quantity}
+            mods={selectedMods}
+          />
+        )}
       </div>
     </DrawerContent>
   );
 }
 
-function ItemCard({ shopId, item }: { shopId: UUID; item: Item }) {
+export function ItemCard({ shopId, item }: { shopId: UUID; item: Item }) {
+  const { setSelectedItem, setOpen } = useItemDetails();
   const { data: cart } = useCart();
   const { data: priceQuote, isFetching: isFetchingPriceQuote } =
     useItemPriceWithDiscounts({
@@ -449,8 +469,13 @@ function ItemCard({ shopId, item }: { shopId: UUID; item: Item }) {
     // or if there is a cart and the current shop is the same as the cart's shop, you can add to cart
     cart.shop === shopId;
 
+  const handleOpen = () => {
+    setSelectedItem(item);
+    setOpen(true);
+  };
+
   return (
-    <DrawerTrigger asChild>
+    <DrawerTrigger asChild onClick={handleOpen}>
       <div className="flex flex-col gap-2">
         <div className="relative overflow-hidden rounded-xl h-36 w-36">
           <Image
@@ -484,35 +509,5 @@ function ItemCard({ shopId, item }: { shopId: UUID; item: Item }) {
         </div>
       </div>
     </DrawerTrigger>
-  );
-}
-
-export function ItemWithSelector({
-  item,
-  shopId,
-}: {
-  item: Item;
-  shopId: UUID;
-}) {
-  const [quantity, setQuantity] = useState(1);
-
-  const reset = () => {
-    setQuantity(1);
-    // setSelectedOptions({});
-  };
-
-  return (
-    <Drawer onClose={reset}>
-      {/* the little square icon, with a quick add button */}
-      <ItemCard item={item} shopId={shopId} />
-
-      {/* the item details expansion drawer */}
-      <ItemDetailsDrawer
-        item={item}
-        shopId={shopId}
-        quantity={quantity}
-        setQuantity={setQuantity}
-      />
-    </Drawer>
   );
 }

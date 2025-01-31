@@ -22,10 +22,10 @@ export const ItemSkeleton = ({ count = 5 }: { count?: number }) => (
 );
 
 const ItemDrawer = ({ items, shopId }: { items: Item[]; shopId: UUID }) => {
-  const { open } = useItemDetails();
+  const { open, setOpen } = useItemDetails();
 
   return (
-    <Drawer open={open} dismissible={true}>
+    <Drawer open={open} dismissible={true} onOpenChange={setOpen}>
       {items.map((item, index) => (
         <ItemCard key={index + item.id} item={item} shopId={shopId} />
       ))}

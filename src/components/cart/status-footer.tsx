@@ -187,11 +187,7 @@ export default function StatusBar() {
 
       <DrawerContent
         full
-        className={cn(
-          CSS_FONT_CLASS_CONFIG,
-          '!bg-background',
-          'overscroll-y-contain',
-        )}
+        className={cn('!bg-background', 'overscroll-y-contain')}
         aria-describedby="status-drawer"
       >
         <DrawerDescription className="hidden">

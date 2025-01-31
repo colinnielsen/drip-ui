@@ -30,6 +30,7 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Skeleton } from '../ui/skeleton';
 import { Body, Headline, Title1 } from '../ui/typography';
 import { useItemDetails } from './item-details-context';
+import { X } from 'lucide-react';
 
 type CategorySections = ItemCategory | '__misc__';
 type ModSection = { [key in CategorySections]: ItemMod[] };
@@ -66,7 +67,7 @@ function AddToBasketButton({
       <DrawerClose asChild onClick={() => setOpen(false)}>
         <CTAButton
           disabled={isFetchingDiscounts || !discountQuotes}
-          onClick={e =>
+          onClick={() =>
             mutate({
               item,
               variant,
@@ -272,7 +273,7 @@ export const QuickAddPlusButton = ({
 // }
 
 export function ItemDetailsDrawer() {
-  const { selectedItem, shopId } = useItemDetails();
+  const { selectedItem, shopId, setOpen } = useItemDetails();
   const [variantZero] = selectedItem?.variants ?? [];
 
   const [quantity, setQuantity] = useState(1);
@@ -307,11 +308,18 @@ export function ItemDetailsDrawer() {
   }, [selectedItem]);
 
   return (
-    <DrawerContent className="max-h-[80vh]">
+    <DrawerContent full className="overscroll-y-contain">
       <div className="flex-1 overflow-y-auto">
         <DrawerDescription className="hidden">
           {selectedItem?.name}
         </DrawerDescription>
+        <div className="flex justify-start w-full items-center px-6 py-4">
+          <DrawerClose asChild onClick={() => setOpen(false)}>
+            <button>
+              <X height={24} width={24} />
+            </button>
+          </DrawerClose>
+        </div>
         <DrawerHeader className="p-0 rounded-t-xl gap-0">
           <div className="min-h-64 relative rounded-t-xl overflow-clip">
             <Image

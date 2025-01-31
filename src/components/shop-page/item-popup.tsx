@@ -271,16 +271,6 @@ export const QuickAddPlusButton = ({
 //   );
 // }
 
-const LogMount = () => {
-  useEffect(() => {
-    console.log('mounted');
-    return () => {
-      console.log('unmounted');
-    };
-  }, []);
-  return null;
-};
-
 export function ItemDetailsDrawer() {
   const { selectedItem, shopId } = useItemDetails();
   const [variantZero] = selectedItem?.variants ?? [];
@@ -317,11 +307,11 @@ export function ItemDetailsDrawer() {
   }, [selectedItem]);
 
   return (
-    <DrawerContent>
-      <DrawerDescription className="hidden">
-        {selectedItem?.name}
-      </DrawerDescription>
-      <div className="h-[90vh] flex flex-col overflow-scroll gap-o divide-y divide-light-gray">
+    <DrawerContent className="max-h-[80vh]">
+      <div className="flex-1 overflow-y-auto">
+        <DrawerDescription className="hidden">
+          {selectedItem?.name}
+        </DrawerDescription>
         <DrawerHeader className="p-0 rounded-t-xl gap-0">
           <div className="min-h-64 relative rounded-t-xl overflow-clip">
             <Image
@@ -333,7 +323,6 @@ export function ItemDetailsDrawer() {
               sizes="100vw"
             />
           </div>
-
           <div className="flex flex-col px-6 py-4 gap-y-2">
             <DrawerTitle asChild>
               <Title1
@@ -345,7 +334,6 @@ export function ItemDetailsDrawer() {
                 {isSingleVariant ? `- ${variant?.name}` : null}
               </Title1>
             </DrawerTitle>
-
             {isSingleVariant ? (
               <Price
                 originalPrice={selectedItem.variants.at(0)!.price}
@@ -355,7 +343,6 @@ export function ItemDetailsDrawer() {
             ) : (
               <PriceRange minPrice={lowestPrice} maxPrice={highestPrice} />
             )}
-
             <NumberInput
               onPlus={() => setQuantity(quantity + 1)}
               onMinus={() => quantity > 1 && setQuantity(quantity - 1)}
@@ -363,14 +350,12 @@ export function ItemDetailsDrawer() {
             />
           </div>
         </DrawerHeader>
-
         {selectedItem?.description && (
           <div className="flex flex-col px-4 py-6 gap-y-2.5">
             <Headline>Description</Headline>
             <Body className="text-left">{selectedItem.description}</Body>
           </div>
         )}
-
         <div className="flex px-6 py-6 flex-col gap-y-2.5">
           <Headline>Pick up</Headline>
           {shop?.__type === 'storefront' && (
@@ -387,11 +372,9 @@ export function ItemDetailsDrawer() {
             </RadioGroup>
           )}
         </div>
-
         {selectedItem && !isSingleVariant && variant && (
           <div className="flex px-6 py-6 flex-col">
             <Headline>Variations</Headline>
-            <LogMount />
             <RadioGroup
               defaultValue={variant.id}
               onValueChange={variantId =>
@@ -426,7 +409,6 @@ export function ItemDetailsDrawer() {
             </RadioGroup>
           </div>
         )}
-
         {modCategories && (
           <div className="flex px-6 py-6 flex-col">
             <Headline>Mods</Headline>
@@ -435,9 +417,7 @@ export function ItemDetailsDrawer() {
             ))}
           </div>
         )}
-
         <div className="flex-grow" />
-
         {selectedItem && variant && (
           <AddToBasketButton
             item={selectedItem}
@@ -476,7 +456,7 @@ export function ItemCard({ shopId, item }: { shopId: UUID; item: Item }) {
 
   return (
     <DrawerTrigger asChild onClick={handleOpen}>
-      <div className="flex flex-col gap-2">
+      <button className="flex flex-col gap-2">
         <div className="relative overflow-hidden rounded-xl h-36 w-36">
           <Image
             src={image}
@@ -507,7 +487,7 @@ export function ItemCard({ shopId, item }: { shopId: UUID; item: Item }) {
             }}
           />
         </div>
-      </div>
+      </button>
     </DrawerTrigger>
   );
 }

@@ -74,7 +74,7 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       {!full && (
-        <div className="mx-auto  h-[6px] w-[75px] rounded-full  absolute -top-4  bg-white -translate-x-1/2 left-1/2 z-[51]" />
+        <div className="mx-auto h-[6px] w-[75px] rounded-full  absolute -top-4  bg-white -translate-x-1/2 left-1/2 z-[51]" />
       )}
       {children}
     </DrawerPrimitive.Content>

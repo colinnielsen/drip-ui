@@ -25,7 +25,7 @@ const ItemDrawer = ({ items, shopId }: { items: Item[]; shopId: UUID }) => {
   const { open } = useItemDetails();
 
   return (
-    <Drawer open={open}>
+    <Drawer open={open} dismissible={true}>
       {items.map((item, index) => (
         <ItemCard key={index + item.id} item={item} shopId={shopId} />
       ))}

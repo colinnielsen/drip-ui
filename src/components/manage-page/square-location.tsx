@@ -119,7 +119,7 @@ const SquareLocation: React.FC<{
                 })
               }
             >
-              {location.added ? 'Update' : 'Connect'}
+              {location.added ? 'Sync' : 'Connect'}
               {!location.added && (
                 <div className="bg-white rounded-full flex justify-center items-center w-7 h-7 active:bg-neutral-200 drop-shadow-md">
                   <PlusSvg />

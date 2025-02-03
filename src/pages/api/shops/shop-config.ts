@@ -21,15 +21,8 @@ import {
 import { S_EthAddress } from '@/lib/effect/validation/ethereum';
 import shopService from '@/services/ShopService';
 import { SquareService, SquareServiceError } from '@/services/SquareService';
-import { Effect, pipe } from 'effect';
-import {
-  all,
-  andThen,
-  catchAll,
-  fail,
-  succeed,
-  tryPromise,
-} from 'effect/Effect';
+import { pipe, Effect } from 'effect';
+
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const NewConfigSchema = S.Struct({
@@ -88,12 +81,12 @@ export default EffectfulApiRoute(function (
     // handle wrong request method
     validateHTTPMethod(['PUT', 'POST', 'GET']),
     // validate the session token
-    andThen(validateSessionToken),
+    Effect.andThen(validateSessionToken),
     // validate the request
-    andThen(req => S.decode(ShopConfigSchema)(req.body)),
-    andThen(body =>
-      all([
-        tryPromise({
+    Effect.andThen(req => S.decode(ShopConfigSchema)(req.body)),
+    Effect.andThen(body =>
+      Effect.all([
+        Effect.tryPromise({
           try: async () => {
             if (body.type === 'square' && body.action === 'update') {
               const existingShopConfig =
@@ -110,7 +103,7 @@ export default EffectfulApiRoute(function (
           },
           catch: e => e as NotFoundError | SQLExecutionError,
         }),
-        tryPromise({
+        Effect.tryPromise({
           try: async () => {
             if (body.type === 'square')
               return {
@@ -131,7 +124,7 @@ export default EffectfulApiRoute(function (
       ]),
     ),
     // create a shop config
-    andThen(([prevConfig, data]) => {
+    Effect.andThen(([prevConfig, data]) => {
       const newShopConfig: Unsaved<ShopConfig> = {
         ...(prevConfig || {}),
         __type: data.type,
@@ -176,27 +169,31 @@ export default EffectfulApiRoute(function (
             : undefined,
       };
 
-      return succeed(newShopConfig);
+      return Effect.succeed(newShopConfig);
     }),
     // save the shop config
-    andThen(newConfig =>
-      tryPromise({
+    Effect.andThen(newConfig =>
+      Effect.tryPromise({
         try: () => shopService.saveShopConfig(newConfig),
         catch: e => new SQLExecutionError(e),
       }),
     ),
     // retyrn the saved config w/ 200 status
-    andThen(savedConfig => res.status(200).json(savedConfig)),
+    Effect.andThen(savedConfig => res.status(200).json(savedConfig)),
     // handle errors
-    catchAll(function (e): Effect.Effect<never, HTTPRouteHandlerErrors, never> {
+    Effect.catchAll(function (e): Effect.Effect<
+      never,
+      HTTPRouteHandlerErrors,
+      never
+    > {
       switch (e._tag) {
         // pluck out any non-500 errors and let them exist as-is
         case 'BadRequestError':
         case 'ParseError':
-          return fail(e);
-        // all remaining errors and mark them as 500
+          return Effect.fail(e);
+        // Effect.all remaining errors and mark them as 500
         default:
-          return fail(new DripServerError(e));
+          return Effect.fail(new DripServerError(e));
       }
     }),
   );

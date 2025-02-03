@@ -1,3 +1,4 @@
+import dripLogo from '@/assets/drip.jpg';
 import orderComplete from '@/assets/order-complete-2.png';
 import { CTAButton } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
@@ -15,7 +16,7 @@ import { Shop } from '@/data-model/shop/ShopType';
 import { useRecentOrder } from '@/queries/OrderQuery';
 import { useShop } from '@/queries/ShopQuery';
 import { CarSimple } from '@phosphor-icons/react/dist/ssr';
-import { Newspaper, Timer, X } from 'lucide-react';
+import { Link, Newspaper, Timer, X } from 'lucide-react';
 import Image from 'next/image';
 import { Fragment } from 'react';
 import { OrderItemDisplay } from '../basket/cart-item';
@@ -49,7 +50,16 @@ export const OrderConfirmation = ({
       <div className="h-full bg-background flex flex-col items-center gap-6 w-full pb-32">
         <div className="flex flex-col items-center justify-center gap-6 px-6">
           <div className="flex items-center justify-center h-[280px] w-[280px] overflow-clip">
-            <Image src={orderComplete} alt="loading bar" width={280} />
+            {order?.status === 'error' ? (
+              <Image
+                src={dripLogo}
+                alt="order error!"
+                width={280}
+                className="rotate-270"
+              />
+            ) : (
+              <Image src={orderComplete} alt="order complete" width={280} />
+            )}
           </div>
           <DrawerTitle>
             <Drip
@@ -62,12 +72,29 @@ export const OrderConfirmation = ({
                   ? 'nice! order confirmed'
                   : order.status === '3-complete'
                     ? 'ready for pickup!'
-                    : ''}
+                    : order.status === 'error'
+                      ? 'order error!'
+                      : ''}
             </Drip>
-            {order?.status === '3-complete' && (
+            {order?.externalOrderInfo?.status === '3-complete' ? (
               <Drip className="text-xl text-center py-2" as="div">
                 enjoy that sweet, sweet brew
               </Drip>
+            ) : (
+              order?.status === 'error' && (
+                <div className="flex flex-col gap-2">
+                  <Drip className="text-xl text-center py-2" as="div">
+                    order error!
+                  </Drip>
+                  <Link
+                    href={'https://t.me/colinnielsen'}
+                    target="_blank"
+                    className="w-full"
+                  >
+                    <CTAButton>get help</CTAButton>
+                  </Link>
+                </div>
+              )
             )}
           </DrawerTitle>
           <DrawerClose asChild>

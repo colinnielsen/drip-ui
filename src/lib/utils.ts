@@ -156,7 +156,7 @@ export const getHostname = () => {
 
   // Local development
   return (
-    (typeof window !== 'undefined' ? window?.location?.hostname : '') ??
+    (typeof window !== 'undefined' ? window?.location?.hostname : '') ||
     'localhost:3000'
   );
 };

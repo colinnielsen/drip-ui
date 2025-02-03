@@ -45,6 +45,8 @@ export default ApiRoute(async function (
     await syncService
       .syncStore(externalId)
       .then(async shopId => {
+        await res.revalidate('/');
+        await res.revalidate(`/shops/${shopId}`);
         return res.status(200).json({ shopId });
       })
       .catch(err => {

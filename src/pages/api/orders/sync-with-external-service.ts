@@ -2,15 +2,7 @@ import { DripServerError, HTTPRouteHandlerErrors } from '@/lib/effect';
 import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import { S, S_UUID, validateHTTPMethod } from '@/lib/effect/validation';
 import OrderService from '@/services/OrderService';
-import { pipe } from 'effect';
-import {
-  andThen,
-  catchAll,
-  Effect,
-  fail,
-  map,
-  tryPromise,
-} from 'effect/Effect';
+import { Effect, pipe } from 'effect';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const SyncWithExternalServiceSchema = S.Struct({ orderIds: S.Array(S_UUID) });
@@ -25,27 +17,33 @@ export default EffectfulApiRoute(function (
     // validate the method
     validateHTTPMethod('POST'),
     // extract the request body
-    map(r => r.body),
+    Effect.map(r => r.body),
     // validate the request body
-    andThen(S.decode(SyncWithExternalServiceSchema)),
+    Effect.andThen(S.decode(SyncWithExternalServiceSchema)),
     // sync with the external service
-    andThen(({ orderIds }) =>
-      tryPromise(() => OrderService.syncWithExternalService([...orderIds])),
+    Effect.andThen(({ orderIds }) =>
+      Effect.tryPromise(() =>
+        OrderService.syncWithExternalService([...orderIds]),
+      ),
     ),
     // return the orders
-    andThen(orders => res.status(200).json(orders)),
+    Effect.andThen(orders => res.status(200).json(orders)),
     // handle errors
-    catchAll(function (e): Effect<never, HTTPRouteHandlerErrors, never> {
+    Effect.catchAll(function (e): Effect.Effect<
+      never,
+      HTTPRouteHandlerErrors,
+      never
+    > {
       switch (e._tag) {
         // pluck out any non-500 errors and let them exist as-is
         case 'BadRequestError':
         case 'ParseError':
           // case 'NotFoundError':
-          return fail(e);
+          return Effect.fail(e);
 
         // all remaining errors and mark them as 500
         default:
-          return fail(new DripServerError(e));
+          return Effect.fail(new DripServerError(e));
       }
     }),
   );

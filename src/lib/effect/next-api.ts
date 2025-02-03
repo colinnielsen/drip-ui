@@ -1,12 +1,5 @@
 import { Console, Effect, pipe } from 'effect';
-import {
-  catchAll,
-  catchAllDefect,
-  fail,
-  runPromise,
-  tapError,
-  withSpan,
-} from 'effect/Effect';
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import { HTTPRouteHandlerErrors } from './errors';
 
@@ -32,14 +25,7 @@ export const EffectfulApiRoute = (
   route: (
     req: NextApiRequest,
     res: NextApiResponse,
-  ) => Effect.Effect<
-    // routes never return any data
-    void,
-    //  + they need to bubble up only http errors
-    HTTPRouteHandlerErrors,
-    //  + they have no requirements
-    never
-  >,
+  ) => Effect.Effect<void, HTTPRouteHandlerErrors, never>,
   handlerPrefix?: string,
 ) => {
   return async (req: NextApiRequest, res: NextApiResponse) => {
@@ -47,17 +33,19 @@ export const EffectfulApiRoute = (
       // run the route
       route(req, res),
       // time the api call
-      withSpan(`api: ${handlerPrefix}`),
+      Effect.withSpan(`api: ${handlerPrefix}`),
       // log any errors
-      tapError(Console.error),
+      Effect.tapError(Console.error),
       // catch all errors and return a 500
-      catchAll(e => fail(res.status(getHTTPRouteHandlerErrorCode(e)).json(e))),
+      Effect.catchAll(e =>
+        Effect.fail(res.status(getHTTPRouteHandlerErrorCode(e)).json(e)),
+      ),
       // finally make sure uncaught errors do stop the program
-      catchAllDefect((e: any) => {
+      Effect.catchAllDefect((e: any) => {
         Console.error(e);
         const wrappedError = new Error(e);
 
-        return fail(
+        return Effect.fail(
           res.status(500).json({
             type: '🚨 fatal uncaught error 🚨',
             message: wrappedError.message,
@@ -67,6 +55,6 @@ export const EffectfulApiRoute = (
       }),
     );
 
-    return await runPromise(nextApiProgram);
+    return await Effect.runPromise(nextApiProgram);
   };
 };

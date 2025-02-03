@@ -18,11 +18,7 @@ import {
   EthAddress,
   USDCAuthorization,
 } from '@/data-model/ethereum/EthereumType';
-import {
-  createExternalOrderInfo,
-  mapCartToNewOrder,
-  needsSyncing,
-} from '@/data-model/order/OrderDTO';
+import { mapCartToNewOrder, needsSyncing } from '@/data-model/order/OrderDTO';
 import {
   CompletedOrder,
   ErroredOrder,
@@ -35,6 +31,7 @@ import {
 } from '@/data-model/order/OrderType';
 import { Shop, SquareShopSourceConfig } from '@/data-model/shop/ShopType';
 import { USDC_CONFIG } from '@/lib/contract-config/USDC';
+import { existsOrNotFoundErr } from '@/lib/effect';
 import {
   BaseEffectError,
   genericError,
@@ -56,23 +53,11 @@ import { sql } from '@vercel/postgres';
 import { differenceInMinutes } from 'date-fns';
 import { Console, Effect, Fiber, pipe } from 'effect';
 import { UnknownException } from 'effect/Cause';
-import {
-  all,
-  andThen,
-  catchTag,
-  fail,
-  flatMap,
-  map,
-  succeed,
-  tap,
-  tryPromise,
-} from 'effect/Effect';
 import { RuntimeFiber } from 'effect/Fiber';
 import { Address, Hash, Hex } from 'viem';
 import { getTransactionReceipt } from 'viem/actions';
 import { effectfulShopService } from './ShopService';
 import { SquareService, SquareServiceError } from './SquareService';
-import { existsOrNotFoundErr } from '@/lib/effect';
 
 // export type UpdateOrderOperation =
 //   | { __type: 'add'; orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[] }
@@ -235,7 +220,7 @@ export class USDCWithdrawalSimulationError extends BaseEffectError {
 const simulateUSDCWithdrawal = (
   authorization: USDCAuthorization,
 ): Effect.Effect<boolean, USDCWithdrawalSimulationError> => {
-  return tryPromise({
+  return Effect.tryPromise({
     try: async () =>
       await BASE_CLIENT.simulateContract({
         address: USDC_CONFIG[ChainId.BASE].address,
@@ -290,9 +275,8 @@ const payForOrderViaUSDCAuthorization = ({
   }
 
   return pipe(
-    all([
-      // pull funds to the relayer
-      tryPromise({
+    Effect.all([
+      Effect.tryPromise({
         try: async () => {
           console.log('sending transferWithAuthorization');
           return await relayer
@@ -324,11 +308,10 @@ const payForOrderViaUSDCAuthorization = ({
         },
         catch: e => new OnChainExecutionError(e),
       }),
-      all(
+      Effect.all(
         [
-          // transfer the tip if there is one
           order.tip
-            ? tryPromise({
+            ? Effect.tryPromise({
                 try: async () => {
                   console.log('sending tip txs');
                   return await relayer.writeContract({
@@ -344,9 +327,8 @@ const payForOrderViaUSDCAuthorization = ({
                 },
                 catch: e => new FundSplitTransferError(e),
               })
-            : succeed(null),
-          // transfer to the shop recipient
-          tryPromise({
+            : Effect.succeed(null),
+          Effect.tryPromise({
             try: async () => {
               console.log('sending shop xfer txs');
               return await relayer.writeContract({
@@ -366,8 +348,7 @@ const payForOrderViaUSDCAuthorization = ({
         { concurrency: 'unbounded' },
       ),
     ]),
-    // return out the funds
-    andThen(([receipt]) => {
+    Effect.andThen(([receipt]) => {
       console.log('finished xfers 🎉');
       return {
         txHash: receipt.transactionHash,
@@ -378,14 +359,13 @@ const payForOrderViaUSDCAuthorization = ({
         to: authorization.to,
       };
     }),
-    // if the transfer fails, return the funds back to the sender
-    catchTag('FundSplitTransferError', e =>
+    Effect.catchTag('FundSplitTransferError', e =>
       pipe(
         e,
         e =>
-          all([
-            succeed(e),
-            tryPromise({
+          Effect.all([
+            Effect.succeed(e),
+            Effect.tryPromise({
               try: async () =>
                 await relayer.writeContract({
                   abi: usdcConfig.abi,
@@ -397,8 +377,8 @@ const payForOrderViaUSDCAuthorization = ({
               catch: e => new OnChainExecutionError(e),
             }),
           ]),
-        andThen(([e]) =>
-          fail(
+        Effect.andThen(([e]) =>
+          Effect.fail(
             new OnChainExecutionError(
               `failed but returned funds back to sender: \n original error: ${e.message}`,
             ),
@@ -532,7 +512,7 @@ const _payForSliceOrder = ({
     // load the shop
     effectfulShopService.findById(cart.shop).pipe(existsOrNotFoundErr),
     // map the cart to a new order
-    andThen(({ tipConfig }) => {
+    Effect.andThen(({ tipConfig }) => {
       const externalOrderInfo = {
         __type: 'slice',
         orderId: sliceOrderId,
@@ -564,13 +544,13 @@ const _payForSliceOrder = ({
       return order;
     }),
     // save the order
-    andThen(order =>
-      tryPromise({
+    Effect.andThen(order =>
+      Effect.tryPromise({
         try: () => save<InProgressOrder>(order),
         catch: e => new SQLExecutionError(e),
       }),
     ),
-    tap(() => Console.debug('saved order')),
+    Effect.tap(() => Console.debug('saved order')),
   );
 
   return pipeline;
@@ -606,26 +586,26 @@ function _payForSquareOrder({
     cart,
     // Load shop and configuration data
     cart =>
-      all(
+      Effect.all(
         [
-          succeed({ cart, usdcAuthorization }),
+          Effect.succeed({ cart, usdcAuthorization }),
           effectfulShopService
             .findById(cart.shop)
             .pipe(
-              andThen(shop =>
+              Effect.andThen(shop =>
                 shop
-                  ? succeed(shop as Shop<'square'>)
-                  : fail(new NotFoundError('Shop not found')),
+                  ? Effect.succeed(shop as Shop<'square'>)
+                  : Effect.fail(new NotFoundError('Shop not found')),
               ),
             ),
           effectfulShopService
             .findShopConfigByShopId(cart.shop)
             .pipe(
-              andThen(shopConfig =>
+              Effect.andThen(shopConfig =>
                 shopConfig?.__type === 'square' &&
                 shopConfig.fundRecipientConfig
-                  ? succeed(shopConfig)
-                  : fail(
+                  ? Effect.succeed(shopConfig)
+                  : Effect.fail(
                       new NotFoundError(
                         "Shop not found or doesn't have a fund recipient config",
                       ),
@@ -636,7 +616,7 @@ function _payForSquareOrder({
         { concurrency: 'unbounded' },
       ),
     // Transform cart into a new order
-    map(([{ cart, usdcAuthorization }, shop, shopConfig]) => ({
+    Effect.map(([{ cart, usdcAuthorization }, shop, shopConfig]) => ({
       unsavedOrder: mapCartToNewOrder({
         cart,
         tipRecipient: shop.tipConfig.recipient,
@@ -647,56 +627,57 @@ function _payForSquareOrder({
       usdcAuthorization,
     })),
     // Simulate and initiate USDC withdrawal
-    andThen(({ unsavedOrder, shop, shopConfig, cart, usdcAuthorization }) =>
-      all([
-        succeed({ unsavedOrder, shop, cart }),
-        // try and simulate the withdrawal
-        simulateUSDCWithdrawal(usdcAuthorization).pipe(
-          tap(success => Console.log('simulation success', success)),
-          andThen(success => succeed(success)),
-        ),
-        // if simulation passes, run the withdraw on a new thread
-        Effect.forkDaemon(
-          payForOrderViaUSDCAuthorization({
-            chainId: ChainId.BASE,
-            order: unsavedOrder,
-            authorization: usdcAuthorization,
-            orderRecipient:
-              shopConfig.__type === 'square'
-                ? shopConfig.fundRecipientConfig!.recipient!
-                : genericError("shouldn't happen"),
-          }),
-        ),
-      ]),
+    Effect.andThen(
+      ({ unsavedOrder, shop, shopConfig, cart, usdcAuthorization }) =>
+        Effect.all([
+          Effect.succeed({ unsavedOrder, shop, cart }),
+          // try and simulate the withdrawal
+          simulateUSDCWithdrawal(usdcAuthorization).pipe(
+            Effect.tap(success => Console.log('simulation success', success)),
+            Effect.andThen(success => Effect.succeed(success)),
+          ),
+          // if simulation passes, run the withdraw on a new thread
+          Effect.forkDaemon(
+            payForOrderViaUSDCAuthorization({
+              chainId: ChainId.BASE,
+              order: unsavedOrder,
+              authorization: usdcAuthorization,
+              orderRecipient:
+                shopConfig.__type === 'square'
+                  ? shopConfig.fundRecipientConfig!.recipient!
+                  : genericError("shouldn't happen"),
+            }),
+          ),
+        ]),
     ),
     // Store the fiber reference for later reconciliation
-    tap(([, , fiber]) => {
+    Effect.tap(([, , fiber]) => {
       USDCWithdrawalFiber = fiber;
     }),
     // Persist the order in the database
-    andThen(([{ shop, unsavedOrder }]) =>
-      all([
-        succeed({ shop, cart }),
-        tryPromise({
+    Effect.andThen(([{ shop, unsavedOrder }]) =>
+      Effect.all([
+        Effect.succeed({ shop, cart }),
+        Effect.tryPromise({
           try: () => save(unsavedOrder),
           catch: e => new SQLExecutionError(e),
         }),
       ]),
     ),
-    tap(() => Console.debug('saved order')),
+    Effect.tap(() => Console.debug('saved order')),
     // Capture the saved order ID
-    tap(([, order]) => (savedOrderId = order.id)),
+    Effect.tap(([, order]) => (savedOrderId = order.id)),
     // Prepare and create the order in Square
-    andThen(([{ shop }, savedOrder]) => ({
+    Effect.andThen(([{ shop }, savedOrder]) => ({
       shop,
       order: savedOrder,
       squareOrder: mapOrderToSquareOrder(shop, savedOrder),
     })),
-    andThen(({ order, shop, squareOrder }) =>
-      all(
+    Effect.andThen(({ order, shop, squareOrder }) =>
+      Effect.all(
         [
-          succeed({ shop, order, squareOrder }),
-          tryPromise({
+          Effect.succeed({ shop, order, squareOrder }),
+          Effect.tryPromise({
             try: () =>
               SquareService.createOrder(
                 shop.__sourceConfig.merchantId,
@@ -708,9 +689,9 @@ function _payForSquareOrder({
         { concurrency: 'unbounded' },
       ),
     ),
-    tap(() => Console.log('created square order')),
+    Effect.tap(() => Console.log('created square order')),
     // Update order with external information
-    andThen(([{ shop, order }, createdSquareOrder]) => {
+    Effect.andThen(([{ shop, order }, createdSquareOrder]) => {
       const externalOrderInfo = {
         __type: 'square',
         orderId:
@@ -732,12 +713,12 @@ function _payForSquareOrder({
       };
     }),
     // Reconcile withdrawal and update order with payment details
-    tap(({ order }) =>
+    Effect.tap(({ order }) =>
       Effect.forkDaemon(
         pipe(
           Fiber.join(USDCWithdrawalFiber),
-          tap(() => Console.log('reconciled withdrawal fiber')),
-          andThen(paymentDetails => {
+          Effect.tap(() => Console.log('reconciled withdrawal fiber')),
+          Effect.andThen(paymentDetails => {
             const nextOrder: InProgressOrder = {
               ...order,
               payments: [
@@ -749,13 +730,13 @@ function _payForSquareOrder({
                 } satisfies PaymentInfo,
               ],
             };
-            return tryPromise({
+            return Effect.tryPromise({
               try: () => save(nextOrder),
               catch: e => new SQLExecutionError(e),
             });
           }),
-          tap(() => Console.log('saved order with payment')),
-          catchTag('OnChainExecutionError', e => {
+          Effect.tap(() => Console.log('saved order with payment')),
+          Effect.catchTag('OnChainExecutionError', e => {
             const erroredOrder: ErroredOrder = {
               ...order,
               status: 'error',
@@ -764,7 +745,7 @@ function _payForSquareOrder({
                 message: e.message,
               },
             };
-            return tryPromise({
+            return Effect.tryPromise({
               try: () => save(erroredOrder),
               catch: e => new SQLExecutionError(e),
             });
@@ -773,14 +754,14 @@ function _payForSquareOrder({
       ),
     ),
     // Finalize the order and process payment
-    andThen(({ order, shop }) =>
-      all(
+    Effect.andThen(({ order, shop }) =>
+      Effect.all(
         [
-          tryPromise({
+          Effect.tryPromise({
             try: () => save<InProgressOrder>(order),
             catch: e => new SQLExecutionError(e),
           }),
-          tryPromise({
+          Effect.tryPromise({
             try: async () =>
               SquareService.payForOrder({
                 merchantId: shop.__sourceConfig.merchantId,
@@ -793,13 +774,13 @@ function _payForSquareOrder({
         { concurrency: 2 },
       ),
     ),
-    tap(() => Console.log('paid for square order')),
-    tap(() => Console.log('returning order')),
+    Effect.tap(() => Console.log('paid for square order')),
+    Effect.tap(() => Console.log('returning order')),
     // Return the final order
-    andThen(([order]) => order),
+    Effect.andThen(([order]) => order),
     // Handle errors and update order status accordingly
-    catchTag('SquareServiceError', squareServiceError =>
-      tryPromise({
+    Effect.catchTag('SquareServiceError', squareServiceError =>
+      Effect.tryPromise({
         try: async () => {
           const finalError = await sql`
             UPDATE orders
@@ -820,9 +801,9 @@ function _payForSquareOrder({
         catch: e => e as SQLExecutionError | SquareServiceError,
       }),
     ),
-    catchTag('USDCWithdrawalSimulationError', err => {
+    Effect.catchTag('USDCWithdrawalSimulationError', err => {
       console.error(err);
-      return fail(new OnChainExecutionError('Fund transfer failed'));
+      return Effect.fail(new OnChainExecutionError('Fund transfer failed'));
     }),
   );
 

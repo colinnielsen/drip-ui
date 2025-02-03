@@ -110,19 +110,15 @@ export const FooterButtonTrigger = (props: FooterData) => {
   );
 };
 
-const useCartOpenAndCloseListener = (type?: FooterData['type']) => {
+const useCartOpenAndCloseListener = (data: FooterData | null) => {
   const { setOpen } = useCartDrawer();
 
   const { data: cart } = useCart();
   const prevCart = usePrevious(cart);
-  const prevType = usePrevious(type);
 
   useEffect(() => {
-    if (prevCart && cart === null) setOpen(false);
-    if (prevCart?.id && cart?.id && prevCart.id !== cart.id) setOpen(false);
-    // when the type changes
-    // if (prevType !== null && type !== null && prevType !== type) setOpen(false);
-  }, [cart, prevCart, type, prevType]);
+    if (data === null) setOpen(false);
+  }, [cart, prevCart]);
 };
 
 const useCartAndShopInfo = (): FooterData | null => {
@@ -157,7 +153,7 @@ const useCartAndShopInfo = (): FooterData | null => {
 export default function StatusBar() {
   const [ready, setIsReady] = useState(false);
   const data = useCartAndShopInfo();
-  useCartOpenAndCloseListener(data?.type);
+  useCartOpenAndCloseListener(data);
 
   const { open, setOpen } = useCartDrawer();
 

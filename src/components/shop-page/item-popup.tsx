@@ -21,6 +21,7 @@ import {
   useItemPriceWithDiscounts,
 } from '@/queries/ItemQuery';
 import { useShop } from '@/queries/ShopQuery';
+import { X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { PlusSvg, Price, PriceRange } from '../ui/icons';
@@ -30,7 +31,6 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Skeleton } from '../ui/skeleton';
 import { Body, Headline, Title1 } from '../ui/typography';
 import { useItemDetails } from './item-details-context';
-import { X } from 'lucide-react';
 
 type CategorySections = ItemCategory | '__misc__';
 type ModSection = { [key in CategorySections]: ItemMod[] };
@@ -309,7 +309,7 @@ export function ItemDetailsDrawer() {
 
   return (
     <DrawerContent full className="overscroll-y-contain">
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 flex flex-col overflow-y-auto">
         <DrawerDescription className="hidden">
           {selectedItem?.name}
         </DrawerDescription>

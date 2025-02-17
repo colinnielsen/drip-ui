@@ -14,7 +14,7 @@ import {
 } from '@/data-model/square-connection/SquareConnectionType';
 import SquareConnectionPersistance from '@/infrastructures/sql/SquareConnectionPersistance';
 import { BaseEffectError } from '@/lib/effect';
-import getSquareClient from '@/lib/squareClient';
+import getSquareClient from '@/lib/data-sources/square';
 import { err } from '@/lib/utils';
 import {
   ApiResponse,

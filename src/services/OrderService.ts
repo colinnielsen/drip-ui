@@ -30,6 +30,7 @@ import {
   PaymentInfo,
 } from '@/data-model/order/OrderType';
 import { Shop, SquareShopSourceConfig } from '@/data-model/shop/ShopType';
+import { User } from '@/data-model/user/UserType';
 import { USDC_CONFIG } from '@/lib/contract-config/USDC';
 import { existsOrNotFoundErr } from '@/lib/effect';
 import {
@@ -46,7 +47,7 @@ import {
   getDripRelayerClient,
   mapChainIdToViemChain,
 } from '@/lib/ethereum';
-import { sliceKit } from '@/lib/slice';
+import { sliceKit } from '@/lib/data-sources/slice';
 import { generateUUID, rehydrateData } from '@/lib/utils';
 import { PayRequest } from '@/pages/api/orders/pay';
 import { sql } from '@vercel/postgres';
@@ -131,87 +132,6 @@ const save = async <T extends Order>(
     r => /* rehydrate any currency objects*/ rehydrateData(r.rows[0]) as T,
   );
 };
-
-// const update = async (
-//   orderId: UUID,
-//   operations: UpdateOrderOperation[],
-// ): Promise<Order | null> => {
-//   const result = await sql`
-//     SELECT
-//     o.*,
-//     (
-//       SELECT json_agg(s.*)
-//       FROM shops s
-//       WHERE s.id = o.shop
-//       LIMIT 1
-//     ) AS relatedshop
-//     FROM orders o
-//     WHERE o.id = ${orderId}
-//   `;
-//   if (!result.rowCount) throw Error('Order not found');
-
-//   const { relatedshop, ...order } = result.rows[0] as Order & {
-//     relatedshop: Shop[];
-//   };
-//   const shop = relatedshop[0];
-
-//   if (order.status !== '1-pending')
-//     throw Error('Cannot update an order that is not pending');
-
-//   for (const op of operations) {
-//     let orderItemId: number;
-
-//     switch (op.__type) {
-//       case 'add':
-//         if (Array.isArray(op.orderItem))
-//           order.orderItems = [
-//             ...order.orderItems,
-//             ...op.orderItem.map<OrderItem>(o => ({ id: v4() as UUID, ...o })),
-//           ];
-//         else order.orderItems.push({ id: v4() as UUID, ...op.orderItem });
-//         break;
-//       case 'delete':
-//         orderItemId = order.orderItems.findIndex(o => o.id === op.orderItemId);
-//         if (orderItemId === -1) break;
-//         order.orderItems.splice(orderItemId, 1);
-//         break;
-//       case 'update':
-//         orderItemId = order.orderItems.findIndex(o => o.id === op.orderItemId);
-//         if (orderItemId === -1) throw Error('bad order id');
-//         order.orderItems[orderItemId] = op.orderItem;
-//         break;
-//       case 'tip':
-//         if (shop.tipConfig.enabled === false)
-//           throw Error('tipping is disabled');
-
-//         order.tip = op.tip
-//           ? {
-//               ...op.tip,
-//               address: shop.tipConfig.address,
-//             }
-//           : null;
-//         break;
-//       default:
-//         let _err: never;
-//         throw Error('bad impl');
-//     }
-//   }
-
-//   if (order.orderItems.length === 0) {
-//     await deleteOrder(orderId);
-//     return null;
-//   }
-
-//   await sql`
-//     UPDATE orders
-//     SET
-//     "orderItems" = ${JSON.stringify(order.orderItems)},
-//     "tip" = ${order.tip ? JSON.stringify(order.tip) : null}
-//     WHERE id = ${orderId}
-//   `;
-
-//   return order;
-// };
 
 export class USDCWithdrawalSimulationError extends BaseEffectError {
   readonly _tag = 'USDCWithdrawalSimulationError';
@@ -493,17 +413,20 @@ const syncOrderWithExternalService = async (
   throw Error(`${_type} not implemented`);
 };
 
-const _payForSliceOrder = ({
-  sliceOrderId,
-  transactionHash,
-  totalPaidWei,
-  cart,
-}: {
-  sliceOrderId: string;
-  transactionHash: Hash;
-  totalPaidWei: bigint;
-  cart: Cart;
-}): Effect.Effect<
+const _payForSliceOrder = (
+  userId: User['id'],
+  {
+    sliceOrderId,
+    transactionHash,
+    totalPaidWei,
+    cart,
+  }: {
+    sliceOrderId: string;
+    transactionHash: Hash;
+    totalPaidWei: bigint;
+    cart: Cart;
+  },
+): Effect.Effect<
   InProgressOrder,
   SQLExecutionError | NotFoundError | GenericError,
   never
@@ -533,6 +456,7 @@ const _payForSliceOrder = ({
 
       const order = {
         ...mapCartToNewOrder({
+          userId,
           cart,
           tipRecipient: tipConfig.recipient,
         }),
@@ -556,13 +480,16 @@ const _payForSliceOrder = ({
   return pipeline;
 };
 
-function _payForSquareOrder({
-  usdcAuthorization,
-  cart,
-}: {
-  usdcAuthorization: USDCAuthorization;
-  cart: Cart;
-}): Effect.Effect<
+function _payForSquareOrder(
+  userId: User['id'],
+  {
+    usdcAuthorization,
+    cart,
+  }: {
+    usdcAuthorization: USDCAuthorization;
+    cart: Cart;
+  },
+): Effect.Effect<
   InProgressOrder,
   | SQLExecutionError
   | NotFoundError
@@ -618,6 +545,7 @@ function _payForSquareOrder({
     // Transform cart into a new order
     Effect.map(([{ cart, usdcAuthorization }, shop, shopConfig]) => ({
       unsavedOrder: mapCartToNewOrder({
+        userId,
         cart,
         tipRecipient: shop.tipConfig.recipient,
       }),
@@ -811,6 +739,7 @@ function _payForSquareOrder({
 }
 
 const pay = (
+  userId: User['id'],
   params: PayRequest,
 ): Effect.Effect<
   Order,
@@ -822,8 +751,8 @@ const pay = (
   | OnChainExecutionError
   | UnimplementedPathError
 > => {
-  if (params.type === 'slice') return _payForSliceOrder(params);
-  if (params.type === 'square') return _payForSquareOrder(params);
+  if (params.type === 'slice') return _payForSliceOrder(userId, params);
+  if (params.type === 'square') return _payForSquareOrder(userId, params);
 
   let _type: never = params;
   return Effect.fail(new UnimplementedPathError(`${_type} not implemented`));

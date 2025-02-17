@@ -12,6 +12,7 @@ export class BaseEffectError extends Error {
       super(e);
     } else if (e instanceof Error) {
       super(e.message, { cause: (e?.cause as any)?.message || e.cause });
+      if ('_tag' in e && typeof e._tag === 'string') this.originalTag = e._tag;
       Error.captureStackTrace(this, this.constructor);
     } else {
       super(String(e));

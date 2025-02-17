@@ -12,9 +12,10 @@ import {
 } from '@/pages/api/orders/authorization-payload';
 import { PayRequest } from '@/pages/api/orders/pay';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CART_QUERY_KEY, useCart, useDeleteCartMutation } from './CartQuery';
+import { useCart, useDeleteCartMutation } from './CartQuery';
 import { useConnectedWallet, useWalletClient } from './EthereumQuery';
 import { ORDERS_QUERY_KEY } from './OrderQuery';
+import { ACTIVE_USER_QUERY_KEY } from './UserQuery';
 
 export const usePayAndOrder = () => {
   const wallet = useConnectedWallet();
@@ -99,24 +100,29 @@ export const usePayAndOrder = () => {
     onSuccess: async ({ cart, order: returnedOrder }) => {
       setPaymentStep('success');
 
-      // delete the cart
-      await deleteCartMutation.mutateAsync({ cartId: cart.id });
+      // refetch queries:
+      // 1. user
+      await queryClient.refetchQueries({
+        queryKey: [ACTIVE_USER_QUERY_KEY],
+      });
 
-      // add the order to the orders
+      // add the order to the orders (if any)
       queryClient.setQueryData(
         [ORDERS_QUERY_KEY, returnedOrder.user],
         (orders: Order[]) => {
-          return [returnedOrder, ...orders];
+          return [returnedOrder, ...(orders || [])];
         },
       );
 
-      // refetch both the orders and the cart
+      // refetch queries:
+      // 2. orders
       queryClient.refetchQueries({
-        queryKey: [ORDERS_QUERY_KEY, returnedOrder.user],
+        queryKey: [ORDERS_QUERY_KEY],
       });
-      queryClient.refetchQueries({
-        queryKey: CART_QUERY_KEY(),
-      });
+
+      // 3. orders
+      // delete the cart
+      await deleteCartMutation.mutateAsync({ cartId: cart.id });
     },
     onError(error) {
       if (error.name !== 'UserRejectedRequestError') errorToast(error);

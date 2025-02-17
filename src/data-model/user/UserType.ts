@@ -1,43 +1,31 @@
 import { UUID } from '@/data-model/_common/type/CommonType';
-import { PrivyDID } from '../_external/privy';
+import { PrivyDID } from '../_external/PrivyType';
+import { Brand } from 'effect';
 
-export type SessionUser = {
-  /**
-   * @dev `session` is a temporary type that is used to represent a user's session pre-signup
-   * `user` is a permanent type that is used to represent a user's identity.
-   */
-  __type: 'session';
-  id: UUID;
-  role: 'user';
-  authServiceId: null;
-  wallet: null;
-  createdAt: string;
-};
+export type UserId = UUID & Brand.Brand<'UserId'>;
+export const UserId = Brand.nominal<UserId>();
 
 export type WalletConnectorType =
   | `injected`
   | `wallet_connect`
   | `coinbase_wallet`
-  | `embedded`;
+  | `embedded`
+  | 'unknown';
 
 export type AuthServiceId = {
   __type: 'privy';
   id: PrivyDID;
+  // TODO: sms auth
+  // phone: string;
 };
 
-export type SavedUser = {
-  __type: 'user';
-  id: UUID;
-  role: 'admin' | 'user';
-  /**
-   * @dev the `authServiceId` is the user id from the external service used to verify the user
-   */
+export type User = {
+  id: UserId;
   authServiceId?: AuthServiceId;
-  wallet: {
+  wallet?: {
     __type: WalletConnectorType;
     address: `0x${string}`;
-  };
-  createdAt: string;
+  } | null;
+  /** iso date string */
+  createdAt: Date;
 };
-
-export type User = SessionUser | SavedUser;

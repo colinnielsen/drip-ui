@@ -1,5 +1,6 @@
 import { initCurrencyZero } from '@/data-model/_common/currency/currencyDTO';
 import { calculateCartTotals } from '@/data-model/cart/CartDTO';
+import { setAuthCookies } from '@/lib/auth-tokens';
 import {
   BadRequestError,
   DripServerError,
@@ -11,19 +12,15 @@ import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import { S, validateHTTPMethod } from '@/lib/effect/validation';
 import { S_Hex } from '@/lib/effect/validation/base';
 import { CartSchema } from '@/lib/effect/validation/cart';
-import { S_USDCAuthorization } from '@/lib/effect/validation/ethereum';
-import { BASE_CLIENT } from '@/lib/ethereum';
-import { getSessionId } from '@/lib/session';
-import OrderService from '@/services/OrderService';
-import { Effect, Either, pipe } from 'effect';
 import {
-  andThen,
-  catchAll,
-  catchTag,
-  fail,
-  succeed,
-  tryPromise,
-} from 'effect/Effect';
+  S_Address,
+  S_USDCAuthorization,
+} from '@/lib/effect/validation/ethereum';
+import { BASE_CLIENT } from '@/lib/ethereum';
+import { authenticationService } from '@/services/AuthenticationService';
+import OrderService from '@/services/OrderService';
+import userService from '@/services/UserService';
+import { Effect, Either, pipe } from 'effect';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const PaySchema = S.Union(
@@ -37,6 +34,7 @@ const PaySchema = S.Union(
     sliceOrderId: S.String,
     transactionHash: S_Hex,
     totalPaidWei: S.BigInt,
+    payerAddress: S_Address,
     cart: CartSchema,
   }),
 );
@@ -44,7 +42,7 @@ const PaySchema = S.Union(
 export type PayRequest = typeof PaySchema.Type;
 
 const validatePayload = (
-  req: NextApiRequest,
+  _req: NextApiRequest,
   body: PayRequest,
 ): Effect.Effect<PayRequest, UnauthorizedError | BadRequestError> =>
   pipe(
@@ -55,13 +53,6 @@ const validatePayload = (
         // validate square cart
         onLeft(squarePayload) {
           const { cart } = squarePayload;
-          const userId = getSessionId(req);
-          // validate userid === requestee
-          if (!userId) return fail(new UnauthorizedError('no user id found'));
-          if (cart.user !== userId)
-            return fail(
-              new UnauthorizedError('user id does not match cart user'),
-            );
 
           // ensure correct totals
           const {
@@ -83,32 +74,32 @@ const validatePayload = (
             !quotedTaxAmount.eq(cart.quotedTaxAmount ?? CURRENCY_ZERO) ||
             !quotedTotalAmount.eq(cart.quotedTotalAmount ?? CURRENCY_ZERO)
           )
-            return fail(
+            return Effect.fail(
               new BadRequestError(
                 'Error: The cart quoted to the user differs from the calculation on the server',
               ),
             );
 
-          return succeed(squarePayload);
+          return Effect.succeed(squarePayload);
         },
         onRight(right) {
           return pipe(
             right,
             // ensure the transaction exists onchain
             slicePayload =>
-              tryPromise(() =>
+              Effect.tryPromise(() =>
                 BASE_CLIENT.waitForTransactionReceipt({
                   hash: slicePayload.transactionHash,
                 }),
               ),
-            andThen(receipt =>
+            Effect.andThen(receipt =>
               // and it was succesful
               receipt.status === 'success'
-                ? succeed(right)
-                : fail(new BadRequestError('Tx not successful')),
+                ? Effect.succeed(right)
+                : Effect.fail(new BadRequestError('Tx not successful')),
             ),
-            catchTag('UnknownException', () =>
-              fail(new BadRequestError('Tx hash not found onchain')),
+            Effect.catchTag('UnknownException', () =>
+              Effect.fail(new BadRequestError('Tx hash not found onchain')),
             ),
           );
         },
@@ -125,28 +116,63 @@ const PayRoute = EffectfulApiRoute(function (
     // check the request method
     validateHTTPMethod('POST'),
     // hydrate the request body
-    andThen(({ body }) => hydrateClassInstancesFromJSONBody(body)),
+    Effect.andThen(({ body }) => hydrateClassInstancesFromJSONBody(body)),
     // validate the rquest body against the schema
-    andThen(S.decode(PaySchema)),
+    Effect.andThen(S.decode(PaySchema)),
     // validate the contents of the body
-    andThen(b => validatePayload(req, b)),
+    Effect.andThen(b => validatePayload(req, b)),
+    // gets the user from the pay request by either cookies, or wallet address.
+    //  or creates a new user if it's their first order
+    //  and sets cookies if the user is new
+    Effect.andThen(payload =>
+      Effect.all({
+        user: userService.getOrInitializeUserFromPayRequest(req, res, payload),
+        payload: Effect.succeed(payload),
+      }),
+    ),
     // pay for the order
-    andThen(OrderService.pay),
-    // return the order
-    andThen(order => res.status(200).json(order)),
+    Effect.andThen(({ payload, user }) =>
+      Effect.all({
+        order: OrderService.pay(user.id, payload),
+        user: Effect.succeed(user),
+      }),
+    ),
+    // issue tokens
+    Effect.andThen(({ order, user }) =>
+      pipe(
+        // pipe over the user id
+        user.id,
+        uid =>
+          Effect.all({
+            // generate a new token pair
+            tokens: authenticationService.issueRefreshAndAccessToken(uid),
+            order: Effect.succeed(order),
+          }),
+      ),
+    ),
+    Effect.andThen(({ tokens: { accessToken, refreshToken }, order }) => {
+      // and set the auth cookies on the response
+      setAuthCookies(res, accessToken.tokenString, refreshToken.tokenString);
+      // return the order
+      return res.status(200).json(order);
+    }),
     // handle errors
-    catchAll(function (e): Effect.Effect<never, HTTPRouteHandlerErrors, never> {
+    Effect.catchAll(function (e): Effect.Effect<
+      never,
+      HTTPRouteHandlerErrors,
+      never
+    > {
       switch (e._tag) {
         // pluck out any non-500 errors and let them exist as-is
         case 'BadRequestError':
         case 'ParseError':
         case 'UnauthorizedError':
         case 'NotFoundError':
-          return fail(e);
+          return Effect.fail(e);
 
         // all remaining errors and mark them as 500
         default:
-          return fail(new DripServerError(e));
+          return Effect.fail(new DripServerError(e));
       }
     }),
   );

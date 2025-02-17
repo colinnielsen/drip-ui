@@ -34,10 +34,10 @@ const useSquareConnectionStatus = () =>
 const AuthorizationResponses = () => {
   const searchParams = useSearchParams();
 
-  const error = searchParams.get('error');
+  const error = searchParams?.get('error');
   if (!error) return null;
 
-  const message = searchParams.get('message');
+  const message = searchParams?.get('message');
 
   return (
     <div className="flex flex-col gap-2 text-red-500">

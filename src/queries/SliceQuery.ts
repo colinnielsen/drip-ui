@@ -8,7 +8,7 @@ import { mapSliceExternalIdToSliceId } from '@/data-model/shop/ShopDTO';
 import { USDC_CONFIG } from '@/lib/contract-config/USDC';
 import { BASE_CLIENT, WAGMI_CONFIG } from '@/lib/ethereum';
 import { useErrorToast } from '@/lib/hooks/use-toast';
-import { SLICE_ENTRYPOINT_ADDRESS, sliceKit } from '@/lib/slice';
+import { SLICE_ENTRYPOINT_ADDRESS, sliceKit } from '@/lib/data-sources/slice';
 import { axiosFetcher, minutes } from '@/lib/utils';
 import { PayRequest } from '@/pages/api/orders/pay';
 import {
@@ -29,6 +29,7 @@ import {
 } from './EthereumQuery';
 import { ORDERS_QUERY_KEY } from './OrderQuery';
 import { useShop } from './ShopQuery';
+import { ACTIVE_USER_QUERY_KEY } from './UserQuery';
 
 //
 //// QUERIES
@@ -150,41 +151,50 @@ export const usePayAndOrder = () => {
 
       setPaymentStep('success');
 
-      const order = await axiosFetcher<Order, PayRequest>(`/api/orders/pay`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          type: 'slice',
-          transactionHash: hash,
-          cart: dripCart,
-          totalPaidWei: dripCart.quotedTotalAmount?.toWei() ?? 0n,
-          sliceOrderId: orderId,
-        },
-        withCredentials: true,
-      });
-
-      // delete the cart
-      await deleteCartMutation.mutateAsync({ cartId: dripCart.id });
-      // add the order to the orders
-      queryClient.setQueryData(
-        [ORDERS_QUERY_KEY, order.user],
-        (orders: Order[]) => {
-          console.log('orders', orders);
-          return [order, ...(orders || [])];
+      const returnedOrder = await axiosFetcher<Order, PayRequest>(
+        `/api/orders/pay`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            type: 'slice',
+            transactionHash: hash,
+            cart: dripCart,
+            totalPaidWei: dripCart.quotedTotalAmount?.toWei() ?? 0n,
+            payerAddress: address,
+            sliceOrderId: orderId,
+          },
+          withCredentials: true,
         },
       );
 
-      // refetch both the orders and the cart
-      queryClient.refetchQueries({
-        queryKey: [ORDERS_QUERY_KEY, order.user],
+      // refetch queries:
+      // 1. user
+      await queryClient.refetchQueries({
+        queryKey: [ACTIVE_USER_QUERY_KEY],
       });
+
+      // add the order to the orders (if any)
+      queryClient.setQueryData(
+        [ORDERS_QUERY_KEY, returnedOrder.user],
+        (orders: Order[]) => {
+          return [returnedOrder, ...(orders || [])];
+        },
+      );
+
+      // refetch queries:
+      // 2. orders
       queryClient.refetchQueries({
-        queryKey: CART_QUERY_KEY(),
+        queryKey: [ORDERS_QUERY_KEY],
       });
+
+      // 3. orders
+      // delete the cart
+      await deleteCartMutation.mutateAsync({ cartId: dripCart.id });
     },
-    [setPaymentStep, dripCart, queryClient, deleteCartMutation],
+    [setPaymentStep, dripCart, queryClient, deleteCartMutation, address],
   );
 
   const ready =

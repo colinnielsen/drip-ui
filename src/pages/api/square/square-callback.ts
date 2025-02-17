@@ -1,18 +1,20 @@
+import { UUID } from '@/data-model/_common/type/CommonType';
 import {
   getSquareAccessToken,
   getSquareAppId,
   getSquareAppSecret,
 } from '@/lib/constants';
+import getSquareClient, {
+  getTempSquareOAuthId,
+  SquareAuthorizationErrors,
+} from '@/lib/data-sources/square';
 import { ApiRoute } from '@/lib/next';
-import { getTempSquareOAuthId } from '@/lib/session';
-import getSquareClient, { SquareAuthorizationErrors } from '@/lib/squareClient';
 import { getHostname, getProtocol } from '@/lib/utils';
 import { CSRFTokenService } from '@/services/CSRFTokenService';
 import { SquareService } from '@/services/SquareService';
 import axios, { AxiosError } from 'axios';
-import { UUID } from '@/data-model/_common/type/CommonType';
-import { NextApiRequest, NextApiResponse } from 'next';
 import * as S from 'effect/Schema';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const SquareCallbackSchema = S.Struct({
   response_type: S.Literal('code'),

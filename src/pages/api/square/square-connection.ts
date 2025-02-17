@@ -3,8 +3,8 @@ import { mapSquareExternalIdToLocationId } from '@/data-model/shop/ShopDTO';
 import { SquareShopConfig } from '@/data-model/shop/ShopType';
 import { MinSquareConnection } from '@/data-model/square-connection/SquareConnectionType';
 import { ApiRoute } from '@/lib/next';
-import { getSessionId } from '@/lib/session';
 import { err } from '@/lib/utils';
+import { authenticationService } from '@/services/AuthenticationService';
 import ShopService from '@/services/ShopService';
 import { SquareService } from '@/services/SquareService';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -23,11 +23,12 @@ export default ApiRoute(async function handler(
   if (req.method !== 'GET')
     return res.status(405).json({ error: 'Method not allowed' });
 
-  const userId = getSessionId(req);
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  const user = await authenticationService.checkAuthentication_sync(req, res);
+
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
-    const connection = await SquareService.findByUserId(userId);
+    const connection = await SquareService.findByUserId(user.id);
     if (!connection)
       return res.status(404).json({ error: 'Connection not found' });
 

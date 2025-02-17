@@ -1,8 +1,8 @@
 import { Effect, pipe } from 'effect';
 import { andThen } from 'effect/Effect';
 import { NextApiRequest } from 'next';
-import { getTempSquareOAuthId } from '../../session';
 import { BadRequestError } from '../errors';
+import { getTempSquareOAuthId } from '@/lib/data-sources/square';
 
 export * as S from 'effect/Schema';
 export * from './base';

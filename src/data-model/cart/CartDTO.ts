@@ -91,7 +91,6 @@ export const addLineItemToCart = (
     | {
         type: 'create';
         shopId: Shop['id'];
-        userId: User['id'];
         newLineItem: LineItem;
       },
 ): Cart => {
@@ -147,7 +146,6 @@ export const addLineItemToCart = (
         id: generateUUID(),
         createdTimestamp: new Date(),
         shop: deps.shopId,
-        user: deps.userId,
         lineItems: nextLineItems,
         tip: null,
       } satisfies Cart;

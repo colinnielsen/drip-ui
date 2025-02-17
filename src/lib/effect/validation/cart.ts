@@ -86,7 +86,6 @@ export const CartSchema = S.Struct({
   id: S_UUID,
   createdTimestamp: S.Date,
   shop: S_UUID,
-  user: S_UUID,
   lineItems: S.mutable(S.Array(LineItemSchema)).pipe(S.minLength(1)),
   discounts: S.optional(S.NullOr(S.mutable(S.Array(DiscountSchema)))),
   tip: S.optional(

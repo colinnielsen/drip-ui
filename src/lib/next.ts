@@ -1,20 +1,11 @@
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next/types';
-import { getSessionId } from './session';
-import { generateUUID, isUUID } from './utils';
+import { generateUUID } from './utils';
 
 // serialize instructions for big int
 
 // @ts-ignore
 BigInt.prototype.toJSON = function () {
   return this.toString();
-};
-
-export const getAndValidateUserRequest = (req: NextApiRequest) => {
-  const userId = getSessionId(req);
-  if (!userId) throw new Error('User ID not found');
-  if (!isUUID(userId)) throw new Error('Invalid User ID');
-
-  return userId;
 };
 
 export const revalidatePathIfExists = async (

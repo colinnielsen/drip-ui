@@ -61,7 +61,7 @@ const useDetermineCheckoutStep = (): {
 } => {
   const slideInView = useSlideInView();
   const { wallets, ready: privyReady } = useWallets();
-  const { data: user, isLoading: isUserLoading } = useUser();
+  const { isLoading: isUserLoading } = useUser();
   const { data: cart } = useCart();
   const { data: balance, isLoading: isBalanceLoading } = useUSDCBalance({
     pollingInterval: slideInView === 0 && cart ? 6_000 : undefined,
@@ -78,7 +78,7 @@ const useDetermineCheckoutStep = (): {
 
   // (shouldn't happen)
 
-  if (!privyReady || isUserLoading || !user || !cart)
+  if (!privyReady || isUserLoading || !cart)
     return {
       step: 'initializing',
     };

@@ -1,7 +1,8 @@
 import { getSquareAppId } from '@/lib/constants';
+import { setTempSquareOAuthId } from '@/lib/data-sources/square';
 import { ApiRoute } from '@/lib/next';
-import { getSessionId, setTempSquareOAuthId } from '@/lib/session';
 import { generateUUID, getHostname, getProtocol } from '@/lib/utils';
+import { authenticationService } from '@/services/AuthenticationService';
 import { CSRFTokenService } from '@/services/CSRFTokenService';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { join } from 'node:path';
@@ -28,15 +29,15 @@ export default ApiRoute(async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const sessionId = getSessionId(req);
   if (req.method !== 'GET')
     return res.status(405).json({ error: 'Method not allowed' });
-  if (!sessionId)
-    return res.status(401).json({ error: 'No session id found in cookies' });
+
+  const user = await authenticationService.checkAuthentication_sync(req, res);
+  if (!user) return res.status(401).json({ error: 'User not found' });
 
   // generate a CSRF token
   const CSRFToken = await CSRFTokenService.save({
-    userId: sessionId,
+    userId: user.id,
     token: generateUUID(),
   });
 
@@ -51,7 +52,7 @@ export default ApiRoute(async function handler(
   url.searchParams.append('state', state);
   url.searchParams.append('redirect_uri', getCallbackUrl());
 
-  setTempSquareOAuthId({ tempOAuthId: sessionId, res });
+  setTempSquareOAuthId({ tempOAuthId: user.id, res });
 
   return res.redirect(url.toString());
 }, 'square-authorization-redirect');

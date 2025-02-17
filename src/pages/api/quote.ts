@@ -10,12 +10,13 @@ import { isItemId } from '@/data-model/item/ItemDTO';
 import { ItemId } from '@/data-model/item/ItemType';
 import { mapSliceExternalIdToSliceId } from '@/data-model/shop/ShopDTO';
 import { SliceShopConfig, SquareShopConfig } from '@/data-model/shop/ShopType';
+import { sliceKit, SliceKitError } from '@/lib/data-sources/slice';
 import {
   DripServerError,
+  existsOrNotFoundErr,
   GenericError,
   HTTPRouteHandlerErrors,
   hydrateClassInstancesFromJSONBody,
-  existsOrNotFoundErr,
   RedisError,
   UnimplementedPathError,
 } from '@/lib/effect';
@@ -27,11 +28,9 @@ import {
   validateHTTPMethod,
 } from '@/lib/effect/validation';
 import { withRedisCacheEffect } from '@/lib/redis';
-import { sliceKit, SliceKitError } from '@/lib/slice';
 import { err } from '@/lib/utils';
 import { effectfulShopService } from '@/services/ShopService';
 import { Effect, pipe } from 'effect';
-import { all, andThen, catchAll, fail, succeed } from 'effect/Effect';
 
 const SingleQuoteRequest = S.Struct({
   type: S.Literal('single'),
@@ -68,7 +67,7 @@ const handleSliceQuote = (
   return pipe(
     { ...req, shopConfig },
     d =>
-      all([
+      Effect.all([
         withRedisCacheEffect(sliceKit.getStoreProducts)({
           slicerId: mapSliceExternalIdToSliceId(d.shopConfig.externalId),
         }),
@@ -77,10 +76,10 @@ const handleSliceQuote = (
           ...(d.userWalletAddress && { buyer: d.userWalletAddress }),
           dynamicPricing: true,
         }),
-        succeed(d),
+        Effect.succeed(d),
       ]),
 
-    andThen(([originalPrices, discountPrices, request]) => {
+    Effect.andThen(([originalPrices, discountPrices, request]) => {
       const originalPriceLookup = originalPrices.cartProducts?.reduce<
         Record<ItemId, Currency | null>
       >(
@@ -161,7 +160,7 @@ const handleSquareQuote = (
   _qr: QuoteRequest,
   _shopConfig: SquareShopConfig,
 ): Effect.Effect<Discount[], never, never> => {
-  return succeed([]);
+  return Effect.succeed([]);
 };
 
 //
@@ -174,21 +173,21 @@ export default EffectfulApiRoute((req, res) => {
     // check the request method
     validateHTTPMethod('POST'),
     // rehydrate currencies
-    andThen(req => hydrateClassInstancesFromJSONBody(req.body)),
+    Effect.andThen(req => hydrateClassInstancesFromJSONBody(req.body)),
     // validate the rquest body against the schema
-    andThen(reqBody => S.decode(QuoteRequestSchema)(reqBody)),
+    Effect.andThen(reqBody => S.decode(QuoteRequestSchema)(reqBody)),
     // load the shop config
-    andThen(reqBody =>
-      all([
+    Effect.andThen(reqBody =>
+      Effect.all([
         effectfulShopService
           .findShopConfigByShopId(reqBody.shopId)
           .pipe(existsOrNotFoundErr),
 
-        succeed(reqBody),
+        Effect.succeed(reqBody),
       ]),
     ),
     // depending on the shop config, return the quote
-    andThen(([config, reqBody]) => {
+    Effect.andThen(([config, reqBody]) => {
       if (config.__type === 'square') return handleSquareQuote(reqBody, config);
       if (config.__type === 'slice') return handleSliceQuote(reqBody, config);
 
@@ -196,19 +195,23 @@ export default EffectfulApiRoute((req, res) => {
       throw new UnimplementedPathError('config type not implemented');
     }),
     // return the discounts
-    andThen(discounts => res.status(200).json(discounts)),
+    Effect.andThen(discounts => res.status(200).json(discounts)),
     // handle errors
-    catchAll(function (e): Effect.Effect<never, HTTPRouteHandlerErrors, never> {
+    Effect.catchAll(function (e): Effect.Effect<
+      never,
+      HTTPRouteHandlerErrors,
+      never
+    > {
       switch (e._tag) {
         // pluck out any non-500 errors and let them exist as-is
         case 'BadRequestError':
         case 'ParseError':
         case 'NotFoundError':
-          return fail(e);
+          return Effect.fail(e);
 
         // all remaining errors and mark them as 500
         default:
-          return fail(new DripServerError(e));
+          return Effect.fail(new DripServerError(e));
       }
     }),
   );

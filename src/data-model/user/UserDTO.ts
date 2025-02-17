@@ -1,9 +1,10 @@
-import { User as PrivyUser } from '@privy-io/server-auth';
 import { UUID } from '@/data-model/_common/type/CommonType';
-import { v5, validate as validateUUID } from 'uuid';
-import { PrivyDID } from '../_external/privy';
-import { SavedUser, SessionUser, User, WalletConnectorType } from './UserType';
 import privy from '@/lib/privy';
+import { generateUUID } from '@/lib/utils';
+import { User as PrivyUser } from '@privy-io/server-auth';
+import { v5, validate as validateUUID } from 'uuid';
+import { PrivyDID } from '../_external/PrivyType';
+import { User, UserId, WalletConnectorType } from './UserType';
 
 // A valid UUID to be used as a namespace
 const PRIVY_NAMESPACE = 'E34251C3-01F3-4788-8E93-CE0FBC50EA5D';
@@ -15,17 +16,17 @@ export const mapPrivyIdToUserId = (privyId: PrivyDID) => {
   return v5(privyId, PRIVY_NAMESPACE) as UUID;
 };
 
-export function createSessionUser(sessionId: UUID): SessionUser {
-  return {
-    __type: 'session',
-    id: sessionId,
-    role: 'user',
-    authServiceId: null,
-    wallet: null,
-    createdAt: new Date().toISOString(),
-  };
-}
+export const mapToUserId = (): User['id'] => UserId(generateUUID());
 
+export const mapToUser = ({
+  wallet: wallet,
+}: {
+  wallet: NonNullable<User['wallet']>;
+}): User => ({
+  id: mapToUserId(),
+  createdAt: new Date(),
+  wallet,
+});
 /**
  * @throws if the user has no wallet
  */
@@ -53,15 +54,14 @@ export function createSessionUser(sessionId: UUID): SessionUser {
 export const mapUserToSavedUserViaPrivy = async (
   user: User,
   _privyInfo: PrivyUser | PrivyDID,
-): Promise<SavedUser> => {
-  const privyInfo =
-    typeof _privyInfo === 'string'
-      ? await privy.getUser(_privyInfo)
-      : _privyInfo;
+): Promise<User> => {
+  const privyDid =
+    typeof _privyInfo === 'string' ? _privyInfo : (_privyInfo.id as PrivyDID);
+
+  const privyInfo = await privy.getUser({ idToken: privyDid });
 
   return {
     ...user,
-    __type: 'user',
     authServiceId: {
       __type: 'privy',
       id: privyInfo.id as PrivyDID,

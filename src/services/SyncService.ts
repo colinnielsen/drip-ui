@@ -13,7 +13,7 @@ import {
   SliceShopConfig,
   SquareShopConfig,
 } from '@/data-model/shop/ShopType';
-import { sliceKit } from '@/lib/slice';
+import { sliceKit } from '@/lib/data-sources/slice';
 import { UUID } from 'node:crypto';
 import FarmerService from './FarmerService';
 import ItemService from './ItemService';

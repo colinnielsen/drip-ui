@@ -6,9 +6,9 @@ import {
   decrementLineItemQuantity,
 } from '@/data-model/cart/CartDTO';
 import { Cart } from '@/data-model/cart/CartType';
+import { Discount } from '@/data-model/discount/DiscountType';
 import { ItemMod } from '@/data-model/item/ItemMod';
 import { Item, ItemVariant } from '@/data-model/item/ItemType';
-import { Discount } from '@/data-model/discount/DiscountType';
 import {
   LineItem,
   LineItemUniqueId,
@@ -17,7 +17,6 @@ import { createLineItemAggregate } from '@/data-model/order/OrderDTO';
 import { LocalStorageCartPersistance } from '@/infrastructures/local-storage/CartPersistance';
 import { useErrorToast } from '@/lib/hooks/use-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useUserId } from './UserQuery';
 import { useItemPriceWithDiscounts } from './ItemQuery';
 
 //
@@ -56,7 +55,6 @@ export const useAddToCart = ({
   shopId: UUID;
   item: Item;
 }) => {
-  const { data: userId } = useUserId();
   const errorToast = useErrorToast();
   const queryClient = useQueryClient();
 
@@ -81,7 +79,6 @@ export const useAddToCart = ({
     }) => {
       if (isFetchingPriceQuote)
         throw new Error('price quote is still fetching');
-      if (!userId) throw new Error('User ID is required');
       if (quantity < 1) throw new Error('Quantity must be positive');
 
       const lineItem = validateLineItem(
@@ -101,7 +98,7 @@ export const useAddToCart = ({
 
       const nextCart = addLineItemToCart(
         prevCart === null
-          ? { type: 'create' as const, newLineItem: lineItem, shopId, userId }
+          ? { type: 'create' as const, newLineItem: lineItem, shopId }
           : {
               type: 'update' as const,
               newLineItem: lineItem,

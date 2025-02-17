@@ -7,7 +7,7 @@ import { ACTIVE_USER_QUERY_KEY, useUser } from '@/queries/UserQuery';
 import { usePrivy } from '@privy-io/react-auth';
 import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useCheckoutContext } from '../context';
 
 export function shouldGoToWelcomeSlide(step: string) {
@@ -36,8 +36,7 @@ export const ConnectButton = ({ onClose }: { onClose?: () => void }) => {
     initialStep === 'connect'
       ? () =>
           connectWallet({
-            suggestedAddress:
-              user?.__type === 'user' ? user?.wallet?.address : undefined,
+            suggestedAddress: user?.wallet?.address,
           })
       : initialStep === 'login' || initialStep === 'signup'
         ? loginOrCreateUser

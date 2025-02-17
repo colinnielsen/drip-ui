@@ -21,18 +21,7 @@ import {
 } from '@/lib/effect/validation';
 import { getDripRelayerAddress } from '@/lib/ethereum';
 import shopService from '@/services/ShopService';
-import { pipe } from 'effect';
-import {
-  all,
-  andThen,
-  catchAll,
-  Effect,
-  fail,
-  flatMap,
-  map,
-  succeed,
-  tryPromise,
-} from 'effect/Effect';
+import { pipe, Effect } from 'effect';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const AuthorizationPayloadSchema = S.Struct({
@@ -60,13 +49,13 @@ export default EffectfulApiRoute(function (
     // validate the method
     validateHTTPMethod('POST'),
     // extract the request body
-    flatMap(r => hydrateClassInstancesFromJSONBody(r.body)),
+    Effect.andThen(r => hydrateClassInstancesFromJSONBody(r.body)),
     // validate the request body
-    andThen(S.decode(AuthorizationPayloadSchema)),
+    Effect.andThen(S.decode(AuthorizationPayloadSchema)),
     // get the shop config
-    andThen(({ orderTotal, shopId, payee }) =>
-      all([
-        tryPromise(() =>
+    Effect.andThen(({ orderTotal, shopId, payee }) =>
+      Effect.all([
+        Effect.tryPromise(() =>
           shopService.findShopConfigByShopId(shopId).then(
             maybeConfig =>
               maybeConfig ||
@@ -75,16 +64,16 @@ export default EffectfulApiRoute(function (
               })(),
           ),
         ),
-        succeed({ orderTotal, shopId, payee }),
+        Effect.succeed({ orderTotal, shopId, payee }),
       ]),
     ),
     // return the orders
-    andThen(([shopConfig, { orderTotal, payee }]) => {
+    Effect.andThen(([shopConfig, { orderTotal, payee }]) => {
       if (
         !('fundRecipientConfig' in shopConfig) ||
         !shopConfig.fundRecipientConfig
       )
-        return fail(
+        return Effect.fail(
           new BadRequestError(
             'Shop config does not have a fund recipient config',
           ),
@@ -99,7 +88,7 @@ export default EffectfulApiRoute(function (
 
       const USDCConfig = USDC_CONFIG[network];
 
-      return succeed({
+      return Effect.succeed({
         domain: USDCConfig.eip712Domain,
         types: USDCConfig.EIP712Types,
         transferAuthorization: mapToUnsignedUSDCAcuthorization({
@@ -111,7 +100,7 @@ export default EffectfulApiRoute(function (
       } satisfies AuthorizationPayloadResponse);
     }),
     // map the bigints to strings
-    andThen(authorizationPayload => ({
+    Effect.andThen(authorizationPayload => ({
       ...authorizationPayload,
       transferAuthorization: {
         ...authorizationPayload.transferAuthorization,
@@ -123,18 +112,22 @@ export default EffectfulApiRoute(function (
       },
     })),
     // send the response
-    map(payload => res.status(200).json(payload)),
+    Effect.andThen(payload => res.status(200).json(payload)),
     // handle errors
-    catchAll(function (e): Effect<never, HTTPRouteHandlerErrors, never> {
+    Effect.catchAll(function (e): Effect.Effect<
+      never,
+      HTTPRouteHandlerErrors,
+      never
+    > {
       switch (e._tag) {
         // pluck out any non-500 errors and let them exist as-is
         case 'BadRequestError':
         case 'ParseError':
-          return fail(e);
+          return Effect.fail(e);
 
         // all remaining errors and mark them as 500
         default:
-          return fail(new DripServerError(e));
+          return Effect.fail(new DripServerError(e));
       }
     }),
   );

@@ -19,6 +19,7 @@ import {
   Order,
   PaymentSummary,
 } from './OrderType';
+import { User } from '../user/UserType';
 
 export const EMPTY_SUMMARY: PaymentSummary = {
   subtotal: null,
@@ -233,9 +234,11 @@ export const mapOrderToPaymentSummary = (
 };
 
 export const mapCartToNewOrder = ({
+  userId,
   cart,
   tipRecipient,
 }: {
+  userId: User['id'];
   cart: Cart;
   tipRecipient?: EthAddress;
 }): Unsaved<NewOrder> => {
@@ -249,7 +252,7 @@ export const mapCartToNewOrder = ({
   return {
     timestamp: new Date(),
     shop: cart.shop,
-    user: cart.user,
+    user: userId,
     lineItems: cart.lineItems,
     discounts: cart.discounts,
     tip:

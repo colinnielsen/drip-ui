@@ -1,7 +1,8 @@
 import { rehydrateCurrency } from '@/data-model/_common/currency/currencyDTO';
 import { BASE_CLIENT } from '@/lib/ethereum';
-import { getAndValidateUserRequest, ApiRoute } from '@/lib/next';
+import { ApiRoute } from '@/lib/next';
 import { isUUID, sleep } from '@/lib/utils';
+import { authenticationService } from '@/services/AuthenticationService';
 import FarmerService from '@/services/FarmerService';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, isHex } from 'viem';
@@ -39,7 +40,10 @@ export default ApiRoute(async function (
     return res.status(405).json({ error: 'Method not allowed' });
 
   const { id: farmerId } = req.query;
-  const userId = getAndValidateUserRequest(req);
+
+  const user = await authenticationService.checkAuthentication_sync(req, res);
+  if (!user) return res.status(401).json({ error: 'not authorized' });
+
   const { amount: amountParam, txHash: txHashParam } = req.body;
   if (
     !amountParam ||
@@ -69,7 +73,7 @@ export default ApiRoute(async function (
   const message = await FarmerService.upsertFarmerMessage({
     amount,
     farmer: farmerId,
-    sendingUser: userId,
+    sendingUser: user.id,
     message: null,
   });
 

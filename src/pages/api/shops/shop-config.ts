@@ -21,7 +21,7 @@ import {
 import { S_EthAddress } from '@/lib/effect/validation/ethereum';
 import shopService from '@/services/ShopService';
 import { SquareService, SquareServiceError } from '@/services/SquareService';
-import { pipe, Effect } from 'effect';
+import { Effect, pipe } from 'effect';
 
 import { NextApiRequest, NextApiResponse } from 'next';
 

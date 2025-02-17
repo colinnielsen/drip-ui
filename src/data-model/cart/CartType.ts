@@ -9,8 +9,6 @@ export type Cart = {
   createdTimestamp: Date;
   /** The id of the shop the cart's associated with */
   shop: UUID;
-  /** Id of the user who created the order */
-  user: UUID;
   /** The items the user ordered */
   lineItems: LineItem[];
   /** all discounts applied on this cart */

@@ -1,17 +1,23 @@
-import { createSessionUser } from '@/data-model/user/UserDTO';
-import { SavedUser, SessionUser, User } from '@/data-model/user/UserType';
+import { mapToUser } from '@/data-model/user/UserDTO';
+import { User } from '@/data-model/user/UserType';
+import { createEffectService, GenericError } from '@/lib/effect';
+import { PayRequest } from '@/pages/api/orders/pay';
 import { sql } from '@vercel/postgres';
+import { Effect, pipe } from 'effect';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { UUID } from 'node:crypto';
+import { Address } from 'viem';
+import {
+  authenticationService,
+  TokenCreationError,
+} from './AuthenticationService';
 
-const findById = async <U extends User['__type']>(id: UUID, type?: U) => {
+const findById = async <U extends User>(id: UUID) => {
   const result = await sql`SELECT * FROM users WHERE id = ${id}`;
-  const maybeUser = result.rows[0] as User | null;
+  const [maybeUser] = result.rows;
   if (!maybeUser) return null;
-  if (type && maybeUser.__type !== type) throw Error('user type mismatch');
 
-  return maybeUser as
-    | (U extends 'session' ? SessionUser : U extends 'user' ? SavedUser : User)
-    | null;
+  return maybeUser as U;
 };
 
 const findByAuthServiceId = async (id: string): Promise<User | null> => {
@@ -21,13 +27,20 @@ const findByAuthServiceId = async (id: string): Promise<User | null> => {
   return maybeUser as User | null;
 };
 
+const findByWalletAddress = async (
+  walletAddress: Address,
+): Promise<User | null> => {
+  const result =
+    await sql`SELECT * FROM users WHERE "wallet"->>'address' = ${walletAddress}`;
+  const maybeUser = result.rows[0];
+  return maybeUser as User | null;
+};
+
 const save = async <T extends User>(user: T): Promise<T> => {
   await sql`
-      INSERT INTO "users" (id, __type, role, "authServiceId", wallet, "createdAt")
-      VALUES (${user.id}, ${user.__type}, ${user.role}, ${JSON.stringify(user.authServiceId)}, ${JSON.stringify(user.wallet)}, ${user.createdAt})
+      INSERT INTO "users" (id, "authServiceId", wallet, "createdAt")
+      VALUES (${user.id},${JSON.stringify(user.authServiceId)}, ${JSON.stringify(user.wallet)}, ${user.createdAt.toISOString()})
           ON CONFLICT (id) DO UPDATE SET
-            __type = EXCLUDED.__type,
-            role = EXCLUDED.role,
             "authServiceId" = EXCLUDED."authServiceId",
             wallet = EXCLUDED.wallet,
             "createdAt" = EXCLUDED."createdAt"
@@ -40,26 +53,45 @@ const deleteUser = async (id: UUID): Promise<void> => {
   if (result.rowCount === 0) throw Error('could not delete');
 };
 
-const migrate = async ({
-  prevId,
-  newId,
-}: {
-  prevId: UUID;
-  newId: UUID;
-}): Promise<User> => {
-  const prevUser = await findById(prevId);
-  if (!prevUser) throw Error('not found');
+const getOrInitializeUserFromPayRequest = (
+  req: NextApiRequest,
+  res: NextApiResponse,
+  payRequest: PayRequest,
+): Effect.Effect<User, TokenCreationError | GenericError, never> => {
+  const pipeline = pipe(
+    // if the user exists from the cookies return it to the success channel
+    authenticationService.checkAuthentication(req, res),
+    // if it does not exist, there will be an unauthorized error
+    Effect.catchTag('UnauthorizedError', () => {
+      const walletAddress =
+        payRequest.type === 'slice'
+          ? payRequest.payerAddress
+          : payRequest.usdcAuthorization.from;
 
-  const user = await save({ ...prevUser, id: newId });
-  await deleteUser(prevId).catch(() => {});
-  return user;
-};
-
-const getOrCreateSessionUser = async (id: UUID): Promise<SessionUser> => {
-  const existingUser = await findById(id);
-  if (existingUser && existingUser.__type === 'session') return existingUser;
-
-  return save(createSessionUser(id));
+      return pipe(
+        // pipe over the wallet address
+        walletAddress,
+        // try to find the user from the wallet address
+        effectfulUserService.findByWalletAddress,
+        Effect.andThen(maybeUser => {
+          // if the user exists, return it to the success channel
+          if (maybeUser) return Effect.succeed(maybeUser);
+          // if the user does not exist, create a new user
+          return pipe(
+            // make a new user
+            mapToUser({
+              wallet: { address: walletAddress, __type: 'unknown' },
+            }),
+            // save the user
+            effectfulUserService.save,
+            // return the user
+            Effect.andThen(user => Effect.succeed(user)),
+          );
+        }),
+      );
+    }),
+  );
+  return pipeline;
 };
 
 //
@@ -69,10 +101,18 @@ const getOrCreateSessionUser = async (id: UUID): Promise<SessionUser> => {
 const userService = {
   findById,
   findByAuthServiceId,
+  findByWalletAddress,
+  getOrInitializeUserFromPayRequest,
   save,
   deleteUser,
-  migrate,
-  getOrCreateSessionUser,
 };
 
 export default userService;
+
+export const effectfulUserService = createEffectService({
+  findById,
+  findByAuthServiceId,
+  findByWalletAddress,
+  save,
+  deleteUser,
+});

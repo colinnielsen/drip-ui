@@ -1,6 +1,6 @@
 import { ApiRoute } from '@/lib/next';
 import { withRedisCache } from '@/lib/redis';
-import { sliceKit } from '@/lib/slice';
+import { sliceKit } from '@/lib/data-sources/slice';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {

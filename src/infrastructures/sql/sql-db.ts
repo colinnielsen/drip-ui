@@ -6,8 +6,6 @@ export const bootstrapSQLDB = async () => {
   await sql`
       CREATE TABLE IF NOT EXISTS "users" (
         "id" UUID PRIMARY KEY,
-        "__type" TEXT NOT NULL,
-        "role" TEXT NOT NULL,
         "authServiceId" JSONB,
         "wallet" JSONB,
         "createdAt" TIMESTAMP NOT NULL

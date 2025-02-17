@@ -14,6 +14,10 @@ export type AccessToken = {
   iat: number;
   /** When the token expires */
   exp: number;
+  /** The hostname of the token issuer */
+  iss: string;
+  /** The audience of the token */
+  aud: string;
 };
 
 // Refresh token payload with additional security fields
@@ -29,6 +33,10 @@ export type RefreshToken = {
   iat: number;
   /** When the token expires */
   exp: number;
+  /** The hostname of the token issuer */
+  iss: string;
+  /** The audience of the token */
+  aud: string;
 };
 
 //

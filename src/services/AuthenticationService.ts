@@ -29,6 +29,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { Hex } from 'viem';
 import { parseSiweMessage } from 'viem/siwe';
 import { effectfulUserService } from './UserService';
+import { getHostname } from '@/lib/utils';
 
 // CONSTANTS
 ////
@@ -77,6 +78,8 @@ const _verifyJWT = (
       try: () =>
         jwtVerify<RefreshToken | AccessToken>(token, getJWTSecret(), {
           currentDate: new Date(),
+          audience: getHostname(),
+          issuer: 'drip',
         }).then(b => b),
       catch: e => new TokenVerificationError((e as Error).message),
     }),
@@ -119,6 +122,8 @@ const issueAccessToken = (
         sub: userId,
         iat,
         exp,
+        iss: 'drip',
+        aud: getHostname(),
       };
       // sign the new access token
       const tokenString = await new SignJWT(token)
@@ -152,6 +157,8 @@ const issueRefreshToken = (
         family,
         iat,
         exp,
+        iss: 'drip',
+        aud: getHostname(),
       };
 
       const tokenString = await new SignJWT(token)

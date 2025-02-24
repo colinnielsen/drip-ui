@@ -23,7 +23,8 @@ export type SliceCheckoutStep =
   | 'login'
   | 'connect'
   | 'get-usdc'
-  | 'pay';
+  | 'pay'
+  | 'error';
 
 export type PaymentStep =
   | 'idle'
@@ -34,6 +35,7 @@ export type PaymentStep =
 
 type CheckoutCtx = {
   step: SliceCheckoutStep;
+  error?: string;
   paymentStep: PaymentStep;
   setPaymentStep: React.Dispatch<React.SetStateAction<PaymentStep>>;
 };
@@ -57,6 +59,7 @@ export const useCheckoutContext = () => {
 
 const useDetermineCheckoutStep = (): {
   step: SliceCheckoutStep;
+  error?: string;
   //   button: JSX.Element | null;
 } => {
   const slideInView = useSlideInView();
@@ -90,7 +93,12 @@ const useDetermineCheckoutStep = (): {
 
   // if (user.__type === 'user' && !authenticated) return { step: 'login' };
 
-  if (!wallet) return { step: 'connect' };
+  if (!wallet)
+    return {
+      step: 'error',
+      error:
+        'guest wallet has not been initialized, please reach out to support',
+    };
   if (isBalanceLoading || balance === undefined)
     return {
       step: 'initializing',

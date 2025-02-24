@@ -10,7 +10,7 @@ export const NextButton = ({
 }: {
   shopType: ShopSourceConfig['type'];
 }) => {
-  const { step } = useCheckoutContext();
+  const { step, error } = useCheckoutContext();
 
   return (
     <div className="px-6 pb-6 w-full min-h-20">
@@ -23,7 +23,7 @@ export const NextButton = ({
       ) : step === 'pay' ? (
         <PayButton {...{ shopType }} />
       ) : (
-        ''
+        <div className="text-red-500">{error || 'error'}</div>
       )}
     </div>
   );

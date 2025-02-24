@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { HomeSvg, MapSvg, ProfileSvg } from './ui/icons';
+import { Wallet } from 'lucide-react';
 
 const LazyCartFooter = dynamic(() => import('./cart/status-footer'), {
   ssr: false,
@@ -20,9 +21,9 @@ export function Footer() {
         <Link href="/" className="flex justify-center w-1/3">
           <HomeSvg />
         </Link>
-        <div className="flex justify-center w-1/3">
-          <MapSvg />
-        </div>
+        <Link href="/wallet" className="flex justify-center w-1/3">
+          <Wallet strokeWidth={1.5} />
+        </Link>
         <div className="flex justify-center w-1/3">
           <Link href="/me">
             <ProfileSvg />

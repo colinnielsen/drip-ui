@@ -4,7 +4,7 @@ import { Shop } from '@/data-model/shop/ShopType';
 import { axiosFetcher, minutes } from '@/lib/utils';
 import { QuoteRequest } from '@/pages/api/quote';
 import { skipToken, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useWalletAddress } from './EthereumQuery';
+import { usePreferredWalletAddress } from './EthereumQuery';
 import { useUser } from './UserQuery';
 
 export const useShops = () =>
@@ -43,7 +43,7 @@ export const useShopDiscounts = <TData = DiscountQuote[]>({
   enabled?: boolean;
   select?: (data: DiscountQuote[]) => TData;
 } = {}) => {
-  const connectedWallet = useWalletAddress() ?? undefined;
+  const connectedWallet = usePreferredWalletAddress() ?? undefined;
   const { data: user, isLoading: userIsLoading } = useUser();
 
   const ready = !userIsLoading && !!shopId && enabled;

@@ -1,7 +1,7 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { USDC_INSTANCE } from '@/lib/ethereum';
 import { err } from '@/lib/utils';
-import { useWallets } from '@privy-io/react-auth';
+import { ConnectedWallet, useWallets } from '@privy-io/react-auth';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import {
@@ -15,47 +15,68 @@ import {
 } from 'viem';
 import { base } from 'viem/chains';
 
-export const useConnectedWallet = () => {
+/**
+ * Returns the user's preferred wallet
+ * @dev this will be their own wallet if they connect it manually via MM or a wallet app
+ * otherwise, this will likely the drip wallet
+ */
+export const usePreferredWallet = ():
+  | {
+      ready: false;
+      wallet: null;
+    }
+  | {
+      ready: true;
+      wallet: ConnectedWallet;
+    } => {
   const { ready, wallets } = useWallets();
   const [wallet] = wallets;
 
-  if (!ready) return null;
-  if (!wallet) return null;
-  return wallet;
+  if (!ready) return { ready: false, wallet: null };
+  return { ready: true, wallet };
 };
+
 type WC = WalletClient<
   CustomTransport,
   typeof base,
   JsonRpcAccount<Address>,
   WalletRpcSchema
 >;
-export const useWalletClient = () => {
+
+export const usePreferredWalletClient = ():
+  | {
+      ready: false;
+      client: null;
+    }
+  | {
+      ready: true;
+      client: WC;
+    } => {
+  const { ready, wallet: preferredWallet } = usePreferredWallet();
+
   const [client, setClient] = useState<WC | null>(null);
-  const { ready, wallets } = useWallets();
-  const [wallet] = wallets;
-  const address = wallet?.address as Address | undefined;
 
   useEffect(() => {
     setClient(null);
-    if (address && ready)
-      wallet?.getEthereumProvider().then(p => {
-        const client = createWalletClient({
-          account: address!,
-          chain: base,
-          transport: custom(p),
-        });
-
-        setClient(client);
+    if (ready && preferredWallet)
+      preferredWallet.getEthereumProvider().then(p => {
+        setClient(
+          createWalletClient({
+            account: preferredWallet.address as Address,
+            chain: base,
+            transport: custom(p),
+          }),
+        );
       });
     else setClient(null);
-  }, [address, ready]);
+  }, [ready, preferredWallet]);
 
-  return client;
+  if (ready === false) return { ready: false, client: null };
+  return { ready: true, client: client as WC };
 };
 
-export const useWalletAddress = () => {
-  const { ready, wallets } = useWallets();
-  const [wallet] = wallets;
+export const usePreferredWalletAddress = () => {
+  const { ready, wallet: preferredWallet } = usePreferredWallet();
 
   // useEffect(() => {
   //   console.log('wallet reference updated!');
@@ -63,8 +84,7 @@ export const useWalletAddress = () => {
   // }, [wallet]);
 
   if (!ready) return null;
-  if (!wallet) return null;
-  return wallet.address as Address;
+  return preferredWallet!.address as Address;
 };
 
 export const useUSDCBalance = ({
@@ -72,7 +92,7 @@ export const useUSDCBalance = ({
 }: {
   pollingInterval?: number;
 } = {}) => {
-  const wallet = useWalletAddress();
+  const wallet = usePreferredWalletAddress();
 
   return useQuery({
     queryKey: ['usdc-balance', wallet],
@@ -94,17 +114,17 @@ export const useUSDCAllowance = ({
   spender?: Address;
   pollingInterval?: number;
 }) => {
-  const wallet = useWalletAddress();
+  const preferredWalletAddress = usePreferredWalletAddress();
 
   return useQuery({
-    queryKey: ['usdc-allowance', wallet],
+    queryKey: ['usdc-allowance', preferredWalletAddress],
     queryFn: async () =>
-      wallet && spender
+      preferredWalletAddress && spender
         ? await USDC_INSTANCE.read
-            .allowance([wallet, spender])
+            .allowance([preferredWalletAddress, spender])
             .then(balance => USDC.fromWei(balance))
         : err('Address is required'),
-    enabled: !!wallet && !!spender,
+    enabled: !!preferredWalletAddress && !!spender,
     refetchInterval: pollingInterval,
   });
 };

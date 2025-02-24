@@ -1,6 +1,9 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { Farmer } from '@/data-model/farmer/FarmerType';
-import { useUSDCBalance, useWalletClient } from '@/queries/EthereumQuery';
+import {
+  useUSDCBalance,
+  usePreferredWalletClient,
+} from '@/queries/EthereumQuery';
 import { useDonate } from '@/queries/FarmerQuery';
 import { useConnectWallet } from '@privy-io/react-auth';
 import { useState } from 'react';
@@ -25,7 +28,7 @@ const SendButton = ({
   amount: USDC;
   onComplete: () => void;
 }) => {
-  const wallet = useWalletClient();
+  const wallet = usePreferredWalletClient();
   const { connectWallet } = useConnectWallet();
   const { data: usdcBalance } = useUSDCBalance({ pollingInterval: 6_000 });
   const { mutateAsync: donate, isPending: sending } = useDonate();

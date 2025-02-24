@@ -1,4 +1,5 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
+import { UUID } from '@/data-model/_common/type/CommonType';
 import {
   Farmer,
   FarmerMessage,
@@ -7,8 +8,7 @@ import {
 import { BASE_CLIENT, USDC_INSTANCE } from '@/lib/ethereum';
 import { axiosFetcher, minutes } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UUID } from '@/data-model/_common/type/CommonType';
-import { useWalletClient } from './EthereumQuery';
+import { usePreferredWalletClient } from './EthereumQuery';
 
 //
 //// QUERIES
@@ -52,24 +52,23 @@ export const useFarmerMessages = (farmerId: string) => {
 //
 
 export const useDonate = () => {
-  const wallet = useWalletClient();
+  const wallet = usePreferredWalletClient();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (variables: { farmer: Farmer; amount: USDC }) => {
-      if (!wallet) throw new Error('Wallet not connected');
+      if (wallet.ready === false) throw new Error('Wallet not connected');
 
-      const [account] = await wallet.getAddresses();
       const { request } = await BASE_CLIENT.simulateContract({
         address: USDC_INSTANCE.address,
         abi: USDC_INSTANCE.abi,
         functionName: 'transfer',
         args: [variables.farmer.ethAddress, variables.amount.toWei()],
-        account: account,
+        account: wallet.client?.account.address,
       });
       let txHash: `0x${string}` | null = null;
       try {
-        txHash = await wallet.writeContract(request);
+        txHash = await wallet.client!.writeContract(request);
       } catch (e) {
         if (
           e instanceof Error &&

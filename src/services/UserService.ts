@@ -37,6 +37,8 @@ const findByWalletAddress = async (
 };
 
 const save = async <T extends User>(user: T): Promise<T> => {
+  console.log('SAVING USER!', user);
+  debugger;
   await sql`
       INSERT INTO "users" (id, "authServiceId", wallet, "createdAt")
       VALUES (${user.id},${JSON.stringify(user.authServiceId)}, ${JSON.stringify(user.wallet)}, ${user.createdAt.toISOString()})

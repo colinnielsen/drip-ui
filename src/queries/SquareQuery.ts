@@ -13,13 +13,17 @@ import {
 import { PayRequest } from '@/pages/api/orders/pay';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCart, useDeleteCartMutation } from './CartQuery';
-import { useConnectedWallet, useWalletClient } from './EthereumQuery';
+import {
+  usePreferredWallet,
+  usePreferredWalletAddress,
+  usePreferredWalletClient,
+} from './EthereumQuery';
 import { ORDERS_QUERY_KEY } from './OrderQuery';
 import { ACTIVE_USER_QUERY_KEY } from './UserQuery';
 
 export const usePayAndOrder = () => {
-  const wallet = useConnectedWallet();
-  const walletClient = useWalletClient();
+  const preferredWalletAddress = usePreferredWalletAddress();
+  const walletClient = usePreferredWalletClient();
   const queryClient = useQueryClient();
   const errorToast = useErrorToast();
 
@@ -29,11 +33,11 @@ export const usePayAndOrder = () => {
   const { setPaymentStep } = useCheckoutContext();
 
   const ready =
-    walletClient &&
+    !!walletClient.client &&
     !!cart &&
     !!cart.quotedTotalAmount &&
     isUSDC(cart.quotedTotalAmount) &&
-    !!wallet?.address;
+    !!preferredWalletAddress;
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -48,11 +52,11 @@ export const usePayAndOrder = () => {
         data: {
           shopId: cart.shop,
           orderTotal: cart.quotedTotalAmount as USDC,
-          payee: wallet.address as `0x${string}`,
+          payee: preferredWalletAddress,
         },
       });
 
-      const signature = await walletClient.signTypedData({
+      const signature = await walletClient.client!.signTypedData({
         domain,
         types,
         message: {

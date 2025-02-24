@@ -2,10 +2,10 @@ import { USDC } from '@/data-model/_common/currency/USDC';
 import { UnimplementedPathError } from '@/lib/effect';
 import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { useCart } from '@/queries/CartQuery';
-import { useUSDCBalance } from '@/queries/EthereumQuery';
+import { usePreferredWallet, useUSDCBalance } from '@/queries/EthereumQuery';
 import { useRecentOrder } from '@/queries/OrderQuery';
 import { useUser } from '@/queries/UserQuery';
-import { useWallets } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useSlideInView } from '../ui/carousel';
 
@@ -60,7 +60,8 @@ const useDetermineCheckoutStep = (): {
   //   button: JSX.Element | null;
 } => {
   const slideInView = useSlideInView();
-  const { wallets, ready: privyReady } = useWallets();
+  const { ready: privyReady } = usePrivy();
+  const wallet = usePreferredWallet();
   const { isLoading: isUserLoading } = useUser();
   const { data: cart } = useCart();
   const { data: balance, isLoading: isBalanceLoading } = useUSDCBalance({
@@ -78,6 +79,8 @@ const useDetermineCheckoutStep = (): {
 
   // (shouldn't happen)
 
+  // make usdc the context if no wallet is connected
+
   if (!privyReady || isUserLoading || !cart)
     return {
       step: 'initializing',
@@ -87,7 +90,7 @@ const useDetermineCheckoutStep = (): {
 
   // if (user.__type === 'user' && !authenticated) return { step: 'login' };
 
-  if (wallets.length === 0) return { step: 'connect' };
+  if (!wallet) return { step: 'connect' };
   if (isBalanceLoading || balance === undefined)
     return {
       step: 'initializing',

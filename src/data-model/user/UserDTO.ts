@@ -16,14 +16,17 @@ export const mapPrivyIdToUserId = (privyId: PrivyDID) => {
   return v5(privyId, PRIVY_NAMESPACE) as UUID;
 };
 
-export const mapToUserId = (): User['id'] => UserId(generateUUID());
+export const mapToUserId = (derivation?: string): User['id'] =>
+  UserId(generateUUID(derivation));
 
 export const mapToUser = ({
   wallet: wallet,
+  authServiceId,
 }: {
   wallet: NonNullable<User['wallet']>;
+  authServiceId?: User['authServiceId'];
 }): User => ({
-  id: mapToUserId(),
+  id: mapToUserId(authServiceId?.id),
   createdAt: new Date(),
   wallet,
 });

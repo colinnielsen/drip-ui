@@ -1,7 +1,7 @@
 import { ChainId } from '@/data-model/ethereum/EthereumType';
 import { User } from '@/data-model/user/UserType';
 import { LoginRequest } from '@/pages/api/auth/login';
-import { useWalletClient } from '@/queries/EthereumQuery';
+import { usePreferredWalletClient } from '@/queries/EthereumQuery';
 import { ACTIVE_USER_QUERY_KEY } from '@/queries/UserQuery';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createSiweMessage, generateSiweNonce } from 'viem/siwe';
@@ -38,16 +38,16 @@ export const useLoginOrCreateUser = ({
   onLogin?: (data: User) => void;
 }) => {
   const queryClient = useQueryClient();
-  const walletClient = useWalletClient();
+  const walletClient = usePreferredWalletClient();
 
   const { mutateAsync: login } = useMutation({
     mutationFn: async () => {
-      if (!walletClient) return;
+      if (walletClient.ready === false) return;
 
       // Create SIWE message
       const message = createSiweMessage({
         domain: window.location.host,
-        address: walletClient?.account.address,
+        address: walletClient.client.account.address,
         statement: 'Sign in to Drip',
         uri: window.location.origin,
         version: '1',
@@ -56,7 +56,7 @@ export const useLoginOrCreateUser = ({
       });
 
       // Sign message
-      const signature = await walletClient.signMessage({
+      const signature = await walletClient.client.signMessage({
         message,
       });
 

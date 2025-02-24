@@ -1,7 +1,7 @@
 import { LoadingCTAButton } from '@/components/ui/button';
 import { ShopSourceConfig } from '@/data-model/shop/ShopType';
 import { useCheckoutContext } from '../context';
-import { GetUSDCButton } from '../onboard/onboard';
+import { GetUSDCButton } from '../onramp/onramp';
 import { PayButton } from '../payment/payment';
 import { ConnectButton, shouldGoToWelcomeSlide } from '../welcome';
 

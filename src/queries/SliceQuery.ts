@@ -23,9 +23,10 @@ import { Address, zeroAddress } from 'viem';
 import { base } from 'viem/chains';
 import { CART_QUERY_KEY, useCart, useDeleteCartMutation } from './CartQuery';
 import {
-  useConnectedWallet,
+  usePreferredWallet,
   useUSDCAllowance,
-  useWalletClient,
+  usePreferredWalletClient,
+  usePreferredWalletAddress,
 } from './EthereumQuery';
 import { ORDERS_QUERY_KEY } from './OrderQuery';
 import { useShop } from './ShopQuery';
@@ -102,16 +103,15 @@ const handleLoadingState = (
 export const usePayAndOrder = () => {
   const queryClient = useQueryClient();
   const deleteCartMutation = useDeleteCartMutation();
-  const wallet = useConnectedWallet();
-  const walletClient = useWalletClient();
-  const address = wallet?.address as Address;
+  const preferredWalletAddress = usePreferredWalletAddress();
+  const walletClient = usePreferredWalletClient();
 
   const { setPaymentStep } = useCheckoutContext();
 
   const { data: dripCart } = useCart();
   const { data: shop } = useShop({ id: dripCart?.shop });
   const { data: sliceCart, isFetching: sliceCartIsFetching } =
-    useCartInSliceFormat({ buyerAddress: address });
+    useCartInSliceFormat({ buyerAddress: preferredWalletAddress });
   const { data: allowance } = useUSDCAllowance({
     spender: SLICE_ENTRYPOINT_ADDRESS,
   });
@@ -163,7 +163,7 @@ export const usePayAndOrder = () => {
             transactionHash: hash,
             cart: dripCart,
             totalPaidWei: dripCart.quotedTotalAmount?.toWei() ?? 0n,
-            payerAddress: address,
+            payerAddress: preferredWalletAddress!,
             sliceOrderId: orderId,
           },
           withCredentials: true,
@@ -194,14 +194,19 @@ export const usePayAndOrder = () => {
       // delete the cart
       await deleteCartMutation.mutateAsync({ cartId: dripCart.id });
     },
-    [setPaymentStep, dripCart, queryClient, deleteCartMutation, address],
+    [
+      setPaymentStep,
+      dripCart,
+      queryClient,
+      deleteCartMutation,
+      preferredWalletAddress,
+    ],
   );
 
   const ready =
-    !!wallet &&
-    !!walletClient &&
+    !!walletClient.client &&
     !!sliceCart &&
-    !!address &&
+    !!preferredWalletAddress &&
     !!allowance &&
     !!dripCart?.quotedTotalAmount &&
     !sliceCartIsFetching;
@@ -216,22 +221,22 @@ export const usePayAndOrder = () => {
     if (!ready) throw new Error('No wallet connected');
     setPaymentStep('awaiting-confirmation');
 
-    await wallet?.switchChain(base.id);
+    await walletClient.client?.switchChain({ id: base.id });
     const totalUsdcToPay = dripCart.quotedTotalAmount?.toWei();
 
-    await handleCheckoutViem(BASE_CLIENT, walletClient, {
+    await handleCheckoutViem(BASE_CLIENT, walletClient.client!, {
       capabilities: null,
       payProductsConfig: await payProductsConfig(WAGMI_CONFIG, {
-        account: address,
+        account: preferredWalletAddress,
         cart: sliceCart,
-        buyer: address,
+        buyer: preferredWalletAddress,
         extraCosts,
       }),
       ref: '',
       referrer: zeroAddress,
       onError: onError,
       onSuccess: onSliceSuccess,
-      buyer: address,
+      buyer: preferredWalletAddress,
       setLoadingState: s => handleLoadingState(s, setPaymentStep),
       // @ts-ignore
       buyerInfo: null,

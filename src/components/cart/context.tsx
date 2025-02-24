@@ -63,8 +63,7 @@ const useDetermineCheckoutStep = (): {
   //   button: JSX.Element | null;
 } => {
   const slideInView = useSlideInView();
-  const { ready: privyReady } = usePrivy();
-  const wallet = usePreferredWallet();
+  const { wallet, ready } = usePreferredWallet();
   const { isLoading: isUserLoading } = useUser();
   const { data: cart } = useCart();
   const { data: balance, isLoading: isBalanceLoading } = useUSDCBalance({
@@ -84,7 +83,7 @@ const useDetermineCheckoutStep = (): {
 
   // make usdc the context if no wallet is connected
 
-  if (!privyReady || isUserLoading || !cart)
+  if (!ready || isUserLoading || !cart)
     return {
       step: 'initializing',
     };

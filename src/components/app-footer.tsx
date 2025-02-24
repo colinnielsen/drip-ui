@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils';
+import { Wallet } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { HomeSvg, MapSvg, ProfileSvg } from './ui/icons';
-import { Wallet } from 'lucide-react';
+import { HomeSvg, ProfileSvg } from './ui/icons';
 
 const LazyCartFooter = dynamic(() => import('./cart/status-footer'), {
   ssr: false,

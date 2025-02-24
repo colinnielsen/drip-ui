@@ -80,9 +80,13 @@ const CTAButton = React.forwardRef(
   },
 );
 
-const LoadingCTAButton = () => (
-  <Skeleton className="h-14 w-full rounded-[50px] bg-secondary-pop" />
-);
+const LoadingCTAButton = () => {
+  return (
+    <Skeleton className="h-14 w-full rounded-[50px] bg-secondary-pop text-center flex justify-center items-center">
+      <Mono className={`uppercase text-white text-md -mt-2 ml-4`}>...</Mono>
+    </Skeleton>
+  );
+};
 
 const SecondaryButton = React.forwardRef(
   (

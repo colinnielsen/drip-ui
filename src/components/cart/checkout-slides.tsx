@@ -21,7 +21,7 @@ export const AsCheckoutSlide = ({
 }) => (
   <CarouselItem
     className={cn(
-      'flex flex-col w-screen h-screen overflow-y-scroll overflow-x-clip',
+      'flex flex-col w-screen h-dvh overflow-y-scroll overflow-x-clip',
     )}
   >
     {children}

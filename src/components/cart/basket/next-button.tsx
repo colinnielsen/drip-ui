@@ -11,7 +11,6 @@ export const NextButton = ({
   shopType: ShopSourceConfig['type'];
 }) => {
   const { step, error } = useCheckoutContext();
-
   return (
     <div className="px-6 pb-6 w-full min-h-20">
       {step === 'initializing' ? (

@@ -83,8 +83,8 @@ export const usePreferredWalletAddress = () => {
   //   console.log(wallet?.address);
   // }, [wallet]);
 
-  if (!ready) return null;
-  return preferredWallet!.address as Address;
+  if (!ready || !preferredWallet) return null;
+  return preferredWallet.address as Address;
 };
 
 export const useUSDCBalance = ({

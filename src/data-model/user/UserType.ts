@@ -1,6 +1,6 @@
 import { UUID } from '@/data-model/_common/type/CommonType';
-import { PrivyDID } from '../_external/PrivyType';
 import { Brand } from 'effect';
+import { PrivyDID } from '../_external/PrivyType';
 
 export type UserId = UUID & Brand.Brand<'UserId'>;
 export const UserId = Brand.nominal<UserId>();

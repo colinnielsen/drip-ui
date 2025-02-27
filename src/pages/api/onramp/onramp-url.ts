@@ -1,20 +1,18 @@
-import { getOnrampBuyUrl } from '@coinbase/onchainkit/fund';
-import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import {
   BadRequestError,
   DripServerError,
   HTTPRouteHandlerErrors,
-  hydrateClassInstancesFromJSONBody,
 } from '@/lib/effect';
+import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import { S, S_Address, validateHTTPMethod } from '@/lib/effect/validation';
-import { Effect, pipe } from 'effect';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { axiosFetcher, generateUUID, isProd } from '@/lib/utils';
-import { authenticationService } from '@/services/AuthenticationService';
 import {
   getOnrampCallbackUrl,
   ONRAMP_TRANSACTION_ID_COOKIE_NAME,
 } from '@/lib/onramping/onramping';
+import { generateUUID, isProd } from '@/lib/utils';
+import { getOnrampBuyUrl } from '@coinbase/onchainkit/fund';
+import { Effect, pipe } from 'effect';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const OnrampQuoteSchema = S.Struct({
   amount: S.Number,
@@ -65,24 +63,22 @@ export default EffectfulApiRoute(
       Effect.andThen(req =>
         Effect.all({
           // issue a transactionId for the onramp session
-          transactionId: req.cookies[ONRAMP_TRANSACTION_ID_COOKIE_NAME]
-            ? Effect.succeed(req.cookies[ONRAMP_TRANSACTION_ID_COOKIE_NAME])
-            : Effect.succeed(generateUUID()).pipe(
-                Effect.tap(uuid =>
-                  res.setHeader(
-                    'Set-Cookie',
-                    [
-                      `${ONRAMP_TRANSACTION_ID_COOKIE_NAME}=${uuid}`,
-                      'Path=/',
-                      // 'HttpOnly',
-                      'SameSite=Lax',
-                      isProd() ? 'Secure' : undefined,
-                    ]
-                      .filter(Boolean)
-                      .join('; '),
-                  ),
-                ),
+          transactionId: Effect.succeed(generateUUID()).pipe(
+            Effect.tap(uuid =>
+              res.setHeader(
+                'Set-Cookie',
+                [
+                  `${ONRAMP_TRANSACTION_ID_COOKIE_NAME}=${uuid}`,
+                  'Path=/',
+                  // 'HttpOnly',
+                  'SameSite=Lax',
+                  isProd() ? 'Secure' : undefined,
+                ]
+                  .filter(Boolean)
+                  .join('; '),
               ),
+            ),
+          ),
           // validate the request body against the schema
           reqBody: S.decode(OnrampQuoteSchema)(req.body),
         }),
@@ -142,7 +138,9 @@ export default EffectfulApiRoute(
           defaultPaymentMethod: 'APPLE_PAY',
           defaultNetwork: 'base',
           partnerUserId: transactionId,
-          redirectUrl: getOnrampCallbackUrl(req.headers.referer!),
+          redirectUrl: getOnrampCallbackUrl(
+            `${req.headers.referer!}?onramp-transaction-id=${transactionId}`,
+          ),
         });
         // const params = new URLSearchParams({
         //   appId: process.env.NEXT_PUBLIC_CDP_APP_ID || '',

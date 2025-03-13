@@ -30,6 +30,7 @@ const config: Config = {
         background: '#FBFBFB',
         'background-card': '#F9F9F9',
         'palette-foreground': '#0A0B0D',
+        'drip-yellow': '#FAD809',
       },
       boxShadow: {
         drawer: '4px 0px 60px 0px rgba(0,0,0,0.40)',

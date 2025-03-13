@@ -62,11 +62,11 @@ const CTAButton = React.forwardRef(
     const isSmall = props.variant === 'cta-small';
     return (
       <Button
-        variant={props.variant || 'cta'}
-        {...rest}
         className="w-full"
+        variant={props.variant || 'cta'}
         disabled={isLoading || rest.disabled}
         ref={ref}
+        {...rest}
       >
         {isLoading ? (
           <LoaderCircle className="h-4 w-4 animate-spin stroke-white" />

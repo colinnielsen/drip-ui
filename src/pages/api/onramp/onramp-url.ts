@@ -15,7 +15,7 @@ import { Effect, pipe } from 'effect';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const OnrampQuoteSchema = S.Struct({
-  amount: S.Number,
+  amount: S.optional(S.Number),
   recipientAddress: S_Address,
 });
 

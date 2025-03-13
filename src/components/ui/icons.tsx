@@ -218,6 +218,60 @@ export function UsdcSVG({ className }: { className?: string }) {
   );
 }
 
+export function EthSVG({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn('h-4 w-4', className)}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 784.37 1277.39"
+    >
+      <g>
+        <polygon
+          fill="#343434"
+          points="392.07,0 383.5,29.11 383.5,873.74 392.07,882.29 784.13,650.54 392.07,0"
+        />
+        <polygon
+          fill="#8C8C8C"
+          points="392.07,0 -0,650.54 392.07,882.29 392.07,472.33 392.07,0"
+        />
+        <polygon
+          fill="#3C3C3B"
+          points="392.07,956.52 387.24,962.41 387.24,1263.28 392.07,1277.38 784.37,724.89 392.07,956.52"
+        />
+        <polygon
+          fill="#8C8C8C"
+          points="392.07,1277.38 392.07,956.52 -0,724.89 392.07,1277.38"
+        />
+        <polygon
+          fill="#141414"
+          points="392.07,882.29 784.13,650.54 392.07,472.33 392.07,882.29"
+        />
+        <polygon
+          fill="#393939"
+          points="0,650.54 392.07,882.29 392.07,472.33 0,650.54"
+        />
+      </g>
+    </svg>
+  );
+}
+
+export function DripTokenSVG({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn('h-4 w-4', className)}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+    >
+      <circle cx="12" cy="12" r="12" fill="#6366F1" />
+      <path
+        d="M12 5.5C8.41 5.5 5.5 8.41 5.5 12C5.5 15.59 8.41 18.5 12 18.5C15.59 18.5 18.5 15.59 18.5 12C18.5 8.41 15.59 5.5 12 5.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z"
+        fill="white"
+      />
+      <path d="M12 8.5L10 12L12 15.5L14 12L12 8.5Z" fill="white" />
+    </svg>
+  );
+}
+
 export function PlusSvg() {
   return (
     <svg

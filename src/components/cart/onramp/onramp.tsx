@@ -1,18 +1,8 @@
-import { CTAButton, LoadingCTAButton } from '@/components/ui/button';
+import { LoadingCTAButton } from '@/components/ui/button';
 import { MIN_USDC_ONRAMP_AMOUNT } from '@/lib/onramping/onramping';
-import { axiosFetcher } from '@/lib/utils';
-import { OnrampQuoteRequest } from '@/pages/api/onramp/onramp-url';
 import { useCart } from '@/queries/CartQuery';
-import {
-  usePreferredWallet,
-  usePreferredWalletAddress,
-} from '@/queries/EthereumQuery';
-import { skipToken, useQuery } from '@tanstack/react-query';
-
-type CoinbaseQuote = {
-  url: string;
-  // Add other quote response fields as needed
-};
+import { usePreferredWalletAddress } from '@/queries/EthereumQuery';
+import { useOnrampQuote } from '@/queries/OnrampQuery';
 
 export const GetUSDCButton = () => {
   const { data: cart, isLoading: isCartLoading } = useCart();
@@ -21,22 +11,10 @@ export const GetUSDCButton = () => {
   const total = cart?.quotedTotalAmount?.toUSDC().toUSD() || 0;
   const usdAmount = Math.max(total, MIN_USDC_ONRAMP_AMOUNT);
 
-  const { data: quote, isLoading: isQuoteLoading } = useQuery({
-    queryKey: ['onramp-quote', usdAmount],
-    queryFn: preferredWalletAddress
-      ? () =>
-          axiosFetcher<CoinbaseQuote, OnrampQuoteRequest>(
-            '/api/onramp/onramp-url',
-            {
-              method: 'POST',
-              data: {
-                amount: usdAmount,
-                recipientAddress: preferredWalletAddress,
-              },
-            },
-          )
-      : skipToken,
-    enabled: !isCartLoading && !!preferredWalletAddress,
+  const { data: quote, isLoading: isQuoteLoading } = useOnrampQuote({
+    usdAmount: usdAmount,
+    recipientAddress: preferredWalletAddress || undefined,
+    enabled: !isCartLoading && !!preferredWalletAddress && !!usdAmount,
   });
 
   if (isQuoteLoading || !quote) return <LoadingCTAButton />;

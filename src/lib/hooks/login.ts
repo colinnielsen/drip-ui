@@ -6,32 +6,6 @@ import { ACTIVE_USER_QUERY_KEY } from '@/queries/UserQuery';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createSiweMessage, generateSiweNonce } from 'viem/siwe';
 
-// export const useLoginOrCreateUser = ({
-//   onLogin,
-// }: {
-//   onLogin?: (data: User) => void;
-// }) => {
-//   const { logout } = useLogout();
-//   const { authenticated } = usePrivy();
-
-//   const { login } = useLogin({
-//     onError(error) {
-//       console.log('loginError', { loginError: error });
-//     },
-//     onComplete: console.log,
-//     // axiosFetcher<User>('/api/users/upsert', {
-//     //   withCredentials: true,
-//     //   method: 'POST',
-//     // }).then(onLogin),
-//   });
-
-//   return () =>
-//     authenticated
-//       ? logout()
-//           .then(() => sleep(300))
-//           .then(() => login())
-//       : login();
-// };
 export const useLoginOrCreateUser = ({
   onLogin,
 }: {
@@ -75,7 +49,7 @@ export const useLoginOrCreateUser = ({
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Login failed');
+        throw new Error(error?.message || 'Login failed');
       }
 
       const user = await res.json();

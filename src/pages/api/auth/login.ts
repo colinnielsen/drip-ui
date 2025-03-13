@@ -30,6 +30,7 @@ export default EffectfulApiRoute(function login(
         userSignature: signature,
         siweMessage: message,
         res,
+        createUserIfNotFound: true,
       }),
     ),
     Effect.andThen(user => Effect.succeed(res.status(200).json(user))),

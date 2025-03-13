@@ -63,7 +63,6 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
         supportedChains: [base],
         // Customize Privy's appearance in your app
         appearance: {
-          // showWalletLoginFirst: false,
           theme: 'light',
           // landingHeader: 'One day, we want your grandma to be able to use Drip',
           // loginMessage:

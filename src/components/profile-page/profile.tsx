@@ -1,9 +1,8 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { Body, Headline, Title2 } from '@/components/ui/typography';
+import { Body, Title2 } from '@/components/ui/typography';
 import { useLoginOrCreateUser } from '@/lib/hooks/login';
-import { useResetUser, useUser, useUserName } from '@/queries/UserQuery';
+import { useUser, useUserName } from '@/queries/UserQuery';
 import Avatar from 'boring-avatars';
-import { LogOut } from 'lucide-react';
 
 export const ProfileInfo = () => {
   const { data: user, isLoading: userIsLoading } = useUser();
@@ -71,14 +70,16 @@ export const ProfileInfo = () => {
 };
 
 export const ResetFooter = () => {
-  const { mutate: reset } = useResetUser();
+  // const { mutate: reset, canLogout } = useResetUser();
 
-  return (
-    <div className="px-6 py-4 flex justify-between items-center">
-      <Headline>Sign out and reset</Headline>
-      <button onClick={() => reset()}>
-        <LogOut height={20} width={20} />
-      </button>
-    </div>
-  );
+  return null;
+
+  // return (
+  //   <div className="px-6 py-4 flex justify-between items-center">
+  //     <Headline>Sign out</Headline>
+  //     <button onClick={() => reset()}>
+  //       <LogOut height={20} width={20} />
+  //     </button>
+  //   </div>
+  // );
 };

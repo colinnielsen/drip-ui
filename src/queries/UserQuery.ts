@@ -1,5 +1,6 @@
 import { User } from '@/data-model/user/UserType';
 import { axiosFetcher, err, isSSR } from '@/lib/utils';
+import { usePrivy } from '@privy-io/react-auth';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { createClient, http } from 'viem';
@@ -35,17 +36,22 @@ export const useUserId = () =>
   useQuery(userQuery({ select: user => user?.id }));
 
 export const useResetUser = () => {
-  return useMutation({
-    mutationFn: () =>
-      axiosFetcher('/api/reset').then(async () => {
-        // await axios('https://auth.privy.io/api/v1/sessions/logout', {
-        //   withCredentials: true,
-        // });
-        localStorage.clear();
+  const { ready } = usePrivy();
+  const { data: user } = useUser();
+  const canLogout = ready && user;
 
-        if (typeof window !== 'undefined') window.location.assign('/');
-      }),
+  const mutation = useMutation({
+    mutationFn: async () => {
+      // axiosFetcher('/api/reset').then(async () => {
+      // }),
+      // await logout();
+      localStorage.clear();
+
+      if (typeof window !== 'undefined') window.location.assign('/');
+    },
   });
+
+  return { ...mutation, canLogout };
 };
 
 export function userNameQuery(

@@ -56,7 +56,6 @@ export default function App({ Component, pageProps }: AppProps) {
               CSS_FONT_CLASS_CONFIG,
               'bg-background',
               'min-h-screen',
-              // 'prose',
             )}
           >
             <Head>

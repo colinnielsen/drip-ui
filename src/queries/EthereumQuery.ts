@@ -55,7 +55,6 @@ export const usePreferredWalletClient = ():
   const { ready, wallet: preferredWallet } = usePreferredWallet();
 
   const [client, setClient] = useState<WC | null>(null);
-
   useEffect(() => {
     setClient(null);
     if (ready && preferredWallet)

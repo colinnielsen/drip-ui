@@ -104,7 +104,7 @@ export function HomePageHeader() {
         </h1>
       </div>
 
-      <Search />
+      {/* <Search /> */}
     </header>
   );
 }

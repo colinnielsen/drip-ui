@@ -22,7 +22,6 @@ const libreFranklin = Libre_Franklin({
 });
 const robotoMono = Roboto_Mono({
   subsets: ['latin'],
-  // weight: '500',
   variable: '--font-roboto-mono',
 });
 const diaryNotes = localFont({
@@ -37,11 +36,6 @@ export const CSS_FONT_CLASS_CONFIG = cn(
   `${libreFranklin.variable} font-sans`,
   `${robotoMono.variable}`,
 );
-
-/* export const metadata: Metadata = {
- *   title: "Drip Coffee",
- *   description: "Onchain coffee breh",
- * }; */
 
 export default function App({ Component, pageProps }: AppProps) {
   const [isOpen, setIsOpen] = useState(false);

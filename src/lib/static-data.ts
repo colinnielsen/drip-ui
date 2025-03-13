@@ -37,26 +37,26 @@ export const STATIC_FARMER_DATA: Farmer[] = [
 ];
 
 export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
-  {
-    __type: 'slice',
-    externalId: mapSliceIdToSliceExternalId(799),
-    location: {
-      label: 'Montgomery, AL',
-      address: '39 Dexter Ave suite 102, Montgomery, AL 36104',
-      coords: [32.3792, -86.3077],
-    },
-    name: 'Prevail Coffee',
-    logo: '/cafes/prevail.webp',
-    url: 'https://prevailcoffee.com/',
-    backgroundImage: '/cafes/prevail-background.webp',
-    farmerAllocation: [
-      {
-        allocationBPS: 300,
-        farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
-        id: crypto.randomUUID() as UUID,
-      },
-    ],
-  },
+  // {
+  //   __type: 'slice',
+  //   externalId: mapSliceIdToSliceExternalId(799),
+  //   location: {
+  //     label: 'Montgomery, AL',
+  //     address: '39 Dexter Ave suite 102, Montgomery, AL 36104',
+  //     coords: [32.3792, -86.3077],
+  //   },
+  //   name: 'Prevail Coffee',
+  //   logo: '/cafes/prevail.webp',
+  //   url: 'https://prevailcoffee.com/',
+  //   backgroundImage: '/cafes/prevail-background.webp',
+  //   farmerAllocation: [
+  //     {
+  //       allocationBPS: 300,
+  //       farmer: 'A76DA066-F116-4F8B-BAF5-34344132BE2E',
+  //       id: crypto.randomUUID() as UUID,
+  //     },
+  //   ],
+  // },
   {
     __type: 'slice',
     externalId: mapSliceIdToSliceExternalId(827),
@@ -103,19 +103,19 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
       coords: [40.71590151851203, -73.95575958202109],
     },
   },
-  {
-    __type: 'slice',
-    externalId: mapSliceIdToSliceExternalId(852),
-    name: 'Noun Coffee',
-    logo: '/cafes/noun.webp',
-    url: 'https://noun.coffee/',
-    backgroundImage: '/cafes/noun-background.webp',
-    location: {
-      label: 'Los Angeles, CA',
-      address: '7702 Santa Monica Blvd, West Hollywood, CA 90046',
-      coords: [34.09070262919442, -118.35688561636172],
-    },
-  },
+  // {
+  //   __type: 'slice',
+  //   externalId: mapSliceIdToSliceExternalId(852),
+  //   name: 'Noun Coffee',
+  //   logo: '/cafes/noun.webp',
+  //   url: 'https://noun.coffee/',
+  //   backgroundImage: '/cafes/noun-background.webp',
+  //   location: {
+  //     label: 'Los Angeles, CA',
+  //     address: '7702 Santa Monica Blvd, West Hollywood, CA 90046',
+  //     coords: [34.09070262919442, -118.35688561636172],
+  //   },
+  // },
   // {
   //   __type: 'slice',
   //   externalId: getSliceStoreIdFromSliceId(877),
@@ -129,19 +129,19 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
   //     coords: [37.765287994762986, -122.46652275888438],
   //   },
   // },
-  {
-    __type: 'slice',
-    externalId: mapSliceIdToSliceExternalId(425),
-    name: 'Compass Coffee',
-    logo: '/cafes/compass.webp',
-    url: 'https://www.compasscoffee.com/',
-    backgroundImage: '/cafes/compass-background.webp',
-    location: {
-      label: 'Washington, DC',
-      address: '1201 Half Street, Washington, District of Columbia 20003, USA',
-      coords: [38.875350752814555, -77.00768132534003],
-    },
-  },
+  // {
+  //   __type: 'slice',
+  //   externalId: mapSliceIdToSliceExternalId(425),
+  //   name: 'Compass Coffee',
+  //   logo: '/cafes/compass.webp',
+  //   url: 'https://www.compasscoffee.com/',
+  //   backgroundImage: '/cafes/compass-background.webp',
+  //   location: {
+  //     label: 'Washington, DC',
+  //     address: '1201 Half Street, Washington, District of Columbia 20003, USA',
+  //     coords: [38.875350752814555, -77.00768132534003],
+  //   },
+  // },
   {
     __type: 'slice',
     externalId: mapSliceIdToSliceExternalId(974),
@@ -155,19 +155,19 @@ export const ONBOARDED_SHOPS: Unsaved<SliceShopConfig>[] = [
       coords: [52.53501427738041, 13.42346353801631],
     },
   },
-  {
-    __type: 'slice',
-    externalId: mapSliceIdToSliceExternalId(1008),
-    name: "Menotti's Coffee",
-    logo: '/cafes/menottis.webp',
-    url: 'https://menottis.com/',
-    backgroundImage: '/cafes/menottis-background.webp',
-    location: {
-      label: 'Los Angeles, CA',
-      address: '56 Windward Ave, Venice, CA 90291',
-      coords: [33.987311727259836, -118.47271489159513],
-    },
-  },
+  // {
+  //   __type: 'slice',
+  //   externalId: mapSliceIdToSliceExternalId(1008),
+  //   name: "Menotti's Coffee",
+  //   logo: '/cafes/menottis.webp',
+  //   url: 'https://menottis.com/',
+  //   backgroundImage: '/cafes/menottis-background.webp',
+  //   location: {
+  //     label: 'Los Angeles, CA',
+  //     address: '56 Windward Ave, Venice, CA 90291',
+  //     coords: [33.987311727259836, -118.47271489159513],
+  //   },
+  // },
   // {
   //   __type: 'slice',
   //   externalId: getSliceStoreIdFromSliceId(805),

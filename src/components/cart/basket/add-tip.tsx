@@ -4,24 +4,24 @@ import {
   DrawerClose,
   DrawerContent,
   DrawerFooter,
+  DrawerPortal,
   DrawerTitle,
   DrawerTrigger,
   NestedDrawer,
 } from '@/components/ui/drawer';
 import { USDCInput } from '@/components/ui/usdc-input';
-import { Currency } from '@/data-model/_common/currency';
+import {
+  initCurrencyZero,
+  subCurrencies,
+} from '@/data-model/_common/currency/currencyDTO';
 import { USDC } from '@/data-model/_common/currency/USDC';
 import { UUID } from '@/data-model/_common/type/CommonType';
 import { Cart } from '@/data-model/cart/CartType';
 import { cn } from '@/lib/utils';
 import { useTipMutation } from '@/queries/CartQuery';
 import { useShop } from '@/queries/ShopQuery';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Headline, Label3, Title1 } from '../../ui/typography';
-import {
-  initCurrencyZero,
-  subCurrencies,
-} from '@/data-model/_common/currency/currencyDTO';
 
 //
 //// UTILS
@@ -127,17 +127,24 @@ const TipDrawer = ({
   cart: Cart;
   tipOption: ReturnType<typeof useTipButtons>['tipOptions'][number];
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [tipAmount, setTipAmount] = useState<USDC>(
     (tipOption.isSelected && cart.tip?.amount) || USDC.ZERO,
   );
   const mutation = useTipMutation();
+
+  useEffect(() => {
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  }, []);
 
   return (
     <>
       <DrawerTitle className="pt-4 px-6 grow text-center" asChild>
         <Title1>Edit tip amount</Title1>
       </DrawerTitle>
-      <USDCInput amount={tipAmount} setAmount={setTipAmount} />;
+      <USDCInput amount={tipAmount} setAmount={setTipAmount} ref={inputRef} />;
       <Divider />
       <DrawerFooter className="p-6 pt-0">
         <DrawerClose asChild>
@@ -166,9 +173,9 @@ function CustomTipButton({
   tipOption: (typeof TIP_OPTIONS)[number] & { isSelected: boolean };
 }) {
   const [open, setOpen] = useState(false);
-
+  console.log({ open, setOpen });
   return (
-    <NestedDrawer open={open} onOpenChange={setOpen}>
+    <NestedDrawer aria-describedby={undefined}>
       <DrawerTrigger asChild>
         <button
           className={cn(
@@ -184,9 +191,14 @@ function CustomTipButton({
           <Label3>{tipOption.label}</Label3>
         </button>
       </DrawerTrigger>
-      <DrawerContent className="flex flex-col gap-4 w-full p-0">
-        {open && <TipDrawer cart={cart} tipOption={tipOption} />}
-      </DrawerContent>
+      <DrawerPortal>
+        <DrawerContent
+          className="flex flex-col gap-4 w-full p-0"
+          aria-describedby={undefined}
+        >
+          <TipDrawer cart={cart} tipOption={tipOption} />
+        </DrawerContent>
+      </DrawerPortal>
     </NestedDrawer>
   );
 }

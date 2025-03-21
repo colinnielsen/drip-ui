@@ -5,6 +5,8 @@ import { useSecondsSinceMount } from '@/lib/hooks/utility-hooks';
 import { cn } from '@/lib/utils';
 import { Clock11, Clock2, Clock5, Clock8, LucideProps } from 'lucide-react';
 import { Label2 } from './typography';
+import Image from 'next/image';
+import dripPNG from '@/assets/drip.png';
 
 export function Price<T extends Currency>({
   originalPrice,
@@ -215,6 +217,12 @@ export function UsdcSVG({ className }: { className?: string }) {
         fill="#fff"
       />
     </svg>
+  );
+}
+
+export function DripTokenIcon({ className }: { className: string }) {
+  return (
+    <Image src={dripPNG} alt="drip logo" quality={10} className={className} />
   );
 }
 

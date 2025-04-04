@@ -18,7 +18,7 @@ const rewards = [
 ];
 
 export const RewardSection = () => {
-  return;
+  return null;
   //   <div>
   //     {rewards.map((r, i) => (
   //       <div key={i}>testing</div>

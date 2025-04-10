@@ -1,40 +1,130 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Drip UI
 
-## Getting Started
+A mobile, onchain coffee ordering platform that rewards users, farmers, and coffee shops.
 
-First, run the development server:
+> "But why crypto? Why USDC?"
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Eliminate 3.5% credit card fees ❌
+- Universal loyalty program. $DRIP token is _actually_ cash in your pocket 💵
+- Tip a coffee grower, or _drip_ them your saved credit card fees 👨‍🌾
+
+## Architecture Video
+
+A walkthrough of [this figma](https://www.figma.com/board/K94ybpdHdf4SiT9u55yUqA/Untitled?node-id=0-1&t=p3b9fGC3t1040HYD-1)
+
+[![architecture video](https://markdown-videos-api.jorgenkh.no/youtube/8GKjd1fyFA8.gif?width=480&height=320&duration=500)](https://youtu.be/8GKjd1fyFA8)
+
+## Walkthrough Video
+
+[![walkthrough video](https://markdown-videos-api.jorgenkh.no/youtube/8GKjd1fyFA8.gif?width=480&height=320&duration=500)](https://youtu.be/8GKjd1fyFA8)
+
+## 🚀 Features
+
+- **Shop Discovery**: Find nearby coffee shops on an interactive map
+- **Digital Menu**: Browse items, customize orders, and apply discounts
+- **Crypto Payments**: User-friendly USDC payments on Base
+- **Farmer Support**: Direct rewards to coffee growers
+- **Order Tracking**: Track order status in real-time
+
+## 💸 Payment Flow
+
+The Drip platform uses USDC for payments:
+
+1. **Lower Fees**: Eliminates the 3-3.5% credit card processing fees
+2. **Direct Rewards**: Enables direct microtips to coffee growers
+3. **Transparent Transactions**: All payments are verifiable onchain
+
+### Payment Process
+
+1. User connects wallet or uses embedded Privy wallet
+2. Order total is calculated in USDC
+3. User approves transaction
+4. Payment is processed on Base
+5. Coffee shop receives payment notification
+6. Optional: Portion of savings automatically "drips" to farmer
+
+## 🌱 Farmer Reward System
+
+Drip connects coffee drinkers directly with the farmers who grow their beans:
+
+1. **Direct Tipping**: Users can send tips directly to verified farmers
+2. **Fee Sharing**: Portion of saved credit card fees can be directed to farmers
+3. **Transparent Impact**: All contributions are trackable on-chain
+
+## 🔧 Tech Stack
+
+- **Framework**: Next.js 14 (Pages Router)
+- **Styling**: Tailwind CSS, Shadcn UI
+- **State Management**: React Query
+- **Type Safety**: TypeScript, Effect Schema
+- **Web3**: Viem, Privy, Slice
+- **Payments**: USDC, Square integration
+- **Database**: Vercel Postgres
+
+## 📋 Project Structure
+
+```markdown
+src/
+├── components/ # UI components
+├── data-model/ # Domain models and business logic
+├── lib/ # Utility functions
+├── pages/ # Next.js page components
+├── queries/ # React Query hooks
+├── services/ # Backend services
+└── styles/ # Global styles
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🏗️ Architecture
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+- **Domain-Driven Design**: Business logic isolated in data-model directory
+- **Functional Programming**: Using Effect.js for rust-like type-safe pipelines
+- **Branded Types**: For strong typing of IDs and special strings
+- **React Query**: For data fetching and state management
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## 🔄 App Lifecycle
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+1. Merchant syncs their shop, pulling in store data
+2. User lands on the page is identified by a JWT in their cookies
+3. User selects a shop and browses the menu
+4. User adds items to cart (stored in local storage)
+5. User places an order via `/order/pay`
+6. Payment is executed on-chain, and the order is sent to an external POS service provider
+7. Barista marks the order as complete
+8. External order is synced with Drip, and order is now complete
+9. User can view order history
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## 🚀 Getting Started
 
-## Learn More
+### Prerequisites
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js 18+ and pnpm
+- Vercel account (for deployment)
+- Square developer account (for payment processing)
+- Slice account (for on-chain POS)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```bash
+# Clone the repository
+git clone https://github.com/your-username/drip-ui.git
+cd drip-ui
 
-## Deploy on Vercel
+# Install dependencies
+pnpm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your API keys and configuration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+# Start the development server
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see the application.
+
+## 📚 Resources
+
+- [Effect.js Documentation](https://effect.website/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Privy Auth Documentation](https://docs.privy.io/)
+- [Slice Kit Documentation](https://docs.slice.so/)

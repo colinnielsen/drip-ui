@@ -12,7 +12,7 @@ A mobile, onchain coffee ordering platform that rewards users, farmers, and coff
 
 A walkthrough of [this figma](https://www.figma.com/board/K94ybpdHdf4SiT9u55yUqA/Untitled?node-id=0-1&t=p3b9fGC3t1040HYD-1)
 
-[![architecture video](https://markdown-videos-api.jorgenkh.no/youtube/8GKjd1fyFA8.gif?width=480&height=320&duration=500)](https://youtu.be/8GKjd1fyFA8)
+[![architecture video](https://github.com/user-attachments/assets/af4ea6ac-924f-4fce-b835-9c53af3bffc4)](https://www.loom.com/share/12ff3ea9625f43d580f18ae0e89a110d?sid=433837d6-5371-4204-879c-c1b94077654e)
 
 ## Walkthrough Video
 
@@ -128,3 +128,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Privy Auth Documentation](https://docs.privy.io/)
 - [Slice Kit Documentation](https://docs.slice.so/)
+
+## 📝 License
+
+© 2024 Drip Software LLC. All rights reserved.

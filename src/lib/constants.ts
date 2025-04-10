@@ -66,11 +66,3 @@ export const getDripRelayerPrivateKey = (): string => {
   if (!key) throw Error('undefined Relayer Private Key');
   return key;
 };
-
-export const getAlchemyKey = (): string => {
-  notAllowedOnClient();
-
-  const key = process.env.ALCHEMY_AA_KEY;
-  if (!key) throw Error('undefined Alchemy Key');
-  return key;
-};

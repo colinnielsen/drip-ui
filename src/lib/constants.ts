@@ -66,3 +66,19 @@ export const getDripRelayerPrivateKey = (): string => {
   if (!key) throw Error('undefined Relayer Private Key');
   return key;
 };
+
+export const getMetalApiKey = (): string => {
+  notAllowedOnClient();
+
+  const key = process.env.METAL_API_KEY;
+  if (!key) throw new Error('METAL_API_KEY not set');
+  return key;
+};
+
+export const getMetalDripTokenAddress = (): string => {
+  const address = process.env.NEXT_PUBLIC_METAL_DRIP_TOKEN_ADDRESS;
+  if (!address) throw new Error('METAL_DRIP_TOKEN_ADDRESS not set');
+  return address;
+};
+
+export const DRIP_REWARD_AMOUNT_PER_ORDER = 1; // Award 1 $DRIP per completed order

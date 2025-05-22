@@ -32,6 +32,7 @@ import {
 import { Shop, SquareShopSourceConfig } from '@/data-model/shop/ShopType';
 import { User } from '@/data-model/user/UserType';
 import { USDC_CONFIG } from '@/lib/contract-config/USDC';
+import { sliceKit } from '@/lib/data-sources/slice';
 import { existsOrNotFoundErr } from '@/lib/effect';
 import {
   BaseEffectError,
@@ -47,7 +48,6 @@ import {
   getDripRelayerClient,
   mapChainIdToViemChain,
 } from '@/lib/ethereum';
-import { sliceKit } from '@/lib/data-sources/slice';
 import { generateUUID, rehydrateData } from '@/lib/utils';
 import { PayRequest } from '@/pages/api/orders/pay';
 import { sql } from '@vercel/postgres';
@@ -59,6 +59,7 @@ import { Address, Hash, Hex } from 'viem';
 import { getTransactionReceipt } from 'viem/actions';
 import { effectfulShopService } from './ShopService';
 import { SquareService, SquareServiceError } from './SquareService';
+import rewardService from './RewardService';
 
 // export type UpdateOrderOperation =
 //   | { __type: 'add'; orderItem: Unsaved<OrderItem> | Unsaved<OrderItem>[] }
@@ -313,46 +314,54 @@ async function _syncSliceOrder(order: InProgressOrder) {
   const timeSince = differenceInMinutes(new Date(), new Date(order.timestamp));
   const itsBeen5Minutes = timeSince > 5;
 
-  const [payment] = order.payments;
+  const transactionHash = order.payments?.[0]?.transactionHash;
+  if (!transactionHash)
+    throw Error(`Transaction hash not found for order ${order.id}`);
 
-  if (!payment || !('transactionHash' in payment))
-    throw Error(
-      '_syncSliceOrder: expected slice order to have an associated payment with a transactionHash',
-    );
-
-  const sliceOrders = await sliceKit
-    .getOrder({
-      transactionHash: payment.transactionHash,
-    })
-    .then(o => o.order.slicerOrders)
+  // Fetch the latest status from Slice
+  const { order: sliceOrderData } = await sliceKit
+    .getOrder({ transactionHash })
     .catch(e => {
       throw Error(`Error fetching order from slice: ${e}`);
     });
 
+  const sliceOrders = sliceOrderData?.slicerOrders ?? [];
   if (!sliceOrders.length) throw Error('slice order not found');
 
   const [sliceOrder] = sliceOrders;
-  const orderNumber = sliceOrder.refOrderId;
-  const status = sliceOrder.status;
+  const { status } = sliceOrder;
+
+  // Determine new status based on Slice and time elapsed
   const newOrderStatus: Order['status'] =
-    status === 'Completed' || itsBeen5Minutes
+    status === 'Completed' || (needsSyncing(order) && itsBeen5Minutes)
       ? '3-complete'
       : status === 'Canceled'
         ? 'cancelled'
         : order.status;
 
+  // Check if the order transitioned to complete during this sync
+  const triggerReward =
+    (order.status as Order['status']) !== '3-complete' &&
+    newOrderStatus === '3-complete';
+
   const result = await sql`UPDATE
         orders
         SET "externalOrderInfo" = ${JSON.stringify({
           ...order.externalOrderInfo!,
-          orderNumber,
           status: newOrderStatus,
         })},
-      "status" = ${newOrderStatus}
+        "status" = ${newOrderStatus}
       WHERE id = ${order.id}
       RETURNING *`;
 
-  return result.rows[0] as InProgressOrder | CompletedOrder;
+  const updatedOrder = result.rows[0] as InProgressOrder | CompletedOrder;
+
+  if (triggerReward) {
+    // Non-blocking call
+    rewardService.triggerOrderCompletionReward(order.user, order.id);
+  }
+
+  return updatedOrder;
 }
 
 async function _syncSquareOrder(order: InProgressOrder) {
@@ -383,6 +392,11 @@ async function _syncSquareOrder(order: InProgressOrder) {
     // override the order status if it's been a while
     needsSyncing(order) && itsBeen5Minutes ? '3-complete' : squreOrderStatus;
 
+  // Check if the order transitioned to complete during this sync
+  const triggerReward =
+    (order.status as Order['status']) !== '3-complete' &&
+    newOrderStatus === '3-complete';
+
   const result = await sql`
     UPDATE
     orders
@@ -396,7 +410,13 @@ async function _syncSquareOrder(order: InProgressOrder) {
     RETURNING *
   `;
 
-  return result.rows[0] as InProgressOrder | CompletedOrder;
+  const updatedOrder = result.rows[0] as InProgressOrder | CompletedOrder;
+
+  if (triggerReward)
+    // Non-blocking call
+    rewardService.triggerOrderCompletionReward(order.user, order.id);
+
+  return updatedOrder;
 }
 
 const syncOrderWithExternalService = async (
@@ -561,7 +581,6 @@ function _payForSquareOrder(
           Effect.succeed({ unsavedOrder, shop, cart }),
           // try and simulate the withdrawal
           simulateUSDCWithdrawal(usdcAuthorization).pipe(
-            Effect.tap(success => Console.log('simulation success', success)),
             Effect.andThen(success => Effect.succeed(success)),
           ),
           // if simulation passes, run the withdraw on a new thread
@@ -592,7 +611,6 @@ function _payForSquareOrder(
         }),
       ]),
     ),
-    Effect.tap(() => Console.debug('saved order')),
     // Capture the saved order ID
     Effect.tap(([, order]) => (savedOrderId = order.id)),
     // Prepare and create the order in Square
@@ -617,7 +635,6 @@ function _payForSquareOrder(
         { concurrency: 'unbounded' },
       ),
     ),
-    Effect.tap(() => Console.log('created square order')),
     // Update order with external information
     Effect.andThen(([{ shop, order }, createdSquareOrder]) => {
       const externalOrderInfo = {
@@ -645,7 +662,6 @@ function _payForSquareOrder(
       Effect.forkDaemon(
         pipe(
           Fiber.join(USDCWithdrawalFiber),
-          Effect.tap(() => Console.log('reconciled withdrawal fiber')),
           Effect.andThen(paymentDetails => {
             const nextOrder: InProgressOrder = {
               ...order,
@@ -663,7 +679,6 @@ function _payForSquareOrder(
               catch: e => new SQLExecutionError(e),
             });
           }),
-          Effect.tap(() => Console.log('saved order with payment')),
           Effect.catchTag('OnChainExecutionError', e => {
             const erroredOrder: ErroredOrder = {
               ...order,
@@ -702,8 +717,6 @@ function _payForSquareOrder(
         { concurrency: 2 },
       ),
     ),
-    Effect.tap(() => Console.log('paid for square order')),
-    Effect.tap(() => Console.log('returning order')),
     // Return the final order
     Effect.andThen(([order]) => order),
     // Handle errors and update order status accordingly

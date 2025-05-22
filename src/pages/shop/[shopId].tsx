@@ -26,6 +26,10 @@ import { useMemo } from 'react';
 ///// STATIC SITE GENERATION
 ///
 
+export type StaticPageData = Awaited<
+  ReturnType<typeof STATIC_PAGE_DATA>
+>[number];
+
 const STATIC_PAGE_DATA = () =>
   ShopService.findAllShopConfigs().then(configs =>
     configs.map(c => ({
@@ -44,15 +48,11 @@ const STATIC_PAGE_DATA = () =>
     })),
   );
 
-export type StaticPageData = Awaited<
-  ReturnType<typeof STATIC_PAGE_DATA>
->[number];
-
 export const getStaticPaths = (async () => {
   const paths = (await STATIC_PAGE_DATA()).map(d => ({
     params: { shopId: d.id },
   }));
-  return { paths, fallback: true };
+  return { paths, fallback: 'blocking' };
 }) satisfies GetStaticPaths;
 
 export const getStaticProps: GetStaticProps<{

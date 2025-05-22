@@ -1,4 +1,3 @@
-import { UUID } from '@/data-model/_common/type/CommonType';
 import {
   JWTString,
   TOKEN_CONFIG,
@@ -8,7 +7,6 @@ import { isProd } from '@/lib/utils';
 import { Effect, Option } from 'effect';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { UnauthorizedError } from './effect';
-import { isUUID } from './utils';
 
 //
 //// HELPERS

@@ -1,10 +1,9 @@
 import { Effect, pipe } from 'effect';
-import { andThen } from 'effect/Effect';
 import { NextApiRequest } from 'next';
 import { BadRequestError } from '../errors';
 import { getTempSquareOAuthId } from '@/lib/data-sources/square';
 
-export * as S from 'effect/Schema';
+export { Schema as S } from 'effect';
 export * from './base';
 export * from './ethereum';
 export * from './currency';
@@ -32,7 +31,7 @@ export const validateSessionToken = (req: NextApiRequest) => {
   return pipe(
     req,
     req => Effect.try(() => getTempSquareOAuthId(req)),
-    andThen(userId => {
+    Effect.andThen(userId => {
       if (!userId)
         return Effect.fail(new BadRequestError('Session token not found'));
 

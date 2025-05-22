@@ -1,4 +1,4 @@
-import * as S from 'effect/Schema';
+import { Schema as S } from 'effect';
 import { S_UUID } from './base';
 import { S_CurrenciesUnion, S_USDC } from './currency';
 import { DiscountId } from '@/data-model/discount/DiscountDTO';

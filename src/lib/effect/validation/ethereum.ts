@@ -1,4 +1,4 @@
-import * as S from 'effect/Schema';
+import { Schema as S } from 'effect';
 import { S_Hex } from './base';
 
 export const S_ChainId = S.Union(S.Literal(8453));

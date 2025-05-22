@@ -2,8 +2,7 @@ import { DripServerError } from '@/lib/effect';
 import { EffectfulApiRoute } from '@/lib/effect/next-api';
 import { S_Hex, validateHTTPMethod } from '@/lib/effect/validation';
 import { authenticationService } from '@/services/AuthenticationService';
-import { Effect, pipe } from 'effect';
-import * as S from 'effect/Schema';
+import { Effect, pipe, Schema as S } from 'effect';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export const S_SiweMessage = S.Struct({

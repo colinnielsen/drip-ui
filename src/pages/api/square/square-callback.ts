@@ -13,7 +13,7 @@ import { getHostname, getProtocol } from '@/lib/utils';
 import { CSRFTokenService } from '@/services/CSRFTokenService';
 import { SquareService } from '@/services/SquareService';
 import axios, { AxiosError } from 'axios';
-import * as S from 'effect/Schema';
+import { Schema as S } from 'effect';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const SquareCallbackSchema = S.Struct({

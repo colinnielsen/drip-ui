@@ -1,6 +1,5 @@
 import { AxiosError } from 'axios';
 import { Effect, pipe } from 'effect';
-import { andThen, fail, map, succeed } from 'effect/Effect';
 import { rehydrateData } from '../utils';
 import {
   BaseEffectError,
@@ -17,8 +16,10 @@ export const existsOrNotFoundErr = <R, E, C>(
 ) =>
   pipe(
     e,
-    andThen(e => (e ? succeed(e) : fail(new NotFoundError('Not found')))),
-    map(e => e as R),
+    Effect.andThen(e =>
+      e ? Effect.succeed(e) : Effect.fail(new NotFoundError('Not found')),
+    ),
+    Effect.map(e => e as R),
   );
 
 export const extractErrorReadable = (error: any, verbose = false) => {

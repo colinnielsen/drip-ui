@@ -13,7 +13,7 @@ export const WalletActions = () => {
 
   return (
     <div className="w-full flex py-4 gap-2 justify-center">
-      <SecondaryButton
+      {/* <SecondaryButton
         onClick={() => window.open(quote?.url)}
         disabled={!quote}
         isLoading={isQuoteLoading}
@@ -24,13 +24,13 @@ export const WalletActions = () => {
           <span className="text-center">cash out $DRIP</span>{' '}
           <ArrowRightIcon className="inline-block w-5 h-5" />
         </div>
-      </SecondaryButton>
+      </SecondaryButton> */}
 
       <CTAButton
         onClick={() => window.open(quote?.url)}
         disabled={!quote}
         isLoading={isQuoteLoading}
-        className="max-w-min"
+        // className="min-w-1/2"
         variant="cta-small"
       >
         <div className="flex gap-2 items-center">

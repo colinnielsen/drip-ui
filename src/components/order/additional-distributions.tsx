@@ -1,16 +1,21 @@
+import dripLogo from '@/assets/drip.jpg';
 import { Currency } from '@/data-model/_common/currency';
-import { AdditionalDistribution } from '@/data-model/order/OrderType';
+import {
+  AdditionalDistribution,
+  FarmerDistribution,
+  RewardTokenDistribution,
+} from '@/data-model/order/OrderType';
 import { useFarmer } from '@/queries/FarmerQuery';
 import Image from 'next/image';
 import Link from 'next/link';
 import { InfoCard } from '../ui/info-card';
-import { Label1, Title2 } from '../ui/typography';
+import { Drip, Label1, Title2 } from '../ui/typography';
 
-const FarmerDistributionInfoCard = ({
+const FarmerDistributionCard = ({
   distribution,
   orderTotal,
 }: {
-  distribution: AdditionalDistribution;
+  distribution: FarmerDistribution;
   orderTotal: Currency;
 }) => {
   const { data: farmer } = useFarmer(distribution.farmerId);
@@ -39,6 +44,32 @@ const FarmerDistributionInfoCard = ({
       </Label1>
     </Link>
   );
+  return <InfoCard left={left} info={info} />;
+};
+
+const RewardDistributionCard = ({
+  distribution,
+}: {
+  distribution: RewardTokenDistribution;
+}) => {
+  const left = (
+    <Image
+      src={dripLogo}
+      alt="drip token reward"
+      fill
+      className="object-cover"
+    />
+  );
+
+  const info = (
+    <div className={'w-full flex flex-col gap-y-2'}>
+      <Drip>Cha-Ching!</Drip>
+      <Label1 className="text-primary-gray">
+        You earned <b>{distribution.tokenAmount.toFixed(2)} $DRIP</b> tokens
+        from this order!
+      </Label1>
+    </div>
+  );
 
   return <InfoCard left={left} info={info} />;
 };
@@ -53,14 +84,21 @@ export const AdditionalOrderDistributions = ({
   return (
     <div>
       {distributions.map((distribution, index) => {
-        if (distribution.__type === 'farmer-distribution')
+        if (distribution.__type === 'farmer-distribution') {
           return (
-            <FarmerDistributionInfoCard
+            <FarmerDistributionCard
               key={index}
               distribution={distribution}
               orderTotal={orderTotal}
             />
           );
+        }
+        if (distribution.__type === 'reward-token-distribution') {
+          return (
+            <RewardDistributionCard key={index} distribution={distribution} />
+          );
+        }
+        return null;
       })}
     </div>
   );

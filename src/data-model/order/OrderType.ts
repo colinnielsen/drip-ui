@@ -32,13 +32,21 @@ export type PaymentInfo = {
   amount: Currency;
 };
 
-type FarmerDistribution = {
+export type FarmerDistribution = {
   __type: 'farmer-distribution';
   farmerId: UUID;
   amount: Currency;
 };
 
-export type AdditionalDistribution = FarmerDistribution;
+export type RewardTokenDistribution = {
+  __type: 'reward-token-distribution';
+  recipient: UUID;
+  tokenAmount: number;
+};
+
+export type AdditionalDistribution =
+  | FarmerDistribution
+  | RewardTokenDistribution;
 
 //
 //// ORDER VARIATIONS

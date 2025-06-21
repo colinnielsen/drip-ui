@@ -11,9 +11,13 @@ import {
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
-import { getDripRelayerPrivateKey } from './constants';
+import {
+  getDripRelayerPrivateKey,
+  getMetalDripTokenAddress,
+} from './constants';
 import { USDC_CONFIG } from './contract-config/USDC';
 import { UnimplementedPathError } from './effect';
+import { erc20Abi } from 'viem';
 
 export const mapChainIdToViemChain = (chainId: ChainId): Chain => {
   if (chainId === ChainId.BASE) return base;
@@ -55,6 +59,12 @@ export const BASE_CLIENT = createPublicClient(BASE_RPC_CONFIG);
 export const USDC_INSTANCE = getContract({
   abi: USDC_CONFIG[ChainId.BASE].abi,
   address: USDC_CONFIG[ChainId.BASE].address,
+  client: BASE_CLIENT,
+});
+
+export const DRIP_INSTANCE = getContract({
+  abi: erc20Abi,
+  address: getMetalDripTokenAddress(),
   client: BASE_CLIENT,
 });
 

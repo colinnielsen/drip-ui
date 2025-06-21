@@ -24,14 +24,15 @@ import {
   ErroredOrder,
   ExternalOrderInfo,
   InProgressOrder,
-  NewOrder,
   Order,
   OrderStatus,
   PaymentInfo,
+  RewardTokenDistribution,
 } from '@/data-model/order/OrderType';
 import { Shop, SquareShopSourceConfig } from '@/data-model/shop/ShopType';
 import { User } from '@/data-model/user/UserType';
 import { USDC_CONFIG } from '@/lib/contract-config/USDC';
+import { sliceKit } from '@/lib/data-sources/slice';
 import { existsOrNotFoundErr } from '@/lib/effect';
 import {
   BaseEffectError,
@@ -40,6 +41,7 @@ import {
   NotFoundError,
   OnChainExecutionError,
   SQLExecutionError,
+  unexpected,
   UnimplementedPathError,
 } from '@/lib/effect/errors';
 import {
@@ -47,16 +49,15 @@ import {
   getDripRelayerClient,
   mapChainIdToViemChain,
 } from '@/lib/ethereum';
-import { sliceKit } from '@/lib/data-sources/slice';
 import { generateUUID, rehydrateData } from '@/lib/utils';
 import { PayRequest } from '@/pages/api/orders/pay';
 import { sql } from '@vercel/postgres';
 import { differenceInMinutes } from 'date-fns';
-import { Console, Effect, Fiber, pipe } from 'effect';
+import { Console, Effect, pipe } from 'effect';
 import { UnknownException } from 'effect/Cause';
-import { RuntimeFiber } from 'effect/Fiber';
 import { Address, Hash, Hex } from 'viem';
 import { getTransactionReceipt } from 'viem/actions';
+import { EffectfulRewardService } from './RewardService';
 import { effectfulShopService } from './ShopService';
 import { SquareService, SquareServiceError } from './SquareService';
 
@@ -133,13 +134,21 @@ const save = async <T extends Order>(
   );
 };
 
+const saveEffect = <T extends Order>(
+  order: T | Unsaved<T>,
+): Effect.Effect<T, SQLExecutionError> =>
+  Effect.tryPromise({
+    try: async () => await save(order),
+    catch: e => new SQLExecutionError(e),
+  });
+
 export class USDCWithdrawalSimulationError extends BaseEffectError {
   readonly _tag = 'USDCWithdrawalSimulationError';
 }
 
 const simulateUSDCWithdrawal = (
   authorization: USDCAuthorization,
-): Effect.Effect<boolean, USDCWithdrawalSimulationError> => {
+): Effect.Effect<true, USDCWithdrawalSimulationError> => {
   return Effect.tryPromise({
     try: async () =>
       await BASE_CLIENT.simulateContract({
@@ -171,7 +180,7 @@ const payForOrderViaUSDCAuthorization = ({
   orderRecipient,
 }: {
   chainId: ChainId;
-  order: Unsaved<NewOrder>;
+  order: Order;
   authorization: USDCAuthorization;
   orderRecipient: EthAddress;
 }): Effect.Effect<
@@ -309,33 +318,63 @@ const payForOrderViaUSDCAuthorization = ({
   );
 };
 
+const distributeOrderRewards = (
+  order: Order,
+): Effect.Effect<
+  Order,
+  GenericError | UnknownException | SQLExecutionError
+> => {
+  const pipeline = pipe(
+    EffectfulRewardService.triggerOrderCompletionReward(order),
+    Effect.andThen(({ rewardAmount, success }) => {
+      if (!success) return Effect.succeed(order);
+
+      const rewardDistribution: RewardTokenDistribution = {
+        __type: 'reward-token-distribution',
+        recipient: order.user,
+        tokenAmount: rewardAmount,
+      };
+
+      const orderWithReward = {
+        ...order,
+        additionalDistributions: [
+          ...(order.additionalDistributions || []),
+          rewardDistribution,
+        ],
+      };
+
+      return Effect.succeed(orderWithReward);
+    }),
+    Effect.andThen(order => saveEffect(order)),
+  );
+
+  return pipeline;
+};
+
 async function _syncSliceOrder(order: InProgressOrder) {
   const timeSince = differenceInMinutes(new Date(), new Date(order.timestamp));
   const itsBeen5Minutes = timeSince > 5;
 
-  const [payment] = order.payments;
+  const transactionHash = order.payments?.[0]?.transactionHash;
+  if (!transactionHash)
+    throw Error(`Transaction hash not found for order ${order.id}`);
 
-  if (!payment || !('transactionHash' in payment))
-    throw Error(
-      '_syncSliceOrder: expected slice order to have an associated payment with a transactionHash',
-    );
-
-  const sliceOrders = await sliceKit
-    .getOrder({
-      transactionHash: payment.transactionHash,
-    })
-    .then(o => o.order.slicerOrders)
+  // Fetch the latest status from Slice
+  const { order: sliceOrderData } = await sliceKit
+    .getOrder({ transactionHash })
     .catch(e => {
       throw Error(`Error fetching order from slice: ${e}`);
     });
 
+  const sliceOrders = sliceOrderData?.slicerOrders ?? [];
   if (!sliceOrders.length) throw Error('slice order not found');
 
   const [sliceOrder] = sliceOrders;
-  const orderNumber = sliceOrder.refOrderId;
-  const status = sliceOrder.status;
+  const { status } = sliceOrder;
+
+  // Determine new status based on Slice and time elapsed
   const newOrderStatus: Order['status'] =
-    status === 'Completed' || itsBeen5Minutes
+    status === 'Completed' || (needsSyncing(order) && itsBeen5Minutes)
       ? '3-complete'
       : status === 'Canceled'
         ? 'cancelled'
@@ -345,14 +384,15 @@ async function _syncSliceOrder(order: InProgressOrder) {
         orders
         SET "externalOrderInfo" = ${JSON.stringify({
           ...order.externalOrderInfo!,
-          orderNumber,
           status: newOrderStatus,
         })},
-      "status" = ${newOrderStatus}
+        "status" = ${newOrderStatus}
       WHERE id = ${order.id}
       RETURNING *`;
 
-  return result.rows[0] as InProgressOrder | CompletedOrder;
+  let updatedOrder = result.rows[0] as InProgressOrder | CompletedOrder;
+
+  return updatedOrder;
 }
 
 async function _syncSquareOrder(order: InProgressOrder) {
@@ -396,7 +436,9 @@ async function _syncSquareOrder(order: InProgressOrder) {
     RETURNING *
   `;
 
-  return result.rows[0] as InProgressOrder | CompletedOrder;
+  let updatedOrder = result.rows[0] as InProgressOrder | CompletedOrder;
+
+  return updatedOrder;
 }
 
 const syncOrderWithExternalService = async (
@@ -500,116 +542,59 @@ function _payForSquareOrder(
   never
 > {
   let savedOrderId: UUID;
-  let USDCWithdrawalFiber: RuntimeFiber<
-    {
-      txHash: Hex;
-      amount: Currency;
-      to: Address;
-    },
-    OnChainExecutionError
-  >;
 
   const pipeline = pipe(
-    cart,
-    // Load shop and configuration data
-    cart =>
-      Effect.all(
-        [
-          Effect.succeed({ cart, usdcAuthorization }),
-          effectfulShopService
-            .findById(cart.shop)
-            .pipe(
-              Effect.andThen(shop =>
-                shop
-                  ? Effect.succeed(shop as Shop<'square'>)
-                  : Effect.fail(new NotFoundError('Shop not found')),
-              ),
-            ),
-          effectfulShopService
-            .findShopConfigByShopId(cart.shop)
-            .pipe(
-              Effect.andThen(shopConfig =>
-                shopConfig?.__type === 'square' &&
-                shopConfig.fundRecipientConfig
-                  ? Effect.succeed(shopConfig)
-                  : Effect.fail(
-                      new NotFoundError(
-                        "Shop not found or doesn't have a fund recipient config",
-                      ),
-                    ),
-              ),
-            ),
-        ],
-        { concurrency: 'unbounded' },
+    effectfulShopService
+      .findById(cart.shop)
+      .pipe(
+        Effect.andThen(shop =>
+          shop
+            ? Effect.succeed(shop as Shop<'square'>)
+            : Effect.fail(new NotFoundError('Shop not found')),
+        ),
       ),
     // Transform cart into a new order
-    Effect.map(([{ cart, usdcAuthorization }, shop, shopConfig]) => ({
+    Effect.andThen(shop => ({
       unsavedOrder: mapCartToNewOrder({
         userId,
         cart,
         tipRecipient: shop.tipConfig.recipient,
       }),
-      shopConfig,
       shop,
-      cart,
-      usdcAuthorization,
     })),
-    // Simulate and initiate USDC withdrawal
-    Effect.andThen(
-      ({ unsavedOrder, shop, shopConfig, cart, usdcAuthorization }) =>
-        Effect.all([
-          Effect.succeed({ unsavedOrder, shop, cart }),
-          // try and simulate the withdrawal
-          simulateUSDCWithdrawal(usdcAuthorization).pipe(
-            Effect.tap(success => Console.log('simulation success', success)),
-            Effect.andThen(success => Effect.succeed(success)),
-          ),
-          // if simulation passes, run the withdraw on a new thread
-          Effect.forkDaemon(
-            payForOrderViaUSDCAuthorization({
-              chainId: ChainId.BASE,
-              order: unsavedOrder,
-              authorization: usdcAuthorization,
-              orderRecipient:
-                shopConfig.__type === 'square'
-                  ? shopConfig.fundRecipientConfig!.recipient!
-                  : genericError("shouldn't happen"),
-            }),
-          ),
-        ]),
-    ),
-    // Store the fiber reference for later reconciliation
-    Effect.tap(([, , fiber]) => {
-      USDCWithdrawalFiber = fiber;
-    }),
-    // Persist the order in the database
-    Effect.andThen(([{ shop, unsavedOrder }]) =>
+    // Simulate USDC withdrawal
+    Effect.andThen(({ unsavedOrder, shop }) =>
       Effect.all([
-        Effect.succeed({ shop, cart }),
-        Effect.tryPromise({
-          try: () => save(unsavedOrder),
-          catch: e => new SQLExecutionError(e),
-        }),
+        Effect.succeed({ unsavedOrder, shop }),
+        simulateUSDCWithdrawal(usdcAuthorization).pipe(
+          Effect.andThen(success => Effect.succeed(success)),
+        ),
       ]),
     ),
-    Effect.tap(() => Console.debug('saved order')),
+    // Persist the order in the database
+    Effect.andThen(([{ shop, unsavedOrder }]) =>
+      Effect.all({
+        shop: Effect.succeed(shop),
+        savedOrder: saveEffect(unsavedOrder),
+      }),
+    ),
     // Capture the saved order ID
-    Effect.tap(([, order]) => (savedOrderId = order.id)),
+    Effect.tap(({ savedOrder }) => (savedOrderId = savedOrder.id)),
     // Prepare and create the order in Square
-    Effect.andThen(([{ shop }, savedOrder]) => ({
+    Effect.andThen(({ shop, savedOrder }) => ({
       shop,
       order: savedOrder,
-      squareOrder: mapOrderToSquareOrder(shop, savedOrder),
+      unCreatedSquareOrder: mapOrderToSquareOrder(shop, savedOrder),
     })),
-    Effect.andThen(({ order, shop, squareOrder }) =>
+    Effect.andThen(({ order, shop, unCreatedSquareOrder }) =>
       Effect.all(
         [
-          Effect.succeed({ shop, order, squareOrder }),
+          Effect.succeed({ shop, order }),
           Effect.tryPromise({
             try: () =>
               SquareService.createOrder(
                 shop.__sourceConfig.merchantId,
-                squareOrder,
+                unCreatedSquareOrder,
               ),
             catch: e => new SquareServiceError(e),
           }),
@@ -617,7 +602,6 @@ function _payForSquareOrder(
         { concurrency: 'unbounded' },
       ),
     ),
-    Effect.tap(() => Console.log('created square order')),
     // Update order with external information
     Effect.andThen(([{ shop, order }, createdSquareOrder]) => {
       const externalOrderInfo = {
@@ -640,72 +624,77 @@ function _payForSquareOrder(
         order: nextOrder,
       };
     }),
-    // Reconcile withdrawal and update order with payment details
-    Effect.tap(({ order }) =>
-      Effect.forkDaemon(
-        pipe(
-          Fiber.join(USDCWithdrawalFiber),
-          Effect.tap(() => Console.log('reconciled withdrawal fiber')),
-          Effect.andThen(paymentDetails => {
-            const nextOrder: InProgressOrder = {
-              ...order,
-              payments: [
-                ...order.payments,
-                {
-                  __type: 'onchain',
-                  amount: paymentDetails.amount,
-                  transactionHash: paymentDetails.txHash,
-                } satisfies PaymentInfo,
-              ],
-            };
-            return Effect.tryPromise({
-              try: () => save(nextOrder),
-              catch: e => new SQLExecutionError(e),
-            });
+    Effect.tap(({ order, shop }) =>
+      Effect.tryPromise({
+        try: async () =>
+          SquareService.payForOrder({
+            merchantId: shop.__sourceConfig.merchantId,
+            locationId: shop.__sourceConfig.locationId,
+            order,
           }),
-          Effect.tap(() => Console.log('saved order with payment')),
-          Effect.catchTag('OnChainExecutionError', e => {
-            const erroredOrder: ErroredOrder = {
-              ...order,
-              status: 'error',
-              errorDetails: {
-                origin: e.originalTag || e._tag,
-                message: e.message,
-              },
-            };
-            return Effect.tryPromise({
-              try: () => save(erroredOrder),
-              catch: e => new SQLExecutionError(e),
-            });
+        catch: e => new SquareServiceError(e),
+      }),
+    ),
+    Effect.tap(({ order }) => saveEffect(order)),
+    // Update order with payment details and withdraw funds
+    Effect.andThen(({ order, shop }) =>
+      pipe(
+        effectfulShopService
+          .findShopConfigByShopId(shop.id)
+          .pipe(
+            Effect.andThen(shopConfig =>
+              shopConfig?.__type === 'square' && shopConfig.fundRecipientConfig
+                ? Effect.succeed(shopConfig)
+                : Effect.fail(
+                    new NotFoundError(
+                      "Shop not found or doesn't have a fund recipient config",
+                    ),
+                  ),
+            ),
+          ),
+        Effect.andThen(shopConfig =>
+          payForOrderViaUSDCAuthorization({
+            chainId: ChainId.BASE,
+            order,
+            authorization: usdcAuthorization,
+            orderRecipient:
+              shopConfig.__type === 'square'
+                ? shopConfig.fundRecipientConfig!.recipient!
+                : unexpected(),
           }),
         ),
+        Effect.andThen(paymentDetails => {
+          const nextOrder: InProgressOrder = {
+            ...order,
+            payments: [
+              ...order.payments,
+              {
+                __type: 'onchain',
+                amount: paymentDetails.amount,
+                transactionHash: paymentDetails.txHash,
+              } satisfies PaymentInfo,
+            ],
+          };
+          return Effect.succeed(nextOrder);
+        }),
+        Effect.catchTag('OnChainExecutionError', e => {
+          const erroredOrder: ErroredOrder = {
+            ...order,
+            status: 'error',
+            errorDetails: {
+              origin: e.originalTag || e._tag,
+              message: e.message,
+            },
+          };
+          return saveEffect(erroredOrder).pipe(() => Effect.fail(e));
+        }),
       ),
     ),
-    // Finalize the order and process payment
-    Effect.andThen(({ order, shop }) =>
-      Effect.all(
-        [
-          Effect.tryPromise({
-            try: () => save<InProgressOrder>(order),
-            catch: e => new SQLExecutionError(e),
-          }),
-          Effect.tryPromise({
-            try: async () =>
-              SquareService.payForOrder({
-                merchantId: shop.__sourceConfig.merchantId,
-                locationId: shop.__sourceConfig.locationId,
-                order,
-              }),
-            catch: e => new SquareServiceError(e),
-          }),
-        ],
-        { concurrency: 2 },
-      ),
-    ),
-    Effect.tap(() => Console.log('paid for square order')),
-    Effect.tap(() => Console.log('returning order')),
+    // Finalize the order
+    Effect.andThen(order => saveEffect(order)),
     // Return the final order
-    Effect.andThen(([order]) => order),
+    Effect.andThen(order => order),
+
     // Handle errors and update order status accordingly
     Effect.catchTag('SquareServiceError', squareServiceError =>
       Effect.tryPromise({
@@ -840,6 +829,7 @@ const orderService = {
   findById,
   save,
   pay,
+  distributeOrderRewards,
   syncWithExternalService,
   checkStatus,
   delete: deleteOrder,

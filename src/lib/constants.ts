@@ -1,3 +1,5 @@
+import { Address, isAddress } from 'viem';
+
 const notAllowedOnClient = () => {
   if (typeof window !== 'undefined')
     throw Error('never do this on the client dawg');
@@ -65,4 +67,20 @@ export const getDripRelayerPrivateKey = (): string => {
   const key = process.env.DRIP_RELAYER_PK;
   if (!key) throw Error('undefined Relayer Private Key');
   return key;
+};
+
+export const getMetalApiKey = (): string => {
+  notAllowedOnClient();
+
+  const key = process.env.METAL_API_KEY;
+  if (!key) throw new Error('METAL_API_KEY not set');
+  return key;
+};
+
+export const getMetalDripTokenAddress = (): Address => {
+  const address = process.env.NEXT_PUBLIC_METAL_DRIP_TOKEN_ADDRESS;
+  if (!address || !isAddress(address))
+    throw new Error('METAL_DRIP_TOKEN_ADDRESS not set');
+
+  return address;
 };

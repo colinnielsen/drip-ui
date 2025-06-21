@@ -1,5 +1,5 @@
 import { USDC } from '@/data-model/_common/currency/USDC';
-import { USDC_INSTANCE } from '@/lib/ethereum';
+import { DRIP_INSTANCE, USDC_INSTANCE } from '@/lib/ethereum';
 import { err } from '@/lib/utils';
 import { ConnectedWallet, useWallets } from '@privy-io/react-auth';
 import { useQuery } from '@tanstack/react-query';
@@ -9,6 +9,7 @@ import {
   createWalletClient,
   custom,
   CustomTransport,
+  formatUnits,
   JsonRpcAccount,
   WalletClient,
   WalletRpcSchema,
@@ -101,6 +102,28 @@ export const useUSDCBalance = ({
             .balanceOf([wallet])
             .then(balance => USDC.fromWei(balance))
         : err('Address is required'),
+    enabled: !!wallet,
+    refetchInterval: pollingInterval,
+  });
+};
+
+export const useDripBalance = ({
+  pollingInterval,
+}: {
+  pollingInterval?: number;
+} = {}) => {
+  const wallet = usePreferredWalletAddress();
+
+  return useQuery({
+    queryKey: ['drip-balance', wallet],
+    queryFn: async () => {
+      if (!wallet) return err('Wallet is required');
+
+      const balance = await DRIP_INSTANCE.read.balanceOf([wallet]);
+
+      // Assuming 18 decimals for DRIP token
+      return formatUnits(balance, 18);
+    },
     enabled: !!wallet,
     refetchInterval: pollingInterval,
   });

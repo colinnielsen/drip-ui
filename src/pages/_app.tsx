@@ -9,7 +9,7 @@ import localFont from 'next/font/local';
 import Head from 'next/head';
 import '../styles/globals.css';
 import { CartDrawerContext } from '@/components/ui/drawer';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 
 const garamond = EB_Garamond({
@@ -39,6 +39,18 @@ export const CSS_FONT_CLASS_CONFIG = cn(
 
 export default function App({ Component, pageProps }: AppProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const isMini = url.searchParams.get('miniApp') === 'true';
+
+    if (isMini) {
+      import('@farcaster/frame-sdk').then(({ sdk }) => {
+        sdk.actions.ready();
+      });
+    }
+  }, []);
+
   return (
     <PrivyProvider>
       <ReactQueryClientProvider useDevTools>

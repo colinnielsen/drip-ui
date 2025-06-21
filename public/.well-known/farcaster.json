@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "PLACEHOLDER: Generate this using the Mini App Manifest Tool in Warpcast",
+    "payload": "PLACEHOLDER: Generate this using the Mini App Manifest Tool in Warpcast",
+    "signature": "PLACEHOLDER: Generate this using the Mini App Manifest Tool in Warpcast"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Drip",
+    "iconUrl": "https://your-drip-app.xyz/drip.png",
+    "homeUrl": "https://your-drip-app.xyz",
+    "imageUrl": "https://your-drip-app.xyz/drip.png",
+    "buttonTitle": "☕ Start Tipping",
+    "splashImageUrl": "https://your-drip-app.xyz/drip.png",
+    "splashBackgroundColor": "#f5f0ec"
+  }
+}

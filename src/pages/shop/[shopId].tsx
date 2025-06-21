@@ -21,6 +21,7 @@ import {
 } from '@tanstack/react-query';
 import { GetStaticPaths, GetStaticProps } from 'next/types';
 import { useMemo } from 'react';
+import Head from 'next/head';
 
 ///
 ///// STATIC SITE GENERATION
@@ -151,8 +152,31 @@ export default function StaticShopPage({
     [_dehydratedState],
   );
 
+  // TODO: Replace with your app's domain
+  const appUrl = 'https://your-drip-app.xyz';
+
+  const frame = {
+    version: 'next',
+    imageUrl: `${appUrl}/api/og/shop?shopId=${staticShop.id}`,
+    button: {
+      title: 'Buy Coffee',
+      action: {
+        type: 'launch_frame',
+        url: `${appUrl}/shop/${staticShop.id}?miniApp=true`,
+        name: `Buy coffee from ${staticShop.label}`,
+        splashImageUrl: `${appUrl}${staticShop.logo}`,
+        splashBackgroundColor: '#f5f0ec',
+      },
+    },
+  };
+
   return (
     <main className="flex flex-col pb-40">
+      <Head>
+        <meta property="fc:frame" content={JSON.stringify(frame)} />
+        <meta property="og:image" content={frame.imageUrl} />
+        <meta property="og:title" content={`Buy coffee from ${staticShop.label}`} />
+      </Head>
       <HydrationBoundary state={dehydratedState}>
         <ShopHeader {...staticShop} />
         <div className="p-5 px-6 flex flex-col gap-5">

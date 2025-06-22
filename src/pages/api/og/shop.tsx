@@ -10,6 +10,11 @@ export const config = {
 export default async function handler(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const shopId = searchParams.get('shopId');
+  const host = req.headers.get('host');
+  const protocol = host?.includes('localhost') ? 'http' : 'https';
+  const font = fetch(
+    new URL('/fonts/diary-notes.ttf', `${protocol}://${host}`),
+  ).then((res) => res.arrayBuffer());
 
   if (!shopId) {
     return new ImageResponse(<>Visit drip.com</>, {
@@ -18,15 +23,12 @@ export default async function handler(req: NextRequest) {
     });
   }
 
-  // This is a bit of a hack because edge routes can't query the db directly
-  // So we call our own api route to get the shop data
-  const host = req.headers.get('host');
-  const protocol = host?.includes('localhost') ? 'http' : 'https';
   const shop = await fetch(
     `${protocol}://${host}/api/shops/${shopId}`,
   ).then((res) => res.json());
 
   const shopName = shop.name || 'a friend';
+  const fontData = await font;
 
   return new ImageResponse(
     (
@@ -41,8 +43,20 @@ export default async function handler(req: NextRequest) {
           backgroundColor: '#fff',
           fontSize: 32,
           fontWeight: 600,
+          backgroundImage: `url(${protocol}://${host}${shop.backgroundImage})`,
+          backgroundSize: '100% 100%',
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+          }}
+        />
         <img
           src={`${protocol}://${host}/drip.png`}
           style={{
@@ -51,7 +65,14 @@ export default async function handler(req: NextRequest) {
           }}
           alt="Drip Logo"
         />
-        <div style={{ marginTop: 40, fontSize: 60 }}>
+        <div
+          style={{
+            marginTop: 40,
+            fontSize: 60,
+            fontFamily: '"Diary Notes"',
+            color: 'white',
+          }}
+        >
           Buy a coffee from {shopName}
         </div>
       </div>
@@ -59,6 +80,13 @@ export default async function handler(req: NextRequest) {
     {
       width: 1200,
       height: 630,
+      fonts: [
+        {
+          name: 'Diary Notes',
+          data: fontData,
+          style: 'normal',
+        },
+      ],
     },
   );
 }

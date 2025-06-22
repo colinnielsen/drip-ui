@@ -9,7 +9,7 @@ import {
   mapSliceExternalIdToSliceId,
 } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
-import { rehydrateData } from '@/lib/utils';
+import { getHostname, rehydrateData } from '@/lib/utils';
 import { farmerQuery } from '@/queries/FarmerQuery';
 import { useShop } from '@/queries/ShopQuery';
 import ShopService from '@/services/ShopService';
@@ -34,9 +34,9 @@ const STATIC_PAGE_DATA = () =>
       id:
         c.__type === 'slice'
           ? mapSliceStoreIdToShopId(
-              mapSliceExternalIdToSliceId(c.externalId),
-              SLICE_VERSION,
-            )
+            mapSliceExternalIdToSliceId(c.externalId),
+            SLICE_VERSION,
+          )
           : mapSquareStoreExternalIdToShopId(c.externalId),
       label: c.name,
       backgroundImage: c.backgroundImage ?? '',
@@ -152,9 +152,7 @@ export default function StaticShopPage({
     [_dehydratedState],
   );
 
-  // TODO: Replace with your app's domain
-  const appUrl = 'https://your-drip-app.xyz';
-
+  const appUrl = getHostname();
   const frame = {
     version: 'next',
     imageUrl: `${appUrl}/api/og/shop?shopId=${staticShop.id}`,

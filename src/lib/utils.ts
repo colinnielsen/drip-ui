@@ -145,11 +145,11 @@ export const getProtocol = (): Protocol => {
 };
 
 /**
- * @returns `www.drip.com` || `drip.com` || `localhost:1234`
+ * @returns `www.dripapp.xyz` || `dripapp.xyz` || `localhost:3000`
  */
 export const getHostname = () => {
   // Production environment on Vercel
-  if (process.env.VERCEL_ENV === 'production') return 'drip-ui.vercel.app';
+  if (process.env.VERCEL_ENV === 'production') return 'dripapp.xyz';
 
   // Preview/Development environments on Vercel
   if (process.env.VERCEL_URL) return process.env.VERCEL_URL;

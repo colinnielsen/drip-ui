@@ -1,5 +1,3 @@
-import { UUID } from '@/data-model/_common/type/CommonType';
-import ShopService from '@/services/ShopService';
 import { ImageResponse } from '@vercel/og';
 import { NextRequest } from 'next/server';
 

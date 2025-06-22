@@ -7,11 +7,11 @@
   "frame": {
     "version": "1",
     "name": "Drip",
-    "iconUrl": "https://your-drip-app.xyz/drip.png",
-    "homeUrl": "https://your-drip-app.xyz",
-    "imageUrl": "https://your-drip-app.xyz/drip.png",
-    "buttonTitle": "☕ Start Tipping",
-    "splashImageUrl": "https://your-drip-app.xyz/drip.png",
+    "iconUrl": "https://dripapp.xyz/drip-logo.png",
+    "homeUrl": "https://dripapp.xyz",
+    "imageUrl": "https://dripapp.xyz/drip.png",
+    "buttonTitle": "☕ Tipping & Sipping",
+    "splashImageUrl": "https://dripapp.xyz/drip.png",
     "splashBackgroundColor": "#f5f0ec"
   }
 }

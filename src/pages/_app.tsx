@@ -9,8 +9,9 @@ import localFont from 'next/font/local';
 import Head from 'next/head';
 import '../styles/globals.css';
 import { CartDrawerContext } from '@/components/ui/drawer';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
+import { actions } from '@farcaster/miniapp-sdk';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -39,6 +40,12 @@ export const CSS_FONT_CLASS_CONFIG = cn(
 
 export default function App({ Component, pageProps }: AppProps) {
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Initialize Farcaster Mini App
+  useEffect(() => {
+    actions.ready();
+  }, []);
+
   return (
     <PrivyProvider>
       <ReactQueryClientProvider useDevTools>
@@ -58,6 +65,10 @@ export default function App({ Component, pageProps }: AppProps) {
                 name="viewport"
                 content="width=device-width, user-scalable=no"
               />
+              <meta name="fc:frame" content="vNext" />
+              <meta name="fc:frame:button:1" content="Order Coffee" />
+              <meta name="fc:frame:button:1:action" content="link" />
+              <meta name="fc:frame:button:1:target" content="https://drip.coffee" />
             </Head>
             <Component {...pageProps} />
             <Footer />

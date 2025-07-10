@@ -1,0 +1,36 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEsInR5cGUiOiJjdXN0b2R5IiwiaWF0IjoxNzA0MzU3NjAwfQ",
+    "payload": "eyJkb21haW4iOiJkcmlwLmNvZmZlZSIsImZpZCI6MSwidGltZXN0YW1wIjoxNzA0MzU3NjAwfQ",
+    "signature": "MHhkZDJlZDVmZWJkZDEwMjM5NWJkNzg1NzY3MzU3ZDUwZGMxMWVkZDY2NzIxMjIzNjQ2NjgxMDRlNDg1NzYxMzUyZDdlNjE3MzQ4ZDIxNzU4MjkzNzY4MjdkZWYxNzc5ZjI1ZGI2MjY3NzVkZGE0NzVjYzAyMDk4ZDI0OGNiMGJhNzFj"
+  },
+  "miniApp": {
+    "name": "Drip Coffee",
+    "description": "Order fresh coffee delivered through blockchain technology",
+    "icon": "https://drip.coffee/drip-logo.png",
+    "url": "https://drip.coffee",
+    "backgroundColor": "#8B4513",
+    "splashBackgroundColor": "#8B4513",
+    "splashImageUrl": "https://drip.coffee/drip-logo.png",
+    "homeUrl": "https://drip.coffee",
+    "imageUrl": "https://drip.coffee/drip.jpg",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "food",
+      "tags": ["coffee", "blockchain", "payment", "delivery"],
+      "supportedPlatforms": ["web", "mobile"]
+    }
+  },
+  "frame": {
+    "name": "Drip Coffee",
+    "homeUrl": "https://drip.coffee",
+    "imageUrl": "https://drip.coffee/drip.jpg",
+    "splashImageUrl": "https://drip.coffee/drip-logo.png",
+    "splashBackgroundColor": "#8B4513",
+    "buttonTitle": "Order Coffee",
+    "version": "1.0.0"
+  },
+  "webhooks": {
+    "cast.created": "https://drip.coffee/api/webhooks/cast-created"
+  }
+}

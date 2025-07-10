@@ -137,6 +137,12 @@ const PayRoute = EffectfulApiRoute(function (
         user: Effect.succeed(user),
       }),
     ),
+    Effect.andThen(({ order, user }) =>
+      Effect.all({
+        order: OrderService.distributeOrderRewards(order),
+        user: Effect.succeed(user),
+      }),
+    ),
     // issue tokens
     Effect.andThen(({ order, user }) =>
       pipe(

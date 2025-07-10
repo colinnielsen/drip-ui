@@ -149,7 +149,7 @@ export const getProtocol = (): Protocol => {
  */
 export const getHostname = () => {
   // Production environment on Vercel
-  if (process.env.VERCEL_ENV === 'production') return 'drip-ui.vercel.app';
+  if (process.env.VERCEL_ENV === 'production') return 'dripapp.xyz';
 
   // Preview/Development environments on Vercel
   if (process.env.VERCEL_URL) return process.env.VERCEL_URL;

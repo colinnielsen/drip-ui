@@ -44,7 +44,7 @@ import {
   OrderLineItemModifier,
   Location as SquareLocation,
   Merchant as SquareMerchant,
-  Order as SquareOrder,
+  Order as SquareOrderImport,
   OrderLineItem as SquareOrderLineItem,
 } from 'square';
 import {
@@ -57,6 +57,8 @@ import { SquareOrderFulfillmentState, SquareOrderStatus } from './SquareType';
 type ImageLookup = Record<string, CatalogImage>;
 
 const ZERO_SQUARE_MONEY: Money = { amount: 0n, currency: 'USD' };
+
+type SquareOrder = SquareOrderImport;
 
 //
 //// UTILITY FUNCTIONS

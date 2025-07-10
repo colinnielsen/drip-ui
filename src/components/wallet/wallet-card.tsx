@@ -1,5 +1,6 @@
 import { useToast } from '@/lib/hooks/use-toast';
 import {
+  useDripBalance,
   usePreferredWalletAddress,
   useUSDCBalance,
 } from '@/queries/EthereumQuery';
@@ -10,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../ui/card';
-import { UsdcSVG } from '../ui/icons';
+import { DripTokenIcon, UsdcSVG } from '../ui/icons';
 import { Skeleton } from '../ui/skeleton';
 import { Drip, Label1, Label2, Mono } from '../ui/typography';
 
@@ -79,10 +80,9 @@ export const WalletCard = () => {
     pollingInterval: 10000,
   });
 
-  // const { data: dripBalance, isLoading: isDripLoading } = {
-  //   data: 95.0,
-  //   isLoading: false,
-  // };
+  const { data: dripBalance, isLoading: isDripLoading } = useDripBalance({
+    pollingInterval: 10000,
+  });
 
   return (
     <Card className="w-full max-w-md bg-drip-yellow opacity-90 rounded-3xl shadow-xl aspect-[3.370/2.125] flex flex-col">
@@ -95,21 +95,15 @@ export const WalletCard = () => {
         <TokenBalance
           icon={<UsdcSVG className="h-6 w-6" />}
           name="USDC"
-          balance={usdcBalance ? usdcBalance.prettyFormat() : '0.00'}
+          balance={usdcBalance ? usdcBalance.prettyFormat() : '--'}
           isLoading={isUsdcLoading}
         />
-        {/* <TokenBalance
+        <TokenBalance
           icon={<DripTokenIcon className="h-9 w-9 -ml-0.5 mt-1" />}
           name="$DRIP"
-          balance={
-            dripBalance
-              ? dripBalance.toLocaleString('en', {
-                  minimumFractionDigits: 2,
-                })
-              : '0.00'
-          }
-          isLoading={isUsdcLoading}
-        /> */}
+          balance={dripBalance ?? '--'}
+          isLoading={isDripLoading}
+        />
       </CardContent>
       <CardFooter>
         <WalletAddress />

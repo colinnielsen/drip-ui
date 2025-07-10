@@ -114,6 +114,10 @@ export const genericError = (message: string | Error | unknown) => {
   throw new GenericError(message);
 };
 
+export const unexpected = (message?: string | Error | unknown) => {
+  throw new GenericError(message || "shouldn't happen");
+};
+
 export const mappingError = (message: string | Error | unknown) => {
   throw new MappingError(message);
 };

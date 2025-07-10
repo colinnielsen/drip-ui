@@ -22,6 +22,7 @@ import { Fragment } from 'react';
 import { OrderItemDisplay } from '../basket/cart-item';
 import { PurchaseSummary } from '../basket/summary';
 import { AsCheckoutSlide } from '../checkout-slides';
+import { ExtraDistributions } from './extra-distributions';
 
 export const OrderConfirmation = ({
   order,
@@ -97,47 +98,7 @@ export const OrderConfirmation = ({
               )
             )}
           </DrawerTitle>
-          <DrawerClose asChild>
-            {/* <Link href={`/farmer/${farmer?.farmer.id}`}>
-              <InfoCard
-                className="h-32"
-                left={
-                  farmer && (
-                    <Image
-                      src={farmer.farmer.image}
-                      alt={'farmer-image'}
-                      fill
-                      className="object-cover"
-                    />
-                  )
-                }
-                info={
-                  <div className="flex flex-col gap-2 py-4 text-left">
-                    <Title2>Thank you</Title2>
-                    <Label1 className="text-primary-gray">
-                      {farmer?.farmer.name} just received{' '}
-                      <span>
-                        $
-                        {(
-                          (+(summary?.subTotal.formatted ?? '0') *
-                            (farmer?.allocation.allocationBPS ?? 0)) /
-                          10000
-                        ).toLocaleString('en-US', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </span>{' '}
-                      from your purchase
-                    </Label1>
-
-                    <Label2 className="underline">
-                      Learn more about {farmer?.farmer.name.split(' ')[0]}
-                    </Label2>
-                  </div>
-                }
-              />
-            </Link> */}
-          </DrawerClose>
+          <ExtraDistributions distributions={order?.additionalDistributions} />
         </div>
 
         <Divider />

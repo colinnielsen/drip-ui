@@ -6,7 +6,7 @@ import userService from './UserService';
 const calculateRewardAmount = (order: Order) => {
   // take the reward amount 20% of the total cost
   const totalCostUSD = order.totalAmount.toUSDC().toUSD();
-  const rewardAmount = totalCostUSD * 0.2;
+  const rewardAmount = Math.floor(totalCostUSD * 0.2 * 100);
   console.log('Reward amount', rewardAmount);
 
   return rewardAmount;
@@ -26,6 +26,8 @@ export const triggerOrderCompletionReward = async (
     }
 
     const rewardAmount = calculateRewardAmount(order);
+
+    if (rewardAmount === 0) return { success: false, rewardAmount: 0 };
 
     // Use the MetalClient to distribute the tokens
     const response = await metalClient.distributeTokens({

@@ -326,8 +326,8 @@ const distributeOrderRewards = (
 > => {
   const pipeline = pipe(
     EffectfulRewardService.triggerOrderCompletionReward(order),
-    Effect.andThen(({ rewardAmount, success }) => {
-      if (!success) return Effect.succeed(order);
+    Effect.andThen(({ rewardAmount, sent }) => {
+      if (!sent) return Effect.succeed(order);
 
       const rewardDistribution: RewardTokenDistribution = {
         __type: 'reward-token-distribution',

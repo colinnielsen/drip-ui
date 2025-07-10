@@ -3,13 +3,24 @@ import { createEffectService } from '@/lib/effect';
 import { metalClient } from '@/lib/metal/MetalClient';
 import userService from './UserService';
 
-const calculateRewardAmount = (order: Order) => {
-  // take the reward amount 20% of the total cost
-  const totalCostUSD = order.totalAmount.toUSDC().toUSD();
-  const rewardAmount = Math.floor(totalCostUSD * 0.2 * 100);
-  console.log('Reward amount', rewardAmount);
+const REWARD_MULTIPLIERS = {
+  tip: 0.3,
+  order: 0.15,
+  farmerTip: 0.5,
+};
 
-  return rewardAmount;
+const calculateRewardAmount = (order: Order) => {
+  const orderCostUSD = order.subtotal.toUSDC().toUSD();
+  const tipCostUSD = order?.tip?.amount.toUSDC().toUSD();
+
+  const orderReward = Math.floor(orderCostUSD * REWARD_MULTIPLIERS.order * 100);
+
+  const tipReward = tipCostUSD
+    ? Math.floor(tipCostUSD * REWARD_MULTIPLIERS.tip * 100)
+    : 0;
+  console.log({ orderReward, tipReward, orderCostUSD, tipCostUSD });
+
+  return orderReward + tipReward;
 };
 
 /**
@@ -17,17 +28,15 @@ const calculateRewardAmount = (order: Order) => {
  */
 export const triggerOrderCompletionReward = async (
   order: Order,
-): Promise<{ success: boolean; rewardAmount: number }> => {
+): Promise<{ sent: boolean; rewardAmount: number }> => {
   try {
     const user = await userService.findById(order.user);
     // Don't throw, just skip reward if user/wallet missing
-    if (!user || !user.wallet?.address) {
-      return { success: false, rewardAmount: 0 };
-    }
+    if (!user || !user.wallet?.address) return { sent: false, rewardAmount: 0 };
 
     const rewardAmount = calculateRewardAmount(order);
 
-    if (rewardAmount === 0) return { success: false, rewardAmount: 0 };
+    if (rewardAmount === 0) return { sent: false, rewardAmount: 0 };
 
     // Use the MetalClient to distribute the tokens
     const response = await metalClient.distributeTokens({
@@ -39,16 +48,16 @@ export const triggerOrderCompletionReward = async (
       console.error(
         `[RewardService] Metal API distribution failed for order ${order.id}.`,
       );
-      return { success: false, rewardAmount: 0 };
+      return { sent: false, rewardAmount: 0 };
     }
 
-    return { success: true, rewardAmount };
+    return { sent: true, rewardAmount };
   } catch (error) {
     console.error(
       `[RewardService] Metal API Call failed during reward distribution for order ${order.id}:`,
       error,
     );
-    return { success: false, rewardAmount: 0 };
+    return { sent: false, rewardAmount: 0 };
   }
 };
 

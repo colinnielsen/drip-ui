@@ -96,7 +96,8 @@ const save = async <T extends Order>(
       "totalAmount",
       "status",
       "payments",
-      "externalOrderInfo"
+      "externalOrderInfo",
+      "additionalDistributions"
     )
     VALUES (
       ${order.id},
@@ -112,7 +113,8 @@ const save = async <T extends Order>(
       ${JSON.stringify(order.totalAmount)},
       ${order.status},
       ${JSON.stringify(order.payments)},
-      ${JSON.stringify(order.externalOrderInfo)}
+      ${JSON.stringify(order.externalOrderInfo)},
+      ${JSON.stringify(order.additionalDistributions)}
     )
     ON CONFLICT (id) DO UPDATE SET
       "timestamp" = EXCLUDED."timestamp",
@@ -127,7 +129,8 @@ const save = async <T extends Order>(
       "totalAmount" = EXCLUDED."totalAmount",
       "status" = EXCLUDED."status",
       "payments" = EXCLUDED."payments",
-      "externalOrderInfo" = EXCLUDED."externalOrderInfo"
+      "externalOrderInfo" = EXCLUDED."externalOrderInfo",
+      "additionalDistributions" = EXCLUDED."additionalDistributions"
     RETURNING *
   `.then(
     r => /* rehydrate any currency objects*/ rehydrateData(r.rows[0]) as T,
@@ -343,9 +346,10 @@ const distributeOrderRewards = (
         ],
       };
 
-      return Effect.succeed(orderWithReward);
+      console.log('orderWithReward', orderWithReward);
+
+      return saveEffect(orderWithReward);
     }),
-    Effect.andThen(order => saveEffect(order)),
   );
 
   return pipeline;

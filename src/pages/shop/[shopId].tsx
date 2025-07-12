@@ -1,6 +1,7 @@
 import FarmerCard from '@/components/shop-page/farmer-intro-card';
 import { ShopHeader, ShopHeaderDetails } from '@/components/shop-page/header';
 import { ItemList } from '@/components/shop-page/item-list';
+import { ShopPageHead } from '@/components/shop-page/ShopPageHead';
 import { SLICE_VERSION } from '@/data-model/_external/data-sources/slice/SliceDTO';
 import { mapSquareStoreExternalIdToShopId } from '@/data-model/_external/data-sources/square/SquareDTO';
 import {
@@ -21,7 +22,6 @@ import {
 } from '@tanstack/react-query';
 import { GetStaticPaths, GetStaticProps } from 'next/types';
 import { useMemo } from 'react';
-import Head from 'next/head';
 
 ///
 ///// STATIC SITE GENERATION
@@ -152,47 +152,9 @@ export default function StaticShopPage({
     [_dehydratedState],
   );
 
-  const shopTitle = `${staticShop.label} - Order Coffee on Drip`;
-  const shopDescription = `Buy a coffee from ${staticShop.label}. Fresh coffee delivered through blockchain technology.`;
-  const shopImage = staticShop.backgroundImage || '/drip.jpg';
-  const shopUrl = `https://drip.coffee/shop/${staticShop.id}`;
-
   return (
     <>
-      <Head>
-        <title>{shopTitle}</title>
-        <meta name="description" content={shopDescription} />
-        
-        {/* Open Graph Meta Tags */}
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content={shopTitle} />
-        <meta property="og:description" content={shopDescription} />
-        <meta property="og:image" content={shopImage} />
-        <meta property="og:url" content={shopUrl} />
-        <meta property="og:site_name" content="Drip Coffee" />
-        
-        {/* Twitter Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={shopTitle} />
-        <meta name="twitter:description" content={shopDescription} />
-        <meta name="twitter:image" content={shopImage} />
-        
-        {/* Farcaster Frame Meta Tags */}
-        <meta name="fc:frame" content="vNext" />
-        <meta name="fc:frame:image" content={`/api/og/shop/${staticShop.id}`} />
-        <meta name="fc:frame:button:1" content={`Buy from ${staticShop.label}`} />
-        <meta name="fc:frame:button:1:action" content="link" />
-        <meta name="fc:frame:button:1:target" content={shopUrl} />
-        
-        {/* Location meta if available */}
-        {staticShop.location && (
-          <>
-            <meta name="geo.placename" content={staticShop.location.label} />
-            <meta name="geo.position" content={`${staticShop.location.coords[0]};${staticShop.location.coords[1]}`} />
-            <meta name="geo.address" content={staticShop.location.address} />
-          </>
-        )}
-      </Head>
+      <ShopPageHead shop={staticShop} />
       
       <main className="flex flex-col pb-40">
         <HydrationBoundary state={dehydratedState}>

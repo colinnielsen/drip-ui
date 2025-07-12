@@ -68,7 +68,7 @@ export default function App({ Component, pageProps }: AppProps) {
               <meta name="fc:frame" content="vNext" />
               <meta name="fc:frame:button:1" content="Order Coffee" />
               <meta name="fc:frame:button:1:action" content="link" />
-              <meta name="fc:frame:button:1:target" content="https://drip.coffee" />
+              <meta name="fc:frame:button:1:target" content="https://dripapp.xyz" />
             </Head>
             <Component {...pageProps} />
             <Footer />

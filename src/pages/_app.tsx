@@ -11,7 +11,7 @@ import '../styles/globals.css';
 import { CartDrawerContext } from '@/components/ui/drawer';
 import { useState, useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
-import { actions } from '@farcaster/miniapp-sdk';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -43,7 +43,7 @@ export default function App({ Component, pageProps }: AppProps) {
   
   // Initialize Farcaster Mini App
   useEffect(() => {
-    actions.ready();
+    sdk.actions.ready();
   }, []);
 
   return (

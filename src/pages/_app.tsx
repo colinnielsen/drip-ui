@@ -40,8 +40,7 @@ export const CSS_FONT_CLASS_CONFIG = cn(
 
 export default function App({ Component, pageProps }: AppProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
-  // Initialize Farcaster Mini App
+
   useEffect(() => {
     sdk.actions.ready();
   }, []);
@@ -65,10 +64,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 name="viewport"
                 content="width=device-width, user-scalable=no"
               />
-              <meta name="fc:frame" content="vNext" />
-              <meta name="fc:frame:button:1" content="Order Coffee" />
-              <meta name="fc:frame:button:1:action" content="link" />
-              <meta name="fc:frame:button:1:target" content="https://dripapp.xyz" />
+              <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://dripapp.xyz/splash-image.png","button":{"title":"Order Coffee ☕","action":{"type":"launch_miniapp","name":"Order Coffee!","url":"https://dripapp.xyz","splashImageUrl":"https://dripapp.xyz/drip-logo.png","splashBackgroundColor":"#EFE8DB"}}}' />
             </Head>
             <Component {...pageProps} />
             <Footer />

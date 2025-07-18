@@ -64,7 +64,6 @@ export default function App({ Component, pageProps }: AppProps) {
                 name="viewport"
                 content="width=device-width, user-scalable=no"
               />
-              <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://dripapp.xyz/splash-image.png","button":{"title":"Order Coffee ☕","action":{"type":"launch_miniapp","name":"Order Coffee!","url":"https://dripapp.xyz","splashImageUrl":"https://dripapp.xyz/drip-logo.png","splashBackgroundColor":"#EFE8DB"}}}' />
             </Head>
             <Component {...pageProps} />
             <Footer />

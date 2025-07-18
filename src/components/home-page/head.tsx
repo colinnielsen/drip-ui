@@ -7,7 +7,7 @@ export function HomePageHead() {
 
   const miniapp = {
     version: '1',
-    imageUrl: 'https://dripapp.xyz/og-image.jpg',
+    imageUrl: 'https://dripapp.xyz/og-image.png',
     button: {
       title: '☕ Order Coffee',
       action: {

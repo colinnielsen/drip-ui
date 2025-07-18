@@ -9,8 +9,9 @@ import localFont from 'next/font/local';
 import Head from 'next/head';
 import '../styles/globals.css';
 import { CartDrawerContext } from '@/components/ui/drawer';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -39,6 +40,11 @@ export const CSS_FONT_CLASS_CONFIG = cn(
 
 export default function App({ Component, pageProps }: AppProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    sdk.actions.ready();
+  }, []);
+
   return (
     <PrivyProvider>
       <ReactQueryClientProvider useDevTools>

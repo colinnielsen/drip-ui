@@ -1,6 +1,7 @@
 import FarmerCard from '@/components/shop-page/farmer-intro-card';
 import { ShopHeader, ShopHeaderDetails } from '@/components/shop-page/header';
 import { ItemList } from '@/components/shop-page/item-list';
+import { ShopPageHead } from '@/components/shop-page/ShopPageHead';
 import { SLICE_VERSION } from '@/data-model/_external/data-sources/slice/SliceDTO';
 import { mapSquareStoreExternalIdToShopId } from '@/data-model/_external/data-sources/square/SquareDTO';
 import {
@@ -152,14 +153,18 @@ export default function StaticShopPage({
   );
 
   return (
-    <main className="flex flex-col pb-40">
-      <HydrationBoundary state={dehydratedState}>
-        <ShopHeader {...staticShop} />
-        <div className="p-5 px-6 flex flex-col gap-5">
-          <ShopHeaderDetails {...staticShop} />
-          <DynamicShopPage {...staticShop} />
-        </div>
-      </HydrationBoundary>
-    </main>
+    <>
+      <ShopPageHead shop={staticShop} />
+
+      <main className="flex flex-col pb-40">
+        <HydrationBoundary state={dehydratedState}>
+          <ShopHeader {...staticShop} />
+          <div className="p-5 px-6 flex flex-col gap-5">
+            <ShopHeaderDetails {...staticShop} />
+            <DynamicShopPage {...staticShop} />
+          </div>
+        </HydrationBoundary>
+      </main>
+    </>
   );
 }

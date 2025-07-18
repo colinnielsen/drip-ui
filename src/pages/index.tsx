@@ -1,4 +1,5 @@
 import drip from '@/assets/drip.jpg';
+import { HomePageHead } from '@/components/home-page/head';
 import { HomePageHeader } from '@/components/home-page/header';
 import { NearMeList, ShopList } from '@/components/home-page/shop-list';
 import { WelcomeDialog } from '@/components/home-page/welcome-popup';
@@ -63,6 +64,8 @@ export default function Home({
 
   return (
     <HydrationBoundary state={dehydratedState}>
+      <HomePageHead />
+
       <div className="flex flex-col gap-5 pb-32">
         <HomePageHeader />
         <LazyMap shops={rehydratedShops} />

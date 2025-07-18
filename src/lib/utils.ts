@@ -145,7 +145,7 @@ export const getProtocol = (): Protocol => {
 };
 
 /**
- * @returns `www.drip.com` || `drip.com` || `localhost:1234`
+ * @returns `dripapp.xyz` || `localhost:1234`
  */
 export const getHostname = () => {
   // Production environment on Vercel
@@ -159,6 +159,10 @@ export const getHostname = () => {
     (typeof window !== 'undefined' ? window?.location?.hostname : '') ||
     'localhost:3000'
   );
+};
+
+export const getAbsoluteUrl = (path: `/${string}`) => {
+  return `${getProtocol()}://${getHostname()}${path}`;
 };
 
 export const sleep = async (ms?: number) =>

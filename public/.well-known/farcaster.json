@@ -1,36 +1,28 @@
 {
-  "accountAssociation": {
-    "header": "eyJmaWQiOjEsInR5cGUiOiJjdXN0b2R5IiwiaWF0IjoxNzA0MzU3NjAwfQ",
-    "payload": "eyJkb21haW4iOiJkcmlwYXBwLnh5eiIsImZpZCI6MSwidGltZXN0YW1wIjoxNzA0MzU3NjAwfQ",
-    "signature": "MHhkZDJlZDVmZWJkZDEwMjM5NWJkNzg1NzY3MzU3ZDUwZGMxMWVkZDY2NzIxMjIzNjQ2NjgxMDRlNDg1NzYxMzUyZDdlNjE3MzQ4ZDIxNzU4MjkzNzY4MjdkZWYxNzc5ZjI1ZGI2MjY3NzVkZGE0NzVjYzAyMDk4ZDI0OGNiMGJhNzFj"
-  },
-  "miniApp": {
-    "name": "Drip",
-    "description": "Order coffee from your favorite local shops",
-    "icon": "https://dripapp.xyz/drip-logo.png",
-    "url": "https://dripapp.xyz",
-    "backgroundColor": "#EFE8DB",
-    "splashBackgroundColor": "#EFE8DB",
-    "splashImageUrl": "https://dripapp.xyz/drip-logo.png",
-    "homeUrl": "https://dripapp.xyz",
-    "imageUrl": "https://dripapp.xyz/drip.jpg",
-    "metadata": {
-      "version": "1.0.0",
-      "category": "food",
-      "tags": ["coffee", "blockchain", "payment", "delivery"],
-      "supportedPlatforms": ["web", "mobile"]
-    }
-  },
   "frame": {
-    "name": "Drip Coffee",
-    "homeUrl": "https://dripapp.xyz",
-    "imageUrl": "https://dripapp.xyz/drip.jpg",
-    "splashImageUrl": "https://dripapp.xyz/drip-logo.png",
+    "name": "Drip",
+    "version": "1",
+    "iconUrl": "https://www.dripapp.xyz/drip.png",
+    "homeUrl": "https://www.dripapp.xyz",
+    "imageUrl": "https://www.dripapp.xyz/og-image.png",
+    "buttonTitle": "order coffee ☕",
+    "splashImageUrl": "https://www.dripapp.xyz/drip-logo.png",
     "splashBackgroundColor": "#EFE8DB",
-    "buttonTitle": "Order Coffee",
-    "version": "1.0.0"
+    "webhookUrl": "https://dripapp.xyz/api/webhooks/cast-created",
+    "subtitle": "Your local cafe. onchain.",
+    "description": "Order-ahead coffee from local cafes using USDC. Support farmers and local businesses.",
+    "screenshotUrls": ["https://dripapp.xyz/drip-home-screenshot.png"],
+    "primaryCategory": "utility",
+    "tags": ["coffee", "food", "utility"],
+    "heroImageUrl": "https://www.dripapp.xyz/og-image.png",
+    "ogTitle": "Drip - order coffee onchain",
+    "ogDescription": "Order-ahead coffee from local cafes using USDC. Support farmers and local businesses.",
+    "ogImageUrl": "https://www.dripapp.xyz/og-image.png",
+    "tagline": "Your local cafe. onchain"
   },
-  "webhooks": {
-    "cast.created": "https://dripapp.xyz/api/webhooks/cast-created"
+  "accountAssociation": {
+    "header": "eyJmaWQiOjM1MDEwMSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDA4NjYxYjM0OWExZDU0MjY2RkU0MzA5N0E5Q0JFQzRjQWVDQjk3YjkifQ",
+    "payload": "eyJkb21haW4iOiJ3d3cuZHJpcGFwcC54eXoifQ",
+    "signature": "MHhlNzkwNWM0ZGU2N2VjZWNjZTVhMDg5ODEzNWNmOTdkZGE5MjM4NjJmYzIwOTA2OWY4Y2I0OTliMDI5ZjUxZWIyNWE4MGFmNzUyNjBiMDczODg0NDg0MTQ2OTAwMTQzOGU4OWRlYzNkNmIyZjI1NzNhZTM0ODA4OGFhYTYxN2FiYTFj"
   }
 }

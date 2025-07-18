@@ -5,12 +5,12 @@
     "signature": "MHhkZDJlZDVmZWJkZDEwMjM5NWJkNzg1NzY3MzU3ZDUwZGMxMWVkZDY2NzIxMjIzNjQ2NjgxMDRlNDg1NzYxMzUyZDdlNjE3MzQ4ZDIxNzU4MjkzNzY4MjdkZWYxNzc5ZjI1ZGI2MjY3NzVkZGE0NzVjYzAyMDk4ZDI0OGNiMGJhNzFj"
   },
   "miniApp": {
-    "name": "Drip Coffee",
-    "description": "Order fresh coffee delivered through blockchain technology",
+    "name": "Drip",
+    "description": "Order coffee from your favorite local shops",
     "icon": "https://dripapp.xyz/drip-logo.png",
     "url": "https://dripapp.xyz",
-    "backgroundColor": "#8B4513",
-    "splashBackgroundColor": "#8B4513",
+    "backgroundColor": "#EFE8DB",
+    "splashBackgroundColor": "#EFE8DB",
     "splashImageUrl": "https://dripapp.xyz/drip-logo.png",
     "homeUrl": "https://dripapp.xyz",
     "imageUrl": "https://dripapp.xyz/drip.jpg",
@@ -26,7 +26,7 @@
     "homeUrl": "https://dripapp.xyz",
     "imageUrl": "https://dripapp.xyz/drip.jpg",
     "splashImageUrl": "https://dripapp.xyz/drip-logo.png",
-    "splashBackgroundColor": "#8B4513",
+    "splashBackgroundColor": "#EFE8DB",
     "buttonTitle": "Order Coffee",
     "version": "1.0.0"
   },

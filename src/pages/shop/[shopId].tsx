@@ -155,7 +155,7 @@ export default function StaticShopPage({
   return (
     <>
       <ShopPageHead shop={staticShop} />
-      
+
       <main className="flex flex-col pb-40">
         <HydrationBoundary state={dehydratedState}>
           <ShopHeader {...staticShop} />

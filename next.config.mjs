@@ -35,6 +35,16 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/.well-known/farcaster.json',
+        destination:
+          'https://api.farcaster.xyz/miniapps/hosted-manifest/01981eea-ac5e-c090-d06e-00c544aa1b9a',
+        permanent: false,
+      },
+    ];
+  },
   // webpack: (config, { isServer }) => {
   //   if (!isServer && process.env.NODE_ENV !== 'production')
   //     config.resolve.fallback.fs = false;

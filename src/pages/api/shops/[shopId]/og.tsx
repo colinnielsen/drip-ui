@@ -54,13 +54,17 @@ export default async function (request: Request) {
       if (!absUrl) return undefined;
       if (absUrl.endsWith('.webp')) {
         // Use weserv.nl to convert to png on the fly (edge cached)
-        return `https://wsrv.nl/?url=${encodeURIComponent(absUrl)}&output=png`; // returns png
+        return absUrl.replace('.webp', '.png'); // returns png
       }
       return absUrl;
     };
 
-    const backgroundSrc = convertIfWebp(makeAbsolute(shop.backgroundImage));
-    const logoSrc = convertIfWebp(makeAbsolute(shop.logo));
+    const absBkg = makeAbsolute(shop.backgroundImage);
+    const absLogo = makeAbsolute(shop.logo);
+    console.log('absBkg', absBkg);
+    console.log('absLogo', absLogo);
+    const backgroundSrc = convertIfWebp(absBkg);
+    const logoSrc = convertIfWebp(absLogo);
 
     if (!backgroundSrc) {
       return new Response('Shop is missing background image', { status: 500 });

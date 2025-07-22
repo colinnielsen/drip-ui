@@ -15,10 +15,10 @@
     "primaryCategory": "utility",
     "tags": ["coffee", "food", "utility"],
     "heroImageUrl": "https://www.dripapp.xyz/og-image.png",
+    "tagline": "Your local cafe. onchain",
     "ogTitle": "Drip - order coffee onchain",
     "ogDescription": "Order-ahead coffee from local cafes using USDC. Support farmers and local businesses.",
-    "ogImageUrl": "https://www.dripapp.xyz/og-image.png",
-    "tagline": "Your local cafe. onchain"
+    "ogImageUrl": "https://www.dripapp.xyz/og-image.png"
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjM1MDEwMSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDA4NjYxYjM0OWExZDU0MjY2RkU0MzA5N0E5Q0JFQzRjQWVDQjk3YjkifQ",

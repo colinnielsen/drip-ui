@@ -16,7 +16,7 @@ export function ShopPageHead({ shop }: ShopPageHeadProps) {
     version: '1',
     imageUrl: `${getAbsoluteUrl(`/api/shops/${shop.id}/og`)}`,
     button: {
-      title: `Order Coffee from ${shop.label} ☕`,
+      title: `Order ☕ - ${shop.label}`,
       action: {
         type: 'launch_miniapp',
         url: shopUrl,

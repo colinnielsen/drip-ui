@@ -1,12 +1,19 @@
-import { Unsaved } from '@/data-model/_common/type/CommonType';
-import { mapSquareLocationToLocation } from '@/data-model/_external/data-sources/square/SquareDTO';
+import { Unsaved, UUID } from '@/data-model/_common/type/CommonType';
+import {
+  mapSquareLocationToLocation,
+  mapSquareStoreExternalIdToShopId,
+} from '@/data-model/_external/data-sources/square/SquareDTO';
+import { SLICE_VERSION } from '@/data-model/_external/data-sources/slice/SliceDTO';
 import {
   mapSliceIdToSliceExternalId,
   mapToSqaureExternalId,
+  mapSliceExternalIdToSliceId,
+  mapSliceStoreIdToShopId,
 } from '@/data-model/shop/ShopDTO';
 import { ShopConfig, SquareShopConfig } from '@/data-model/shop/ShopType';
 import {
   DripServerError,
+  existsOrNotFoundErr,
   HTTPRouteHandlerErrors,
   NotFoundError,
   SQLExecutionError,
@@ -19,11 +26,12 @@ import {
   validateSessionToken,
 } from '@/lib/effect/validation';
 import { S_EthAddress } from '@/lib/effect/validation/ethereum';
-import shopService from '@/services/ShopService';
+import shopService, { effectfulShopService } from '@/services/ShopService';
 import { SquareService, SquareServiceError } from '@/services/SquareService';
 import { Effect, pipe } from 'effect';
 
 import { NextApiRequest, NextApiResponse } from 'next';
+import { isNotNullable } from 'effect/Predicate';
 
 const NewConfigSchema = S.Struct({
   name: S.String,
@@ -48,12 +56,23 @@ const NewConfigSchema = S.Struct({
 const ShopConfigSchema = S.Union(
   S.extend(
     S.partial(NewConfigSchema),
-    S.Struct({
-      type: S.Literal('square'),
-      action: S.Union(S.Literal('add'), S.Literal('update')),
-      locationId: S.String,
-      merchantId: S.String,
-    }),
+    S.extend(
+      S.Struct({
+        type: S.Literal('square'),
+        action: S.Union(S.Literal('add'), S.Literal('update')),
+        locationId: S.String,
+        merchantId: S.String,
+      }),
+      S.partial(
+        S.Struct({
+          location: S.Struct({
+            coords: S.mutable(S.Tuple(S.Number, S.Number)),
+            label: S.String,
+            address: S.String,
+          }),
+        }),
+      ),
+    ),
   ),
   S.extend(
     S.partial(NewConfigSchema),
@@ -70,12 +89,71 @@ const ShopConfigSchema = S.Union(
   ),
 );
 
+// Delete request schema
+const DeleteShopConfigSchema = S.Union(
+  S.Struct({
+    type: S.Literal('square'),
+    locationId: S.String,
+    merchantId: S.String,
+  }),
+  S.Struct({
+    type: S.Literal('slice'),
+    shopId: S.Number,
+  }),
+);
+
 export type ShopConfigRequest = typeof ShopConfigSchema.Type;
 
 export default EffectfulApiRoute(function (
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  // DELETION LOGIC ---------------------------------------------------------
+  if (req.method === 'DELETE') {
+    const deletePipeline = pipe(
+      req,
+      validateHTTPMethod(['DELETE']),
+      Effect.andThen(validateSessionToken),
+      Effect.andThen(req => S.decode(DeleteShopConfigSchema)(req.body)),
+      Effect.andThen(body => {
+        const externalId =
+          body.type === 'square'
+            ? mapToSqaureExternalId(body)
+            : mapSliceIdToSliceExternalId(body.shopId);
+
+        return pipe(
+          effectfulShopService
+            .findShopConfigByExternalId(externalId)
+            .pipe(existsOrNotFoundErr),
+          Effect.andThen(config =>
+            effectfulShopService.removeShopConfigByExternalId(externalId),
+          ),
+          Effect.andThen(() =>
+            Effect.succeed(res.status(200).json({ deleted: externalId })),
+          ),
+        );
+      }),
+      // error handling
+      Effect.catchAll(function (e): Effect.Effect<
+        never,
+        HTTPRouteHandlerErrors,
+        never
+      > {
+        switch (e._tag) {
+          case 'BadRequestError':
+          case 'ParseError':
+          case 'NotFoundError':
+            return Effect.fail(e);
+          default:
+            return Effect.fail(new DripServerError(e));
+        }
+      }),
+    );
+
+    return deletePipeline;
+  }
+  // -------------------------------------------------------------------------
+
   const routePipeline = pipe(
     req,
     // handle wrong request method
@@ -160,13 +238,16 @@ export default EffectfulApiRoute(function (
               } satisfies SquareShopConfig['tipConfig'],
             }
           : {}),
-        // let square provide the location data during the sync step
+        // location precedence:
+        // 1. user-provided location (via form)
+        // 2. location fetched from Square API (if available)
+        // 3. undefined
         location:
           data.type === 'square'
-            ? data.squareLocation.address
-              ? mapSquareLocationToLocation(data.squareLocation)
-              : undefined
-            : undefined,
+            ? data.location ||
+              mapSquareLocationToLocation(data.squareLocation) ||
+              undefined
+            : data.location,
       };
 
       return Effect.succeed(newShopConfig);
@@ -175,6 +256,37 @@ export default EffectfulApiRoute(function (
     Effect.andThen(newConfig =>
       Effect.tryPromise({
         try: () => shopService.saveShopConfig(newConfig),
+        catch: e => new SQLExecutionError(e),
+      }),
+    ),
+    // update existing shop logo / backgroundImage if present
+    Effect.andThen(savedConfig =>
+      Effect.tryPromise({
+        try: async () => {
+          // derive shop id from config external id
+          let shopId: UUID | null = null;
+          if (savedConfig.__type === 'square') {
+            shopId = mapSquareStoreExternalIdToShopId(savedConfig.externalId);
+          } else if (savedConfig.__type === 'slice') {
+            const sliceId = mapSliceExternalIdToSliceId(savedConfig.externalId);
+            shopId = mapSliceStoreIdToShopId(sliceId, SLICE_VERSION);
+          }
+
+          if (shopId) {
+            const existingShop = await shopService.findById(shopId);
+            if (existingShop) {
+              const updatedShop = {
+                ...existingShop,
+                logo: savedConfig.logo ?? existingShop.logo,
+                backgroundImage:
+                  savedConfig.backgroundImage ?? existingShop.backgroundImage,
+              };
+              await shopService.save(updatedShop);
+            }
+          }
+
+          return savedConfig;
+        },
         catch: e => new SQLExecutionError(e),
       }),
     ),

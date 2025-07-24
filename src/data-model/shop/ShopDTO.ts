@@ -12,9 +12,11 @@ import {
   PhysicalShopWithLocation,
   TipConfig,
   ShopSourceConfig,
+  ShopConfig,
 } from './ShopType';
 import { mapToEthAddress } from '../ethereum/EthereumDTO';
 import { ChainId } from '../ethereum/EthereumType';
+import { Entity } from '../__global/entities';
 
 // CONSTANTS
 // -----------------------------------------------------------------------------
@@ -82,6 +84,13 @@ export const mapSliceStoreIdToShopId = (
   sliceVersion: number,
 ): Shop['id'] => generateUUID(`SLICE_V${sliceVersion}::${sliceId}`);
 
+export const mapSliceExternalIdToShopId = (
+  sliceExternalId: SliceExternalId,
+): Shop['id'] => {
+  const [, , sliceId] = sliceExternalId.split('::');
+  return generateUUID(`SLICE_V${SLICE_VERSION}::${sliceId}`);
+};
+
 export const mapSliceIdToSliceExternalId = (sliceId: number): SliceExternalId =>
   `SLICE_STORE::V${SLICE_VERSION}::${sliceId}`;
 
@@ -104,6 +113,13 @@ export const mapToSqaureExternalId = ({
   merchantId: string;
   locationId: string;
 }): SquareExternalId => `SQUARE_STORE::${merchantId}::${locationId}`;
+
+export const mapSquareExternalIdToShopId = (
+  squareExternalId: SquareExternalId,
+): Shop['id'] => {
+  const [, merchantId, locationId] = squareExternalId.split('::');
+  return generateUUID(`SQUARE_STORE::${merchantId}::${locationId}`);
+};
 
 export const mapSquareExternalIdToMerchantIdFrom = (
   externalId: SquareExternalId,
@@ -138,4 +154,50 @@ export const mapShopSourceConfigToExternalId = (
   if (shopSourceConfig.type === 'slice') return shopSourceConfig.id;
 
   throw new Error('Invalid shop source config');
+};
+
+export const mapShopConfigToShopPreview = (config: ShopConfig): Shop => {
+  // Determine if this should be treated as an online or storefront for UI
+  const isStorefront = !!config.location;
+
+  // derive a deterministic __sourceConfig for compatibility with existing helpers
+  const __sourceConfig =
+    config.__type === 'square'
+      ? {
+          type: 'square' as const,
+          merchantId: ((): string => {
+            const [, merchantId] = config.externalId.split('::');
+            return merchantId ?? '';
+          })(),
+          locationId: ((): string => {
+            const [, _merchantId, locationId] = config.externalId.split('::');
+            return locationId ?? '';
+          })(),
+        }
+      : {
+          type: 'slice' as const,
+          id: config.externalId,
+          version: 1,
+        };
+
+  const id =
+    config.__type === 'square'
+      ? mapSquareExternalIdToShopId(config.externalId)
+      : mapSliceExternalIdToShopId(config.externalId);
+
+  return {
+    id,
+    __type: 'storefront',
+    __entity: Entity.shop,
+    __sourceConfig,
+    label: config.name ?? 'Unnamed Cafe',
+    backgroundImage: config.backgroundImage ?? '',
+    logo: config.logo ?? '',
+    url: config.url,
+    tipConfig: config.tipConfig ?? EMPTY_TIP_CONFIG,
+    farmerAllocations: config.farmerAllocation ?? [],
+    menu: EMPTY_MENU,
+    // storefront-specific prop
+    location: isStorefront ? (config.location ?? null) : null,
+  } satisfies PhysicalShop;
 };

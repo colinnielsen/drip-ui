@@ -115,7 +115,7 @@ const ConnectedState = ({
       <div className="flex flex-col gap-2 w-full pt-10">
         <Title1>Locations:</Title1>
 
-        <div className="grid md:grid-cols-2 gap-4 sm:grid-cols-1 max-w-2xl ">
+        <div className="flex flex-wrap gap-8 w-full justify-start">
           {squareLocations.map(location => {
             const config = squareShopConfigs.find(
               config =>

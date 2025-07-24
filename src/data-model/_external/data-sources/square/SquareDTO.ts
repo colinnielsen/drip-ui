@@ -344,19 +344,26 @@ export const mapSquareStoreToShop = ({
       genericError('business must include a name'),
     location: location,
     backgroundImage:
+      // 1. user-supplied override via manual config
+      squareshopConfig.backgroundImage ||
+      // 2. POS background from Square
       squareLocation.posBackgroundUrl ||
+      // 3. full-format logo can double as hero banner
       squareLocation.fullFormatLogoUrl ||
-      // worst case use the logo as a background image
+      // 4. fallback to logo as a last resort
       squareLocation.logoUrl ||
+      // 5. absolute default asset
       DEFAULT_BACKGROUND_IMAGE,
     logo:
-      // try and use the logo url
+      // 1. user-supplied override via manual config
+      squareshopConfig.logo ||
+      // 2. Square’s dedicated logo url
       squareLocation.logoUrl ||
-      // then try and use the pos background url
+      // 3. POS background (often contains branding)
       squareLocation.posBackgroundUrl ||
-      // then try and use the full format logo url
+      // 4. full format logo
       squareLocation.fullFormatLogoUrl ||
-      // otherwise use the default logo
+      // 5. absolute default asset
       DEFAULT_SHOP_LOGO,
     farmerAllocations: squareshopConfig.farmerAllocation || [],
   };

@@ -211,6 +211,15 @@ const findSquareShopConfigsByMerchantId = async (
   return result.rows as ShopConfig[];
 };
 
+// Add helper to remove shop config by external id
+const removeShopConfigByExternalId = async (
+  externalId: ShopExternalId,
+): Promise<void> => {
+  const id = deriveShopConfigIdFromExternalId(externalId);
+  const result = await sql`DELETE FROM shop_configs WHERE id = ${id}`;
+  if (result.rowCount === 0) throw Error('could not delete');
+};
+
 //
 //// SERVICE OBJECT
 ///
@@ -225,6 +234,7 @@ const shopService = {
   findShopConfigByShopId,
   findSquareShopConfigsByMerchantId,
   remove,
+  removeShopConfigByExternalId,
 };
 
 export default shopService;

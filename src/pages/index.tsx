@@ -4,9 +4,11 @@ import { HomePageHeader } from '@/components/home-page/header';
 import { NearMeList, ShopList } from '@/components/home-page/shop-list';
 import { WelcomeDialog } from '@/components/home-page/welcome-popup';
 import { Skeleton } from '@/components/ui/skeleton';
+import { mapShopConfigToShopPreview } from '@/data-model/shop/ShopDTO';
 import { Shop } from '@/data-model/shop/ShopType';
 import { rehydrateData } from '@/lib/utils';
 import ShopService from '@/services/ShopService';
+
 import {
   dehydrate,
   DehydratedState,
@@ -20,7 +22,9 @@ import { useMemo } from 'react';
 export const getStaticProps: GetStaticProps<{
   dehydratedState: DehydratedState;
 }> = async () => {
-  const shops = await ShopService.findAll({ rehydrate: false });
+  const shopConfigs = await ShopService.findAllShopConfigs();
+
+  const shops = shopConfigs.map(mapShopConfigToShopPreview);
 
   const queryClient = new QueryClient();
   await queryClient.setQueryData(['shop'], shops);

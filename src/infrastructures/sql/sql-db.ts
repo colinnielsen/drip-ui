@@ -16,6 +16,7 @@ export const bootstrapSQLDB = async () => {
         "id" UUID PRIMARY KEY,
         "__type" TEXT NOT NULL,
         "__sourceConfig" JSONB,
+        "logo" TEXT,
         "label" TEXT NOT NULL,
         "backgroundImage" TEXT,
         "logo" TEXT,
@@ -95,22 +96,6 @@ export const bootstrapSQLDB = async () => {
         created_at TIMESTAMP NOT NULL,
         FOREIGN KEY ("farmer") REFERENCES "farmers" ("id"),
         FOREIGN KEY ("sending_user") REFERENCES "users" ("id")
-      );
-    `;
-
-  await sql`
-      CREATE TABLE IF NOT EXISTS "square_connections" (
-        "id" UUID PRIMARY KEY,
-        "userId" UUID NOT NULL,
-        "merchantId" TEXT NOT NULL,
-        "businessName" TEXT NOT NULL,
-        "accessToken_encrypted" TEXT NOT NULL,
-        "refreshToken_encrypted" TEXT NOT NULL,
-        "expiresAt" TIMESTAMP NOT NULL,
-        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY ("userId") REFERENCES "users" ("id"),
-        UNIQUE ("userId", "merchantId")
       );
     `;
 

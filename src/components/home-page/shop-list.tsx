@@ -157,10 +157,9 @@ export const NearMeList = () => {
           <LoadingCards />
         ) : locationState === 'ready-to-request' ||
           locationState === 'loading' ||
-          locationState === 'error' ||
-          locationState === 'denied' ? (
+          locationState === 'error' ? (
           <EnableLocationCard />
-        ) : (
+        ) : locationState === 'denied' ? null : (
           <First3ClosestShops />
         )}
       </div>

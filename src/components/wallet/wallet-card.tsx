@@ -100,7 +100,7 @@ export const WalletCard = () => {
         />
         <TokenBalance
           icon={<DripTokenIcon className="h-9 w-9 -ml-0.5 mt-1" />}
-          name="$DRIP"
+          name="$PREVAIL"
           balance={dripBalance ?? '--'}
           isLoading={isDripLoading}
         />

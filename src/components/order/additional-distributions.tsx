@@ -55,7 +55,7 @@ const RewardDistributionCard = ({
   const left = (
     <Image
       src={dripLogo}
-      alt="drip token reward"
+      alt="prevail token reward"
       fill
       className="object-cover"
     />
@@ -65,7 +65,7 @@ const RewardDistributionCard = ({
     <div className={'w-full flex flex-col gap-y-2'}>
       <Drip>Cha-Ching!</Drip>
       <Label1 className="text-primary-gray">
-        You earned <b>{distribution.tokenAmount.toFixed(2)} $DRIP</b> tokens
+        You earned <b>{distribution.tokenAmount.toFixed(2)} $PREVAIL</b> tokens
         from this order!
       </Label1>
     </div>

@@ -24,7 +24,7 @@ export const DripRewardCard = ({
       }
       info={
         <div className="flex flex-col gap-2 py-4 text-left">
-          <Title2>Drip Rewards!</Title2>
+          <Title2>PREVAIL Rewards!</Title2>
           <Label1 className="text-primary-gray">
             You earned{' '}
             <span className="font-semibold text-black">

@@ -31,7 +31,7 @@ const getRewardCopy = (
   const emoji = getElementFromId(CELEBRATION_EMOJIS, rewardId);
   const tipBonus = tipAmount ? ' - and being a good tipper!' : '';
 
-  return `${action} ${rewardAmount} $DRIP for buying ${lineItemCount} ${lineItemCount === 1 ? 'item' : 'items'} from ${shopName}${tipBonus} ${emoji}`;
+  return `${action} ${rewardAmount} $PREVAIL for buying ${lineItemCount} ${lineItemCount === 1 ? 'item' : 'items'} from ${shopName}${tipBonus} ${emoji}`;
 };
 
 const RewardItem = ({ reward }: { reward: UserReward }) => {
@@ -139,7 +139,7 @@ export const RewardSection = () => {
           <div className="text-center py-8">
             <Label1 className="text-gray-500 mb-2">No rewards yet!</Label1>
             <Label2 className="text-gray-400">
-              Complete orders to start earning $DRIP rewards ☕
+              Complete orders to start earning $PREVAIL rewards ☕
             </Label2>
           </div>
         </CardContent>

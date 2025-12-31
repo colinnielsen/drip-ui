@@ -7,6 +7,8 @@ import { AppProps } from 'next/app';
 import { EB_Garamond, Libre_Franklin, Roboto_Mono } from 'next/font/google';
 import localFont from 'next/font/local';
 import Head from 'next/head';
+import { MobileGuard } from '@/components/mobile-guard';
+import { useRouter } from 'next/router';
 import '../styles/globals.css';
 import { CartDrawerContext } from '@/components/ui/drawer';
 import { useState, useEffect } from 'react';
@@ -41,9 +43,23 @@ export const CSS_FONT_CLASS_CONFIG = cn(
 export default function App({ Component, pageProps }: AppProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const router = useRouter();
+  const isManageRoute = router.pathname.includes('/manage');
+
+  const showFooter = !isManageRoute;
+
   useEffect(() => {
     sdk.actions.ready();
   }, []);
+
+  const app = (
+    <>
+      <Component {...pageProps} />
+      {showFooter && <Footer />}
+      <GlobalListeners />
+      <Toaster />
+    </>
+  );
 
   return (
     <PrivyProvider>
@@ -65,10 +81,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 content="width=device-width, user-scalable=no"
               />
             </Head>
-            <Component {...pageProps} />
-            <Footer />
-            <GlobalListeners />
-            <Toaster />
+            {isManageRoute ? app : <MobileGuard>{app}</MobileGuard>}
           </div>
         </CartDrawerContext.Provider>
       </ReactQueryClientProvider>

@@ -44,6 +44,7 @@
     "date-fns": "^3.6.0",
     "effect": "^3.12.4",
     "embla-carousel-react": "^8.5.2",
+    "ethers": "^5.7.2",
     "jose": "^5.9.6",
     "lodash": "^4.17.21",
     "lucide-react": "^0.397.0",

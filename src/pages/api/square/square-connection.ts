@@ -51,7 +51,7 @@ export default ApiRoute(async function handler(
           address: l.address,
           type:
             (l.type as 'PHYSICAL' | 'MOBILE') || err('Location type not found'),
-          logoUrl: l.logoUrl || err('Location logoUrl not found'),
+          logoUrl: l.logoUrl ?? null,
           businessName:
             l.businessName || err('Location businessName not found'),
           status:

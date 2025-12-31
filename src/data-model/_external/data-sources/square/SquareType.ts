@@ -5,7 +5,7 @@ export type QueriedSquareLocation = {
   name: string;
   address?: Address;
   type: 'PHYSICAL' | 'MOBILE';
-  logoUrl: string;
+  logoUrl: string | null;
   businessName: string;
   status: 'ACTIVE' | 'INACTIVE';
   added: boolean;

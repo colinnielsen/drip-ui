@@ -23,6 +23,25 @@ import {
   updateShopConfig,
 } from './api-calls';
 
+async function uploadToBlob(file: File, folder: string): Promise<string> {
+  const res = await fetch(
+    `/api/blob/upload?folder=${encodeURIComponent(folder)}&filename=${encodeURIComponent(file.name)}`,
+    {
+      method: 'POST',
+      headers: { 'content-type': file.type || 'application/octet-stream' },
+      body: file,
+    },
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error || 'Upload failed');
+  }
+
+  const data = (await res.json()) as { url: string };
+  return data.url;
+}
+
 const SquareLocation: React.FC<{
   location: QueriedSquareLocation;
   connection: MinSquareConnection;
@@ -176,23 +195,67 @@ const SquareLocation: React.FC<{
             />
           </div>
 
-          {/* Logo URL */}
+          {/* Logo Upload */}
           <div className="flex flex-col gap-1">
-            <Label htmlFor={`logo-${location.id}`}>Logo URL</Label>
+            <Label htmlFor={`logo-file-${location.id}`}>Logo</Label>
             <Input
-              id={`logo-${location.id}`}
-              value={logoUrl}
-              onChange={e => setLogoUrl(e.target.value)}
+              id={`logo-file-${location.id}`}
+              type="file"
+              accept="image/*"
+              disabled={syncing}
+              onChange={async e => {
+                const input = e.currentTarget; // capture immediately
+                const file = input.files?.[0];
+                if (!file) return;
+
+                try {
+                  setSyncing(true);
+                  const url = await uploadToBlob(file, 'square/logos');
+                  setLogoUrl(url);
+                  successToast.toast({
+                    title: 'Uploaded',
+                    description:
+                      'Logo uploaded. Click “Save & Sync” to persist.',
+                  });
+                } catch (err) {
+                  errorToast(err);
+                } finally {
+                  setSyncing(false);
+                  input.value = ''; // safe reset
+                }
+              }}
             />
           </div>
 
-          {/* Background Image URL */}
+          {/* Background Upload */}
           <div className="flex flex-col gap-1">
-            <Label htmlFor={`bg-${location.id}`}>Background Image URL</Label>
+            <Label htmlFor={`bg-file-${location.id}`}>Background Image</Label>
             <Input
-              id={`bg-${location.id}`}
-              value={backgroundImage}
-              onChange={e => setBackgroundImage(e.target.value)}
+              id={`bg-file-${location.id}`}
+              type="file"
+              accept="image/*"
+              disabled={syncing}
+              onChange={async e => {
+                const input = e.currentTarget; // capture immediately
+                const file = input.files?.[0];
+                if (!file) return;
+
+                try {
+                  setSyncing(true);
+                  const url = await uploadToBlob(file, 'square/backgrounds');
+                  setBackgroundImage(url);
+                  successToast.toast({
+                    title: 'Uploaded',
+                    description:
+                      'Background uploaded. Click “Save & Sync” to persist.',
+                  });
+                } catch (err) {
+                  errorToast(err);
+                } finally {
+                  setSyncing(false);
+                  input.value = ''; // safe reset
+                }
+              }}
             />
           </div>
 

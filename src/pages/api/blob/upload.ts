@@ -47,6 +47,8 @@ export default async function handler(
 
     return res.status(200).json({ url: blob.url });
   } catch (e: any) {
-    return res.status(500).json({ error: e?.message || 'Upload failed' });
+    return res.status(500).json({
+      error: `Upload failed: ${e?.message ?? 'unknown error'}`,
+    });
   }
 }

@@ -50,7 +50,7 @@ const ItemSchema = S.Struct({
   description: S.String,
   image: S.String,
   category: S.Union(S.String, S.Null),
-  variants: S.mutable(S.NonEmptyArray(ItemVariantSchema)),
+  variants: S.mutable(S.Array(ItemVariantSchema)).pipe(S.minLength(1)),
   mods: S.optional(S.NullOr(S.mutable(S.Array(ItemModSchema)))),
 });
 
@@ -86,7 +86,7 @@ export const CartSchema = S.Struct({
   id: S_UUID,
   createdTimestamp: S.Date,
   shop: S_UUID,
-  lineItems: S.mutable(S.NonEmptyArray(LineItemSchema)),
+  lineItems: S.mutable(S.Array(LineItemSchema)).pipe(S.minLength(1)),
   discounts: S.optional(S.NullOr(S.mutable(S.Array(DiscountSchema)))),
   tip: S.optional(
     S.NullOr(
